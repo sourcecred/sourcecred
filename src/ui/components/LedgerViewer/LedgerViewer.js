@@ -16,21 +16,25 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import Dialog from "@material-ui/core/Dialog";
 import Toolbar from "@material-ui/core/Toolbar";
 import DialogContent from "@material-ui/core/DialogContent";
-import Tooltip from "@material-ui/core/Tooltip";
 import Chip from "@material-ui/core/Chip";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import {Ledger, type LedgerEvent} from "../../core/ledger/ledger";
-import {useLedger} from "../utils/LedgerContext";
+import {Ledger, type LedgerEvent} from "../../../core/ledger/ledger";
+import {useLedger} from "../../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
-import {formatTimestamp} from "../utils/dateHelpers";
-import type {IdentityId} from "../../core/identity/identity";
-import type {Allocation, GrainReceipt} from "../../core/ledger/grainAllocation";
-import type {CurrencyDetails} from "../../api/currencyConfig";
-import * as G from "../../core/ledger/grain";
+import {formatTimestamp} from "../../utils/dateHelpers";
+import type {
+  Allocation,
+  GrainReceipt,
+} from "../../../core/ledger/grainAllocation";
+import type {CurrencyDetails} from "../../../api/currencyConfig";
+import * as G from "../../../core/ledger/grain";
+import AddAlias from "./AddAlias";
+import TransferGrain from "./TransferGrain";
+import IdentityDetails from "./IdentityDetails";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -231,39 +235,7 @@ const LedgerEventRow = React.memo(
             </>
           );
         case "ADD_ALIAS":
-          try {
-            const account = ledger.account(action.identityId);
-            let alias = action.alias.description;
-            // description has format: channel/[handle](optional url). Parse out channel & handle
-            const descriptionParts = alias.match(/^([^/]*)\/\[([^\]]*)\]/);
-
-            if (descriptionParts) {
-              const [, channel, handle] = descriptionParts;
-              alias = `${channel}/${handle}`;
-            }
-
-            return (
-              <>
-                <IdentityDetails
-                  id={action.identityId}
-                  name={`${account.identity.name} ⇐ ${alias}`}
-                />
-                <Chip
-                  className={classes.chip}
-                  label={account.identity.subtype}
-                  size="small"
-                />
-              </>
-            );
-          } catch (e) {
-            console.warn("Unable to find account for action: ", action);
-            return (
-              <IdentityDetails
-                id={action.identityId}
-                name="[Unknown Account]"
-              />
-            );
-          }
+          return <AddAlias action={action} ledger={ledger} classes={classes} />;
         case "TOGGLE_ACTIVATION":
           try {
             const account = ledger.account(action.identityId);
@@ -300,67 +272,8 @@ const LedgerEventRow = React.memo(
             </Box>
           ));
         case "TRANSFER_GRAIN":
-          let sender;
-          let recipient;
-          const amount = G.formatAndTrim(action.amount);
-          try {
-            const senderAccount = ledger.account(action.from);
-            sender = (
-              <>
-                <IdentityDetails
-                  id={senderAccount.identity.id}
-                  name={senderAccount.identity.name}
-                />
-                <Chip
-                  className={classes.chip}
-                  label={senderAccount.identity.subtype}
-                  size="small"
-                />
-              </>
-            );
-          } catch (e) {
-            console.warn(
-              "Unable to find account for sender in action: ",
-              action
-            );
-            sender = (
-              <IdentityDetails id={action.from} name="[Unknown Account]" />
-            );
-          }
-
-          try {
-            const recipientAccount = ledger.account(action.to);
-            recipient = (
-              <>
-                <IdentityDetails
-                  id={recipientAccount.identity.id}
-                  name={recipientAccount.identity.name}
-                />
-                <Chip
-                  className={classes.chip}
-                  label={recipientAccount.identity.subtype}
-                  size="small"
-                />
-              </>
-            );
-          } catch (e) {
-            console.warn(
-              "Unable to find account for recipient in action: ",
-              action
-            );
-            recipient = (
-              <IdentityDetails id={action.to} name="[Unknown Account]" />
-            );
-          }
-
           return (
-            <>
-              {sender}
-              &nbsp; &rArr; &nbsp;
-              {amount}
-              &nbsp; &rArr; &nbsp;
-              {recipient}
-            </>
+            <TransferGrain action={action} ledger={ledger} classes={classes} />
           );
 
         default:
@@ -395,17 +308,3 @@ const LedgerEventRow = React.memo(
 );
 
 LedgerEventRow.displayName = "LedgerEventRow";
-
-const IdentityDetails = ({
-  id,
-  name,
-}: {
-  id: IdentityId,
-  name: string,
-}): ReactNode => {
-  return (
-    <Tooltip title={`ID: ${id}`} interactive placement="left">
-      <Box mr={1}>{`${name}`}</Box>
-    </Tooltip>
-  );
-};
