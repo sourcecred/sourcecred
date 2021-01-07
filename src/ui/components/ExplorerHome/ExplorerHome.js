@@ -91,10 +91,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type ExplorerHomeProps = {|
-  +initialView: CredView,
+  +initialView: CredView | null,
 |};
 
 export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
+  if (!initialView) return null;
   const classes = useStyles();
   const [tab, setTab] = useState<number>(1);
   const [checkboxes, setCheckboxes] = useState({

@@ -52,7 +52,7 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
 };
 
 const customRoutes = (
-  credView: CredView,
+  credView: CredView | null,
   hasBackend: Boolean,
   currency: CurrencyDetails
 ) => {
@@ -61,7 +61,7 @@ const customRoutes = (
       <Explorer initialView={credView} />
     </Route>,
     <Route key="root" exact path="/">
-      <Redirect to="/explorer" />
+      <Redirect to={credView ? "/explorer" : "/accounts"} />
     </Route>,
     <Route key="accounts" exact path="/accounts">
       <AccountOverview currency={currency} />
