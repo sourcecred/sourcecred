@@ -19,7 +19,7 @@ import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
 import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
-import {LedgerViewer} from "./LedgerViewer";
+import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
 
 const dataProvider = fakeDataProvider({}, true);
 
