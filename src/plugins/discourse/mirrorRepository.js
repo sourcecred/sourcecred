@@ -3,8 +3,17 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
-import type {TopicId, PostId, Topic, Post, LikeAction, User} from "./fetch";
+import type {
+  TopicId,
+  PostId,
+  Topic,
+  Post,
+  LikeAction,
+  User,
+  Tag,
+} from "./fetch";
 import {type TimestampMs} from "../../util/timestamp";
+import * as MapUtil from "../../util/map";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
@@ -215,6 +224,16 @@ export class SqliteMirrorRepository
             FOREIGN KEY(author_username) REFERENCES users(username)
         )
       `,
+      // TODO: If this bloats, consider making a separate tags table, and
+      // referencing topic_tags by integer id rather than full tag name.
+      dedent`\
+        CREATE TABLE topic_tags (
+            topic_id INTEGER NOT NULL,
+            tag_name TEXT NOT NULL,
+            PRIMARY KEY(topic_id, tag_name),
+            FOREIGN KEY(topic_id) REFERENCES topics(id)
+      )
+      `,
       dedent`\
         CREATE TABLE posts (
             id INTEGER PRIMARY KEY,
@@ -261,56 +280,87 @@ export class SqliteMirrorRepository
   }
 
   topics(): $ReadOnlyArray<Topic> {
-    return this._db
-      .prepare(
-        dedent`\
-        SELECT
-          id,
-          category_id,
-          title,
-          timestamp_ms,
-          bumped_ms,
-          author_username
-        FROM topics`
-      )
-      .all()
-      .map((x) => ({
-        id: x.id,
-        categoryId: x.category_id,
-        title: x.title,
-        timestampMs: x.timestamp_ms,
-        bumpedMs: x.bumped_ms,
-        authorUsername: x.author_username,
-      }));
+    return this._db.transaction(() => {
+      const topics = this._db
+        .prepare(
+          dedent`\
+            SELECT
+              id,
+              category_id,
+              title,
+              timestamp_ms,
+              bumped_ms,
+              author_username
+            FROM topics
+        `
+        )
+        .all()
+        .map((x) => ({
+          id: x.id,
+          categoryId: x.category_id,
+          title: x.title,
+          timestampMs: x.timestamp_ms,
+          bumpedMs: x.bumped_ms,
+          authorUsername: x.author_username,
+        }));
+
+      const tags = this._db
+        .prepare(
+          dedent`\
+            SELECT
+              tag_name AS tagName,
+              topic_id AS topicId
+            FROM topic_tags
+            ORDER BY tagName
+        `
+        )
+        .all();
+      const idToTags: Map<TopicId, Tag[]> = new Map();
+      for (const {tagName, topicId} of tags) {
+        MapUtil.pushValue(idToTags, topicId, tagName);
+      }
+      return topics.map((t) => {
+        const tags = idToTags.get(t.id) || [];
+        return {...t, tags};
+      });
+    })();
   }
 
   topicById(id: TopicId): ?Topic {
     const res = this._db
       .prepare(
         dedent`\
-        SELECT
-          id,
-          category_id,
-          title,
-          timestamp_ms,
-          bumped_ms,
-          author_username
-        FROM topics
-        WHERE id = :id`
+          SELECT
+            id,
+            category_id,
+            title,
+            timestamp_ms,
+            bumped_ms,
+            author_username,
+            topic_tags.tag_name AS tagName
+          FROM topics
+          LEFT OUTER JOIN topic_tags
+            ON topics.id = topic_tags.topic_id
+          WHERE id = :id
+          ORDER BY tagName
+        `
       )
-      .get({id});
+      .all({id});
 
-    if (!res) {
+    if (res.length === 0) {
       return null;
     }
+    const first = res[0];
+    const tags = first.tagName == null ? [] : res.map((x) => x.tagName);
 
     return {
-      id: res.id,
-      categoryId: res.category_id,
-      title: res.title,
-      timestampMs: res.timestamp_ms,
-      bumpedMs: res.bumped_ms,
-      authorUsername: res.author_username,
+      id: first.id,
+      categoryId: first.category_id,
+      tags,
+      title: first.title,
+      timestampMs: first.timestamp_ms,
+      bumpedMs: first.bumped_ms,
+      authorUsername: first.author_username,
     };
   }
 
@@ -318,16 +368,16 @@ export class SqliteMirrorRepository
     return this._db
       .prepare(
         dedent`\
-        SELECT
-          id,
-          timestamp_ms,
-          author_username,
-          topic_id,
-          trust_level,
-          index_within_topic,
-          reply_to_post_index,
-          cooked
-        FROM posts`
+          SELECT
+            id,
+            timestamp_ms,
+            author_username,
+            topic_id,
+            trust_level,
+            index_within_topic,
+            reply_to_post_index,
+            cooked
+          FROM posts`
       )
       .all()
       .map((x) => ({
@@ -346,17 +396,17 @@ export class SqliteMirrorRepository
     const res = this._db
       .prepare(
         dedent`\
-        SELECT
-          id,
-          timestamp_ms,
-          author_username,
-          topic_id,
-          trust_level,
-          index_within_topic,
-          reply_to_post_index,
-          cooked
-        FROM posts
-        WHERE id = :id`
+          SELECT
+            id,
+            timestamp_ms,
+            author_username,
+            topic_id,
+            trust_level,
+            index_within_topic,
+            reply_to_post_index,
+            cooked
+          FROM posts
+          WHERE id = :id`
       )
       .get({id});
 
@@ -544,37 +594,65 @@ export class SqliteMirrorRepository
     return toAddResult(res);
   }
 
-  addTopic(topic: Topic): AddResult {
-    this.addUserIfNotExists({username: topic.authorUsername, trustLevel: null});
-    const res = this._db
-      .prepare(
-        dedent`\
-          REPLACE INTO topics (
-              id,
-              category_id,
-              title,
-              timestamp_ms,
-              bumped_ms,
-              author_username
-          ) VALUES (
-              :id,
-              :category_id,
-              :title,
-              :timestamp_ms,
-              :bumped_ms,
-              :author_username
-          )
-        `
-      )
-      .run({
-        id: topic.id,
-        category_id: topic.categoryId,
-        title: topic.title,
-        timestamp_ms: topic.timestampMs,
-        bumped_ms: topic.bumpedMs,
-        author_username: topic.authorUsername,
+  addTopic(topic: Topic) {
+    this._db.transaction(() => {
+      this.addUserIfNotExists({
+        username: topic.authorUsername,
+        trustLevel: null,
       });
-    return toAddResult(res);
+      this._db
+        .prepare(
+          dedent`\
+            REPLACE INTO topics (
+                id,
+                category_id,
+                title,
+                timestamp_ms,
+                bumped_ms,
+                author_username
+            ) VALUES (
+                :id,
+                :category_id,
+                :title,
+                :timestamp_ms,
+                :bumped_ms,
+                :author_username
+            )
+        `
+        )
+        .run({
+          id: topic.id,
+          category_id: topic.categoryId,
+          title: topic.title,
+          timestamp_ms: topic.timestampMs,
+          bumped_ms: topic.bumpedMs,
+          author_username: topic.authorUsername,
+        });
+
+      this._db
+        .prepare(
+          dedent`
+            DELETE FROM topic_tags
+            WHERE topic_id = :id
+      `
+        )
+        .run({id: topic.id});
+
+      const addTag = this._db.prepare(
+        dedent`
+          INSERT INTO topic_tags (
+            tag_name,
+            topic_id
+          ) VALUES (
+            :tagName,
+            :id
+          )
+      `
+      );
+      for (const tagName of topic.tags) {
+        addTag.run({id: topic.id, tagName});
+      }
+    })();
   }
 
   addUserIfNotExists(user: User): AddResult {

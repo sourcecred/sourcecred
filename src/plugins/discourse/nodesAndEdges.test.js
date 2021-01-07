@@ -15,6 +15,7 @@ describe("plugins/discourse/nodesAndEdges", () => {
       timestampMs: 0,
       authorUsername: "decentralion",
       categoryId: 1,
+      tags: ["some", "example"],
       bumpedMs: 0,
     };
     const post1 = {

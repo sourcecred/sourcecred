@@ -48,6 +48,7 @@ describe("plugins/discourse/referenceDetector", () => {
       const topic: Topic = {
         id: 123,
         categoryId: 1,
+        tags: ["some", "example"],
         title: "Sample topic",
         timestampMs: 456789,
         bumpedMs: 456999,
@@ -77,6 +78,7 @@ describe("plugins/discourse/referenceDetector", () => {
       const topic: Topic = {
         id: 123,
         categoryId: 1,
+        tags: ["some", "example"],
         title: "Sample topic",
         timestampMs: 456789,
         bumpedMs: 456999,

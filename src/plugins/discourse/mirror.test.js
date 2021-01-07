@@ -166,8 +166,10 @@ class MockFetcher implements Discourse {
   }
 
   _topicLatest(topicId: TopicId): TopicLatest {
-    const {id, title, timestampMs, categoryId, bumpedMs} = this._topic(topicId);
-    return {id, title, timestampMs, categoryId, bumpedMs};
+    const {id, title, timestampMs, categoryId, bumpedMs, tags} = this._topic(
+      topicId
+    );
+    return {id, title, timestampMs, categoryId, bumpedMs, tags};
   }
 
   _topicView(id: TopicId): TopicView {
@@ -186,6 +188,7 @@ class MockFetcher implements Discourse {
     return {
       id,
       categoryId: this._topicToCategory.get(id) || 1,
+      tags: ["example"],
       title: `topic ${id}`,
       timestampMs,
       authorUsername: openingPost.authorUsername,

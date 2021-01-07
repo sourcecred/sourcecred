@@ -117,6 +117,7 @@ describe("plugins/discourse/createGraph", () => {
     const topic = {
       id: 1,
       title: "first topic",
+      tags: ["some", "example"],
       timestampMs: 0,
       authorUsername: "decentralion",
       categoryId: 1,

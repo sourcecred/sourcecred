@@ -19,6 +19,7 @@ export type UserId = number;
 export type PostId = number;
 export type TopicId = number;
 export type CategoryId = number;
+export type Tag = string;
 
 /**
  * The "view" received from the Discourse API
@@ -30,6 +31,7 @@ export type CategoryId = number;
 export type TopicView = {|
   +id: TopicId,
   +categoryId: CategoryId,
+  +tags: $ReadOnlyArray<Tag>,
   +title: string,
   +timestampMs: TimestampMs,
   +authorUsername: string,
@@ -45,6 +47,7 @@ export type TopicView = {|
 export type TopicLatest = {|
   +id: TopicId,
   +categoryId: CategoryId,
+  +tags: $ReadOnlyArray<Tag>,
   +title: string,
   +timestampMs: TimestampMs,
   +bumpedMs: number,
@@ -274,10 +277,14 @@ export class Fetcher implements Discourse {
     const json = await response.json();
     const {posts_count: postCount} = json;
     let posts = json.post_stream.posts.map(parsePost);
+    // Tags might be `undefined` if tags were disabled on the server.
+    // If so, set tags to an empty array.
+    const tags = json.tags || [];
     const topic: TopicView = {
       id: json.id,
       categoryId: json.category_id,
       title: json.title,
+      tags,
       timestampMs: Date.parse(json.created_at),
       authorUsername: json.details.created_by.username,
     };
@@ -412,6 +419,7 @@ function parseLatestTopic(json: any): TopicLatest {
   return {
     id: json.id,
     categoryId: json.category_id,
+    tags: json.tags,
     title: json.title,
     timestampMs: Date.parse(json.created_at),
     bumpedMs: Date.parse(json.bumped_at),
