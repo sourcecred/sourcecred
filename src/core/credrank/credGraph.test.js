@@ -31,7 +31,7 @@ describe("core/credrank/credGraph", () => {
       const mpgParticipants = Array.from(mpg.participants());
       const expectedParticipants = mpgParticipants.map((p) => ({
         ...p,
-        credPerEpoch: expect.anything(),
+        credPerInterval: expect.anything(),
         cred: expect.anything(),
       }));
       const actualParticipants = Array.from(cg.participants());
@@ -48,6 +48,11 @@ describe("core/credrank/credGraph", () => {
         participantCred += cred;
       }
       expect(totalMint).toBeCloseTo(participantCred);
+    });
+    it("exposes the mpg intervals", async () => {
+      const mpg = markovProcessGraph();
+      const cg = await credGraph();
+      expect(cg.intervals()).toEqual(mpg.intervals());
     });
   });
 

@@ -11,6 +11,7 @@ import {
 } from "./markovProcessGraph";
 import {type MarkovEdge, type TransitionProbability} from "./markovEdge";
 import {payoutGadget} from "./edgeGadgets";
+import {type IntervalSequence} from "../interval";
 
 export type Node = {|
   +address: NodeAddressT,
@@ -32,7 +33,7 @@ export type Participant = {|
   +address: NodeAddressT,
   +description: string,
   +cred: number,
-  +credPerEpoch: $ReadOnlyArray<number>,
+  +credPerInterval: $ReadOnlyArray<number>,
   +id: Uuid,
 |};
 
@@ -90,15 +91,19 @@ export class CredGraph {
         epochStart,
       }));
       let totalCred = 0;
-      const credPerEpoch = epochs.map((e) => {
+      const credPerInterval = epochs.map((e) => {
         const payoutAddress = payoutGadget.toRaw(e);
         const payoutMarkovEdge = NullUtil.get(this._mpg.edge(payoutAddress));
         const cred = this._credFlow(payoutMarkovEdge);
         totalCred += cred;
         return cred;
       });
-      yield {address, description, credPerEpoch, cred: totalCred, id};
+      yield {address, description, credPerInterval, cred: totalCred, id};
     }
+  }
+
+  intervals(): IntervalSequence {
+    return this._mpg.intervals();
   }
 
   *inNeighbors(addr: NodeAddressT): Iterator<Edge> {
