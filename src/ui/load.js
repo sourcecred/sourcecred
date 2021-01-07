@@ -11,7 +11,7 @@ import {
 export type LoadResult = LoadSuccess | LoadFailure;
 export type LoadSuccess = {|
   +type: "SUCCESS",
-  +credView: CredView,
+  +credView: CredView | null,
   +ledger: Ledger,
   +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
   +hasBackend: Boolean,
@@ -33,16 +33,19 @@ export async function load(): Promise<LoadResult> {
   ];
   const responses = await Promise.all(queries);
 
-  for (const response of responses.slice(0, 4)) {
+  for (const response of responses.slice(1, 4)) {
     if (!response.ok) {
       console.error(response);
       return {type: "FAILURE", error: response.status};
     }
   }
   try {
-    const json = await responses[0].json();
-    const credResult = credResultFromJSON(json);
-    const credView = new CredView(credResult);
+    let credView = null;
+    if (responses[0].ok) {
+      const json = await responses[0].json();
+      const credResult = credResultFromJSON(json);
+      credView = new CredView(credResult);
+    }
     const {bundledPlugins} = await responses[1].json();
     const rawLedger = await responses[2].text();
     const ledger = Ledger.parse(rawLedger);

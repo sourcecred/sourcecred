@@ -254,7 +254,11 @@ const WeightsConfigSection = ({
   );
 };
 
-export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
+export const Explorer = ({
+  initialView,
+}: {
+  initialView: CredView | null,
+}): ReactNode => {
   const [{credView}, setCredViewState] = useState({
     credView: initialView,
   });
@@ -327,7 +331,15 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
   const paramsUpToDate =
     deepEqual(params, currentParams) && deepEqual(weights, currentWeights);
 
-  if (!credView) return null;
+  if (!credView)
+    return (
+      <div className={css(styles.root)}>
+        <p>
+          This page is unavailable because Cred information was unable to load.
+          Calculate cred through the CLI in order to use this page.
+        </p>
+      </div>
+    );
 
   return (
     <div className={css(styles.root)}>
