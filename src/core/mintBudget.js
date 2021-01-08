@@ -1,8 +1,8 @@
 // @flow
 
 import {sum} from "d3-array";
+import findLast from "lodash.findlast";
 import * as NullUtil from "../util/null";
-import {findLast} from "../util/findLast";
 import * as Weights from "./weights";
 import * as C from "../util/combo";
 import {type NodeAddressT, NodeAddress} from "./graph";

@@ -35,6 +35,8 @@
     "lodash.isequal": "^4.5.0",
     "lodash.sortby": "^4.7.0",
     "lodash.sortedindex": "^4.1.0",
+    "lodash.findlast": "^4.6.0",
+    "lodash.findlastindex": "^4.6.0",
     "object-assign": "^4.1.1",
     "promise": "^8.1.0",
     "ra-data-fakerest": "^3.6.2",
