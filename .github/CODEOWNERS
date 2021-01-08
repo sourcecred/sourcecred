@@ -7,6 +7,8 @@
 /src/util/ @decentralion @blueridger
 /src/core/ @decentralion @blueridger
 /src/analysis/ @decentralion @blueridger
+/src/graphql/ @wchargin
+/src/core/credrank/ @decentralion @blueridger @wchargin
 
 # Ledger
 /src/ledger/ @decentralion @blueridger @topocount
