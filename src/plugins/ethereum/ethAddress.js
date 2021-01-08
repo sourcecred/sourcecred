@@ -7,6 +7,9 @@ import {compatibleParser} from "../../util/compat";
 
 export opaque type EthAddress: string = string;
 
+export const ETH_CURRENCY_ADDRESS: EthAddress =
+  "0x0000000000000000000000000000000000000000";
+
 /**
  * parseAddress will accept any 20-byte hexadecimal ethereum address encoded as
  * a string, optionally prefixed with `0x`.
