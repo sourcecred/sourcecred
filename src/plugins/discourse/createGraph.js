@@ -14,6 +14,8 @@ import {
 } from "./references";
 import * as NE from "./nodesAndEdges";
 
+import {likeWeight} from "./weights";
+
 export type GraphUser = {|
   +node: Node,
 |};
@@ -77,24 +79,6 @@ export const DEFAULT_TRUST_LEVEL_TO_WEIGHT = Object.freeze({
   "4": 1.5,
 });
 
-export function weightForTrustLevel(trustLevel: ?number): NodeWeight {
-  if (trustLevel == null) {
-    // The null trust level shouldn't happen in practice, right now users who
-    // only like but never post will have null trust level (will be fixed by #2045).
-    // This means they could have trust level 1. But to be conservative, we treat anyone
-    // with a null trust level as if they have trust level 0.
-    // Possibly this could come up with deleted users too.
-    return 0;
-  }
-
-  const key = String(trustLevel);
-  const weight = DEFAULT_TRUST_LEVEL_TO_WEIGHT[key];
-  if (weight == null) {
-    throw new Error(`invalid trust level: ${String(key)}`);
-  }
-  return weight;
-}
-
 export function _createGraphData(
   serverUrl: string,
   repo: ReadRepository
@@ -147,7 +131,7 @@ export function _createGraphData(
     const createsLike = NE.createsLikeEdge(serverUrl, like);
     const likes = NE.likesEdge(serverUrl, like);
     const user = repo.findUser(like.username);
-    const weight = weightForTrustLevel(user != null ? user.trustLevel : null);
+    const weight = likeWeight(user);
 
     // Update how much total like weight this post has, so that we can
     // set up a hasLikedPost edge flowing cred from the topic
