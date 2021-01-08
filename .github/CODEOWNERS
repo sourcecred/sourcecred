@@ -1,0 +1,14 @@
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence
+* @sourcecred/reviewers
+
+# Core libraries
+/src/util/ @decentralion @blueridger
+/src/core/ @decentralion @blueridger
+/src/analysis/ @decentralion @blueridger
+
+# Ledger
+/src/ledger/ @decentralion @blueridger @topocount
+
+# UI
+/src/ui/ @topocount @hammadj @KuraFire
