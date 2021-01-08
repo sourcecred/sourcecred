@@ -101,7 +101,7 @@ export function _computeReweighting(
   const reweightingsForEachBudget: $ReadOnlyArray<Reweighting> = budget.entries.map(
     (entry) => _reweightingForEntry({evaluator, partition, entry})
   );
-  return reweightingsForEachBudget.flat();
+  return [].concat(...reweightingsForEachBudget);
 }
 
 /**
