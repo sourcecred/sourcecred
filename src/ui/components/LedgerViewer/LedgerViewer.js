@@ -17,7 +17,6 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import Dialog from "@material-ui/core/Dialog";
 import Toolbar from "@material-ui/core/Toolbar";
 import DialogContent from "@material-ui/core/DialogContent";
-import Tooltip from "@material-ui/core/Tooltip";
 import Chip from "@material-ui/core/Chip";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import TableCell from "@material-ui/core/TableCell";
@@ -25,19 +24,24 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import {Ledger, type LedgerEvent} from "../../core/ledger/ledger";
-import {useLedger} from "../utils/LedgerContext";
+import {Ledger, type LedgerEvent} from "../../../core/ledger/ledger";
+import {useLedger} from "../../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
-import {formatTimestamp} from "../utils/dateHelpers";
-import type {IdentityId} from "../../core/identity/identity";
-import type {Allocation, GrainReceipt} from "../../core/ledger/grainAllocation";
-import type {CurrencyDetails} from "../../api/currencyConfig";
+import {formatTimestamp} from "../../utils/dateHelpers";
+import type {
+  Allocation,
+  GrainReceipt,
+} from "../../../core/ledger/grainAllocation";
+import type {CurrencyDetails} from "../../../api/currencyConfig";
 import {
   useTableState,
   SortOrders,
   DEFAULT_SORT,
-} from "../../webutil/tableState";
-import * as G from "../../core/ledger/grain";
+} from "../../../webutil/tableState";
+import * as G from "../../../core/ledger/grain";
+import AddAlias from "./AddAlias";
+import TransferGrain from "./TransferGrain";
+import IdentityDetails from "./IdentityDetails";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -54,6 +58,12 @@ const useStyles = makeStyles((theme) => {
     toolbar: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(1),
+    },
+    chip: {
+      fontSize: "0.55rem",
+      color: "#828282",
+      backgroundColor: "#383838",
+      textShadow: "0 1px 0 rgba(0,0,0, 0.4)",
     },
   };
 });
@@ -220,6 +230,7 @@ const LedgerEventRow = React.memo(
     currencySuffix: string,
     handleClickOpen: (a: Allocation) => void,
   }) => {
+    const classes = useStyles();
     const {action} = event;
     const getEventDetails = () => {
       switch (action.type) {
@@ -230,9 +241,15 @@ const LedgerEventRow = React.memo(
                 id={action.identity.id}
                 name={action.identity.name}
               />
-              <Chip label={action.identity.subtype} size="small" />
+              <Chip
+                className={classes.chip}
+                label={action.identity.subtype}
+                size="small"
+              />
             </>
           );
+        case "ADD_ALIAS":
+          return <AddAlias action={action} ledger={ledger} classes={classes} />;
         case "TOGGLE_ACTIVATION":
           try {
             const account = ledger.account(action.identityId);
@@ -268,6 +285,10 @@ const LedgerEventRow = React.memo(
               />
             </Box>
           ));
+        case "TRANSFER_GRAIN":
+          return (
+            <TransferGrain action={action} ledger={ledger} classes={classes} />
+          );
 
         default:
           return "";
@@ -301,17 +322,3 @@ const LedgerEventRow = React.memo(
 );
 
 LedgerEventRow.displayName = "LedgerEventRow";
-
-const IdentityDetails = ({
-  id,
-  name,
-}: {
-  id: IdentityId,
-  name: string,
-}): ReactNode => {
-  return (
-    <Tooltip title={`ID: ${id}`} interactive placement="left">
-      <Box mr={1}>{`${name}`}</Box>
-    </Tooltip>
-  );
-};

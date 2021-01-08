@@ -834,7 +834,7 @@ const changeIdentityTypeParser = C.object({
   newType: identityTypeParser,
 });
 
-type AddAlias = {|
+export type AddAlias = {|
   +type: "ADD_ALIAS",
   +identityId: IdentityId,
   +alias: Alias,
@@ -874,7 +874,7 @@ const distributeGrainParser: C.Parser<DistributeGrain> = C.object({
   distribution: distributionParser,
 });
 
-type TransferGrain = {|
+export type TransferGrain = {|
   +type: "TRANSFER_GRAIN",
   +from: IdentityId,
   +to: IdentityId,
