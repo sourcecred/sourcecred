@@ -2,6 +2,7 @@
 
 import {sum} from "d3-array";
 import * as NullUtil from "../util/null";
+import {findLast} from "../util/findLast";
 import * as Weights from "./weights";
 import * as C from "../util/combo";
 import {type NodeAddressT, NodeAddress} from "./graph";
@@ -217,10 +218,10 @@ export function _findCurrentBudgetValue(
   periods: $ReadOnlyArray<BudgetPeriod>,
   timestamp: TimestampMs
 ): number {
-  const currentPeriod = periods
-    .slice()
-    .reverse()
-    .find((period) => period.startTimeMs <= timestamp);
+  const currentPeriod = findLast(
+    periods,
+    (period) => period.startTimeMs <= timestamp
+  );
   return currentPeriod ? currentPeriod.budgetValue : Infinity;
 }
 
