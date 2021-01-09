@@ -23,7 +23,7 @@ const CredTimeline = ({
     .y((d) => yScale(d));
 
   return (
-    <svg width={width} height={height}>
+    <svg viewBox={`0 0 ${width} ${height}`}>
       <path d={gen(data)} stroke="cyan" fill="none" stokewidth={1} />
     </svg>
   );
