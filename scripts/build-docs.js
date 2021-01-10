@@ -1,4 +1,5 @@
 // @flow
+
 const fs = require("fs");
 const path = require("path");
 const jsdoc2md = require("jsdoc-to-markdown");
@@ -22,11 +23,12 @@ function getFilesFromDir(dir, fileTypes) {
   var filesToReturn = [];
   function walkDir(currentPath) {
     var files = fs.readdirSync(currentPath);
-    for (var i in files) {
+    for (let i = 0; i < files.length; i++) {
       var curFile = path.join(currentPath, files[i]);
       if (
         fs.statSync(curFile).isFile() &&
-        fileTypes.indexOf(path.extname(curFile)) != -1
+        fileTypes.indexOf(path.extname(curFile)) !== -1 &&
+        curFile.indexOf(".test") === -1
       ) {
         filesToReturn.push(curFile.replace(dir, ""));
       } else if (fs.statSync(curFile).isDirectory()) {
@@ -42,6 +44,12 @@ async function generateDocs(inputFile) {
   /* input and output paths */
   const outputDir = "./docs";
 
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, {
+      recursive: true,
+    });
+  }
+
   /* get template data */
   const templateData = jsdoc2md.getTemplateDataSync({
     files: inputFile,
@@ -55,14 +63,16 @@ async function generateDocs(inputFile) {
   }, []);
 
   /* create a documentation file for each class */
-  for (const className of classNames) {
-    const template = `{{#class name="${className}"}}{{>docs}}{{/class}}`;
-    const output = jsdoc2md.renderSync({
-      data: templateData,
-      template: template,
-    });
-    fs.writeFileSync(path.resolve(outputDir, `${className}.md`), output);
-    success(`rendering ${className}`);
+  if (classNames.length > 0) {
+    for (const className of classNames) {
+      const template = `{{#class name="${className}"}}{{>docs}}{{/class}}`;
+      const output = jsdoc2md.renderSync({
+        data: templateData,
+        template: template,
+      });
+      fs.writeFileSync(path.resolve(outputDir, `${className}.md`), output);
+      success(`rendering ${className}`);
+    }
   }
 }
 
