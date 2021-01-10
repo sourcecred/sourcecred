@@ -4,7 +4,13 @@ import {Graph, type Node, type Edge} from "../../core/graph";
 import {type NodeWeight} from "../../core/weights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type WeightedGraph} from "../../core/weightedGraph";
-import {type PostId, type TopicId, type Post} from "./fetch";
+import {
+  type PostId,
+  type TopicId,
+  type CategoryId,
+  type Tag,
+  type Post,
+} from "./fetch";
 import {type ReadRepository} from "./mirrorRepository";
 import {declaration} from "./declaration";
 import {
@@ -13,7 +19,7 @@ import {
   linksToReferences,
 } from "./references";
 import * as NE from "./nodesAndEdges";
-
+import {type DiscourseConfig} from "./config";
 import {likeWeight} from "./weights";
 
 export type GraphUser = {|
@@ -80,13 +86,18 @@ export const DEFAULT_TRUST_LEVEL_TO_WEIGHT = Object.freeze({
 });
 
 export function _createGraphData(
-  serverUrl: string,
+  config: DiscourseConfig,
   repo: ReadRepository
 ): GraphData {
+  const {serverUrl} = config;
   const users = repo.users().map((u) => NE.userNode(serverUrl, u.username));
 
+  const topicIdToCategory = new Map<TopicId, CategoryId>();
+  const topicIdToTags = new Map<TopicId, $ReadOnlyArray<Tag>>();
   const topics: $ReadOnlyArray<GraphTopic> = repo.topics().map((topic) => {
     const node = NE.topicNode(serverUrl, topic);
+    topicIdToCategory.set(topic.id, topic.categoryId);
+    topicIdToTags.set(topic.id, topic.tags);
     const hasAuthor = NE.authorsTopicEdge(serverUrl, topic);
     return {node, hasAuthor};
   });
@@ -131,8 +142,16 @@ export function _createGraphData(
     const createsLike = NE.createsLikeEdge(serverUrl, like);
     const likes = NE.likesEdge(serverUrl, like);
     const user = repo.findUser(like.username);
-    const weight = likeWeight(user);
-
+    const post = repo.postById(like.postId);
+    const topicId = post ? post.topicId : null;
+    let weight = 0;
+    if (topicId) {
+      const categoryId = topicIdToCategory.get(topicId);
+      const tags = topicIdToTags.get(topicId);
+      weight = likeWeight(config.weights, user, categoryId, tags);
+    } else {
+      weight = likeWeight(config.weights, user);
+    }
     // Update how much total like weight this post has, so that we can
     // set up a hasLikedPost edge flowing cred from the topic
     const existingWeight = postIdToLikeWeight.get(like.postId) || 0;
@@ -201,10 +220,10 @@ export function _graphFromData({
 }
 
 export function createGraph(
-  serverUrl: string,
+  config: DiscourseConfig,
   repo: ReadRepository
 ): WeightedGraph {
-  const data = _createGraphData(serverUrl, repo);
+  const data = _createGraphData(config, repo);
   return _graphFromData(data);
 }
 
