@@ -1,8 +1,100 @@
 // @flow
 
 import {type NodeWeight} from "../../core/weights";
+import * as C from "../../util/combo";
+import * as NullUtil from "../../util/null";
 import {DEFAULT_TRUST_LEVEL_TO_WEIGHT} from "./createGraph";
 import {type User} from "./fetch";
+
+type WeightConfig = {|
+  [string]: NodeWeight,
+|};
+export type SerializedConfig = {|
+  +defaultWeight?: NodeWeight,
+  +weights?: WeightConfig,
+|};
+
+type TagWeights = Map<string, NodeWeight>;
+
+export type TagConfig = {|
+  +defaultWeight: NodeWeight,
+  +weights: TagWeights,
+|};
+
+type CategoryWeights = Map<number, NodeWeight>;
+
+export type CategoryConfig = {|
+  +defaultWeight: NodeWeight,
+  +weights: CategoryWeights,
+|};
+
+export function upgradeCategories(c: SerializedConfig): CategoryConfig {
+  const newConfig = {
+    defaultWeight: NullUtil.orElse(c.defaultWeight, 1),
+    weights: new Map(),
+  };
+  if (c.weights) {
+    const mapWeights = Object.entries(c.weights).map(
+      ([categoryString, weight]) => [
+        parseInt(categoryString, 10),
+        // needed to satisfy flow here, or it enforces "mixed" type
+        parseInt(weight, 10),
+      ]
+    );
+    newConfig.weights = new Map(mapWeights);
+  }
+
+  return newConfig;
+}
+
+export function upgradeTags(c: SerializedConfig): TagConfig {
+  const newConfig = {
+    defaultWeight: NullUtil.orElse(c.defaultWeight, 1),
+    weights: new Map(),
+  };
+  if (c.weights) {
+    const mapWeights = Object.entries(c.weights).map(([tag, weight]) => [
+      tag,
+      // needed to satisfy flow here, or it enforces a "mixed" type
+      parseInt(weight, 10),
+    ]);
+    newConfig.weights = new Map(mapWeights);
+  }
+
+  return newConfig;
+}
+
+export const tagConfigParser: C.Parser<TagConfig> = C.fmap(
+  C.object(
+    {},
+    {
+      defaultWeight: C.number,
+      weights: C.dict(C.number),
+    }
+  ),
+  upgradeTags
+);
+
+// categoryIDs should all be numbers, so the parser verifies that it is
+// indeed a number, then return a string since it is a dict key
+export function parseCategoryId(id: string): string {
+  const result = parseInt(id, 10);
+  if (Number.isNaN(result)) {
+    throw new Error(`CategoryId should be a number; got ${id}`);
+  }
+  return id;
+}
+
+export const categoryConfigParser: C.Parser<CategoryConfig> = C.fmap(
+  C.object(
+    {},
+    {
+      defaultWeight: C.number,
+      weights: C.dict(C.number, C.fmap(C.string, parseCategoryId)),
+    }
+  ),
+  upgradeCategories
+);
 
 export function likeWeight(user: ?User): NodeWeight {
   if (user == null) {
