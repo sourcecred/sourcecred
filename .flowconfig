@@ -1,6 +1,5 @@
 # If modifying this file, please modify .flowconfig-ci too!
 [ignore]
-.*/scripts/build-docs.js
 
 [include]
 
