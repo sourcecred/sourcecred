@@ -14,6 +14,7 @@ import {
   TextField,
 } from "@material-ui/core";
 import {useLedger} from "../utils/LedgerContext";
+import {useTableState} from "../../webutil/tableState";
 import {IdentityMerger} from "./IdentityMerger";
 import {type Identity, type IdentityId} from "../../core/identity";
 import {AliasView} from "./AliasView";
@@ -38,13 +39,29 @@ const useStyles = makeStyles((theme) => {
       justifyContent: "center",
       alignItems: "center",
     },
+    spreadRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      margin: theme.spacing(6, 0, 0, 0),
+    },
     updateElement: {
       flexGrow: 2,
       flexBasis: theme.spacing(5),
       margin: theme.spacing(3, 0),
     },
+    filterBox: {
+      flexGrow: 1,
+      maxWidth: "15rem",
+    },
     checkboxElement: {flexGrow: 1, flexBasis: 0, margin: theme.spacing(3)},
     IdentitiesHeader: {margin: theme.spacing(3, 0)},
+    cancelButton: {
+      marginLeft: theme.spacing(2),
+    },
+    addEditPrompt: {
+      margin: 0,
+    },
   };
 });
 
@@ -56,6 +73,9 @@ export const LedgerAdmin = (): ReactNode => {
   const [selectedId, setSelectedId] = useState<IdentityId | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
+  const filteredLedger = useTableState(
+    ledger.accounts().map((a) => a.identity)
+  );
 
   const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
     setIdentityName(event.currentTarget.value);
@@ -96,38 +116,46 @@ export const LedgerAdmin = (): ReactNode => {
     setPromptString("Update Identity: ");
   };
 
+  const filterIdentities = (event: SyntheticInputEvent<HTMLInputElement>) => {
+    // fuzzy match letters "in order, but not necessarily sequentially", per issue #2490
+    const filterString = event.target.value
+      .trim()
+      .toLowerCase()
+      .split("")
+      .join("+.*");
+    const regex = new RegExp(filterString);
+
+    filteredLedger.createOrUpdateFilterFn("filterIdentities", (identity) =>
+      regex.test(identity.name.toLowerCase())
+    );
+  };
+
   const renderIdentities = () => {
-    const renderIdentity = (i: Identity, notLastElement: boolean) => (
-      <>
-        <ListItem button onClick={() => setActiveIdentity(i)} key={i.id}>
-          {i.name}
-        </ListItem>
-        {notLastElement && <Divider />}
-      </>
+    const renderIdentity = (i: Identity) => (
+      <ListItem button onClick={() => setActiveIdentity(i)} key={i.id}>
+        {i.name}
+      </ListItem>
     );
-    const numAccounts = ledger.accounts().length;
-    return (
-      <>
-        {ledger
-          .accounts()
-          .map((a) => a.identity)
-          .map((identity, index) =>
-            renderIdentity(identity, index < numAccounts - 1)
-          )}
-      </>
-    );
+
+    const list = filteredLedger.currentPage;
+    const lastIndex = list.length - 1;
+
+    return list.map((identity, index) => (
+      <React.Fragment key={identity.id}>
+        {renderIdentity(identity)}
+        {index < lastIndex && <Divider key={`divider-${identity.id}`} />}
+      </React.Fragment>
+    ));
   };
 
   return (
     <Container className={classes.root}>
       <span className={classes.centerRow}>
-        <h1 className={classes.IdentitiesHeader}>Identities</h1>{" "}
-        {ledger.accounts().length > 0 && <h3> (click one to update it)</h3>}
+        <h1 className={classes.IdentitiesHeader}>Identities</h1>
       </span>
-      <h3>{promptString}</h3>
+      <h3 className={classes.addEditPrompt}>{promptString}</h3>
       <div className={classes.centerRow}>
         <TextField
-          fullWidth
           className={classes.updateElement}
           variant="outlined"
           type="text"
@@ -137,7 +165,6 @@ export const LedgerAdmin = (): ReactNode => {
         />
         {selectedId && (
           <FormControlLabel
-            fullWidth
             className={classes.checkboxElement}
             control={
               <Checkbox
@@ -152,7 +179,10 @@ export const LedgerAdmin = (): ReactNode => {
         )}
       </div>
       <ButtonGroup color="primary" variant="contained">
-        <Button onClick={createOrUpdateIdentity}>
+        <Button
+          onClick={createOrUpdateIdentity}
+          disabled={nextIdentityName.trim().length === 0}
+        >
           {selectedId ? "update username" : "create identity"}
         </Button>
         <Button
@@ -169,18 +199,35 @@ export const LedgerAdmin = (): ReactNode => {
         >
           save ledger to disk
         </Button>
-        {selectedId && <Button onClick={resetIdentity}>New identity</Button>}
       </ButtonGroup>
+      {selectedId && (
+        <Button onClick={resetIdentity} className={classes.cancelButton}>
+          Cancel
+        </Button>
+      )}
       {selectedId && (
         <>
           <AliasView selectedId={selectedId} />
           <IdentityMerger selectedId={selectedId} />
         </>
-      )}
+      )}{" "}
+      <div className={classes.spreadRow}>
+        <h3>
+          Identities{" "}
+          {ledger.accounts().length > 0 && (
+            <small> (click one to update it)</small>
+          )}
+        </h3>
+        <TextField
+          className={classes.filterBox}
+          variant="outlined"
+          type="text"
+          onChange={filterIdentities}
+          label={"Filter list..."}
+        />
+      </div>
       <div className={classes.centerRow}>
-        <List fullWidth className={classes.identityList}>
-          {renderIdentities()}
-        </List>
+        <List className={classes.identityList}>{renderIdentities()}</List>
       </div>
     </Container>
   );
