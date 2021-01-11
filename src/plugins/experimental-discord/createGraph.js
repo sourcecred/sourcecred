@@ -1,6 +1,7 @@
 // @flow
 
 import {escape} from "entities";
+import {orElse as either} from "../../util/null";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import {empty as emptyWeights} from "../../core/weights";
 import {
@@ -243,43 +244,36 @@ export function* findGraphMessages(
         continue;
       }
 
-      const reactions = [];
-      for (const reaction of repo.reactions(channel.id, message.id)) {
-        const reactingMember = memberMap.get(reaction.authorId);
-        if (!reactingMember) {
-          // Probably this user left the server.
-          // Let's ignore this reaction (keeping the rest of the message)
-          continue;
-        }
-        reactions.push({reaction, reactingMember});
-      }
+      const reactions: $ReadOnlyArray<GraphReaction> = repo
+        .reactions(channel.id, message.id)
+        .reduce((reactions, reaction) => {
+          const reactingMember = memberMap.get(reaction.authorId);
+          // If not member, skip this reaction, keep the rest of message.
+          return reactingMember
+            ? reactions.concat({reaction, reactingMember})
+            : reactions;
+        }, []);
 
-      const mentions = [];
-      for (const userId of message.mentions) {
+      // If mentioned member not found, skip this reaction, keep the rest of message.
+      const mentions = message.mentions.reduce((mentions, userId) => {
         const mentionedMember = memberMap.get(userId);
-        if (!mentionedMember) {
-          // Probably this user left the server.
-          // We'll skip this mention (keeping the rest of the message)
-          continue;
-        }
-        mentions.push(mentionedMember);
-      }
-      if (mentions.length === 0 && reactions.length === 0) {
-        // No valid mentions or reactions, meaning this message won't have real Cred effects.
-        // let's skip it.
-        continue;
-      }
+        return mentions.concat(either(mentionedMember, []));
+      }, []);
 
       const author = memberMap.get(message.authorId) || null;
 
-      yield {
-        message,
-        author,
-        reactions,
-        mentions,
-        channelName: channel.name,
-        channelId: channel.id,
-      };
+      // Skip if no valid mentions or reactions, as this message won't have real Cred effects.
+      const credLess = mentions.length === 0 && reactions.length === 0;
+      if (!credLess) {
+        yield {
+          message,
+          author,
+          reactions,
+          mentions,
+          channelName: channel.name,
+          channelId: channel.id,
+        };
+      }
     }
   }
 }
