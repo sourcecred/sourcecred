@@ -1,6 +1,6 @@
 // @flow
 
-import React, {useState, type Node as ReactNode} from "react";
+import React, {useState, useMemo, type Node as ReactNode} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import {
@@ -74,7 +74,7 @@ export const LedgerAdmin = (): ReactNode => {
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
   const filteredLedger = useTableState(
-    ledger.accounts().map((a) => a.identity)
+    useMemo(() => ledger.accounts().map((a) => a.identity), [ledger])
   );
 
   const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
