@@ -2,7 +2,7 @@
 
 import {type NodeWeight} from "../../core/weights";
 import * as C from "../../util/combo";
-import * as NullUtil from "../../util/null";
+import * as MapUtil from "../../util/map";
 import {orElse as either} from "../../util/null";
 import {DEFAULT_TRUST_LEVEL_TO_WEIGHT} from "./createGraph";
 import {type User} from "./fetch";
@@ -20,11 +20,16 @@ export function parseCategoryId(id: string): CategoryId {
   return id;
 }
 
+// parse out the opaque type
+export function parseTagId(id: string): TagId {
+  return id;
+}
+
 export type SerializedWeightsConfig = {|
   +defaultTagWeight?: NodeWeight,
-  +tagWeights: {[TagId]: NodeWeight},
+  +tagWeights?: {|[TagId]: NodeWeight|},
   +defaultCategoryWeight?: NodeWeight,
-  +categoryWeights: {[CategoryId]: NodeWeight},
+  +categoryWeights?: {|[CategoryId]: NodeWeight|},
 |};
 
 export type WeightsConfig = {|
@@ -43,16 +48,17 @@ function upgrade(s: SerializedWeightsConfig): WeightsConfig {
   };
 }
 
-const serializedWeightsConfigParser: Parser<SerializedWeightsConfig> = C.object(
+const serializedWeightsConfigParser: C.Parser<SerializedWeightsConfig> = C.object(
+  {},
   {
     defaultCategoryWeight: C.number,
     defaultTagWeight: C.number,
-    categoryWeight: C.dict(C.number, C.fmap(C.string, parseCategoryId)),
-    tagWeight: C.dict(C.number, C.string),
+    categoryWeights: C.dict(C.number, C.fmap(C.string, parseCategoryId)),
+    tagWeights: C.dict(C.number, C.fmap(C.string, parseTagId)),
   }
 );
 
-export const weightsConfigParser: Parser<WeightsConfig> = C.fmap(
+export const weightsConfigParser: C.Parser<WeightsConfig> = C.fmap(
   serializedWeightsConfigParser,
   upgrade
 );

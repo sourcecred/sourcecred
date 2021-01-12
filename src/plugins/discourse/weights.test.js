@@ -29,7 +29,7 @@ describe("plugins/discourse/weights", () => {
   describe("parseCategoryId", () => {
     it("rejects keys that arent numbers", () => {
       const thunk = () => parseCategoryId("bad");
-      expect(thunk).toThrow(`CategoryId should be a number; got bad`);
+      expect(thunk).toThrow(`CategoryId should be a string integer; got bad`);
     });
     it("accepts keys that are numbers", () => {
       expect(parseCategoryId("5")).toEqual("5");

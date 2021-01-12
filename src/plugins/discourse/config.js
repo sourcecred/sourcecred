@@ -1,6 +1,6 @@
 // @flow
 
-import * as Combo from "../../util/combo";
+import * as C from "../../util/combo";
 import {optionsShapeParser, type MirrorOptions} from "./mirror";
 import {
   type WeightsConfig,
@@ -17,26 +17,23 @@ export type SerializedDiscourseConfig = {|
 export type DiscourseConfig = {|
   +serverUrl: string,
   +mirrorOptions?: $Shape<MirrorOptions>,
-  +weights: WeightsConfig,
+  +weights?: WeightsConfig,
 |};
 
-export const parser: Combo.Parser<DiscourseConfig> = (() => {
-  const C = Combo;
-  return C.object(
-    {
-      serverUrl: C.fmap(C.string, (serverUrl) => {
-        const httpRE = new RegExp(/^https?:\/\//);
-        if (!httpRE.test(serverUrl)) {
-          throw new Error(
-            "expected server url to start with 'https://' or 'http://'"
-          );
-        }
-        return serverUrl;
-      }),
-    },
-    {
-      mirrorOptions: optionsShapeParser,
-      weights: weightsConfigParser,
-    }
-  );
-})();
+export const parser: C.Parser<DiscourseConfig> = C.object(
+  {
+    serverUrl: C.fmap(C.string, (serverUrl) => {
+      const httpRE = new RegExp(/^https?:\/\//);
+      if (!httpRE.test(serverUrl)) {
+        throw new Error(
+          "expected server url to start with 'https://' or 'http://'"
+        );
+      }
+      return serverUrl;
+    }),
+  },
+  {
+    mirrorOptions: optionsShapeParser,
+    weights: weightsConfigParser,
+  }
+);
