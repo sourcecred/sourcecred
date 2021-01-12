@@ -1,76 +1,37 @@
 // @flow
 
-import cloneDeep from "lodash.clonedeep";
 import {NodeAddress} from "../graph";
 import {Ledger} from "./ledger";
 import {newIdentity} from "../identity";
 import * as G from "./grain";
 import * as uuid from "../../util/uuid";
-import {createUuidMock} from "./testUtils"; // for spy purposes
+import {
+  createUuidMock,
+  failsWithoutMutation,
+  createDateMock,
+  createTestLedgerFixture,
+  id1,
+  id2,
+  id3,
+  g,
+} from "./testUtils";
+
+const uuidMock = createUuidMock();
+const dateMock = createDateMock();
+const {
+  identity1,
+  identity2,
+  ledgerWithIdentities,
+  ledgerWithActiveIdentities,
+} = createTestLedgerFixture(uuidMock, dateMock);
+const {resetFakeUuid, setNextUuid} = uuidMock;
+const {setFakeDate} = dateMock;
+
+const allocationId1: uuid.Uuid = uuid.random();
+const allocationId2: uuid.Uuid = uuid.random();
+const allocationId3: uuid.Uuid = uuid.random();
 
 describe("core/ledger/ledger", () => {
-  // Helper for constructing Grain values.
-  const g = (s) => G.fromString(s);
-
-  let nextFakeDate = 0;
-  function resetFakeDate() {
-    nextFakeDate = 0;
-  }
-  function setFakeDate(ts: number) {
-    // Use this when you want specific timestamps, rather than just
-    // auto-incrementing
-    jest.spyOn(global.Date, "now").mockImplementationOnce(() => ts);
-  }
-  jest.spyOn(global.Date, "now").mockImplementation(() => nextFakeDate++);
-
-  const {resetFakeUuid, setNextUuid} = createUuidMock();
-
-  const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
-  const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
-  const id3 = uuid.fromString("EpbMqV0HmcolKvpXTwSddA");
-
-  const allocationId1 = uuid.random();
-  const allocationId2 = uuid.random();
-  const allocationId3 = uuid.random();
-
-  // Verify that a method fails, throwing an error, without mutating the ledger.
-  function failsWithoutMutation(
-    ledger: Ledger,
-    operation: (Ledger) => any,
-    message: string
-  ) {
-    const copy = cloneDeep(ledger);
-    expect(() => operation(ledger)).toThrow(message);
-    expect(copy).toEqual(ledger);
-  }
-
-  const identity1 = () => {
-    setNextUuid(id1);
-    return newIdentity("USER", "steven");
-  };
-  const identity2 = () => {
-    setNextUuid(id2);
-    return newIdentity("ORGANIZATION", "crystal-gems");
-  };
-
-  function ledgerWithIdentities() {
-    resetFakeUuid();
-    resetFakeDate();
-    const ledger = new Ledger();
-    setNextUuid(id1);
-    ledger.createIdentity("USER", "steven");
-    setNextUuid(id2);
-    ledger.createIdentity("ORGANIZATION", "crystal-gems");
-    return ledger;
-  }
-
-  function ledgerWithActiveIdentities() {
-    const ledger = ledgerWithIdentities();
-    ledger.activate(id1);
-    ledger.activate(id2);
-    return ledger;
-  }
-
   const alias = {
     address: NodeAddress.fromParts(["alias"]),
     description: "alias",
