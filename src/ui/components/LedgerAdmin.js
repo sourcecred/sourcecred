@@ -74,7 +74,7 @@ export const LedgerAdmin = (): ReactNode => {
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
   const filteredLedger = useTableState(
-    useMemo(() => ledger.accounts().map((a) => a.identity), [ledger])
+    useMemo(() => ledger.accounts().map((a) => a.identity), [ledger.accounts()])
   );
 
   const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
@@ -202,7 +202,7 @@ export const LedgerAdmin = (): ReactNode => {
       </ButtonGroup>
       {selectedId && (
         <Button onClick={resetIdentity} className={classes.cancelButton}>
-          Cancel
+          Back
         </Button>
       )}
       {selectedId && (
