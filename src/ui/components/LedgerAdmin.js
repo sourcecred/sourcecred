@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => {
     },
     checkboxElement: {flexGrow: 1, flexBasis: 0, margin: theme.spacing(3)},
     IdentitiesHeader: {margin: theme.spacing(3, 0)},
-    cancelButton: {
+    backButton: {
       marginLeft: theme.spacing(2),
     },
     addEditPrompt: {
@@ -201,7 +201,7 @@ export const LedgerAdmin = (): ReactNode => {
         </Button>
       </ButtonGroup>
       {selectedId && (
-        <Button onClick={resetIdentity} className={classes.cancelButton}>
+        <Button onClick={resetIdentity} className={classes.backButton}>
           Back
         </Button>
       )}
