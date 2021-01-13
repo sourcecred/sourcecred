@@ -4,28 +4,11 @@ import {Ledger} from "../core/ledger/ledger";
 import * as uuid from "../util/uuid";
 import {LedgerManager} from "./ledgerManager";
 import type {LedgerLog} from "../core/ledger/ledger";
-import * as G from "../core/ledger/grain";
-import {createUuidMock} from "../core/ledger/testUtils";
+import {g, id1, id2, createTestLedgerFixture} from "../core/ledger/testUtils";
+
+const {ledgerWithIdentities} = createTestLedgerFixture();
 
 describe("api/ledgerManager", () => {
-  // Helper for constructing Grain values.
-  const g = (s) => G.fromString(s);
-
-  const {resetFakeUuid, setNextUuid} = createUuidMock();
-
-  const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
-  const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
-
-  function ledgerWithIdentities() {
-    resetFakeUuid();
-    const ledger = new Ledger();
-    setNextUuid(id1);
-    ledger.createIdentity("USER", "steven");
-    setNextUuid(id2);
-    ledger.createIdentity("ORGANIZATION", "crystal-gems");
-    return ledger;
-  }
-
   const mockStorage = {
     read: jest.fn(() => Promise.resolve(new Ledger())),
     write: jest.fn((ledger: Ledger) => {
