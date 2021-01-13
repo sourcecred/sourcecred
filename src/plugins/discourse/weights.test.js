@@ -1,6 +1,6 @@
 // @flow
 
-import {_trustLevelWeight, likeWeight} from "./weights";
+import {_trustLevelWeight, likeWeight, parseCategoryId} from "./weights";
 import {DEFAULT_TRUST_LEVEL_TO_WEIGHT as weights} from "./createGraph";
 
 describe("plugins/discourse/weights", () => {
@@ -23,6 +23,20 @@ describe("plugins/discourse/weights", () => {
           weights[trustLevel.toString()]
         );
       });
+    });
+  });
+
+  describe("parseCategoryId", () => {
+    it("rejects keys that arent numbers", () => {
+      const thunk = () => parseCategoryId("bad");
+      expect(thunk).toThrow(`CategoryId should be a string integer; got bad`);
+    });
+    it("accepts keys that are numbers", () => {
+      expect(parseCategoryId("5")).toEqual("5");
+    });
+    it("rejects non-integer keys that are numbers", () => {
+      const thunk = () => parseCategoryId("5.5");
+      expect(thunk).toThrow("CategoryId should be a string integer; got 5.5");
     });
   });
 });
