@@ -14,11 +14,11 @@ import {
 } from "../../core/graph";
 import {
   _createReferenceEdges,
-  weightForTrustLevel,
   _createGraphData,
   _graphFromData,
 } from "./createGraph";
 import * as NE from "./nodesAndEdges";
+import {likeWeight} from "./weights";
 
 import {userAddress, postAddress, topicAddress} from "./address";
 
@@ -462,24 +462,6 @@ describe("plugins/discourse/createGraph", () => {
     });
   });
 
-  describe("weightForTrustLevel", () => {
-    it("has a weight of 0 for a null or undefined trustLevel", () => {
-      expect(weightForTrustLevel(null)).toEqual(0);
-      expect(weightForTrustLevel(undefined)).toEqual(0);
-    });
-    it("throws an error for an invalid trustLevel", () => {
-      const thunk = () => weightForTrustLevel(-1);
-      expect(thunk).toThrowError("invalid trust level");
-    });
-    it("works as expected for a regular user", () => {
-      expect(weightForTrustLevel(0)).toEqual(0);
-      expect(weightForTrustLevel(1)).toEqual(0.1);
-      expect(weightForTrustLevel(2)).toEqual(1);
-      expect(weightForTrustLevel(3)).toEqual(1.25);
-      expect(weightForTrustLevel(4)).toEqual(1.5);
-    });
-  });
-
   describe("_createGraphData", () => {
     it("adds weights to likes based on user trust levels", () => {
       const {repo, data, likes} = example();
@@ -488,7 +470,7 @@ describe("plugins/discourse/createGraph", () => {
         const user = repo.findUser(like.username);
         const trustLevel = user == null ? null : user.trustLevel;
         seenTrustLevels.add(trustLevel);
-        const expectedWeight = weightForTrustLevel(trustLevel);
+        const expectedWeight = likeWeight(user);
         expect(data.likes[i].weight).toEqual(expectedWeight);
       });
       // Validation: Just to double check this test is working as intended,
@@ -518,8 +500,7 @@ describe("plugins/discourse/createGraph", () => {
       }
       likes.forEach((like) => {
         const user = repo.findUser(like.username);
-        const trustLevel = user == null ? null : user.trustLevel;
-        const weight = weightForTrustLevel(trustLevel);
+        const weight = likeWeight(user);
         postLikeWeight[like.postId] += weight;
       });
       const expectedTopicHasLikedPosts = [];
