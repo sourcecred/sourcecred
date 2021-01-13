@@ -34,5 +34,9 @@ describe("plugins/discourse/weights", () => {
     it("accepts keys that are numbers", () => {
       expect(parseCategoryId("5")).toEqual("5");
     });
+    it("rejects non-integer keys that are numbers", () => {
+      const thunk = () => parseCategoryId("5.5");
+      expect(thunk).toThrow("CategoryId should be a string integer; got 5.5");
+    });
   });
 });

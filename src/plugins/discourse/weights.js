@@ -14,7 +14,7 @@ export opaque type TagId: string = string;
 
 export function parseCategoryId(id: string): CategoryId {
   const result = parseInt(id, 10);
-  if (Number.isNaN(result)) {
+  if (Number.isNaN(result) || result.toString() !== id) {
     throw new Error(`CategoryId should be a string integer; got ${id}`);
   }
   return id;
@@ -48,7 +48,7 @@ function upgrade(s: SerializedWeightsConfig): WeightsConfig {
   };
 }
 
-const serializedWeightsConfigParser: C.Parser<SerializedWeightsConfig> = C.object(
+export const serializedWeightsConfigParser: C.Parser<SerializedWeightsConfig> = C.object(
   {},
   {
     defaultCategoryWeight: C.number,

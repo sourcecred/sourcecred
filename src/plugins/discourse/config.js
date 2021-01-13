@@ -3,24 +3,25 @@
 import * as C from "../../util/combo";
 import {optionsShapeParser, type MirrorOptions} from "./mirror";
 import {
-  type WeightsConfig,
   weightsConfigParser,
+  serializedWeightsConfigParser,
+  type WeightsConfig,
   type SerializedWeightsConfig,
 } from "./weights";
 
 export type SerializedDiscourseConfig = {|
   +serverUrl: string,
   +mirrorOptions?: $Shape<MirrorOptions>,
-  +weights: SerializedWeightsConfig,
+  +weights?: SerializedWeightsConfig,
 |};
 
 export type DiscourseConfig = {|
   +serverUrl: string,
+  +weights: WeightsConfig,
   +mirrorOptions?: $Shape<MirrorOptions>,
-  +weights?: WeightsConfig,
 |};
 
-export const parser: C.Parser<DiscourseConfig> = C.object(
+const serializedParser: C.Parser<SerializedDiscourseConfig> = C.object(
   {
     serverUrl: C.fmap(C.string, (serverUrl) => {
       const httpRE = new RegExp(/^https?:\/\//);
@@ -34,6 +35,18 @@ export const parser: C.Parser<DiscourseConfig> = C.object(
   },
   {
     mirrorOptions: optionsShapeParser,
-    weights: weightsConfigParser,
+    weights: serializedWeightsConfigParser,
   }
+);
+
+export function upgrade(c: SerializedDiscourseConfig): DiscourseConfig {
+  return {
+    ...c,
+    weights: weightsConfigParser.parseOrThrow(c.weights || {}),
+  };
+}
+
+export const parser: C.Parser<DiscourseConfig> = C.fmap(
+  serializedParser,
+  upgrade
 );
