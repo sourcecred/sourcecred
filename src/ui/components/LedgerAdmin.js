@@ -140,12 +140,20 @@ export const LedgerAdmin = (): ReactNode => {
     const list = filteredLedger.currentPage;
     const lastIndex = list.length - 1;
 
-    return list.map((identity, index) => (
-      <React.Fragment key={identity.id}>
-        {renderIdentity(identity)}
-        {index < lastIndex && <Divider key={`divider-${identity.id}`} />}
-      </React.Fragment>
-    ));
+    if (lastIndex > -1) {
+      return list.map((identity, index) => (
+        <React.Fragment key={identity.id}>
+          {renderIdentity(identity)}
+          {index < lastIndex && <Divider key={`divider-${identity.id}`} />}
+        </React.Fragment>
+      ));
+    } else {
+      return (
+        <ListItem button key="no_results">
+          <em>No results</em>
+        </ListItem>
+      );
+    }
   };
 
   return (
