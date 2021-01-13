@@ -17,7 +17,7 @@ import {
   edgeWeightEvaluator,
 } from "../algorithm/weightEvaluator";
 import {
-  type Participant,
+  type Participant as MarkovProcessParticipant,
   type Parameters as MarkovProcessGraphParameters,
   type Arguments as MarkovProcessGraphArguments,
   MarkovProcessGraph,
@@ -25,7 +25,7 @@ import {
 import * as uuid from "../../util/uuid"; // for spy purposes
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {markovProcessGraphPagerank} from "./compute";
-import {CredGraph} from "./credGraph";
+import {CredGraph, type Participant} from "./credGraph";
 
 /**
  * This module contains test helpers for working with CredRank data,
@@ -47,23 +47,37 @@ export const participantNode2: GraphNode = {
 };
 deepFreeze([participantNode1, participantNode2]);
 
-export const participant1: Participant = {
+export const participant1: MarkovProcessParticipant = {
   description: participantNode1.description,
   address: participantNode1.address,
   id: uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA"),
 };
-export const participant2: Participant = {
+export const participant2: MarkovProcessParticipant = {
   description: participantNode2.description,
   address: participantNode2.address,
-  id: uuid.fromString("YVZhbGlkVXVpZE20TGFzdA"),
+  id: uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ"),
 };
 
-export const participants: $ReadOnlyArray<Participant> = deepFreeze([
-  participant1,
-  participant2,
-]);
+export const expectedParticipant1: Participant = {
+  description: participantNode1.description,
+  address: participantNode1.address,
+  id: uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA"),
+  cred: 2.999999337965189,
+  credPerInterval: [0.9479471812187605, 2.0520521567464285],
+};
+export const expectedParticipant2: Participant = {
+  description: participantNode2.description,
+  address: participantNode2.address,
+  id: uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ"),
+  cred: 1.286615549244117e-19,
+  credPerInterval: [5.146462196976468e-20, 7.719693295464702e-20],
+};
 
-const intervals: IntervalSequence = deepFreeze(
+export const participants: $ReadOnlyArray<MarkovProcessParticipant> = deepFreeze(
+  [participant1, participant2]
+);
+
+export const intervals: IntervalSequence = deepFreeze(
   intervalSequence([
     {startTimeMs: 0, endTimeMs: 2},
     {startTimeMs: 2, endTimeMs: 4},

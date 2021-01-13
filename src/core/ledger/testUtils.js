@@ -17,10 +17,13 @@ export interface DateMock {
 }
 
 export interface LedgerMock {
-  identity1(): Identity;
-  identity2(): Identity;
-  ledgerWithIdentities(): Ledger;
-  ledgerWithActiveIdentities(): Ledger;
+  identity1(id?: IdentityId): Identity;
+  identity2(id?: IdentityId): Identity;
+  ledgerWithIdentities(firstId?: IdentityId, secondId?: IdentityId): Ledger;
+  ledgerWithActiveIdentities(
+    firstId?: IdentityId,
+    secondId?: IdentityId
+  ): Ledger;
 }
 
 export const createUuidMock = (): UuidMock => {
@@ -66,30 +69,36 @@ export const createTestLedgerFixture = (
   uuidMock: UuidMock = createUuidMock(),
   dateMock: DateMock = createDateMock()
 ): LedgerMock => {
-  const identity1 = (): Identity => {
-    uuidMock.setNextUuid(id1);
+  const identity1 = (id?: IdentityId = id1): Identity => {
+    uuidMock.setNextUuid(id);
     return newIdentity("USER", "steven");
   };
-  const identity2 = (): Identity => {
-    uuidMock.setNextUuid(id2);
+  const identity2 = (id?: IdentityId = id2): Identity => {
+    uuidMock.setNextUuid(id);
     return newIdentity("ORGANIZATION", "crystal-gems");
   };
 
-  const ledgerWithIdentities = (): Ledger => {
+  const ledgerWithIdentities = (
+    firstId: IdentityId = id1,
+    secondId: IdentityId = id2
+  ): Ledger => {
     uuidMock.resetFakeUuid();
     dateMock.resetFakeDate();
     const ledger = new Ledger();
-    uuidMock.setNextUuid(id1);
+    uuidMock.setNextUuid(firstId);
     ledger.createIdentity("USER", "steven");
-    uuidMock.setNextUuid(id2);
+    uuidMock.setNextUuid(secondId);
     ledger.createIdentity("ORGANIZATION", "crystal-gems");
     return ledger;
   };
 
-  const ledgerWithActiveIdentities = (): Ledger => {
+  const ledgerWithActiveIdentities = (
+    firstId: IdentityId = id1,
+    secondId: IdentityId = id2
+  ): Ledger => {
     const ledger = ledgerWithIdentities();
-    ledger.activate(id1);
-    ledger.activate(id2);
+    ledger.activate(firstId);
+    ledger.activate(secondId);
     return ledger;
   };
 
