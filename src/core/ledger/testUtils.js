@@ -1,4 +1,9 @@
 // @flow
+
+import cloneDeep from "lodash.clonedeep";
+import {Ledger} from "./ledger";
+import {newIdentity, type Identity, type IdentityId} from "../identity";
+import * as G from "./grain";
 import * as uuid from "../../util/uuid";
 
 export interface UuidMock {
@@ -6,7 +11,19 @@ export interface UuidMock {
   setNextUuid(id: uuid.Uuid): void;
 }
 
-export function createUuidMock(): UuidMock {
+export interface DateMock {
+  resetFakeDate(): void;
+  setFakeDate(id: number): void;
+}
+
+export interface LedgerMock {
+  identity1(): Identity;
+  identity2(): Identity;
+  ledgerWithIdentities(): Ledger;
+  ledgerWithActiveIdentities(): Ledger;
+}
+
+export const createUuidMock = (): UuidMock => {
   const randomMock = jest.spyOn(uuid, "random");
 
   let nextFakeUuidIndex = 0;
@@ -26,6 +43,78 @@ export function createUuidMock(): UuidMock {
   }
 
   randomMock.mockImplementation(nextFakeUuid);
+  return {resetFakeUuid, setNextUuid};
+};
 
-  return {setNextUuid, resetFakeUuid};
+export const createDateMock = (): DateMock => {
+  let nextFakeDate = 0;
+
+  function resetFakeDate() {
+    nextFakeDate = 0;
+  }
+  function setFakeDate(ts: number) {
+    // Use this when you want specific timestamps, rather than just
+    // auto-incrementing
+    jest.spyOn(global.Date, "now").mockImplementationOnce(() => ts);
+  }
+  jest.spyOn(global.Date, "now").mockImplementation(() => nextFakeDate++);
+
+  return {setFakeDate, resetFakeDate};
+};
+
+export const createTestLedgerFixture = (
+  uuidMock: UuidMock = createUuidMock(),
+  dateMock: DateMock = createDateMock()
+): LedgerMock => {
+  const identity1 = (): Identity => {
+    uuidMock.setNextUuid(id1);
+    return newIdentity("USER", "steven");
+  };
+  const identity2 = (): Identity => {
+    uuidMock.setNextUuid(id2);
+    return newIdentity("ORGANIZATION", "crystal-gems");
+  };
+
+  const ledgerWithIdentities = (): Ledger => {
+    uuidMock.resetFakeUuid();
+    dateMock.resetFakeDate();
+    const ledger = new Ledger();
+    uuidMock.setNextUuid(id1);
+    ledger.createIdentity("USER", "steven");
+    uuidMock.setNextUuid(id2);
+    ledger.createIdentity("ORGANIZATION", "crystal-gems");
+    return ledger;
+  };
+
+  const ledgerWithActiveIdentities = (): Ledger => {
+    const ledger = ledgerWithIdentities();
+    ledger.activate(id1);
+    ledger.activate(id2);
+    return ledger;
+  };
+
+  return {
+    identity1,
+    identity2,
+    ledgerWithIdentities,
+    ledgerWithActiveIdentities,
+  };
+};
+
+// Helper for constructing Grain values.
+export const g = (s: string): G.Grain => G.fromString(s);
+
+export const id1: IdentityId = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
+export const id2: IdentityId = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
+export const id3: IdentityId = uuid.fromString("EpbMqV0HmcolKvpXTwSddA");
+
+// Verify that a method fails, throwing an error, without mutating the ledger.
+export function failsWithoutMutation(
+  ledger: Ledger,
+  operation: (Ledger) => any,
+  message: string
+) {
+  const copy = cloneDeep(ledger);
+  expect(() => operation(ledger)).toThrow(message);
+  expect(copy).toEqual(ledger);
 }

@@ -1,26 +1,13 @@
 // @flow
 
 import {diffLedger} from "./diffLedger";
-import * as uuid from "../../util/uuid";
 import {Ledger} from "./ledger";
-import {createUuidMock} from "./testUtils"; // for spy purposes
+import {id1, id2, createTestLedgerFixture, createUuidMock} from "./testUtils";
+
+const uuidMock = createUuidMock();
+const {ledgerWithIdentities} = createTestLedgerFixture(uuidMock);
 
 describe("core/ledger/diffLedger", () => {
-  const {resetFakeUuid, setNextUuid} = createUuidMock();
-
-  const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
-  const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
-
-  function ledgerWithIdentities() {
-    resetFakeUuid();
-    const ledger = new Ledger();
-    setNextUuid(id1);
-    ledger.createIdentity("USER", "steven");
-    setNextUuid(id2);
-    ledger.createIdentity("ORGANIZATION", "crystal-gems");
-    return ledger;
-  }
-
   it("should handle the empty case", () => {
     const a = new Ledger();
     const b = new Ledger();
@@ -67,7 +54,7 @@ describe("core/ledger/diffLedger", () => {
     const aLedgerLog = a.eventLog();
 
     // Create a duplicate event out-of-order in b to test if it gets filtered
-    setNextUuid(aLedgerLog[aLedgerLog.length - 1].uuid);
+    uuidMock.setNextUuid(aLedgerLog[aLedgerLog.length - 1].uuid);
     b.activate(id2);
 
     // Create a new event in b to test if it gets ignored
