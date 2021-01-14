@@ -88,7 +88,7 @@ class MockFetcher implements Discourse {
 
   constructor() {
     // Start with 2, as category ID 1 is reserved as "uncategorized".
-    this._nextCategoryId = 2;
+    this._nextCategoryId = "2";
     this._nextTopicId = 1;
     this._nextPostId = 1;
     this._categories = new Set();
@@ -187,7 +187,7 @@ class MockFetcher implements Discourse {
     const timestampMs = 1000 + id;
     return {
       id,
-      categoryId: this._topicToCategory.get(id) || 1,
+      categoryId: this._topicToCategory.get(id) || "1",
       tags: ["example"],
       title: `topic ${id}`,
       timestampMs,
@@ -210,7 +210,7 @@ class MockFetcher implements Discourse {
   addCategory(topic?: $Shape<TopicOptions>): CreatedCategory {
     // Have the new Category exist.
     const categoryId = this._nextCategoryId;
-    this._nextCategoryId++;
+    this._nextCategoryId = String(parseInt(this._nextCategoryId, 10) + 1);
     this._categories.add(categoryId);
 
     // Add the Topic and Post.
@@ -229,7 +229,7 @@ class MockFetcher implements Discourse {
    */
   addTopic(topic?: TopicOptions): CreatedTopic {
     const {categoryId, authorUsername, cooked} = topic || {};
-    if (categoryId === 1) {
+    if (categoryId === "1") {
       throw new Error(
         `Category with ID 1 is reserved as uncategorized, please don't explicitly define it.`
       );
