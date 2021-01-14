@@ -1,6 +1,5 @@
 // @flow
 
-import {DEFAULT_SUFFIX} from "../core/ledger/grain";
 import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
 
@@ -21,6 +20,7 @@ export type CurrencyDetails = {|
 |};
 
 export const DEFAULT_NAME = "Grain";
+export const DEFAULT_SUFFIX = "g";
 
 /**
  * Utilized by combo.fmap to enforce default currency values
