@@ -120,6 +120,7 @@ const AdminApp = (): ReactNode => {
         <div>
           <h1>Load Failure</h1>
           <p>Check console for details.</p>
+          <p>{loadResult.error}</p>
         </div>
       );
     case "SUCCESS":
@@ -140,7 +141,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
 
   return (
     // TODO (@topocount) create context for read-only instance state
-    <LedgerProvider initialLedger={loadSuccess.ledger}>
+    <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
       <Admin
         layout={createAppLayout(loadSuccess)}
         theme={theme}
