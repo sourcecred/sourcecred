@@ -1,7 +1,7 @@
 # Reference: https://bit.ly/2XlscBF
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence
-* @sourcecred/reviewers
+* @decentralion @hammadj @blueridger @topocount
 
 # Core libraries
 /src/util/ @decentralion @blueridger
