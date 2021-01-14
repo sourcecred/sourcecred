@@ -18,7 +18,9 @@ import {
   _graphFromData,
 } from "./createGraph";
 import * as NE from "./nodesAndEdges";
+import {type NodeWeight} from "../../core/weights";
 import {likeWeight} from "./weights";
+import {type DiscourseConfig, parser as configParser} from "./config";
 
 import {userAddress, postAddress, topicAddress} from "./address";
 
@@ -119,6 +121,24 @@ describe("plugins/discourse/createGraph", () => {
     }
   }
 
+  function getConfig(
+    serverUrl: string = "https://sc.sc",
+    defaultTagWeight?: NodeWeight = 0,
+    defaultCategoryWeight?: NodeWeight = 0,
+    tagWeights?: {[string]: number} = {"some": 3, "example": 0.5},
+    categoryWeights?: {[string]: number} = {"1": 1}
+  ): DiscourseConfig {
+    return configParser.parseOrThrow({
+      serverUrl,
+      weights: {
+        defaultTagWeight,
+        defaultCategoryWeight,
+        tagWeights,
+        categoryWeights,
+      },
+    });
+  }
+
   function example() {
     const url = "https://url.com";
     const topic = {
@@ -184,7 +204,7 @@ describe("plugins/discourse/createGraph", () => {
     ];
     const posts = [post1, post2, post3];
     const repo = new MockRepository([topic], [post1, post2, post3], likes);
-    const data = _createGraphData(url, repo);
+    const data = _createGraphData(getConfig(url), repo);
     const {graph, weights} = _graphFromData(data);
     return {graph, weights, repo, data, topic, url, posts, likes};
   }
@@ -207,7 +227,7 @@ describe("plugins/discourse/createGraph", () => {
       const like = {timestampMs: 5, username: "mystery-user", postId: 9999};
       const repo = new MockRepository([], [], [like]);
       const url = "https://foo";
-      const data = _createGraphData(url, repo);
+      const data = _createGraphData(getConfig(url), repo);
       const expectedNode = NE.likeNode(url, like, "[unknown post]");
       expect(data.likes[0].node).toEqual(expectedNode);
     });
@@ -225,7 +245,7 @@ describe("plugins/discourse/createGraph", () => {
       };
       const repo = new MockRepository([], [post], []);
       const url = "https://foo";
-      const data = _createGraphData(url, repo);
+      const data = _createGraphData(getConfig(url), repo);
       const postUrl = `${url}/t/${String(post.topicId)}/${String(
         post.indexWithinTopic
       )}`;
@@ -463,14 +483,21 @@ describe("plugins/discourse/createGraph", () => {
   });
 
   describe("_createGraphData", () => {
-    it("adds weights to likes based on user trust levels", () => {
+    it("adds weights to likes based on user trust levels, categoryId, and tags", () => {
       const {repo, data, likes} = example();
       const seenTrustLevels = new Set();
       likes.forEach((like, i) => {
         const user = repo.findUser(like.username);
         const trustLevel = user == null ? null : user.trustLevel;
         seenTrustLevels.add(trustLevel);
-        const expectedWeight = likeWeight(user);
+        const {topicId} = repo.postById(like.postId) || {};
+        const {categoryId, tags} = repo.topicById(topicId) || {};
+        const expectedWeight = likeWeight(
+          getConfig().weights,
+          user,
+          categoryId,
+          tags
+        );
         expect(data.likes[i].weight).toEqual(expectedWeight);
       });
       // Validation: Just to double check this test is working as intended,
@@ -500,7 +527,9 @@ describe("plugins/discourse/createGraph", () => {
       }
       likes.forEach((like) => {
         const user = repo.findUser(like.username);
-        const weight = likeWeight(user);
+        const {topicId} = repo.postById(like.postId) || {};
+        const {categoryId, tags} = repo.topicById(topicId) || {};
+        const weight = likeWeight(getConfig().weights, user, categoryId, tags);
         postLikeWeight[like.postId] += weight;
       });
       const expectedTopicHasLikedPosts = [];

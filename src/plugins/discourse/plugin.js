@@ -65,7 +65,7 @@ export class DiscoursePlugin implements Plugin {
     const _ = rd; // TODO(#1808): not yet used
     const config = await loadConfig(ctx);
     const repo = await repository(ctx, config.serverUrl);
-    return createGraph(config.serverUrl, repo);
+    return createGraph(config, repo);
   }
 
   async referenceDetector(
