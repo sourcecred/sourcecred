@@ -5,12 +5,12 @@ const path = require("path");
 const jsdoc2md = require("jsdoc-to-markdown");
 const chalk = require("chalk");
 
-function success(message) {
+function success(message /*: string */) {
   const label = chalk.bgGreen.bold.white(" SUCCESS ");
   console.log(`${label} ${message}`);
 }
 
-function error(message) {
+function error(message /*: string */) {
   const label = chalk.bgRed.bold.white(" FAIL ");
   console.log(`${label} ${message}`);
 }
@@ -19,9 +19,9 @@ function error(message) {
 // with the file path relative to the given dir
 // dir: path of the directory you want to search the files for
 // fileTypes: array of file types you are search files, ex: ['.txt', '.jpg']
-function getFilesFromDir(dir, fileTypes) {
+function getFilesFromDir(dir /*: string */, fileTypes /*: string[] */) {
   var filesToReturn = [];
-  function walkDir(currentPath) {
+  function walkDir(currentPath /*: string */) {
     var files = fs.readdirSync(currentPath);
     for (let i = 0; i < files.length; i++) {
       var curFile = path.join(currentPath, files[i]);
@@ -40,7 +40,7 @@ function getFilesFromDir(dir, fileTypes) {
   return filesToReturn;
 }
 
-async function generateDocs(inputFile) {
+async function generateDocs(inputFile /*: string */) {
   /* input and output paths */
   const outputDir = "./docs";
 
