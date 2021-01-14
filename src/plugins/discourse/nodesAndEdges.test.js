@@ -14,7 +14,7 @@ describe("plugins/discourse/nodesAndEdges", () => {
       title: "first topic",
       timestampMs: 0,
       authorUsername: "decentralion",
-      categoryId: 1,
+      categoryId: "1",
       tags: ["some", "example"],
       bumpedMs: 0,
     };

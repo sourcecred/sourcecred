@@ -127,7 +127,7 @@ describe("plugins/discourse/createGraph", () => {
       tags: ["some", "example"],
       timestampMs: 0,
       authorUsername: "decentralion",
-      categoryId: 1,
+      categoryId: "1",
       bumpedMs: 0,
     };
     const post1 = {

@@ -216,7 +216,7 @@ export class SqliteMirrorRepository
       dedent`\
         CREATE TABLE topics (
             id INTEGER PRIMARY KEY,
-            category_id INTEGER NOT NULL,
+            category_id TEXT NOT NULL,
             title TEXT NOT NULL,
             timestamp_ms INTEGER NOT NULL,
             bumped_ms INTEGER NOT NULL,

@@ -14,7 +14,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       const repository = new SqliteMirrorRepository(db, url);
       const topic: Topic = {
         id: 123,
-        categoryId: 42,
+        categoryId: "42",
         tags: [],
         title: "Sample topic 1",
         timestampMs: 456789,
@@ -31,7 +31,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       const repository = new SqliteMirrorRepository(db, url);
       const topic: Topic = {
         id: 123,
-        categoryId: 42,
+        categoryId: "42",
         tags: ["example", "some"],
         title: "Sample topic 1",
         timestampMs: 456789,
@@ -48,7 +48,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       const repository = new SqliteMirrorRepository(db, url);
       const oldTopic: Topic = {
         id: 123,
-        categoryId: 42,
+        categoryId: "42",
         tags: ["example", "some"],
         title: "Sample topic 1",
         timestampMs: 456789,
@@ -57,7 +57,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       };
       const newTopic: Topic = {
         id: 123,
-        categoryId: 42,
+        categoryId: "42",
         tags: ["example", "other"],
         title: "Sample topic 1",
         timestampMs: 456789,
@@ -75,7 +75,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       const repository = new SqliteMirrorRepository(db, url);
       const topic: Topic = {
         id: 123,
-        categoryId: 42,
+        categoryId: "42",
         tags: ["c", "b", "a"],
         title: "Sample topic 1",
         timestampMs: 456789,
@@ -96,7 +96,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       const repository = new SqliteMirrorRepository(db, url);
       const topic1: Topic = {
         id: 123,
-        categoryId: 42,
+        categoryId: "42",
         tags: ["example", "some"],
         title: "Sample topic 1",
         timestampMs: 456789,
@@ -105,7 +105,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       };
       const topic2: Topic = {
         id: 124,
-        categoryId: 42,
+        categoryId: "42",
         tags: [],
         title: "Sample topic 2",
         timestampMs: 456789,
@@ -162,7 +162,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 1,
+      categoryId: "1",
       tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
@@ -185,7 +185,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 1,
+      categoryId: "1",
       tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
@@ -242,7 +242,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 1,
+      categoryId: "1",
       tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
@@ -298,7 +298,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 1,
+      categoryId: "1",
       tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
@@ -353,7 +353,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic1: Topic = {
       id: 123,
-      categoryId: 42,
+      categoryId: "42",
       tags: ["example", "some"],
       title: "Sample topic 1",
       timestampMs: 456789,
@@ -362,7 +362,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     };
     const topic2: Topic = {
       id: 456,
-      categoryId: 42,
+      categoryId: "42",
       tags: ["example", "some"],
       title: "Sample topic 2",
       timestampMs: 456789,
@@ -389,7 +389,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 42,
+      categoryId: "42",
       tags: ["example", "some"],
       title: "Sample topic 1",
       timestampMs: 456789,
@@ -423,7 +423,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 1,
+      categoryId: "1",
       tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
@@ -457,7 +457,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 1,
+      categoryId: "1",
       tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
@@ -499,7 +499,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
     const topic: Topic = {
       id: 123,
-      categoryId: 1,
+      categoryId: "1",
       tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
