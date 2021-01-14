@@ -35,6 +35,13 @@ function upgrade(c: SerializedCurrencyDetails): CurrencyDetails {
   };
 }
 
+export function defaultCurrencyConfig(): CurrencyDetails {
+  return {
+    name: DEFAULT_NAME,
+    suffix: DEFAULT_SUFFIX,
+  };
+}
+
 export const parser: C.Parser<CurrencyDetails> = C.fmap(
   C.object({}, {currencyName: C.string, currencySuffix: C.string}),
   upgrade
