@@ -18,7 +18,7 @@ import {type TimestampMs} from "../../util/timestamp";
 export type UserId = number;
 export type PostId = number;
 export type TopicId = number;
-export type CategoryId = number;
+export type CategoryId = string;
 export type Tag = string;
 
 /**

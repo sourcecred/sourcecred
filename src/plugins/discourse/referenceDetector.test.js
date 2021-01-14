@@ -47,7 +47,7 @@ describe("plugins/discourse/referenceDetector", () => {
       const detector = new DiscourseReferenceDetector(repo);
       const topic: Topic = {
         id: 123,
-        categoryId: 1,
+        categoryId: "1",
         tags: ["some", "example"],
         title: "Sample topic",
         timestampMs: 456789,
@@ -77,7 +77,7 @@ describe("plugins/discourse/referenceDetector", () => {
       const detector = new DiscourseReferenceDetector(repo);
       const topic: Topic = {
         id: 123,
-        categoryId: 1,
+        categoryId: "1",
         tags: ["some", "example"],
         title: "Sample topic",
         timestampMs: 456789,
