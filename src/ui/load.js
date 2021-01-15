@@ -39,7 +39,7 @@ export async function load(): Promise<LoadResult> {
   ];
   const responses = await Promise.all(queries);
 
-  for (const response of responses.slice(1, 4)) {
+  for (const response of responses.slice(1, 3)) {
     if (!response.ok) {
       console.error(response);
       return {type: "FAILURE", error: response.status};

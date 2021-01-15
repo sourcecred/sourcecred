@@ -55,7 +55,7 @@ type SpecialDistributionProps = {|+currency: CurrencyDetails|};
 export const SpecialDistribution = ({
   currency: {name: currencyName},
 }: SpecialDistributionProps): ReactNode => {
-  const {ledger, updateLedger} = useLedger();
+  const {ledger, updateLedger, saveToDisk} = useLedger();
 
   const classes = useStyles();
   const [credTimestamp, setCredTimestamp] = useState<TimestampMs>(+Date.now());
@@ -89,16 +89,6 @@ export const SpecialDistribution = ({
       );
     }
   };
-
-  const postLedger = () =>
-    fetch("data/ledger.json", {
-      headers: {
-        Accept: "text/plain",
-        "Content-Type": "text/plain",
-      },
-      method: "POST",
-      body: ledger.serialize(),
-    });
 
   return (
     <Container className={classes.root}>
@@ -187,7 +177,7 @@ export const SpecialDistribution = ({
           color="primary"
           variant="contained"
           className={classes.element}
-          onClick={postLedger}
+          onClick={saveToDisk}
         >
           Save Ledger To Disk
         </Button>

@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => {
 });
 
 export const LedgerAdmin = (): ReactNode => {
-  const {ledger, updateLedger} = useLedger();
+  const {ledger, updateLedger, saveToDisk} = useLedger();
 
   const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
@@ -155,20 +155,7 @@ export const LedgerAdmin = (): ReactNode => {
         <Button onClick={createOrUpdateIdentity}>
           {selectedId ? "update username" : "create identity"}
         </Button>
-        <Button
-          onClick={() => {
-            fetch("data/ledger.json", {
-              headers: {
-                Accept: "text/plain",
-                "Content-Type": "text/plain",
-              },
-              method: "POST",
-              body: ledger.serialize(),
-            });
-          }}
-        >
-          save ledger to disk
-        </Button>
+        <Button onClick={saveToDisk}>save ledger to disk</Button>
         {selectedId && <Button onClick={resetIdentity}>New identity</Button>}
       </ButtonGroup>
       {selectedId && (
