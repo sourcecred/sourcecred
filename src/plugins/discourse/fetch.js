@@ -282,7 +282,7 @@ export class Fetcher implements Discourse {
     const tags = json.tags || [];
     const topic: TopicView = {
       id: json.id,
-      categoryId: json.category_id,
+      categoryId: json.category_id.toString(),
       title: json.title,
       tags,
       timestampMs: Date.parse(json.created_at),
@@ -418,7 +418,7 @@ function parseLatestTopic(json: any): TopicLatest {
 
   return {
     id: json.id,
-    categoryId: json.category_id,
+    categoryId: json.category_id.toString(),
     tags: json.tags,
     title: json.title,
     timestampMs: Date.parse(json.created_at),
