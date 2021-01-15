@@ -54,7 +54,6 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
     allocationPolicies.push({
       budget: G.fromInteger(immediatePerWeek),
       policyType: "IMMEDIATE",
-      numPeriodsLookback: 1, // TODO(eli): no customization until after #2600.
     });
   }
   if (recentPerWeek > 0) {

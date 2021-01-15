@@ -52,7 +52,6 @@ describe("api/grainConfig", () => {
         immediatePerWeek: 20,
         recentPerWeek: 30,
         recentWeeklyDecayRate: 0.5,
-        maxSimultaneousDistributions: 100,
       };
 
       expect(parser.parseOrThrow(grainConfig)).toEqual(grainConfig);
@@ -95,29 +94,6 @@ describe("api/grainConfig", () => {
       expect(() => toDistributionPolicy(x)).not.toThrow();
     });
 
-    it("default immediate's numPeriodsLookback to 1", () => {
-      const x: GrainConfig = {
-        balancedPerWeek: 0,
-        immediatePerWeek: 100,
-        recentPerWeek: 0,
-        recentWeeklyDecayRate: 0.1,
-        maxSimultaneousDistributions: 2,
-      };
-
-      const expectedDistributionPolicy: DistributionPolicy = {
-        allocationPolicies: [
-          {
-            budget: fromInteger(100),
-            policyType: "IMMEDIATE",
-            numPeriodsLookback: 1,
-          },
-        ],
-        maxSimultaneousDistributions: 2,
-      };
-
-      expect(toDistributionPolicy(x)).toEqual(expectedDistributionPolicy);
-    });
-
     it("creates DistributionPolicy from valid GrainConfig", () => {
       const x: GrainConfig = {
         balancedPerWeek: 10,
@@ -132,7 +108,6 @@ describe("api/grainConfig", () => {
           {
             budget: fromInteger(20),
             policyType: "IMMEDIATE",
-            numPeriodsLookback: 1,
           },
           {
             budget: fromInteger(30),
