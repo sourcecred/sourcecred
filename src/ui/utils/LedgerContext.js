@@ -7,11 +7,13 @@ import {LedgerManager} from "../../api/ledgerManager";
 const LedgerContext = React.createContext<LedgerContextValue>({
   ledger: new Ledger(),
   updateLedger: () => {},
+  saveToDisk: () => Promise.resolve(),
 });
 
 type LedgerContextValue = {|
   +ledger: Ledger,
   updateLedger(ledger: Ledger): void,
+  saveToDisk(): Promise<void>,
 |};
 
 type LedgerProviderProps = {|
@@ -31,8 +33,21 @@ export const LedgerProvider = ({
   const updateLedger = (_?: Ledger) =>
     setLedgerState({ledger: ledgerManager.ledger});
 
+  const saveToDisk = async () => {
+    try {
+      const res = await ledgerManager.persist();
+      if (res.error) {
+        alert(`Failed to save ledger: ${res.error}`);
+        return;
+      }
+      alert("Ledger saved to disk");
+    } catch (e) {
+      alert(`Failed to save ledger: ${e.message}`);
+    }
+  };
+
   return (
-    <LedgerContext.Provider value={{ledger, updateLedger}}>
+    <LedgerContext.Provider value={{ledger, updateLedger, saveToDisk}}>
       {children}
     </LedgerContext.Provider>
   );

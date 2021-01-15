@@ -50,7 +50,7 @@ type TransferProps = {|+currency: CurrencyDetails|};
 export const Transfer = ({
   currency: {name: currencyName, suffix: currencySuffix},
 }: TransferProps): ReactNode => {
-  const {ledger, updateLedger} = useLedger();
+  const {ledger, updateLedger, saveToDisk} = useLedger();
 
   const classes = useStyles();
   const [sender, setSender] = useState<Account | null>(null);
@@ -73,16 +73,6 @@ export const Transfer = ({
       setMemo("");
     }
   };
-
-  const postLedger = () =>
-    fetch("data/ledger.json", {
-      headers: {
-        Accept: "text/plain",
-        "Content-Type": "text/plain",
-      },
-      method: "POST",
-      body: ledger.serialize(),
-    });
 
   return (
     <Container className={classes.root}>
@@ -158,7 +148,7 @@ export const Transfer = ({
           color="primary"
           variant="contained"
           className={classes.element}
-          onClick={postLedger}
+          onClick={saveToDisk}
         >
           save ledger to disk
         </Button>
