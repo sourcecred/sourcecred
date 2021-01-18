@@ -8,44 +8,33 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Menu,
-  MenuItem,
-  ListItem,
-  ListItemText,
-  List,
-  Divider,
-  Slider,
 } from "@material-ui/core";
-import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
-import {StyleSheet, css} from "aphrodite/no-important";
+import {makeStyles} from "@material-ui/core/styles";
 import deepEqual from "lodash.isequal";
-import {format} from "d3-format";
 import {sum} from "d3-array";
 import {CredView} from "../../../analysis/credView";
 import sortBy from "../../../util/sortBy";
-import {type NodeAddressT} from "../../../core/graph";
-import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 import {
   type WeightsT,
   copy as weightsCopy,
   empty as emptyWeights,
 } from "../../../core/weights";
-import {WeightConfig} from "../../weights/WeightConfig";
-import {WeightsFileManager} from "../../weights/WeightsFileManager";
 import {
   defaultParams,
   type TimelineCredParameters,
 } from "../../../analysis/timeline/params";
 
 import NodeRow from "./NodeRow";
+import FilterSelect, {type FilterState, DEFAULT_FILTER} from "./FilterSelect";
+import WeightsConfigSection from "./WeightsConfigSection";
 
-const styles = StyleSheet.create({
-  combobox: {margin: "0px 32px 16px"},
-  menuHeader: {fontWeight: "bold"},
-  divider: {backgroundColor: "#F20057", height: "2px"},
-  parentGrid: {marginTop: 30},
-  weightConfig: {marginTop: 10},
+const useStyles = makeStyles((theme) => ({
+  combobox: {
+    margin: "0px 32px 16px",
+  },
+  parentGrid: {
+    marginTop: theme.spacing(1),
+  },
   root: {
     width: "80%",
     margin: "0 auto",
@@ -63,196 +52,7 @@ const styles = StyleSheet.create({
   endCell: {
     width: "30%",
   },
-});
-
-export type FilterState = {|
-  // Whether to filter down to a particular type prefix.
-  // If unset, shows all user-typed nodes
-  filter: NodeAddressT | null,
-  anchorEl: HTMLElement | null,
-  name: string | null,
-|};
-
-const FilterSelect = ({
-  credView,
-  filterState,
-  setFilterState,
-}: {
-  credView: CredView,
-  filterState: FilterState,
-  setFilterState: (FilterState) => void,
-}) => {
-  const plugins = credView.plugins();
-
-  const handleMenuClose = () =>
-    setFilterState({...filterState, anchorEl: null});
-
-  const optionGroup = (declaration: PluginDeclaration) => {
-    const header = (
-      <MenuItem
-        key={declaration.nodePrefix}
-        value={declaration.nodePrefix}
-        className={css(styles.menuHeader)}
-        onClick={() =>
-          setFilterState({
-            anchorEl: null,
-            filter: declaration.nodePrefix,
-            name: declaration.name,
-          })
-        }
-      >
-        {declaration.name}
-      </MenuItem>
-    );
-    const entries = declaration.nodeTypes.map((type, index) => (
-      <MenuItem
-        key={index}
-        value={type.prefix}
-        onClick={() =>
-          setFilterState({
-            anchorEl: null,
-            filter: type.prefix,
-            name: type.name,
-          })
-        }
-      >
-        {"\u2003" + type.name}
-      </MenuItem>
-    ));
-    return [header, ...entries];
-  };
-  return (
-    <>
-      <List component="div" aria-label="Device settings">
-        <ListItem
-          button
-          aria-haspopup="true"
-          aria-controls="filter-menu"
-          aria-label="filters"
-          onClick={(event) =>
-            setFilterState({
-              ...filterState,
-              anchorEl: event.currentTarget,
-            })
-          }
-        >
-          <ListItemText
-            primary={
-              filterState.name ? `Filter: ${filterState.name}` : "Filter"
-            }
-          />
-          {filterState.anchorEl ? (
-            <KeyboardArrowUpIcon />
-          ) : (
-            <KeyboardArrowDownIcon />
-          )}
-        </ListItem>
-        <Divider className={css(styles.divider)} />
-      </List>
-
-      <Menu
-        id="lock-menu"
-        anchorEl={filterState.anchorEl}
-        keepMounted
-        open={Boolean(filterState.anchorEl)}
-        onClose={handleMenuClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{vertical: "bottom", horizontal: "left"}}
-        transformOrigin={{vertical: "top", horizontal: "left"}}
-      >
-        <MenuItem
-          key={"All users"}
-          value={""}
-          className={css(styles.menuHeader)}
-          onClick={() =>
-            setFilterState({
-              anchorEl: null,
-              filter: null,
-              name: "All users",
-            })
-          }
-        >
-          All users
-        </MenuItem>
-        {plugins.map(optionGroup)}
-      </Menu>
-    </>
-  );
-};
-
-type WeightConfigSectionProps = {|
-  show: boolean,
-  credView: CredView,
-  weights: WeightsT,
-  setWeightsState: ({weights: WeightsT}) => void,
-  params: TimelineCredParameters,
-  setParams: (TimelineCredParameters) => void,
-|};
-
-const WeightsConfigSection = ({
-  show,
-  credView,
-  weights,
-  setWeightsState,
-  params,
-  setParams,
-}: WeightConfigSectionProps) => {
-  if (!show) return [];
-  return (
-    <Grid container>
-      <Grid container className={css(styles.weightConfig)} spacing={2}>
-        <Grid container item xs={12} direction="column">
-          <Grid>
-            <Grid>Upload/Download weights:</Grid>
-            <Grid>
-              <WeightsFileManager
-                weights={weights}
-                onWeightsChange={(weights: WeightsT) => {
-                  setWeightsState({weights});
-                }}
-              />
-            </Grid>
-          </Grid>
-          <Grid container item spacing={2} alignItems="center">
-            <Grid>α</Grid>
-            <Grid item xs={2}>
-              <Slider
-                value={params.alpha}
-                min={0.05}
-                max={0.95}
-                step={0.05}
-                valueLabelDisplay="auto"
-                onChange={(_, val) => {
-                  setParams({
-                    ...params,
-                    alpha: val,
-                  });
-                }}
-              />
-            </Grid>
-            <Grid>{format(".2f")(params.alpha)}</Grid>
-          </Grid>
-        </Grid>
-        <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
-          <WeightConfig
-            declarations={credView.plugins()}
-            nodeWeights={weights.nodeWeights}
-            edgeWeights={weights.edgeWeights}
-            onNodeWeightChange={(prefix, weight) => {
-              weights.nodeWeights.set(prefix, weight);
-
-              setWeightsState({weights});
-            }}
-            onEdgeWeightChange={(prefix, weight) => {
-              weights.edgeWeights.set(prefix, weight);
-              setWeightsState({weights});
-            }}
-          />
-        </Grid>
-      </Grid>
-    </Grid>
-  );
-};
+}));
 
 export const Explorer = ({
   initialView,
@@ -265,19 +65,15 @@ export const Explorer = ({
 
   const updateCredView = (credView: CredView) => setCredViewState({credView});
 
-  const [filterState, setFilterState] = useState<FilterState>({
-    anchorEl: null,
-    filter: null,
-    name: null,
-  });
-
+  const [filterState, setFilterState] = useState<FilterState>(DEFAULT_FILTER);
   const [recalculating, setRecalculating] = useState(false);
-
   const [showWeightConfig, setShowWeightConfig] = useState(false);
+  const classes = useStyles();
 
   // TODO: Allow sorting/displaying only recent cred...
   const sortedNodes = useMemo(() => {
     if (!credView) return {sortedNodes: [], total: 0};
+
     const nodes =
       filterState.filter == null
         ? credView.userNodes()
@@ -333,7 +129,7 @@ export const Explorer = ({
 
   if (!credView)
     return (
-      <div className={css(styles.root)}>
+      <div className={classes.root}>
         <p>
           This page is unavailable because Cred information was unable to load.
           Calculate cred through the CLI in order to use this page.
@@ -342,7 +138,7 @@ export const Explorer = ({
     );
 
   return (
-    <div className={css(styles.root)}>
+    <div className={classes.root}>
       <Grid
         container
         item
@@ -350,7 +146,7 @@ export const Explorer = ({
         direction="row"
         justify="space-between"
         alignItems="center"
-        className={css(styles.parentGrid)}
+        className={classes.parentGrid}
       >
         <Grid container item xs>
           <FilterSelect
@@ -392,15 +188,13 @@ export const Explorer = ({
         params={params}
         setParams={setParams}
       />
-      <Table className={css(styles.table)}>
+      <Table className={classes.table}>
         <TableHead>
           <TableRow>
-            <TableCell>
-              {filterState.name ? filterState.name : "All users"}
-            </TableCell>
-            <TableCell className={css(styles.credCell)}>Cred</TableCell>
-            <TableCell className={css(styles.credCell)}>% Total</TableCell>
-            <TableCell className={css(styles.endCell)} />
+            <TableCell>{filterState.name}</TableCell>
+            <TableCell className={classes.credCell}>Cred</TableCell>
+            <TableCell className={classes.credCell}>% Total</TableCell>
+            <TableCell className={classes.endCell} />
           </TableRow>
         </TableHead>
         <TableBody>{sortedNodes}</TableBody>
