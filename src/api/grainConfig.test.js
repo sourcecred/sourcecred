@@ -46,12 +46,27 @@ describe("api/grainConfig", () => {
       expect(parser.parseOrThrow(grainConfig)).toEqual(grainConfig);
     });
 
-    it("works on well formed object", () => {
+    it("works with missing policy parameters", () => {
       const grainConfig = {
         balancedPerWeek: 10,
+        underpaidPerWeek: 100,
         immediatePerWeek: 20,
         recentPerWeek: 30,
         recentWeeklyDecayRate: 0.5,
+      };
+      expect(parser.parseOrThrow(grainConfig)).toEqual(grainConfig);
+    });
+
+    it("works on well formed object", () => {
+      const grainConfig = {
+        balancedPerWeek: 10,
+        underpaidPerWeek: 100,
+        immediatePerWeek: 20,
+        recentPerWeek: 30,
+        recentWeeklyDecayRate: 0.5,
+        underpaidThreshold: 50,
+        underpaidExponent: 0.5,
+        maxSimultaneousDistributions: 10,
       };
 
       expect(parser.parseOrThrow(grainConfig)).toEqual(grainConfig);
@@ -72,16 +87,41 @@ describe("api/grainConfig", () => {
       expect(toDistributionPolicy(x)).toEqual(expected);
     });
 
-    it("errors on missing discount for recent policy", () => {
-      const x: GrainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
-        recentPerWeek: 10,
-      };
+    describe("recent policy parameters", () => {
+      it("errors on missing discount for recent policy", () => {
+        const x: GrainConfig = {
+          balancedPerWeek: 10,
+          immediatePerWeek: 20,
+          recentPerWeek: 10,
+        };
 
-      expect(() => toDistributionPolicy(x)).toThrowError(
-        "no recentWeeklyDecayRate specified"
-      );
+        expect(() => toDistributionPolicy(x)).toThrowError(
+          "no recentWeeklyDecayRate specified"
+        );
+      });
+    });
+
+    describe("underpaid policy parameters", () => {
+      it("errors on missing threshold for underpaid policy", () => {
+        const x: GrainConfig = {
+          underpaidPerWeek: 100,
+          underpaidExponent: 0.5,
+        };
+
+        expect(() => toDistributionPolicy(x)).toThrowError(
+          "no threshold specified"
+        );
+      });
+      it("errors on missing exponent for underpaid policy", () => {
+        const x: GrainConfig = {
+          underpaidPerWeek: 100,
+          underpaidThreshold: 10,
+        };
+
+        expect(() => toDistributionPolicy(x)).toThrowError(
+          "no exponent specified"
+        );
+      });
     });
 
     it("does not error for missing recentWeeklyDecayRate if 0 recent budget", () => {

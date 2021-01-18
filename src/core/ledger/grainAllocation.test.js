@@ -25,6 +25,12 @@ describe("core/ledger/grainAllocation", () => {
     discount: toDiscount(discount),
   });
   const balanced = (n: number) => ({policyType: "BALANCED", budget: ng(n)});
+  const underpaid = (n: number, threshold: number, exponent: number) => ({
+    policyType: "UNDERPAID",
+    budget: ng(n),
+    threshold: ng(threshold),
+    exponent,
+  });
 
   describe("computeAllocation", () => {
     describe("validation", () => {
@@ -214,6 +220,118 @@ describe("core/ledger/grainAllocation", () => {
         const expectedReceipts = [
           {id: i1.id, amount: ng(0)},
           {id: i2.id, amount: ng(0)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+    });
+
+    describe("underpaid policy", () => {
+      it("errors on negative threshold", () => {
+        const policy = underpaid(100, -1, 1);
+        const i1 = aid(0, [1, 1, 10]);
+        const i2 = aid(0, [3, 0, 20]);
+
+        expect(() => computeAllocation(policy, [i1, i2])).toThrowError(
+          "threshold must be >= 0"
+        );
+      });
+
+      it("errors if exponent below range (0, 1]", () => {
+        const policy = underpaid(100, 0, 0);
+        const i1 = aid(0, [1, 1, 10]);
+        const i2 = aid(0, [3, 0, 20]);
+
+        expect(() => computeAllocation(policy, [i1, i2])).toThrowError(
+          "exponent must be in range"
+        );
+      });
+
+      it("errors if exponent above range (0, 1]", () => {
+        const policy = underpaid(100, 0, 1.1);
+        const i1 = aid(0, [1, 1, 10]);
+        const i2 = aid(0, [3, 0, 20]);
+
+        expect(() => computeAllocation(policy, [i1, i2])).toThrowError(
+          "exponent must be in range"
+        );
+      });
+
+      it("equivalent to balanced with threshold 0 and exponent 1", () => {
+        const policy1 = balanced(100);
+        const policy2 = underpaid(100, 0, 1);
+        const i1 = aid(0, [1, 1, 10]);
+        const i2 = aid(0, [3, 0, 20]);
+        const allocation1 = computeAllocation(policy1, [i1, i2]);
+        const allocation2 = computeAllocation(policy2, [i1, i2]);
+        expect(allocation1.receipts).toEqual(allocation2.receipts);
+      });
+
+      it("splits based on quadratic lifetime Cred when there's no paid amounts and zero threshold", () => {
+        const policy = underpaid(100, 0, 0.5);
+        const i1 = aid(0, [40, 9]);
+        const i2 = aid(0, [9, 0]);
+        const allocation = computeAllocation(policy, [i1, i2]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(70)},
+          {id: i2.id, amount: ng(30)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+
+      it("takes past payment into account checking threshold", () => {
+        const policy = underpaid(100, 30, 0.5);
+        const i1 = aid(0, [0, 45]);
+        const i2 = aid(40, [55, 0]);
+        const allocation = computeAllocation(policy, [i1, i2]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(100)},
+          {id: i2.id, amount: ng(0)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+
+      it("handles 0 budget correctly", () => {
+        const policy = underpaid(0, 100, 0.5);
+        const i1 = aid(30, [1, 1]);
+        const i2 = aid(0, [3, 0]);
+        const allocation = computeAllocation(policy, [i1, i2]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(0)},
+          {id: i2.id, amount: ng(0)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+
+      it("drops users below threshold from allocation", () => {
+        const policy = underpaid(150, 31, 1);
+        const i1 = aid(0, [80, 0]);
+        const i2 = aid(0, [0, 40]);
+        const i3 = aid(0, [0, 30]);
+        const allocation = computeAllocation(policy, [i1, i2, i3]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(100)},
+          {id: i2.id, amount: ng(50)},
+          {id: i3.id, amount: ng(0)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
