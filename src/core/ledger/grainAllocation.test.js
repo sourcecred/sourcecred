@@ -1,30 +1,28 @@
 // @flow
 
-import * as G from "./grain";
 import {random as randomUuid, parser as uuidParser} from "../../util/uuid";
 import {
   computeAllocation,
   type AllocationIdentity,
   _validateAllocationBudget,
 } from "./grainAllocation";
+import {fromString as nngFromString} from "./nonnegativeGrain";
 import {toDiscount} from "./policies/recent";
 
 describe("core/ledger/grainAllocation", () => {
-  // concise helper for grain from a string
-  const g = (x: string) => G.fromString(x);
   // concise helper for grain from a number
-  const ng = (x: number) => g(x.toString());
+  const nng = (x: number) => nngFromString(x.toString());
   // concise helper for an allocation identity
   function aid(paid: number, cred: $ReadOnlyArray<number>): AllocationIdentity {
-    return {id: randomUuid(), paid: ng(paid), cred};
+    return {id: randomUuid(), paid: nng(paid), cred};
   }
-  const immediate = (n: number) => ({policyType: "IMMEDIATE", budget: ng(n)});
+  const immediate = (n: number) => ({policyType: "IMMEDIATE", budget: nng(n)});
   const recent = (n: number, discount: number) => ({
     policyType: "RECENT",
-    budget: ng(n),
+    budget: nng(n),
     discount: toDiscount(discount),
   });
-  const balanced = (n: number) => ({policyType: "BALANCED", budget: ng(n)});
+  const balanced = (n: number) => ({policyType: "BALANCED", budget: nng(n)});
 
   describe("computeAllocation", () => {
     describe("validation", () => {
@@ -32,18 +30,9 @@ describe("core/ledger/grainAllocation", () => {
         const thunk = () => computeAllocation(immediate(5), []);
         expect(thunk).toThrowError("must have at least one identity");
       });
-      it("errors if the budget is negative", () => {
-        const id = aid(5, [1]);
-        const thunk = () => computeAllocation(immediate(-5), [id]);
-        expect(thunk).toThrowError("invalid budget");
-      });
       it("errors if the total cred is zero", () => {
         const thunk = () => computeAllocation(immediate(5), [aid(0, [0])]);
         expect(thunk).toThrowError("cred is zero");
-      });
-      it("errors if there's negative paid", () => {
-        const thunk = () => computeAllocation(immediate(5), [aid(-1, [0])]);
-        expect(thunk).toThrowError("negative paid");
       });
       it("errors if there's NaN or Infinity in Cred", () => {
         const thunk = () => computeAllocation(immediate(5), [aid(0, [NaN])]);
@@ -73,8 +62,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(0, [0, 3]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(4)},
-          {id: i2.id, amount: ng(6)},
+          {id: i1.id, amount: nng(4)},
+          {id: i2.id, amount: nng(6)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -89,8 +78,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(0, [3, 0]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(0)},
-          {id: i2.id, amount: ng(0)},
+          {id: i1.id, amount: nng(0)},
+          {id: i2.id, amount: nng(0)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -109,9 +98,9 @@ describe("core/ledger/grainAllocation", () => {
         const i3 = aid(0, [100, 0, 0]);
         const allocation = computeAllocation(policy, [i1, i2, i3]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(38)},
-          {id: i2.id, amount: ng(31)},
-          {id: i3.id, amount: ng(31)},
+          {id: i1.id, amount: nng(38)},
+          {id: i2.id, amount: nng(31)},
+          {id: i3.id, amount: nng(31)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -127,8 +116,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(100, [100, 100, 100]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(50)},
-          {id: i2.id, amount: ng(50)},
+          {id: i1.id, amount: nng(50)},
+          {id: i2.id, amount: nng(50)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -144,8 +133,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(0, [0, 10, 100]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(0)},
-          {id: i2.id, amount: ng(100)},
+          {id: i1.id, amount: nng(0)},
+          {id: i2.id, amount: nng(100)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -161,8 +150,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(0, [0, 10, 100]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(0)},
-          {id: i2.id, amount: ng(0)},
+          {id: i1.id, amount: nng(0)},
+          {id: i2.id, amount: nng(0)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -180,8 +169,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(0, [3, 0]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(40)},
-          {id: i2.id, amount: ng(60)},
+          {id: i1.id, amount: nng(40)},
+          {id: i2.id, amount: nng(60)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -196,8 +185,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(30, [3, 0]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(20)},
-          {id: i2.id, amount: ng(0)},
+          {id: i1.id, amount: nng(20)},
+          {id: i2.id, amount: nng(0)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -212,8 +201,8 @@ describe("core/ledger/grainAllocation", () => {
         const i2 = aid(0, [3, 0]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
-          {id: i1.id, amount: ng(0)},
-          {id: i2.id, amount: ng(0)},
+          {id: i1.id, amount: nng(0)},
+          {id: i2.id, amount: nng(0)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -229,12 +218,12 @@ describe("core/ledger/grainAllocation", () => {
         const i1 = aid(0, [1]);
         const policy = {
           policyType: "SPECIAL",
-          budget: ng(100),
+          budget: nng(100),
           memo: "something",
           recipient: i1.id,
         };
         const allocation = computeAllocation(policy, [i1]);
-        const expectedReceipts = [{id: i1.id, amount: ng(100)}];
+        const expectedReceipts = [{id: i1.id, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
           id: uuidParser.parseOrThrow(allocation.id),
@@ -247,7 +236,7 @@ describe("core/ledger/grainAllocation", () => {
         const other = aid(0, [1]);
         const policy = {
           policyType: "SPECIAL",
-          budget: ng(100),
+          budget: nng(100),
           memo: "something",
           recipient: id,
         };

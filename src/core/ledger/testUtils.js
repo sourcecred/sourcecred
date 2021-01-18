@@ -4,6 +4,10 @@ import cloneDeep from "lodash.clonedeep";
 import {Ledger} from "./ledger";
 import {newIdentity, type Identity, type IdentityId} from "../identity";
 import * as G from "./grain";
+import {
+  type NonnegativeGrain,
+  fromString as toNonnegativeGrain,
+} from "./nonnegativeGrain";
 import * as uuid from "../../util/uuid";
 
 export interface UuidMock {
@@ -112,6 +116,9 @@ export const createTestLedgerFixture = (
 
 // Helper for constructing Grain values.
 export const g = (s: string): G.Grain => G.fromString(s);
+
+// Helper for constructing NonnegativeGrain values.
+export const nng = (s: string): NonnegativeGrain => toNonnegativeGrain(s);
 
 export const id1: IdentityId = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
 export const id2: IdentityId = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");

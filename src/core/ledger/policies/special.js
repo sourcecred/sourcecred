@@ -5,7 +5,7 @@ import * as P from "../../../util/combo";
 import {type IdentityId} from "../../identity";
 import {type GrainReceipt} from "../grainAllocation";
 import {type ProcessedIdentities} from "../processedIdentities";
-import * as G from "../grain";
+import {type NonnegativeGrain, grainParser} from "../nonnegativeGrain";
 
 /**
  * The Special policy is a power-maintainer tool for directly paying Grain
@@ -20,7 +20,7 @@ export type Special = "SPECIAL";
 
 export type SpecialPolicy = {|
   +policyType: Special,
-  +budget: G.Grain,
+  +budget: NonnegativeGrain,
   +memo: string,
   +recipient: IdentityId,
 |};
@@ -39,7 +39,7 @@ export function specialReceipts(
 
 export const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
   policyType: P.exactly(["SPECIAL"]),
-  budget: G.parser,
+  budget: grainParser,
   memo: P.string,
   recipient: uuidParser,
 });

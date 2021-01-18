@@ -4,7 +4,13 @@ import {Ledger} from "../core/ledger/ledger";
 import * as uuid from "../util/uuid";
 import {LedgerManager} from "./ledgerManager";
 import type {LedgerLog} from "../core/ledger/ledger";
-import {g, id1, id2, createTestLedgerFixture} from "../core/ledger/testUtils";
+import {
+  g,
+  nng,
+  id1,
+  id2,
+  createTestLedgerFixture,
+} from "../core/ledger/testUtils";
 
 const {ledgerWithIdentities} = createTestLedgerFixture();
 
@@ -31,7 +37,7 @@ describe("api/ledgerManager", () => {
   };
 
   const allocation = {
-    policy: {policyType: "IMMEDIATE", budget: g("15")},
+    policy: {policyType: "IMMEDIATE", budget: nng("15")},
     id: uuid.random(),
     receipts: [
       {amount: g("10"), id: id1},
