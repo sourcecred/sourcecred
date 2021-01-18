@@ -4,7 +4,11 @@ import * as G from "../grain";
 import * as P from "../../../util/combo";
 import {type GrainReceipt} from "../grainAllocation";
 import {type ProcessedIdentities} from "../processedIdentities";
-import {type NonnegativeGrain, grainParser} from "../nonnegativeGrain";
+import {
+  type NonnegativeGrain,
+  grainParser,
+  numberParser,
+} from "../nonnegativeGrain";
 
 /**
  * The Immediate policy evenly distributes its Grain budget
@@ -35,6 +39,11 @@ export function immediateReceipts(
   );
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
+
+export const immediateConfigParser: P.Parser<ImmediatePolicy> = P.object({
+  policyType: P.exactly(["IMMEDIATE"]),
+  budget: numberParser,
+});
 
 export const immediatePolicyParser: P.Parser<ImmediatePolicy> = P.object({
   policyType: P.exactly(["IMMEDIATE"]),

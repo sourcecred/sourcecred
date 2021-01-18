@@ -5,7 +5,11 @@ import * as P from "../../../util/combo";
 import {type IdentityId} from "../../identity";
 import {type GrainReceipt} from "../grainAllocation";
 import {type ProcessedIdentities} from "../processedIdentities";
-import {type NonnegativeGrain, grainParser} from "../nonnegativeGrain";
+import {
+  type NonnegativeGrain,
+  grainParser,
+  numberParser,
+} from "../nonnegativeGrain";
 
 /**
  * The Special policy is a power-maintainer tool for directly paying Grain
@@ -36,6 +40,13 @@ export function specialReceipts(
   }
   throw new Error(`no active grain account for identity: ${policy.recipient}`);
 }
+
+export const specialConfigParser: P.Parser<SpecialPolicy> = P.object({
+  policyType: P.exactly(["SPECIAL"]),
+  budget: numberParser,
+  memo: P.string,
+  recipient: uuidParser,
+});
 
 export const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
   policyType: P.exactly(["SPECIAL"]),
