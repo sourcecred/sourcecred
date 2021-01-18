@@ -15,6 +15,7 @@ import {CredView} from "../../analysis/credView";
 import {NodeAddress, type NodeAddressT} from "../graph";
 import {type IntervalSequence} from "../interval";
 import {type Alias} from "../identity";
+import {CredGraph} from "../credrank/credGraph";
 
 export type Cred = $ReadOnlyArray<number>;
 
@@ -58,6 +59,32 @@ export function computeCredAccounts(
       );
     } else {
       userlikeInfo.set(address, {cred: credOverTime.cred, description});
+    }
+  }
+  return _computeCredAccounts(grainAccounts, userlikeInfo, intervals);
+}
+
+export function computeCredAccounts2(
+  ledger: Ledger,
+  credGraph: CredGraph
+): CredAccountData {
+  const grainAccounts = ledger.accounts();
+  const userlikeInfo = new Map();
+  const intervals = credGraph.intervals();
+  const noIntervals = intervals.length === 0;
+  for (const {
+    address,
+    description,
+    credPerInterval,
+  } of credGraph.participants()) {
+    if (noIntervals) {
+      userlikeInfo.set(address, {cred: [], description});
+    } else if (credPerInterval === null) {
+      throw new Error(
+        `userlike ${NodeAddress.toString(address)} does not have detailed cred`
+      );
+    } else {
+      userlikeInfo.set(address, {cred: credPerInterval, description});
     }
   }
   return _computeCredAccounts(grainAccounts, userlikeInfo, intervals);

@@ -5,7 +5,8 @@ import {type IntervalSequence, intervalSequence} from "../interval";
 import {Ledger} from "./ledger";
 import {type AllocationPolicy} from "./policies";
 import {CredView} from "../../analysis/credView";
-import {computeCredAccounts} from "./credAccounts";
+import {CredGraph} from "../credrank/credGraph";
+import {computeCredAccounts, computeCredAccounts2} from "./credAccounts";
 import {computeDistribution} from "./computeDistribution";
 import {type Distribution} from "./distribution";
 
@@ -55,6 +56,33 @@ export function applyDistributions(
     // Recompute for every endpoint because the Ledger will be in a different state
     // (wrt paid balances)
     const accountsData = computeCredAccounts(ledger, view);
+    const distribution = computeDistribution(
+      policy.allocationPolicies,
+      accountsData,
+      interval.endTimeMs
+    );
+    ledger.distributeGrain(distribution);
+    return distribution;
+  });
+}
+
+export function applyDistributions2(
+  policy: DistributionPolicy,
+  credGraph: CredGraph,
+  ledger: Ledger,
+  currentTimestamp: TimestampMs
+): $ReadOnlyArray<Distribution> {
+  const credIntervals = credGraph.intervals();
+  const distributionIntervals = _chooseDistributionIntervals(
+    credIntervals,
+    ledger.lastDistributionTimestamp(),
+    currentTimestamp,
+    policy.maxSimultaneousDistributions
+  );
+  return distributionIntervals.map((interval) => {
+    // Recompute for every endpoint because the Ledger will be in a different state
+    // (wrt paid balances)
+    const accountsData = computeCredAccounts2(ledger, credGraph);
     const distribution = computeDistribution(
       policy.allocationPolicies,
       accountsData,
