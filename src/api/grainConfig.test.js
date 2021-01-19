@@ -3,7 +3,7 @@
 import {parser, toDistributionPolicy, type GrainConfig} from "./grainConfig";
 import {type DistributionPolicy} from "../core/ledger/applyDistributions";
 import {toDiscount} from "../core/ledger/policies/recent";
-import {fromInteger} from "../core/ledger/grain";
+import {fromInteger as toNonnegativeGrain} from "../core/ledger/nonnegativeGrain";
 
 describe("api/grainConfig", () => {
   describe("parser", () => {
@@ -106,16 +106,16 @@ describe("api/grainConfig", () => {
       const expectedDistributionPolicy: DistributionPolicy = {
         allocationPolicies: [
           {
-            budget: fromInteger(20),
+            budget: toNonnegativeGrain(20),
             policyType: "IMMEDIATE",
           },
           {
-            budget: fromInteger(30),
+            budget: toNonnegativeGrain(30),
             policyType: "RECENT",
             discount: toDiscount(0.1),
           },
           {
-            budget: fromInteger(10),
+            budget: toNonnegativeGrain(10),
             policyType: "BALANCED",
           },
         ],

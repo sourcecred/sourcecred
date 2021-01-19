@@ -1,9 +1,9 @@
 // @flow
 
 import {type DistributionPolicy} from "../core/ledger/applyDistributions";
-import * as G from "../core/ledger/grain";
 import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
+import {fromInteger as toNonnegativeGrain} from "../core/ledger/nonnegativeGrain";
 import {toDiscount} from "../core/ledger/policies/recent";
 
 export type GrainConfig = {|
@@ -49,10 +49,11 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
       `balanced budget must be nonnegative integer, got ${balancedPerWeek}`
     );
   }
+
   const allocationPolicies = [];
   if (immediatePerWeek > 0) {
     allocationPolicies.push({
-      budget: G.fromInteger(immediatePerWeek),
+      budget: toNonnegativeGrain(immediatePerWeek),
       policyType: "IMMEDIATE",
     });
   }
@@ -62,14 +63,14 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
       throw new Error(`no recentWeeklyDecayRate specified for recent policy`);
     }
     allocationPolicies.push({
-      budget: G.fromInteger(recentPerWeek),
+      budget: toNonnegativeGrain(recentPerWeek),
       policyType: "RECENT",
       discount: toDiscount(recentWeeklyDecayRate),
     });
   }
   if (balancedPerWeek > 0) {
     allocationPolicies.push({
-      budget: G.fromInteger(balancedPerWeek),
+      budget: toNonnegativeGrain(balancedPerWeek),
       policyType: "BALANCED",
     });
   }

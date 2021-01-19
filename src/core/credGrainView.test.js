@@ -3,7 +3,7 @@
 import {CredGrainView} from "./credGrainView";
 import * as GraphUtil from "./credrank/testUtils";
 import {createTestLedgerFixture} from "./ledger/testUtils";
-import {g} from "./ledger/testUtils";
+import {g, nng} from "./ledger/testUtils";
 import {Ledger} from "./ledger/ledger";
 import * as uuid from "../util/uuid";
 
@@ -23,7 +23,7 @@ describe("core/credGrainView", () => {
     const id1 = GraphUtil.participant1.id;
     const id2 = GraphUtil.participant2.id;
     const allocation1 = {
-      policy: {policyType: "IMMEDIATE", budget: g("10")},
+      policy: {policyType: "IMMEDIATE", budget: nng("10")},
       id: allocationId1,
       receipts: [
         {amount: g("3"), id: id1},
@@ -32,7 +32,7 @@ describe("core/credGrainView", () => {
     };
     const allocation2 = {
       id: allocationId2,
-      policy: {policyType: "BALANCED", budget: g("20")},
+      policy: {policyType: "BALANCED", budget: nng("20")},
       receipts: [
         {amount: g("10"), id: id1},
         {amount: g("10"), id: id2},
@@ -289,7 +289,7 @@ describe("core/credGrainView", () => {
     const id1 = GraphUtil.participant1.id;
     const id2 = GraphUtil.participant2.id;
     const allocation1 = {
-      policy: {policyType: "IMMEDIATE", budget: g("10")},
+      policy: {policyType: "IMMEDIATE", budget: nng("10")},
       id: allocationId1,
       receipts: [
         {amount: g("3"), id: id1},
