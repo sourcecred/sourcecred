@@ -12,6 +12,8 @@ import {type Account} from "../../core/ledger/ledger";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import * as G from "../../core/ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
+import findLast from "lodash.findlast";
+import {formatTimestamp} from "../utils/dateHelpers";
 import {makeStyles} from "@material-ui/core/styles";
 
 type OverviewProps = {|+currency: CurrencyDetails|};
@@ -31,6 +33,13 @@ export const AccountOverview = ({
   const classes = useStyles();
 
   const accounts = ledger.accounts();
+  const lastPayoutEvent = findLast(
+    ledger.eventLog(),
+    (event) => event.action.type === "DISTRIBUTE_GRAIN"
+  );
+  const lastPayoutMessage = lastPayoutEvent
+    ? `Last distribution: ${formatTimestamp(lastPayoutEvent.ledgerTimestamp)}`
+    : "";
 
   function comparator(a: Account, b: Account) {
     if (a.balance === b.balance) {
@@ -41,21 +50,24 @@ export const AccountOverview = ({
 
   const sortedAccounts = accounts.slice().sort(comparator);
   return (
-    <TableContainer component={Paper} className={classes.container}>
-      <Table stickyHeader>
-        <TableHead>
-          <TableRow>
-            <TableCell>Username</TableCell>
-            <TableCell align="right">Active?</TableCell>
-            <TableCell align="right">Current Balance</TableCell>
-            <TableCell align="right">{`${currencyName}`} Earned</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedAccounts.map((a) => AccountRow(a, currencySuffix))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <>
+      <TableContainer component={Paper} className={classes.container}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell>Username</TableCell>
+              <TableCell align="right">Active?</TableCell>
+              <TableCell align="right">Current Balance</TableCell>
+              <TableCell align="right">{`${currencyName}`} Earned</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortedAccounts.map((a) => AccountRow(a, currencySuffix))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <p align="right">{lastPayoutMessage}</p>
+    </>
   );
 };
 
