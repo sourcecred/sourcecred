@@ -7,10 +7,8 @@ import {
   Button,
   Checkbox,
   Container,
-  Divider,
   FormControlLabel,
   List,
-  ListItem,
   TextField,
 } from "@material-ui/core";
 import {useLedger} from "../utils/LedgerContext";
@@ -18,6 +16,7 @@ import {useTableState} from "../../webutil/tableState";
 import {IdentityMerger} from "./IdentityMerger";
 import {type Identity, type IdentityId} from "../../core/identity";
 import {AliasView} from "./AliasView";
+import {IdentityListItems} from "./IdentityListItems";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -73,7 +72,9 @@ export const LedgerAdmin = (): ReactNode => {
   const [selectedId, setSelectedId] = useState<IdentityId | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
-  const accounts = useMemo(() => ledger.accounts().map((a) => a.identity), [ledger._latestTimestamp]);
+  const accounts = useMemo(() => ledger.accounts().map((a) => a.identity), [
+    ledger._latestTimestamp,
+  ]);
   const accountsTableState = useTableState(accounts);
 
   const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
@@ -124,35 +125,9 @@ export const LedgerAdmin = (): ReactNode => {
       .join("+.*");
     const regex = new RegExp(filterString);
 
-    filteredLedger.createOrUpdateFilterFn("filterIdentities", (identity) =>
+    accountsTableState.createOrUpdateFilterFn("filterIdentities", (identity) =>
       regex.test(identity.name.toLowerCase())
     );
-  };
-
-  const renderIdentities = () => {
-    const renderIdentity = (i: Identity) => (
-      <ListItem button onClick={() => setActiveIdentity(i)} key={i.id}>
-        {i.name}
-      </ListItem>
-    );
-
-    const list = filteredLedger.currentPage;
-    const lastIndex = list.length - 1;
-
-    if (lastIndex > -1) {
-      return list.map((identity, index) => (
-        <React.Fragment key={identity.id}>
-          {renderIdentity(identity)}
-          {index < lastIndex && <Divider key={`divider-${identity.id}`} />}
-        </React.Fragment>
-      ));
-    } else {
-      return (
-        <ListItem button key="no_results">
-          <em>No results</em>
-        </ListItem>
-      );
-    }
   };
 
   return (
@@ -223,7 +198,7 @@ export const LedgerAdmin = (): ReactNode => {
       <div className={classes.spreadRow}>
         <h3>
           Identities{" "}
-          {ledger.accounts().length > 0 && (
+          {accountsTableState.length > 0 && (
             <small> (click one to update it)</small>
           )}
         </h3>
@@ -237,7 +212,10 @@ export const LedgerAdmin = (): ReactNode => {
       </div>
       <div className={classes.centerRow}>
         <List fullWidth className={classes.identityList}>
-          {renderIdentities()}
+          <IdentityListItems
+            identities={accountsTableState.currentPage}
+            onClick={(identity) => setActiveIdentity(identity)}
+          />
         </List>
       </div>
     </Container>
