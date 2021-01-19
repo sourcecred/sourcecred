@@ -12,6 +12,7 @@ import serve from "./serve";
 import grain from "./grain";
 import credrank from "./credrank";
 import help from "./help";
+import grain2 from "./grain2";
 
 const sourcecred: Command = async (args, std) => {
   if (args.length === 0) {
@@ -39,6 +40,8 @@ const sourcecred: Command = async (args, std) => {
       return serve(args.slice(1), std);
     case "grain":
       return grain(args.slice(1), std);
+    case "grain2":
+      return grain2(args.slice(1), std);
     case "credrank":
       return credrank(args.slice(1), std);
     default:
