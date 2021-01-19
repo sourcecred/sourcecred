@@ -5,7 +5,11 @@ import * as G from "../grain";
 import * as P from "../../../util/combo";
 import {type GrainReceipt} from "../grainAllocation";
 import {type ProcessedIdentities} from "../processedIdentities";
-import {type NonnegativeGrain, grainParser} from "../nonnegativeGrain";
+import {
+  type NonnegativeGrain,
+  grainParser,
+  numberParser,
+} from "../nonnegativeGrain";
 
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their
@@ -76,6 +80,11 @@ export function balancedReceipts(
   const grainAmounts = G.splitBudget(budget, floatUnderpayment);
   return identities.map(({id}, i) => ({id, amount: grainAmounts[i]}));
 }
+
+export const balancedConfigParser: P.Parser<BalancedPolicy> = P.object({
+  policyType: P.exactly(["BALANCED"]),
+  budget: numberParser,
+});
 
 export const balancedPolicyParser: P.Parser<BalancedPolicy> = P.object({
   policyType: P.exactly(["BALANCED"]),
