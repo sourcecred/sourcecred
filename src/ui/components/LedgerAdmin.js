@@ -73,9 +73,8 @@ export const LedgerAdmin = (): ReactNode => {
   const [selectedId, setSelectedId] = useState<IdentityId | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
-  const filteredLedger = useTableState(
-    useMemo(() => ledger.accounts().map((a) => a.identity), [ledger.accounts()])
-  );
+  const accounts = useMemo(() => ledger.accounts().map((a) => a.identity), [ledger._latestTimestamp]);
+  const accountsTableState = useTableState(accounts);
 
   const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
     setIdentityName(event.currentTarget.value);
