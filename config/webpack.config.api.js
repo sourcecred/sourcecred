@@ -33,6 +33,7 @@ module.exports = ({
     chunkFilename: "[name].[chunkhash:8].chunk.js",
     libraryTarget: "umd",
     library: "sourcecred",
+    libraryExport: "default",
     // Use `this` for compatibility with both Node and browser.
     globalObject: "this",
   },
