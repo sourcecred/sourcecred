@@ -49,3 +49,10 @@ export const immediatePolicyParser: P.Parser<ImmediatePolicy> = P.object({
   policyType: P.exactly(["IMMEDIATE"]),
   budget: grainParser,
 });
+
+export function toString(policy: ImmediatePolicy): string {
+  return [
+    policy.policyType + " Policy",
+    "Budget " + G.format(policy.budget, 3),
+  ].join(`\n`);
+}

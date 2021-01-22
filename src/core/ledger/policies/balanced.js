@@ -90,3 +90,10 @@ export const balancedPolicyParser: P.Parser<BalancedPolicy> = P.object({
   policyType: P.exactly(["BALANCED"]),
   budget: grainParser,
 });
+
+export function toString(policy: BalancedPolicy): string {
+  return [
+    policy.policyType + " Policy",
+    "Budget " + G.format(policy.budget, 3),
+  ].join(`\n`);
+}
