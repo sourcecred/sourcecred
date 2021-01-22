@@ -22,6 +22,7 @@ import * as credView from "../analysis/credView";
 import * as credData from "../analysis/credData";
 import * as credResult from "../analysis/credResult";
 import * as ledger from "../core/ledger/ledger";
+import * as ledgerUtils from "../core/ledger/utils";
 import * as grain from "../core/ledger/grain";
 import * as identity from "../core/identity";
 
@@ -45,6 +46,7 @@ const api = {
     ledger,
     identity,
     grain,
+    utils: ledgerUtils,
   },
   plugins: {
     github: {
