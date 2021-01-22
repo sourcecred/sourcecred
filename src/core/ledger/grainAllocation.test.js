@@ -16,7 +16,11 @@ describe("core/ledger/grainAllocation", () => {
   function aid(paid: number, cred: $ReadOnlyArray<number>): AllocationIdentity {
     return {id: randomUuid(), paid: nng(paid), cred};
   }
-  const immediate = (n: number) => ({policyType: "IMMEDIATE", budget: nng(n)});
+  const immediate = (n: number) => ({
+    policyType: "IMMEDIATE",
+    budget: nng(n),
+    numIntervalsLookback: 1,
+  });
   const recent = (n: number, discount: number) => ({
     policyType: "RECENT",
     budget: nng(n),
