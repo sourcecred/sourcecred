@@ -106,7 +106,17 @@ export class LedgerManager {
    *    conflict with the local changes (e.g. double spend)
    */
   async reloadLedger(): Promise<ReloadResult> {
-    const remoteLedger = await this._storage.read();
+    let remoteLedger: Ledger;
+    try {
+      remoteLedger = await this._storage.read();
+    } catch (e) {
+      return {
+        error: e.message,
+        remoteChanges: [],
+        localChanges: [],
+      };
+    }
+
     const localChanges = this._getLocalChanges(remoteLedger);
     const remoteChanges = this._getRemoteChanges(remoteLedger);
 

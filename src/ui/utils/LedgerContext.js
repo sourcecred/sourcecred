@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {Ledger} from "../../core/ledger/ledger";
+import {LedgerManager} from "../../api/ledgerManager";
 
 const LedgerContext = React.createContext<LedgerContextValue>({
   ledger: new Ledger(),
@@ -14,17 +15,21 @@ type LedgerContextValue = {|
 |};
 
 type LedgerProviderProps = {|
-  +initialLedger: Ledger,
+  +ledgerManager: LedgerManager,
   +children: React.Node,
 |};
 
 export const LedgerProvider = ({
   children,
-  initialLedger,
+  ledgerManager,
 }: LedgerProviderProps): React.Node => {
-  const [{ledger}, setLedgerState] = React.useState({ledger: initialLedger});
+  const [{ledger}, setLedgerState] = React.useState({
+    ledger: ledgerManager.ledger,
+  });
 
-  const updateLedger = (ledger: Ledger) => setLedgerState({ledger});
+  // Workaround to trigger UI update in React since ledger object is mutable
+  const updateLedger = (_?: Ledger) =>
+    setLedgerState({ledger: ledgerManager.ledger});
 
   return (
     <LedgerContext.Provider value={{ledger, updateLedger}}>
