@@ -28,19 +28,21 @@ describe("core/ledger/identityProposal", () => {
         alias: otherAlias,
         type: "USER",
       };
-      ensureIdentityExists(ledger, proposal);
+      const returnId = ensureIdentityExists(ledger, proposal);
       // Verify that the ledger didn't mutate.
       expect(ledger.eventLog()).toEqual(log);
+      expect(returnId).toEqual(id);
     });
     it("creates a new identity (with alias) if address isn't taken", () => {
       const ledger = new Ledger();
-      ensureIdentityExists(ledger, proposal);
+      const returnId = ensureIdentityExists(ledger, proposal);
       const account = ledger.accountByAddress(alias.address);
       if (account == null) {
         throw new Error("identity not created");
       }
       expect(account.identity.name).toEqual(proposal.name);
       expect(account.identity.aliases).toEqual([alias]);
+      expect(account.identity.id).toEqual(returnId);
     });
     it("uses the discriminator logic from _chooseIdentityName if needed", () => {
       const ledger = new Ledger();
