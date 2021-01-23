@@ -23,6 +23,13 @@ function die(std, message) {
   return 1;
 }
 
+/**
+ * The grain command is soon to be deprecated, as part of a transition
+ * to @blueridger's `CredGrainView`.  This original grain command uses
+ * `CredView`, which will be deprecated.
+ *
+ * grain2 forks this command and eliminates the dependence on `CredView`
+ */
 const grainCommand: Command = async (args, std) => {
   let simulation = false;
   if (args.length === 1 && (args[0] === "--simulation" || args[0] === "-s")) {
