@@ -301,6 +301,11 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.12.10.tgz#824600d59e96aea26a5a2af5a9d812af05c3ae81"
   integrity sha512-PJdRPwyoOqFAWfLytxrWwGrAxghCgh/yTNCYciOz8QgjflA7aZhECPZAa2VUedKg2+QMWkI0L9lynh2SNmNEgA==
 
+"@babel/parser@^7.9.4":
+  version "7.12.11"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.12.11.tgz#9ce3595bcd74bc5c466905e86c535b8b25011e79"
+  integrity sha512-N3UxG+uuF4CMYoNj8AhnbAcJF0PiuJ9KHuy1lQmkYsxTer/MAH9UBNHsBoAX/4s6NvlDD047No8mYVGGzLL4hg==
+
 "@babel/plugin-proposal-async-generator-functions@^7.12.1":
   version "7.12.1"
   resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-generator-functions/-/plugin-proposal-async-generator-functions-7.12.1.tgz#dc6c1170e27d8aca99ff65f4925bd06b1c90550e"
@@ -7039,7 +7044,7 @@ lodash.sortedindex@^4.1.0:
   resolved "https://registry.yarnpkg.com/lodash.sortedindex/-/lodash.sortedindex-4.1.0.tgz#3f6417ee20e8b22416ab005bfa16344a0446b448"
   integrity sha1-P2QX7iDosiQWqwBb+hY0SgRGtEg=
 
-"lodash@>=3.5 <5", lodash@^4.0.0, lodash@^4.15.0, lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@~4.17.5:
+"lodash@>=3.5 <5", lodash@^4.0.0, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@~4.17.5:
   version "4.17.20"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
   integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
@@ -7108,6 +7113,32 @@ markdown-escapes@^1.0.0:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.4.tgz#c95415ef451499d7602b91095f3c8e8975f78535"
   integrity sha512-8z4efJYk43E0upd0NbVXwgSTQs6cT3T06etieCMEg7dRbzCbxUCK/GHlX8mhHRDcp+OLlHkPKsvqQTCvsRl2cg==
+
+markdown-it-anchor@^5.2.7:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/markdown-it-anchor/-/markdown-it-anchor-5.3.0.tgz#d549acd64856a8ecd1bea58365ef385effbac744"
+  integrity sha512-/V1MnLL/rgJ3jkMWo84UR+K+jF1cxNG1a+KwqeXqTIJ+jtA8aWSHuigx8lTzauiIjBDbwF3NcWQMotd0Dm39jA==
+
+markdown-it@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-10.0.0.tgz#abfc64f141b1722d663402044e43927f1f50a8dc"
+  integrity sha512-YWOP1j7UbDNz+TumYP1kpwnP0aEa711cJjrAQrzd0UXlbJfc5aAq0F/PZHjiioqDC1NKgvIMX+o+9Bk7yuM2dg==
+  dependencies:
+    argparse "^1.0.7"
+    entities "~2.0.0"
+    linkify-it "^2.0.0"
+    mdurl "^1.0.1"
+    uc.micro "^1.0.5"
+
+marked@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.8.2.tgz#4faad28d26ede351a7a1aaa5fec67915c869e355"
+  integrity sha512-EGwzEeCcLniFX51DhTpmTom+dSA/MG/OBUDjnWtHbEnjAH180VzUeAw+oE4+Zv+CoYBWyRlYOTR0N8SO9R1PVw==
+
+marked@^1.1.0:
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-1.2.7.tgz#6e14b595581d2319cdcf033a24caaf41455a01fb"
+  integrity sha512-No11hFYcXr/zkBvL6qFmAp1z6BKY3zqLMHny/JN/ey+al7qwCM2+CMBL9BOgqMxZU36fz4cCWfn2poWIf7QRXA==
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -7354,6 +7385,11 @@ mkdirp-classic@^0.5.2:
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/mkdirp-classic/-/mkdirp-classic-0.5.3.tgz#fa10c9115cc6d8865be221ba47ee9bed78601113"
   integrity sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==
+
+mkdirp2@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/mkdirp2/-/mkdirp2-1.0.4.tgz#56de1f8f5c93cf2199906362eba0f9f262ee4437"
+  integrity sha512-Q2PKB4ZR4UPtjLl76JfzlgSCUZhSV1AXQgAZa1qt5RiaALFjP/CDrGvFBrOz7Ck6McPcwMAxTsJvWOUjOU8XMw==
 
 mkdirp@^0.5.1, mkdirp@^0.5.3, mkdirp@^0.5.5:
   version "0.5.5"
@@ -8952,6 +8988,35 @@ recursive-readdir@2.2.2:
   dependencies:
     minimatch "3.0.4"
 
+reduce-extract@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/reduce-extract/-/reduce-extract-1.0.0.tgz#67f2385beda65061b5f5f4312662e8b080ca1525"
+  integrity sha1-Z/I4W+2mUGG19fQxJmLosIDKFSU=
+  dependencies:
+    test-value "^1.0.1"
+
+reduce-flatten@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/reduce-flatten/-/reduce-flatten-1.0.1.tgz#258c78efd153ddf93cb561237f61184f3696e327"
+  integrity sha1-JYx479FT3fk8tWEjf2EYTzaW4yc=
+
+reduce-flatten@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/reduce-flatten/-/reduce-flatten-3.0.0.tgz#da477d68453fd9510f9a5fbef86e0fa04b4fd315"
+  integrity sha512-eczl8wAYBxJ6Egl6I1ECIF+8z6sHu+KE7BzaEDZTpPXKXfy9SUDQlVYwkRcNTjJLC3Iakxbhss50KuT/R6SYfg==
+
+reduce-unique@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/reduce-unique/-/reduce-unique-2.0.1.tgz#fb34b90e89297c1e08d75dcf17e9a6443ea71081"
+  integrity sha512-x4jH/8L1eyZGR785WY+ePtyMNhycl1N2XOLxhCbzZFaqF4AXjLzqSxa2UHgJ2ZVR/HHyPOvl1L7xRnW8ye5MdA==
+
+reduce-without@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/reduce-without/-/reduce-without-1.0.1.tgz#68ad0ead11855c9a37d4e8256c15bbf87972fc8c"
+  integrity sha1-aK0OrRGFXJo31OglbBW7+Hly/Iw=
+  dependencies:
+    test-value "^2.0.0"
+
 redux-saga@^1.0.0:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-1.1.3.tgz#9f3e6aebd3c994bbc0f6901a625f9a42b51d1112"
@@ -10136,6 +10201,17 @@ symbol-tree@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
+
+table-layout@^0.4.2:
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/table-layout/-/table-layout-0.4.5.tgz#d906de6a25fa09c0c90d1d08ecd833ecedcb7378"
+  integrity sha512-zTvf0mcggrGeTe/2jJ6ECkJHAQPIYEwDoqsiqBjI24mvRmQbInK5jq33fyypaCBxX08hMkfmdOqj6haT33EqWw==
+  dependencies:
+    array-back "^2.0.0"
+    deep-extend "~0.6.0"
+    lodash.padend "^4.6.1"
+    typical "^2.6.1"
+    wordwrapjs "^3.0.0"
 
 table@^6.0.4:
   version "6.0.6"
