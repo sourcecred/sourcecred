@@ -1,6 +1,6 @@
 // @flow
 
-import {TaskReporter} from "../../util/taskReporter";
+import {TaskManager} from "../../util/taskManager";
 import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import * as Model from "./models";
@@ -23,21 +23,21 @@ export class Mirror {
     this.guild = guild;
   }
 
-  async update(reporter: TaskReporter) {
+  async update(manager: TaskManager) {
     const guild = await this.validateGuildId();
-    reporter.start(`discord/${guild.name}`);
+    manager.start(`discord/${guild.name}`);
     await this.addMembers();
     const channels = await this.addTextChannels();
     for (const channel of channels) {
-      reporter.start(`discord/${guild.name}/#${channel.name}`);
+      manager.start(`discord/${guild.name}/#${channel.name}`);
       try {
         await this.addMessages(channel.id);
       } catch (e) {
         console.warn(e);
       }
-      reporter.finish(`discord/${guild.name}/#${channel.name}`);
+      manager.finish(`discord/${guild.name}/#${channel.name}`);
     }
-    reporter.finish(`discord/${guild.name}`);
+    manager.finish(`discord/${guild.name}`);
   }
 
   async validateGuildId(): Promise<{|

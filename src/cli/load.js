@@ -3,7 +3,8 @@
 import * as NullUtil from "../util/null";
 import type {Command} from "./command";
 import {loadInstanceConfig, pluginDirectoryContext} from "./common";
-import {LoggingTaskReporter, ScopedTaskReporter} from "../util/taskReporter";
+import {LoggingTaskReporter} from "../util/taskReporter";
+import {TaskManager} from "../util/taskManager";
 import {type PluginId, parser as pluginIdParser} from "../api/pluginId";
 import {isDirEmpty} from "../util/disk";
 import dedent from "../util/dedent";
@@ -51,50 +52,30 @@ const loadCommand: Command = async (args, std) => {
     }
   }
   const taskReporter = new LoggingTaskReporter(std.out);
-  taskReporter.start("load");
+  const manager = new TaskManager(taskReporter);
+  manager.start("load");
   const failedPlugins = [];
   const loadPromises = [];
   const cacheEmpty = new Map<PluginId, boolean>();
   for (const name of pluginsToLoad) {
     const plugin = NullUtil.get(config.bundledPlugins.get(name));
     const task = `loading ${name}`;
-    taskReporter.start(task);
+    const scopedManager = manager.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);
-    const childTaskReporter = new ScopedTaskReporter(taskReporter, name);
 
     const loadPlugin = () =>
-      plugin
-        .load(dirContext, childTaskReporter)
-        .then(() => taskReporter.finish(task));
-
-    const endChildRunners = () => {
-      // create static array of taskIds from activeTasks map
-      Array.from(taskReporter.activeTasks.keys())
-        .filter((taskId) => taskId.startsWith(name))
-        .forEach((taskId: string) => {
-          taskReporter.finish(taskId);
-          warn(std, taskId, "Parent task restarting. Retrying");
-        });
-    };
+      plugin.load(dirContext, scopedManager).then(() => manager.finish(task));
 
     const restartParentRunner = (error: string) => {
-      taskReporter.finish(task);
-      warn(
-        std,
-        task,
-        `Error updating cache. clearing cache and restarting.
-        This is the error from the plugin:\n
-        ${error}`
-      );
-      taskReporter.start(task);
+      manager.finish(task);
+      warn(std, task, `clearing cache: ${error}`);
+      manager.start(task);
     };
 
     cacheEmpty.set(name, isDirEmpty(dirContext.cacheDirectory()));
     const loadWithPossibleRetry = loadPlugin()
       .catch((e) => {
         if (!cacheEmpty.get(name)) {
-          // remove child runner entries
-          endChildRunners();
           restartParentRunner(e);
           // clear the cache and try again
           fs.emptyDirSync(dirContext.cacheDirectory());

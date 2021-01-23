@@ -1,7 +1,7 @@
 // @flow
 
 import * as Combo from "../../util/combo";
-import type {TaskReporter} from "../../util/taskReporter";
+import type {TaskManager} from "../../util/taskManager";
 import type {Discourse, Topic, TopicLatest} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
 
@@ -77,15 +77,15 @@ export class Mirror {
     };
   }
 
-  async update(reporter: TaskReporter) {
-    reporter.start("discourse");
-    await this._updateTopicsV2(reporter);
-    await this._updateLikes(reporter);
-    reporter.finish("discourse");
+  async update(manager: TaskManager) {
+    manager.start("discourse");
+    await this._updateTopicsV2(manager);
+    await this._updateLikes(manager);
+    manager.finish("discourse");
   }
 
-  async _updateTopicsV2(reporter: TaskReporter) {
-    reporter.start("discourse/topics");
+  async _updateTopicsV2(manager: TaskManager) {
+    manager.start("discourse/topics");
 
     const {
       topicBumpMs: lastLocalTopicBumpMs,
@@ -158,10 +158,10 @@ export class Mirror {
       this._repo.bumpDefinitionTopicCheck(startTime);
     }
 
-    reporter.finish("discourse/topics");
+    manager.finish("discourse/topics");
   }
 
-  async _updateLikes(reporter: TaskReporter) {
+  async _updateLikes(manager: TaskManager) {
     const addLike = (like) => {
       try {
         const res = this._repo.addLike(like);
@@ -193,7 +193,7 @@ export class Mirror {
     // since our last scan. This would likely improve the performance of this
     // section of the update significantly.
 
-    reporter.start("discourse/likes");
+    manager.start("discourse/likes");
     for (const {username} of this._repo.users()) {
       let offset = 0;
       let upToDate = false;
@@ -215,6 +215,6 @@ export class Mirror {
         offset += likeActions.length;
       }
     }
-    reporter.finish("discourse/likes");
+    manager.finish("discourse/likes");
   }
 }

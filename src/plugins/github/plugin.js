@@ -19,7 +19,7 @@ import {fromRelationalViews as referenceDetectorFromRelationalViews} from "./ref
 import {parser, type GithubConfig} from "./config";
 import {validateToken, type GithubToken} from "./token";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
-import {type TaskReporter} from "../../util/taskReporter";
+import {TaskManager} from "../../util/taskManager";
 import {repoIdToString} from "./repoId";
 import {
   type PluginId,
@@ -67,19 +67,16 @@ export class GithubPlugin implements Plugin {
     return declaration;
   }
 
-  async load(
-    ctx: PluginDirectoryContext,
-    reporter: TaskReporter
-  ): Promise<void> {
+  async load(ctx: PluginDirectoryContext, manager: TaskManager): Promise<void> {
     const cache = new CacheProviderImpl(ctx);
     const token = getTokenFromEnv();
     const config = await loadConfig(ctx);
     for (const repoId of config.repoIds) {
       const repoString = repoIdToString(repoId);
       const task = `github: loading ${repoString}`;
-      reporter.start(task);
+      manager.start(task);
       await fetchGithubRepo(repoId, {token, cache});
-      reporter.finish(task);
+      manager.finish(task);
     }
   }
 
