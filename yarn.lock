@@ -8582,10 +8582,10 @@ querystringify@^2.1.1:
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.1.1.tgz#60e5a5fd64a7f8bfa4d2ab2ed6fdf4c85bad154e"
   integrity sha512-w7fLxIRCRT7U8Qu53jQnJyPkYZIaR4n5151KMfcJlO/A9397Wxb1amJvROTK6TOnp7PfoAmg/qXiNHI+08jRfA==
 
-ra-core@^3.11.2:
-  version "3.11.2"
-  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.11.2.tgz#22a6b93e093ddcbbb45f04904f74020c6c4d8fde"
-  integrity sha512-1oYCnXER5iSmEwHi3Hy2CkAuJXkC/6AjkJlVf0trnhzvUxkzusMOV9dm4ONyyrPDwGFc7oStNA793F7qNZbXog==
+ra-core@^3.11.3:
+  version "3.11.3"
+  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.11.3.tgz#3677e3c2e5e2d0ce4a57ed243acb92225dcaf254"
+  integrity sha512-1+lV+tUz2BJLkvzct9N79WFtQ13JNIhwbV/R8lhQDbE5Y+S1jWNuU3OWbbjv1AoWLJSfxxFwHRtVdLncO6x1hQ==
   dependencies:
     "@testing-library/react" "^8.0.7"
     classnames "~2.2.5"
@@ -8604,25 +8604,25 @@ ra-data-fakerest@^3.6.2:
   dependencies:
     fakerest "^2.2.0"
 
-ra-i18n-polyglot@^3.11.2:
-  version "3.11.2"
-  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.11.2.tgz#b0d4e00c371f927bd082f5ac9f2bc2af02ad2967"
-  integrity sha512-hTZuWzuFydopFMobVYmohuXauu+2RIv0Wceg6QUtrvYFkBnTlg5qRwFvoqCy3Oq5ZGqiMQDbu05ldo42BuWbgQ==
+ra-i18n-polyglot@^3.11.3:
+  version "3.11.3"
+  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.11.3.tgz#1950b1c043769b9b5c4ff13a89eb4dcb96b698d7"
+  integrity sha512-EUo5vVKMwKFlcqwSlr9kMP9TPLHT2c56A9ZYiiEEJMG5Ad9/RWunFWBksqof7VGjyXo7JPMYAYPgfS6KyhjsyQ==
   dependencies:
     node-polyglot "^2.2.2"
-    ra-core "^3.11.2"
+    ra-core "^3.11.3"
 
-ra-language-english@^3.11.2:
-  version "3.11.2"
-  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.11.2.tgz#eeab5aefaadae4e064dfd8df4fb041477b9936ea"
-  integrity sha512-ainBiE4+4ITJgU4+nLu0I3Lu+nsDzYOW8iFU+T+xcXW/Dni4lfUr5PGzvCefhNx5E5mXzUxJUkmpbYzUaMlILg==
+ra-language-english@^3.11.3:
+  version "3.11.3"
+  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.11.3.tgz#e25ea4668e1755d478cfb3169ee4af913f8ca48b"
+  integrity sha512-jNXcGZTzjN3xzTU0gim7iD9ZSvK1P3orZVxGO8vmj3Ue9bUam6nNvDg+dpJjV/hlGdsguZ49hUggfDHhl7q9cA==
   dependencies:
-    ra-core "^3.11.2"
+    ra-core "^3.11.3"
 
-ra-ui-materialui@^3.11.2:
-  version "3.11.2"
-  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.11.2.tgz#995a6407293eb5d437250b4fd5b473eb97060a60"
-  integrity sha512-RLbP80re/CX/KH/FtZ5q0HHcvHUnCvbvdw4uu5uHz/SPMJi8rfO3522GyxavwbFq0ZQKx0gAvJ+4RmYkv8eH8A==
+ra-ui-materialui@^3.11.3:
+  version "3.11.3"
+  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.11.3.tgz#d866fad9b4b73e8014e515797290a38b411fe159"
+  integrity sha512-m9T4XSrAa0AqH6WPXo6dc3gwoq8ztpmPeJU4qt5p7lEZoxbWWJnJwvYjLLTePL3nxk+cEo2WX93UrZeAsW4lpw==
   dependencies:
     autosuggest-highlight "^3.1.1"
     classnames "~2.2.5"
@@ -8708,9 +8708,9 @@ rc@^1.2.7:
     strip-json-comments "~2.0.1"
 
 react-admin@^3.6.2:
-  version "3.11.2"
-  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.11.2.tgz#938aa74461d33121f093d1224ddffdc7e9bcbb48"
-  integrity sha512-6ITpWzI6jVmjXtrez1+MgnePpET7Yl3XdC4wW0t/flyhkk8S/JJnxnYtanm10hjSQntZouypXYrm/nMZpVQHJw==
+  version "3.11.3"
+  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.11.3.tgz#fb55fa0ce4a5c5508b77330b4fcb62bcf9a923ce"
+  integrity sha512-pwRvQbXJ/YM5QFpgDp5NUcuqvV3tfggH+WLev6kpPopX39mI1Opf2DVKQmnBzvYTTimE6rLEmCwlIvL3Nldz9A==
   dependencies:
     "@material-ui/core" "^4.11.1"
     "@material-ui/icons" "^4.9.1"
@@ -8718,10 +8718,10 @@ react-admin@^3.6.2:
     connected-react-router "^6.5.2"
     final-form "^4.18.5"
     final-form-arrays "^3.0.1"
-    ra-core "^3.11.2"
-    ra-i18n-polyglot "^3.11.2"
-    ra-language-english "^3.11.2"
-    ra-ui-materialui "^3.11.2"
+    ra-core "^3.11.3"
+    ra-i18n-polyglot "^3.11.3"
+    ra-language-english "^3.11.3"
+    ra-ui-materialui "^3.11.3"
     react-final-form "^6.3.3"
     react-final-form-arrays "^3.1.1"
     react-redux "^7.1.0"
