@@ -20,7 +20,7 @@ import {
   buildNMessages,
 } from "./testUtils";
 
-describe("plugins/discord/sqliteMirror", () => {
+describe("plugins/wip-discord/sqliteMirror", () => {
   describe("constructor", () => {
     it("initializes a new database succsessfully", () => {
       const db = new Database(":memory:");

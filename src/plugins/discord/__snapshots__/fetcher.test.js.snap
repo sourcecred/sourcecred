@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads channels 1`] = `
+exports[`plugins/discord/fetcher snapshot testing loads channels 1`] = `
 Array [
   Object {
     "id": "678348980756938813",
@@ -35,7 +35,7 @@ Array [
 ]
 `;
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads emojis 1`] = `
+exports[`plugins/discord/fetcher snapshot testing loads emojis 1`] = `
 Array [
   Object {
     "id": "678399364418502669",
@@ -44,7 +44,7 @@ Array [
 ]
 `;
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads guilds 1`] = `
+exports[`plugins/discord/fetcher snapshot testing loads guilds 1`] = `
 Array [
   Object {
     "id": "678348980639498428",
@@ -54,7 +54,7 @@ Array [
 ]
 `;
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads members 1`] = `
+exports[`plugins/discord/fetcher snapshot testing loads members 1`] = `
 Array [
   Object {
     "nick": null,
@@ -171,7 +171,7 @@ Array [
 ]
 `;
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads messages 1`] = `
+exports[`plugins/discord/fetcher snapshot testing loads messages 1`] = `
 Array [
   Object {
     "authorId": "143776454050709505",
@@ -286,7 +286,7 @@ Array [
 ]
 `;
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads messages 2`] = `
+exports[`plugins/discord/fetcher snapshot testing loads messages 2`] = `
 Array [
   Object {
     "authorId": "143776454050709505",
@@ -396,7 +396,7 @@ Array [
 ]
 `;
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads reactions 1`] = `
+exports[`plugins/discord/fetcher snapshot testing loads reactions 1`] = `
 Array [
   Object {
     "authorId": "143776454050709505",
@@ -419,7 +419,7 @@ Array [
 ]
 `;
 
-exports[`plugins/experimental-discord/fetcher snapshot testing loads roles 1`] = `
+exports[`plugins/discord/fetcher snapshot testing loads roles 1`] = `
 Array [
   Object {
     "id": "678348980639498428",
