@@ -35,6 +35,8 @@ export function immediateReceipts(
   policy: ImmediatePolicy,
   identities: ProcessedIdentities
 ): $ReadOnlyArray<GrainReceipt> {
+  // Default to 1 interval to preserve back-compat with old ledger events
+
   if (policy.numIntervalsLookback < 1) {
     throw new Error(
       `numIntervalsLookback must be at least 1, got ${policy.numIntervalsLookback}`
@@ -65,11 +67,22 @@ export const immediateConfigParser: P.Parser<ImmediatePolicy> = P.object({
   numIntervalsLookback: P.number,
 });
 
-export const immediatePolicyParser: P.Parser<ImmediatePolicy> = P.object({
-  policyType: P.exactly(["IMMEDIATE"]),
-  budget: grainParser,
-  numIntervalsLookback: P.number,
-});
+export const immediatePolicyParser: P.Parser<ImmediatePolicy> = P.fmap(
+  P.object(
+    {
+      policyType: P.exactly(["IMMEDIATE"]),
+      budget: grainParser,
+    },
+    {
+      numIntervalsLookback: P.number,
+    }
+  ),
+  (policy) => ({
+    ...policy,
+    numIntervalsLookback:
+      policy.numIntervalsLookback != null ? policy.numIntervalsLookback : 1,
+  })
+);
 
 export function toString(policy: ImmediatePolicy): string {
   return [
