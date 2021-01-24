@@ -9,18 +9,18 @@ import {type AllocationIdentity} from "./grainAllocation";
 // - no Paid is negative
 // - total Cred is positive
 // - all cred arrays have same length
-export opaque type ProcessedIdentities: $ReadOnlyArray<{|
+export opaque type ProcessedIdentities: $ReadOnlyArray < {|
   +paid: G.Grain,
-  +id: IdentityId,
-  +cred: $ReadOnlyArray<number>,
-  +lifetimeCred: number,
-  +mostRecentCred: number,
-|}> = $ReadOnlyArray<{|
+    +id: IdentityId,
+      +cred: $ReadOnlyArray < number >,
+        +lifetimeCred: number,
+          +mostRecentCred: number,
+|}> = $ReadOnlyArray < {|
   +paid: G.Grain,
-  +id: IdentityId,
-  +cred: $ReadOnlyArray<number>,
-  +lifetimeCred: number,
-  +mostRecentCred: number,
+    +id: IdentityId,
+      +cred: $ReadOnlyArray < number >,
+        +lifetimeCred: number,
+          +mostRecentCred: number,
 |}>;
 export function processIdentities(
   items: $ReadOnlyArray<AllocationIdentity>
@@ -59,7 +59,9 @@ export function processIdentities(
     };
   });
   if (!hasPositiveCred) {
-    throw new Error("cred is zero");
+    throw new Error(
+      "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
+    );
   }
   return results;
 }
