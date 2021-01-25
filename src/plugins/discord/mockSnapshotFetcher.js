@@ -6,7 +6,7 @@ import fs from "fs-extra";
 import {Fetcher} from "./fetcher";
 
 async function snapshotFetch(url: string | Request | URL): Promise<Response> {
-  const snapshotDir = "src/plugins/experimental-discord/snapshots";
+  const snapshotDir = "src/plugins/discord/snapshots";
   const filename = base64url(url);
   const file = path.join(snapshotDir, filename);
   if (await fs.exists(file)) {

@@ -7,7 +7,7 @@ import deepFreeze from "deep-freeze";
 // to change.
 import * as discourseAddress from "../plugins/discourse/address";
 import * as discourseDeclaration from "../plugins/discourse/declaration";
-import * as discordDeclaration from "../plugins/experimental-discord/declaration";
+import * as discordDeclaration from "../plugins/discord/declaration";
 import * as initiativesDeclaration from "../plugins/initiatives/declaration";
 import * as githubDeclaration from "../plugins/github/declaration";
 import * as githubEdges from "../plugins/github/edges";

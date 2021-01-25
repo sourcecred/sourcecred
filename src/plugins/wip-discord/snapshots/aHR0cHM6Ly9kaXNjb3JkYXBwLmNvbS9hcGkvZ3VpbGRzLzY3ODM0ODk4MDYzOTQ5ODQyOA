@@ -18,7 +18,7 @@
     }
   ],
   "banner": null,
-  "owner_id": "420341518948237331",
+  "owner_id": "143776454050709505",
   "application_id": null,
   "region": "us-south",
   "afk_channel_id": null,
@@ -36,8 +36,7 @@
       "color": 0,
       "hoist": false,
       "managed": false,
-      "mentionable": false,
-      "permissions_new": "33620992"
+      "mentionable": false
     },
     {
       "id": "678349848684003359",
@@ -47,8 +46,7 @@
       "color": 2123412,
       "hoist": false,
       "managed": false,
-      "mentionable": false,
-      "permissions_new": "104324673"
+      "mentionable": false
     },
     {
       "id": "678350026946117694",
@@ -58,8 +56,7 @@
       "color": 15105570,
       "hoist": false,
       "managed": false,
-      "mentionable": false,
-      "permissions_new": "104324681"
+      "mentionable": false
     },
     {
       "id": "678359229433905152",
@@ -69,11 +66,7 @@
       "color": 0,
       "hoist": false,
       "managed": true,
-      "mentionable": false,
-      "tags": {
-        "bot_id": "678351352770068560"
-      },
-      "permissions_new": "66560"
+      "mentionable": false
     },
     {
       "id": "728740243926286386",
@@ -83,32 +76,14 @@
       "color": 0,
       "hoist": false,
       "managed": true,
-      "mentionable": false,
-      "tags": {
-        "bot_id": "728738433199112280"
-      },
-      "permissions_new": "66560"
-    },
-    {
-      "id": "761706197606334535",
-      "name": "SourceCred Test",
-      "permissions": 8,
-      "position": 1,
-      "color": 0,
-      "hoist": false,
-      "managed": true,
-      "mentionable": false,
-      "tags": {
-        "bot_id": "761705425870782516"
-      },
-      "permissions_new": "8"
+      "mentionable": false
     }
   ],
   "default_message_notifications": 1,
   "mfa_level": 0,
   "explicit_content_filter": 0,
   "max_presences": null,
-  "max_members": 100000,
+  "max_members": 250000,
   "max_video_channel_users": 25,
   "vanity_url_code": null,
   "premium_tier": 0,

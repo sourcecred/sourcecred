@@ -10,8 +10,8 @@ if [ ! "$(jq --version)" ]; then
   exit 1
 fi
 
-if [ -z "${SOURCECRED_DISCORD_BOT_TOKEN:-}" ]; then
-  printf >&2 "Please set the SOURCECRED_DISCORD_TOKEN environment variable.\n"
+if [ -z "${SOURCECRED_TEST_SERVER_TOKEN:-}" ]; then
+  printf >&2 "Please set the SOURCECRED_TEST_SERVER_TOKEN environment variable.\n"
   exit 1
 fi
 
@@ -24,17 +24,23 @@ fetch() {
   path="${snapshots_dir}/${filename}"
   curl -sfL "$url" \
     -H "Accept: application/json" \
-    -H "Authorization: Bot ${SOURCECRED_DISCORD_BOT_TOKEN}" \
+    -H "Authorization: Bot ${SOURCECRED_TEST_SERVER_TOKEN}" \
     | jq '.' > "${path}"
 }
 
+GUILD_ID="678348980639498428"
+CHANNEL_ID="678394406507905129"
+MESSAGE_ID="678394436757094410"
+EMOJI_ID="678399364418502669"
+EMOJI_NAME="sourcecred"
 rm -r "${snapshots_dir}"
 mkdir "${snapshots_dir}"
-fetch "/guilds/678348980639498428"
-fetch "/guilds/678348980639498428/channels"
-fetch "/guilds/678348980639498428/members?after=0&limit=10"
-fetch "/channels/678348980849213472/messages?after=0&limit=5"
-fetch "/channels/678394406507905129/messages?after=0&limit=5"
-fetch "/channels/678394406507905129/messages?after=678394436757094410&limit=5"
-fetch "/channels/678394406507905129/messages?after=678394455849566208&limit=5"
-fetch "/channels/678394406507905129/messages/678394436757094410/reactions/sourcecred:678399364418502669?after=0&limit=5"
+fetch "/users/@me/guilds"
+fetch "/guilds/$GUILD_ID"
+fetch "/guilds/$GUILD_ID/channels"
+fetch "/guilds/$GUILD_ID/roles"
+fetch "/guilds/$GUILD_ID/emojis"
+fetch "/guilds/$GUILD_ID/members?after=0&limit=1000"
+fetch "/channels/$CHANNEL_ID/messages?after=0&limit=10"
+fetch "/channels/$CHANNEL_ID/messages?after=678394455849566208&limit=10"
+fetch "/channels/$CHANNEL_ID/messages/$MESSAGE_ID/reactions/$EMOJI_NAME:$EMOJI_ID?after=0&limit=100"
