@@ -62,8 +62,8 @@ export async function load(): Promise<LoadResult> {
     const currency = currencyParser.parseOrThrow(
       currencyResponse.ok ? await currencyResponse.json() : {}
     );
-    if (responses[5].ok) {
-      const json = await responses[5].json();
+    if (responses[4].ok) {
+      const json = await responses[4].json();
       credGraph = CredGraph.fromJSON(json);
     }
     const ledgerResult = await ledgerManager.reloadLedger();
