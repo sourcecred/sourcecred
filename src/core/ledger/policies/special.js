@@ -3,6 +3,7 @@
 import {parser as uuidParser} from "../../../util/uuid";
 import * as P from "../../../util/combo";
 import {type IdentityId} from "../../identity";
+import * as G from "../grain";
 import {type GrainReceipt} from "../grainAllocation";
 import {type ProcessedIdentities} from "../processedIdentities";
 import {
@@ -54,3 +55,12 @@ export const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
   memo: P.string,
   recipient: uuidParser,
 });
+
+export function toString(policy: SpecialPolicy): string {
+  return [
+    policy.policyType + " Policy",
+    "Budget " + G.format(policy.budget, 3),
+    "Memo: " + policy.memo,
+    "Recepient: " + policy.recipient,
+  ].join(`\n`);
+}

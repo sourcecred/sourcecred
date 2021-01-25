@@ -12,6 +12,7 @@ import {
   type IdentityType,
   identityTypeParser,
 } from "../identity";
+import type {IdentityId} from "../identity";
 
 /**
  * An IdentityProposal allows a plugin to report a participant identity,
@@ -51,7 +52,7 @@ export const parser: C.Parser<IdentityProposal> = C.object({
 
 /**
  * Given a Ledger and an IdentityProposal, ensure that some Ledger account
- * exists for the proposed identity.
+ * exists for the proposed identity and return the identity ID.
  *
  * If there is already an account matching the node address of the proposal's
  * alias, then the ledger is unchanged.
@@ -62,14 +63,16 @@ export const parser: C.Parser<IdentityProposal> = C.object({
 export function ensureIdentityExists(
   ledger: Ledger,
   proposal: IdentityProposal
-) {
-  if (ledger.accountByAddress(proposal.alias.address) != null) {
+): IdentityId {
+  const existingAccount = ledger.accountByAddress(proposal.alias.address);
+  if (existingAccount != null) {
     // there is already some account that includes this address; do nothing
-    return;
+    return existingAccount.identity.id;
   }
   const name = _chooseIdentityName(proposal, (n) => ledger.nameAvailable(n));
   const id = ledger.createIdentity(proposal.type, name);
   ledger.addAlias(id, proposal.alias);
+  return id;
 }
 
 const MAX_NUMERIC_DISCRIMINATOR = 100;

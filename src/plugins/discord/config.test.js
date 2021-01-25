@@ -2,7 +2,7 @@
 
 import {type DiscordConfig, parser, _upgrade} from "./config";
 
-describe("plugins/experimental-discord/config", () => {
+describe("plugins/discord/config", () => {
   it("can load a basic config", () => {
     const raw = {
       guildId: "453243919774253079",

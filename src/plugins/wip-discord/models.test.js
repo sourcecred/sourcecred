@@ -2,7 +2,7 @@
 
 import {emojiToRef, refToEmoji, isAuthoredByNonUser} from "./models";
 
-describe("plugins/discord/models", () => {
+describe("plugins/wip-discord/models", () => {
   describe("model helper functions", () => {
     describe("emojiToRef", () => {
       it("returns name if id is null", () => {

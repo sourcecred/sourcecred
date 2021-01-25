@@ -3,17 +3,18 @@ import * as pluginId from "../api/pluginId";
 import {CredView} from "../analysis/credView";
 import {CredGraph} from "../core/credrank/credGraph";
 import {fromJSON as credResultFromJSON} from "../analysis/credResult";
-import {Ledger} from "../core/ledger/ledger";
 import {
   type CurrencyDetails,
   parser as currencyParser,
 } from "../api/currencyConfig";
+import {LedgerManager} from "../api/ledgerManager";
+import {createLedgerDiskStorage} from "./utils/ledgerDiskStorage";
 
 export type LoadResult = LoadSuccess | LoadFailure;
 export type LoadSuccess = {|
   +type: "SUCCESS",
   +credView: CredView | null,
-  +ledger: Ledger,
+  +ledgerManager: LedgerManager,
   +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
   +hasBackend: Boolean,
   +currency: CurrencyDetails,
@@ -26,17 +27,22 @@ export async function load(): Promise<LoadResult> {
   // utilize functional programming best practices.
   // Optional loads require some better organization
   // than ternaries. There's also a lot of repeated code here
+
+  const diskStorage = createLedgerDiskStorage("data/ledger.json");
+  const ledgerManager = new LedgerManager({
+    storage: diskStorage,
+  });
+
   const queries = [
     fetch("output/credResult.json"),
     fetch("sourcecred.json"),
-    fetch("data/ledger.json"),
     fetch("static/server-info.json"),
     fetch("config/currencyDetails.json"),
     fetch("output/credGraph.json"),
   ];
   const responses = await Promise.all(queries);
 
-  for (const response of responses.slice(1, 4)) {
+  for (const response of responses.slice(1, 3)) {
     if (!response.ok) {
       console.error(response);
       return {type: "FAILURE", error: response.status};
@@ -51,10 +57,8 @@ export async function load(): Promise<LoadResult> {
       credView = new CredView(credResult);
     }
     const {bundledPlugins} = await responses[1].json();
-    const rawLedger = await responses[2].text();
-    const ledger = Ledger.parse(rawLedger);
-    const {hasBackend} = await responses[3].json();
-    const currencyResponse = responses[4];
+    const {hasBackend} = await responses[2].json();
+    const currencyResponse = responses[3];
     const currency = currencyParser.parseOrThrow(
       currencyResponse.ok ? await currencyResponse.json() : {}
     );
@@ -62,12 +66,19 @@ export async function load(): Promise<LoadResult> {
       const json = await responses[5].json();
       credGraph = CredGraph.fromJSON(json);
     }
+    const ledgerResult = await ledgerManager.reloadLedger();
+    if (ledgerResult.error) {
+      return {
+        type: "FAILURE",
+        error: `Error processing ledger events: ${ledgerResult.error}`,
+      };
+    }
 
     return {
       type: "SUCCESS",
       credView,
       bundledPlugins,
-      ledger,
+      ledgerManager,
       hasBackend,
       currency,
       credGraph,

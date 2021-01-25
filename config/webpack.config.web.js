@@ -13,7 +13,7 @@ const webpack = require("webpack");
 
 const RemoveBuildDirectoryPlugin = require("./RemoveBuildDirectoryPlugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const ManifestPlugin = require("webpack-manifest-plugin");
+const {WebpackManifestPlugin} = require("webpack-manifest-plugin");
 const StaticSiteGeneratorPlugin = require("static-site-generator-webpack-plugin");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const paths = require("./paths");
@@ -286,7 +286,7 @@ async function plugins(mode /*: "development" | "production" */) {
     // Generate a manifest file which contains a mapping of all asset filenames
     // to their corresponding output file so that tools can pick it up without
     // having to parse `index.html`.
-    new ManifestPlugin({
+    new WebpackManifestPlugin({
       fileName: "asset-manifest.json",
     }),
     // Moment.js is an extremely popular library that bundles large locale files

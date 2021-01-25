@@ -3,7 +3,7 @@
 import type {Plugin} from "./plugin";
 import {GithubPlugin} from "../plugins/github/plugin";
 import {DiscoursePlugin} from "../plugins/discourse/plugin";
-import {DiscordPlugin} from "../plugins/experimental-discord/plugin";
+import {DiscordPlugin} from "../plugins/discord/plugin";
 import {InitiativesPlugin} from "../plugins/initiatives/plugin";
 import {EthereumPlugin} from "../plugins/ethereum/plugin";
 

@@ -23,7 +23,7 @@ import AppBar from "./AppBar";
 import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
 import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
-import {Ledger} from "../../core/ledger/ledger";
+import {LedgerManager} from "../../api/ledgerManager";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -72,9 +72,11 @@ const customRoutes = (
   hasBackend: Boolean,
   currency: CurrencyDetails,
   credGraph: CredGraph | null,
-  ledger: Ledger
+  ledgerManager: LedgerManager
 ) => {
-  const credGrainView = credGraph ? new CredGrainView(credGraph, ledger) : null;
+  const credGrainView = credGraph
+    ? new CredGrainView(credGraph, ledgerManager.ledger)
+    : null;
 
   const routes = [
     <Route key="explorer" exact path="/explorer">
@@ -127,6 +129,7 @@ const AdminApp = (): ReactNode => {
         <div>
           <h1>Load Failure</h1>
           <p>Check console for details.</p>
+          <p>{loadResult.error}</p>
         </div>
       );
     case "SUCCESS":
@@ -147,7 +150,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
 
   return (
     // TODO (@topocount) create context for read-only instance state
-    <LedgerProvider initialLedger={loadSuccess.ledger}>
+    <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
       <Admin
         layout={createAppLayout(loadSuccess)}
         theme={theme}
@@ -158,7 +161,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
           loadSuccess.hasBackend,
           loadSuccess.currency,
           loadSuccess.credGraph,
-          loadSuccess.ledger
+          loadSuccess.ledgerManager
         )}
       >
         {/*

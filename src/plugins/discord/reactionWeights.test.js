@@ -9,7 +9,7 @@ import {
   reactionWeight,
 } from "./reactionWeights";
 
-describe("plugins/experimental-discord/reactionWeights", () => {
+describe("plugins/discord/reactionWeights", () => {
   const channelId = "1";
   const messageId = "2";
   const authorId = "4";
