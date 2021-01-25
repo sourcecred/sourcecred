@@ -11,6 +11,8 @@ import {Explorer} from "./Explorer/Explorer";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
+import {CredGraph} from "../../core/credrank/credGraph";
+import {CredGrainView} from "../../core/credGrainView";
 import {AccountOverview} from "./AccountOverview";
 import {Transfer} from "./Transfer";
 import {SpecialDistribution} from "./SpecialDistribution";
@@ -21,6 +23,7 @@ import AppBar from "./AppBar";
 import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
 import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
+import {Ledger} from "../../core/ledger/ledger";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -67,8 +70,12 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
 const customRoutes = (
   credView: CredView | null,
   hasBackend: Boolean,
-  currency: CurrencyDetails
+  currency: CurrencyDetails,
+  credGraph: CredGraph | null,
+  ledger: Ledger
 ) => {
+  const credGrainView = credGraph ? new CredGrainView(credGraph, ledger) : null;
+
   const routes = [
     <Route key="explorer" exact path="/explorer">
       <Explorer initialView={credView} />
@@ -88,7 +95,7 @@ const customRoutes = (
       <LedgerAdmin />
     </Route>,
     <Route key="explorer-home" exact path="/explorer-home">
-      <ExplorerHome initialView={credView} />
+      <ExplorerHome initialView={credGrainView} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
       <Transfer currency={currency} />
@@ -149,7 +156,9 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
         customRoutes={customRoutes(
           loadSuccess.credView,
           loadSuccess.hasBackend,
-          loadSuccess.currency
+          loadSuccess.currency,
+          loadSuccess.credGraph,
+          loadSuccess.ledger
         )}
       >
         {/*

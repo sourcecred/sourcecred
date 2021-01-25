@@ -19,7 +19,7 @@ import {
   TextField,
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {CredView} from "../../../analysis/credView";
+import {CredGrainView} from "../../../core/credGrainView";
 import sortBy from "../../../util/sortBy";
 import CredTimeline from "./CredTimeline";
 
@@ -91,11 +91,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type ExplorerHomeProps = {|
-  +initialView: CredView | null,
+  +initialView: CredGrainView | null,
 |};
 
 export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
   if (!initialView) return null;
+
   const classes = useStyles();
   const [tab, setTab] = useState<number>(1);
   const [checkboxes, setCheckboxes] = useState({
@@ -124,20 +125,26 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
     chart,
   });
 
-  const nodes = initialView.userNodes();
-  // TODO: Allow sorting/displaying only recent cred...
-  const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred);
-  const credTimelines = sortedNodes.map((node) =>
-    node.credOverTime === null ? null : node.credOverTime.cred
-  );
+  // sort by cred amount, highest to lowest
+  const nodes = sortBy(initialView.participants(), (n) => -n.cred);
+  // create an array of 0s for the cred summary graph at the top of the page
+  let credTimelineSummary = initialView.intervals().map(() => 0);
 
-  const rows = [
-    createData("Frozen yoghurt", 159, 6.0, credTimelines[1]),
-    createData("Ice cream sandwich", 237, 9.0, credTimelines[2]),
-    createData("Eclair", 262, 16.0, credTimelines[3]),
-    createData("Cupcake", 305, 3.7, credTimelines[4]),
-    createData("Gingerbread", 356, 16.0, credTimelines[5]),
-  ];
+  const rows = nodes.map((node) => {
+    const {credPerInterval} = node;
+
+    // add this node's cred to the summary graph
+    credTimelineSummary = credTimelineSummary.map(
+      (total, i) => credPerInterval[i] + total
+    );
+
+    return createData(
+      node.identity.name,
+      node.cred,
+      node.grainEarned,
+      credPerInterval
+    );
+  });
 
   const makeCircle = (
     value: string | number,
@@ -174,7 +181,7 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
         Explorer Home
       </h1>
       <div className={`${classes.centerRow} ${classes.graph}`}>
-        <CredTimeline height={150} width={1000} data={credTimelines[0]} />
+        <CredTimeline height={150} width={1000} data={credTimelineSummary} />
       </div>
       <Divider style={{margin: 20}} />
       <div className={`${classes.rightRow}`}>
@@ -207,7 +214,7 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
               marginBottom: "20px",
             }}
           >
-            <span style={{fontSize: "24px"}}>Last Week&aposs Activity</span>
+            <span style={{fontSize: "24px"}}>Last Week&apos;s Activity</span>
             <TextField label="Filter Names" variant="outlined" />
           </div>
           <TableContainer component={Paper}>
