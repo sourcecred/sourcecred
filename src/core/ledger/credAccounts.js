@@ -64,6 +64,11 @@ export function computeCredAccounts(
   return _computeCredAccounts(grainAccounts, userlikeInfo, intervals);
 }
 
+/**
+ * computeCredAccounts2 is a fork of applyDistributions that
+ * uses a CredGraph instead of a CredView, as part of a move
+ * away from CredView in favor of CredGrainView.
+ */
 export function computeCredAccounts2(
   ledger: Ledger,
   credGraph: CredGraph
