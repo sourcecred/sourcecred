@@ -1,6 +1,6 @@
 // @flow
 import React, {useState, type Node as ReactNode} from "react";
-import {Button, Container, TextField} from "@material-ui/core";
+import {Button, Container, TextField, useMediaQuery} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, format, gt, lt, fromFloatString} from "../../core/ledger/grain";
 import {type Account} from "../../core/ledger/ledger";
@@ -40,6 +40,15 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     alignItems: "center",
   },
+  verticalElementMobileLayout: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "inherit",
+  },
+  rootMobileLayout: {
+    margin: "0 auto",
+    padding: "0 1em 1em",
+  },
   element: {flex: 1, margin: "20px"},
   arrowInput: {width: "40%", display: "inline-block"},
   pageHeader: {color: theme.palette.text.primary},
@@ -57,6 +66,16 @@ export const Transfer = ({
   const [receiver, setReceiver] = useState<Account | null>(null);
   const [amount, setAmount] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
+  const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
+
+  const disabled = (amount) => {
+    return (
+      !Number(amount) ||
+      !(sender && receiver) ||
+      gt(fromFloatString(amount), sender.balance) ||
+      lt(fromFloatString(amount), fromFloatString("0"))
+    );
+  };
 
   const submitTransfer = () => {
     if (sender && receiver) {
@@ -75,11 +94,17 @@ export const Transfer = ({
   };
 
   return (
-    <Container className={classes.root}>
+    <Container
+      className={`${isXSmall ? classes.rootMobileLayout : classes.root}`}
+    >
       <h1 className={`${classes.centerRow} ${classes.pageHeader}`}>
         Transfer {`${currencyName}`}
       </h1>
-      <div className={classes.centerRow}>
+      <div
+        className={`${classes.centerRow} ${
+          isXSmall ? classes.verticalElementMobileLayout : ""
+        }`}
+      >
         <div
           className={`${classes.dropdownWrapper} ${classes.centerRow} ${classes.element}`}
         >
@@ -104,7 +129,7 @@ export const Transfer = ({
               {sender && ` max: ${format(sender.balance, 2, currencySuffix)}`}
             </span>
           </div>
-          <div className={classes.triangle} />
+          <div className={`${isXSmall ? "" : classes.triangle}`} />
         </div>
         <div
           className={`${classes.dropdownWrapper} ${classes.centerRow} ${classes.element}`}
@@ -116,7 +141,11 @@ export const Transfer = ({
           />
         </div>
       </div>
-      <div className={classes.centerRow}>
+      <div
+        className={`${classes.centerRow} ${
+          isXSmall ? classes.verticalElementMobileLayout : ""
+        }`}
+      >
         <TextField
           variant="outlined"
           size="medium"
@@ -127,18 +156,17 @@ export const Transfer = ({
           onChange={(e) => setMemo(e.currentTarget.value)}
         />
       </div>
-      <div className={classes.centerRow}>
+      <div
+        className={`${classes.centerRow} ${
+          isXSmall ? classes.verticalElementMobileLayout : ""
+        }`}
+      >
         <Button
           size="large"
           color="primary"
           variant="contained"
           className={classes.element}
-          disabled={
-            !Number(amount) ||
-            !(sender && receiver) ||
-            gt(fromFloatString(amount), sender.balance) ||
-            lt(fromFloatString(amount), fromFloatString("0"))
-          }
+          disabled={disabled(amount)}
           onClick={submitTransfer}
         >
           transfer grain
