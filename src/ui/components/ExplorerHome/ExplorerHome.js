@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
     height: "150px",
   },
   barChartWrapper: {flexGrow: 1, flexBasis: 0, margin: "20px"},
-  tableWrapper: {flexGrow: 3, flexBasis: 0, margin: "20px"},
+  tableWrapper: {flexGrow: 0, flexBasis: 0, margin: "20px auto"},
   checklabel: {
     margin: "5px",
   },
@@ -312,13 +312,6 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
               label="Organizations"
             />
           </FormGroup>
-        </div>
-        <div
-          className={classes.barChartWrapper}
-          style={{flexDirection: "column"}}
-        >
-          <h2>Cred By Plugin</h2>
-          <div className={classes.barChart}>Bar Chart</div>
         </div>
       </div>
     </Container>
