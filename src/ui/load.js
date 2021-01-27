@@ -1,6 +1,7 @@
 // @flow
 import * as pluginId from "../api/pluginId";
 import {CredView} from "../analysis/credView";
+import {CredGraph} from "../core/credrank/credGraph";
 import {fromJSON as credResultFromJSON} from "../analysis/credResult";
 import {
   type CurrencyDetails,
@@ -17,6 +18,7 @@ export type LoadSuccess = {|
   +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
   +hasBackend: Boolean,
   +currency: CurrencyDetails,
+  +credGraph: CredGraph | null,
 |};
 export type LoadFailure = {|+type: "FAILURE", +error: any|};
 
@@ -36,6 +38,7 @@ export async function load(): Promise<LoadResult> {
     fetch("sourcecred.json"),
     fetch("static/server-info.json"),
     fetch("config/currencyDetails.json"),
+    fetch("output/credGraph.json"),
   ];
   const responses = await Promise.all(queries);
 
@@ -47,6 +50,7 @@ export async function load(): Promise<LoadResult> {
   }
   try {
     let credView = null;
+    let credGraph = null;
     if (responses[0].ok) {
       const json = await responses[0].json();
       const credResult = credResultFromJSON(json);
@@ -58,6 +62,10 @@ export async function load(): Promise<LoadResult> {
     const currency = currencyParser.parseOrThrow(
       currencyResponse.ok ? await currencyResponse.json() : {}
     );
+    if (responses[4].ok) {
+      const json = await responses[4].json();
+      credGraph = CredGraph.fromJSON(json);
+    }
     const ledgerResult = await ledgerManager.reloadLedger();
     if (ledgerResult.error) {
       return {
@@ -73,6 +81,7 @@ export async function load(): Promise<LoadResult> {
       ledgerManager,
       hasBackend,
       currency,
+      credGraph,
     };
   } catch (e) {
     console.error(e);
