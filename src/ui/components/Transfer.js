@@ -183,7 +183,7 @@ export const Transfer = ({
           color="primary"
           variant="contained"
           className={classes.element}
-          disabled={disabled(amount)}
+          disabled={isDisabled}
           onClick={submitTransfer}
         >
           transfer grain
