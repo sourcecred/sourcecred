@@ -66,6 +66,11 @@ export function applyDistributions(
   });
 }
 
+/**
+ * applyDistributions2 is a fork of applyDistributions that
+ * uses a CredGraph instead of a CredView, as part of a move
+ * away from CredView in favor of CredGrainView.
+ */
 export function applyDistributions2(
   policy: DistributionPolicy,
   credGraph: CredGraph,
