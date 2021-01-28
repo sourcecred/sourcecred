@@ -81,14 +81,12 @@ export const Transfer = ({
   const [memo, setMemo] = useState<string>("");
   const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
 
-  const disabled = (amount) => {
-    return (
+  const isDisabled = (
       !Number(amount) ||
       !(sender && receiver) ||
       gt(fromFloatString(amount), sender.balance) ||
       lt(fromFloatString(amount), fromFloatString("0"))
     );
-  };
 
   const submitTransfer = () => {
     if (sender && receiver) {
