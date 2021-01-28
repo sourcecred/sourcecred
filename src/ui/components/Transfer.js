@@ -22,14 +22,27 @@ const useStyles = makeStyles((theme) => ({
     padding: "5px 20px",
     display: "flex",
     alignItems: "center",
+    width: "200px",
   },
   triangle: {
     width: 0,
     height: 0,
+    top: "100%",
     background: theme.palette.background,
     borderTop: "30px solid transparent",
     borderBottom: "30px solid transparent",
     borderLeft: `30px solid ${theme.palette.background.paper}`,
+  },
+  downArrow: {
+    flexDirection: "column",
+    "&:after": {
+      content: '""',
+      display: "block",
+      background: theme.palette.background,
+      borderTop: `20px solid ${theme.palette.background.paper}`,
+      borderRight: "120px solid transparent",
+      borderLeft: "120px solid transparent",
+    },
   },
   dropdownWrapper: {
     border: `1px solid ${theme.palette.text.primary}`,
@@ -114,7 +127,13 @@ export const Transfer = ({
             placeholder="From..."
           />
         </div>
-        <div className={`${classes.centerRow} ${classes.element}`}>
+        <div
+          className={`${classes.centerRow} ${classes.element} ${
+            isXSmall
+              ? classes.verticalElementMobileLayout && classes.downArrow
+              : ""
+          }`}
+        >
           <div className={classes.arrowBody}>
             <TextField
               className={classes.arrowInput}
