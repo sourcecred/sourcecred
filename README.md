@@ -103,8 +103,8 @@ on our Discord. You can also come to our weekly dev meeting, on Mondays at 12pm 
 
 ### Dependencies
 
-- Install [Node] (tested on v12.x.x and v10.x.x).
-- Install [Yarn] (tested on v1.7.0).
+- Install [Node] (tested on v14.x.x, v12.x.x and v10.x.x).
+- Install [Yarn] (tested on v1.7.0-v1.22.10).
 - For macOS users: Ensure that your environment provides GNU
   coreutils. [See this comment for details about what, how, and
   why.][macos-gnu]

@@ -108,7 +108,7 @@
   "scripts": {
     "prettify": "prettier --write '**/*.{js,md,yml}'",
     "check-pretty": "prettier --list-different '**/*.{js,md,yml}'",
-    "start": "NODE_ENV=development webpack serve --config config/webpack.config.web.js",
+    "start": "./scripts/devServer.sh",
     "build": "run-p build:* && cp -r ./build ./bin/site-template && chmod +x ./bin/sourcecred.js",
     "build:frontend": "NODE_ENV=production webpack --config config/webpack.config.web.js",
     "build:backend": "NODE_ENV=development webpack --config config/webpack.config.backend.js",
