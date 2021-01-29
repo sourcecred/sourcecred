@@ -41,9 +41,9 @@ function makeConfig(mode /*: "production" | "development" */) /*: Object */ {
       before: (app /*: ExpressApp<ExpressRequest, ExpressResponse> */) => {
         let developmentInstancePath /*: ?string */ =
           process.env["SOURCECRED_DEV_INSTANCE"];
-        const argv = process.argv;
-        if (argv[argv.length - 2] === "--instance") {
-          developmentInstancePath = argv[argv.length - 1];
+        const instance /*: ?string */ = process.env["INSTANCE"];
+        if (instance != null) {
+          developmentInstancePath = instance;
         }
         if (developmentInstancePath == null) {
           developmentInstancePath = "sharness/__snapshots__/test-instance";
