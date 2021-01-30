@@ -1,6 +1,11 @@
 // @flow
 
-import React, {type Node as ReactNode, useEffect, useState} from "react";
+import React, {
+  type Node as ReactNode,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
@@ -11,7 +16,6 @@ import {Explorer} from "./Explorer/Explorer";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
-import {CredGraph} from "../../core/credrank/credGraph";
 import {CredGrainView} from "../../core/credGrainView";
 import {AccountOverview} from "./AccountOverview";
 import {Transfer} from "./Transfer";
@@ -23,7 +27,6 @@ import AppBar from "./AppBar";
 import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
 import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
-import {LedgerManager} from "../../api/ledgerManager";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -71,13 +74,8 @@ const customRoutes = (
   credView: CredView | null,
   hasBackend: Boolean,
   currency: CurrencyDetails,
-  credGraph: CredGraph | null,
-  ledgerManager: LedgerManager
+  credGrainView: CredGrainView | null
 ) => {
-  const credGrainView = credGraph
-    ? new CredGrainView(credGraph, ledgerManager.ledger)
-    : null;
-
   const routes = [
     <Route key="explorer" exact path="/explorer">
       <Explorer initialView={credView} />
@@ -147,6 +145,16 @@ const AdminApp = (): ReactNode => {
  */
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
+  const credGrainView = useMemo(
+    () =>
+      loadSuccess.credGraph
+        ? new CredGrainView(
+            loadSuccess.credGraph,
+            loadSuccess.ledgerManager.ledger
+          )
+        : null,
+    [loadSuccess.credGraph, loadSuccess.ledgerManager.ledger]
+  );
 
   return (
     // TODO (@topocount) create context for read-only instance state
@@ -160,8 +168,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
           loadSuccess.credView,
           loadSuccess.hasBackend,
           loadSuccess.currency,
-          loadSuccess.credGraph,
-          loadSuccess.ledgerManager
+          credGrainView
         )}
       >
         {/*

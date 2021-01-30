@@ -111,7 +111,7 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
     setCheckboxes({...checkboxes, [event.target.name]: event.target.checked});
   };
 
-  const data = [
+  const summaryInfo = [
     {title: "Cred This Week", value: 610},
     {title: "Grain Harvested", value: "6,765g"},
     {title: "Active Participants", value: 13},
@@ -199,10 +199,10 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
         </Tabs>
       </div>
       <div className={classes.centerRow}>
-        {makeCircle(data[0].value, data[0].title, "#6174CC")}
-        {makeCircle(data[1].value, data[1].title, "#FFAA3D")}
-        {makeCircle(data[2].value, data[2].title, "#FDBBD1")}
-        {makeCircle(data[3].value, data[3].title, "#4BD76D")}
+        {makeCircle(summaryInfo[0].value, summaryInfo[0].title, "#6174CC")}
+        {makeCircle(summaryInfo[1].value, summaryInfo[1].title, "#FFAA3D")}
+        {makeCircle(summaryInfo[2].value, summaryInfo[2].title, "#FDBBD1")}
+        {makeCircle(summaryInfo[3].value, summaryInfo[3].title, "#4BD76D")}
       </div>
       <div className={classes.row}>
         <div className={classes.tableWrapper} style={{flexDirection: "column"}}>
