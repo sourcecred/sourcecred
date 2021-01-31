@@ -31,6 +31,9 @@ import * as ledgerUtils from "../core/ledger/utils";
 import * as grain from "../core/ledger/grain";
 import * as identity from "../core/identity";
 
+import * as manager from "./ledgerManager";
+import * as storage from "./ledgerStorage";
+
 const api = {
   core: {
     address,
@@ -52,6 +55,8 @@ const api = {
     identity,
     grain,
     utils: ledgerUtils,
+    manager,
+    storage,
   },
   plugins: {
     github: {
