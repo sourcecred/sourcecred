@@ -434,7 +434,7 @@ export class SqliteMirrorRepository {
         username: member.user.username,
         discriminator: member.user.discriminator,
         bot: Number(member.user.bot),
-        nick: member.nick,
+        nick: member.nick || null,
       });
 
     for (const role of member.roles) {
