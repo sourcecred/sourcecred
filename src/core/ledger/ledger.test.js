@@ -288,7 +288,7 @@ describe("core/ledger/ledger", () => {
       it("fails on invalid type", () => {
         const ledger = new Ledger();
         const fooId = ledger.createIdentity("USER", "foo");
-        // $FlowExpectedError[incompatible-call]
+        // $FlowExpectedError[prop-missing]
         const thunk = () => ledger.changeIdentityType(fooId, "ENTITY");
         failsWithoutMutation(ledger, thunk, "invalid type ENTITY");
       });
