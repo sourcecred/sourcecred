@@ -160,9 +160,9 @@ exports[`analysis/credResult to/fro JSON to/froJSON snapshots as expected 1`] = 
             \\"version\\": \\"0.2.0\\"
           },
           {
-            \\"edgeWeights\\": {
+            \\"edgeWeightsT\\": {
             },
-            \\"nodeWeights\\": {
+            \\"nodeWeightsT\\": {
             }
           }
         ]

@@ -28,7 +28,7 @@ import {
   NodeAddress,
   EdgeAddress,
 } from "../core/graph";
-import {compareWeights} from "../core/weights";
+import {compareWeightsT} from "../core/weights";
 import {
   toJSON as weightedGraphToJSON,
   type WeightedGraph,
@@ -203,7 +203,7 @@ function computeAndLogDiff(
     oldWeightedGraph.graph,
     newWeightedGraph.graph
   );
-  const weightDiff = compareWeights(
+  const weightDiff = compareWeightsT(
     oldWeightedGraph.weights,
     newWeightedGraph.weights
   );

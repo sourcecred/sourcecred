@@ -292,7 +292,7 @@ export class MarkovProcessGraph {
     };
 
     // Add graph nodes
-    const nwe = nodeWeightEvaluator(weightedGraph.weights);
+    const nwe = nodeWeightEvaluator(weightedGraph.weights.nodeWeightsT);
     for (const node of weightedGraph.graph.nodes()) {
       if (_scoringAddresses.has(node.address)) {
         // Scoring nodes are not included in the Markov process graph:
@@ -426,7 +426,7 @@ export class MarkovProcessGraph {
       +weight: number,
     |};
     const unidirectionalGraphEdges = function* (): Iterator<_UnidirectionalGraphEdge> {
-      const ewe = edgeWeightEvaluator(weightedGraph.weights);
+      const ewe = edgeWeightEvaluator(weightedGraph.weights.edgeWeightsT);
       for (const edge of (function* () {
         for (const edge of weightedGraph.graph.edges({showDangling: false})) {
           const weight = ewe(edge.address);

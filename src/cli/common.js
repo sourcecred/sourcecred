@@ -35,7 +35,7 @@ import {
 } from "../api/currencyConfig";
 import {defaultCurrencyConfig} from "../api/currencyConfig";
 
-import * as Weights from "../core/weights";
+import * as WeightsT from "../core/weights/weightsT";
 
 export function loadInstanceConfig(baseDir: string): Promise<InstanceConfig> {
   const projectFilePath = pathJoin(baseDir, "sourcecred.json");
@@ -176,8 +176,8 @@ export async function loadAndMergePluginWeigtedGraphs(
   const weightsPath = pathJoin(baseDir, "config", "weights.json");
   const weights = await loadJsonWithDefault(
     weightsPath,
-    Weights.parser,
-    Weights.empty
+    WeightsT.parser,
+    WeightsT.empty
   );
   return overrideWeights(combinedGraph, weights);
 }

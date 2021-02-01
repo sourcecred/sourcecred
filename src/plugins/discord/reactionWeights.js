@@ -2,7 +2,7 @@
 
 import * as Model from "./models";
 import * as NullUtil from "../../util/null";
-import {type NodeWeight} from "../../core/weights";
+import {type NodeWeight} from "../../core/weights/nodeWeights";
 
 export type RoleWeightConfig = {|
   +defaultWeight: NodeWeight,

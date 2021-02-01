@@ -2,8 +2,7 @@
 
 import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
 import type {EdgeType, NodeType, NodeAndEdgeTypes} from "./types";
-import * as Weights from "../core/weights";
-import {type WeightsT} from "../core/weights";
+import * as WeightsT from "../core/weights/weightsT";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 const COMPAT_INFO = {type: "sourcecred/pluginDeclarations", version: "0.1.0"};
@@ -42,14 +41,16 @@ export function combineTypes(
   return {nodeTypes, edgeTypes};
 }
 
-export function weightsForDeclaration(dec: PluginDeclaration): WeightsT {
-  const weights = Weights.empty();
+export function weightsForDeclaration(
+  dec: PluginDeclaration
+): WeightsT.WeightsT {
+  const weights = WeightsT.empty();
   const {nodeTypes, edgeTypes} = dec;
   for (const {prefix, defaultWeight} of nodeTypes) {
-    weights.nodeWeights.set(prefix, defaultWeight);
+    weights.nodeWeightsT.set(prefix, defaultWeight);
   }
   for (const {prefix, defaultWeight} of edgeTypes) {
-    weights.edgeWeights.set(prefix, defaultWeight);
+    weights.edgeWeightsT.set(prefix, defaultWeight);
   }
   return weights;
 }

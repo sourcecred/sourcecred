@@ -3323,8 +3323,8 @@ Array [
 
 exports[`plugins/github/createGraph example weights matches snapshot 1`] = `
 Object {
-  "edgeWeights": Map {},
-  "nodeWeights": Map {
+  "edgeWeightsT": Map {},
+  "nodeWeightsT": Map {
     "N sourcecred github PULL sourcecred-test example-github 9 " => 0,
   },
 }

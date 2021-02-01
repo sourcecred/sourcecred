@@ -5,7 +5,7 @@ import deepFreeze from "deep-freeze";
 import {Graph, NodeAddress} from "./graph";
 import {intervalSequence} from "./interval";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
-import {empty as emptyWeights} from "./weights";
+import {empty as emptyWeightsT} from "./weights";
 import {utcWeek} from "d3-time";
 import {
   _alignPeriodsToIntervals,
@@ -26,7 +26,7 @@ describe("core/bonusMinting", () => {
     it("adds no nodes or node weights if there is no minting", () => {
       const wg = createBonusGraph([]);
       expect(wg.graph.equals(new Graph())).toBe(true);
-      expect(wg.weights.nodeWeights).toEqual(new Map());
+      expect(wg.weights.nodeWeightsT).toEqual(new Map());
     });
     it("adds the bonus edge prefix weight even without minting", () => {
       const {weights} = createBonusGraph([]);
@@ -34,7 +34,7 @@ describe("core/bonusMinting", () => {
         BONUS_EDGE_PREFIX,
         BONUS_EDGE_WEIGHT
       );
-      expect(weights.edgeWeights).toEqual(expectedEdgeWeights);
+      expect(weights.edgeWeightsT).toEqual(expectedEdgeWeights);
     });
     it("only contains recipient if there is no minting", () => {
       const recipient = {
@@ -45,8 +45,8 @@ describe("core/bonusMinting", () => {
       const mint = {recipient, bonusIntervals: []};
 
       const expectedGraph = new Graph().addNode(recipient);
-      const expectedWeights = emptyWeights();
-      expectedWeights.edgeWeights.set(BONUS_EDGE_PREFIX, BONUS_EDGE_WEIGHT);
+      const expectedWeights = emptyWeightsT();
+      expectedWeights.edgeWeightsT.set(BONUS_EDGE_PREFIX, BONUS_EDGE_WEIGHT);
 
       const wg = createBonusGraph([mint]);
       expect(wg.graph.equals(expectedGraph)).toBe(true);
@@ -69,12 +69,12 @@ describe("core/bonusMinting", () => {
         .addNode(recipient)
         .addNode(bonusNode(recipient, interval))
         .addEdge(bonusEdge(recipient, interval));
-      const expectedWeights = emptyWeights();
-      expectedWeights.nodeWeights.set(
+      const expectedWeights = emptyWeightsT();
+      expectedWeights.nodeWeightsT.set(
         bonusNodeAddress(recipient, interval),
         10
       );
-      expectedWeights.edgeWeights.set(BONUS_EDGE_PREFIX, BONUS_EDGE_WEIGHT);
+      expectedWeights.edgeWeightsT.set(BONUS_EDGE_PREFIX, BONUS_EDGE_WEIGHT);
 
       const wg = createBonusGraph([mint]);
       expect(wg.graph.equals(expectedGraph)).toBe(true);
@@ -110,7 +110,7 @@ describe("core/bonusMinting", () => {
     class TestWeightedGraph {
       wg: WeightedGraphT;
       constructor() {
-        this.wg = {weights: emptyWeights(), graph: new Graph()};
+        this.wg = {weights: emptyWeightsT(), graph: new Graph()};
       }
       addNode(opts: {|
         +id: number,
@@ -119,7 +119,7 @@ describe("core/bonusMinting", () => {
       |}): TestWeightedGraph {
         const {id, timestampMs, mint} = opts;
         const address = NodeAddress.fromParts([String(id)]);
-        this.wg.weights.nodeWeights.set(address, mint);
+        this.wg.weights.nodeWeightsT.set(address, mint);
         this.wg.graph.addNode({address, description: String(id), timestampMs});
         return this;
       }
@@ -147,7 +147,7 @@ describe("core/bonusMinting", () => {
           timestampMs: null,
         };
         wg.graph.addNode(recipient);
-        wg.weights.nodeWeights.set(recipient.address, 0);
+        wg.weights.nodeWeightsT.set(recipient.address, 0);
         const policy = {
           address: recipient.address,
           periods: [{startTimeMs: w1, weight: 0.5}],

@@ -1,7 +1,7 @@
 // @flow
 
 import {exampleGraph, exampleRelationalView} from "./example/example";
-import {empty as emptyWeights} from "../../core/weights";
+import {empty as emptyWeightsT} from "../../core/weights";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";
 
@@ -23,10 +23,10 @@ describe("plugins/github/createGraph", () => {
     expect(unmergedPrs).not.toHaveLength(0);
     expect(mergedPrs).not.toHaveLength(0);
 
-    const expectedWeights = emptyWeights();
+    const expectedWeights = emptyWeightsT();
     for (const unmerged of unmergedPrs) {
       const addr = N.toRaw(unmerged.address());
-      expectedWeights.nodeWeights.set(addr, 0);
+      expectedWeights.nodeWeightsT.set(addr, 0);
     }
     const {weights} = createGraph(view);
     expect(weights).toEqual(expectedWeights);

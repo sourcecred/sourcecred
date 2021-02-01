@@ -14,6 +14,7 @@ import {
   type Node,
 } from "../graph";
 import {type WeightedGraph} from "../weightedGraph";
+import {type NodeWeightsT} from "../weights/nodeWeights";
 import {
   type Interval,
   partitionGraph,
@@ -137,8 +138,8 @@ export async function timelinePagerank(
   }
   // Produce the evaluators we will use to get the baseline weight for each
   // node and edge
-  const nodeEvaluator = nodeWeightEvaluator(weightedGraph.weights);
-  const edgeEvaluator = edgeWeightEvaluator(weightedGraph.weights);
+  const nodeEvaluator = nodeWeightEvaluator(weightedGraph.weights.nodeWeightsT);
+  const edgeEvaluator = edgeWeightEvaluator(weightedGraph.weights.edgeWeightsT);
 
   const graphPartitionSlices = partitionGraph(weightedGraph.graph);
   if (graphPartitionSlices.length === 0) {
@@ -183,20 +184,20 @@ export function* _timelineNodeWeights(
 ): Iterator<Map<NodeAddressT, number>> {
   let lastNodeWeights = new Map();
   for (const nodes of nodeCreationHistory) {
-    const nodeWeights = new Map();
+    const nodeWeightsT = new Map();
     // Decay all the previous weights.
     for (const [address, weight] of lastNodeWeights.entries()) {
-      nodeWeights.set(address, weight * intervalDecay);
+      nodeWeightsT.set(address, weight * intervalDecay);
     }
     // Add new nodes at full weight.
     for (const {address} of nodes) {
       // Normalize by (1 - intervalDecay) so that the total weight of a node across
       // intervals converges to the full base weight
       const normalizedWeight = nodeEvaluator(address) * (1 - intervalDecay);
-      nodeWeights.set(address, normalizedWeight);
+      nodeWeightsT.set(address, normalizedWeight);
     }
-    yield nodeWeights;
-    lastNodeWeights = nodeWeights;
+    yield nodeWeightsT;
+    lastNodeWeights = nodeWeightsT;
   }
 }
 
@@ -206,20 +207,20 @@ export function* _timelineNodeToConnections(
   edgeEvaluator: EdgeWeightEvaluator,
   intervalDecay: number
 ): Iterator<NodeToConnections> {
-  const edgeWeights = new Map();
+  const edgeWeightsT = new Map();
   for (const edges of edgeCreationHistory) {
-    for (const [address, {forwards, backwards}] of edgeWeights.entries()) {
-      edgeWeights.set(address, {
+    for (const [address, {forwards, backwards}] of edgeWeightsT.entries()) {
+      edgeWeightsT.set(address, {
         forwards: forwards * intervalDecay,
         backwards: backwards * intervalDecay,
       });
     }
     for (const {address} of edges) {
-      edgeWeights.set(address, edgeEvaluator(address));
+      edgeWeightsT.set(address, edgeEvaluator(address));
     }
     const defaultEdgeWeight = deepFreeze({forwards: 0, backwards: 0});
     const currentEdgeWeight = (e: Edge) => {
-      return NullUtil.orElse(edgeWeights.get(e.address), defaultEdgeWeight);
+      return NullUtil.orElse(edgeWeightsT.get(e.address), defaultEdgeWeight);
     };
     yield createConnections(graph, currentEdgeWeight, SYNTHETIC_LOOP_WEIGHT);
   }
@@ -239,12 +240,12 @@ export async function _computeTimelineDistribution(
   let pi0: Distribution | null = null;
 
   for (const interval of intervals) {
-    const nodeWeights = NullUtil.get(nodeWeightIterator.next().value);
+    const nodeWeightsT = NullUtil.get(nodeWeightIterator.next().value);
     const nodeToConnections = NullUtil.get(
       nodeToConnectionsIterator.next().value
     );
     const result = await _intervalResult(
-      nodeWeights,
+      nodeWeightsT,
       nodeToConnections,
       nodeOrder,
       edgeOrder,
@@ -261,7 +262,7 @@ export async function _computeTimelineDistribution(
 }
 
 export async function _intervalResult(
-  nodeWeights: Map<NodeAddressT, number>,
+  nodeWeightsT: NodeWeightsT,
   nodeToConnections: NodeToConnections,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   edgeOrder: $ReadOnlyArray<EdgeAddressT>,
@@ -273,7 +274,7 @@ export async function _intervalResult(
   const nodeToIndex = new Map(nodeOrder.map((x, i) => [x, i]));
   const edgeToIndex = new Map(edgeOrder.map((x, i) => [x, i]));
 
-  const seed = weightedDistribution(nodeOrder, nodeWeights);
+  const seed = weightedDistribution(nodeOrder, nodeWeightsT);
   if (pi0 == null) {
     pi0 = seed;
   }
@@ -284,7 +285,7 @@ export async function _intervalResult(
     maxIterations: 255,
     yieldAfterMs: 30,
   });
-  const intervalWeight = sum(nodeWeights.values());
+  const intervalWeight = sum(nodeWeightsT.values());
   const forwardFlow = new Float64Array(edgeOrder.length);
   const backwardFlow = new Float64Array(edgeOrder.length);
   const syntheticLoopFlow = new Float64Array(nodeOrder.length);

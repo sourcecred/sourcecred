@@ -34,7 +34,8 @@ import {
   Graph,
 } from "./graph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
-import {empty as emptyWeights, type EdgeWeight} from "./weights";
+import {empty as emptyWeightsT} from "./weights";
+import {type EdgeWeight} from "./weights/edgeWeights";
 import {type TimestampMs} from "../util/timestamp";
 import {type IntervalSequence, type Interval, partitionGraph} from "./interval";
 import {nodeWeightEvaluator} from "./algorithm/weightEvaluator";
@@ -117,7 +118,7 @@ export function createBonusGraph(
   bonusMints: ComputedBonusMinting
 ): WeightedGraphT {
   const graph = new Graph();
-  const weights = emptyWeights();
+  const weights = emptyWeightsT();
   for (const {recipient, bonusIntervals} of bonusMints) {
     graph.addNode(recipient);
     for (const {interval, amount} of bonusIntervals) {
@@ -126,10 +127,10 @@ export function createBonusGraph(
       }
       graph.addNode(bonusNode(recipient, interval));
       graph.addEdge(bonusEdge(recipient, interval));
-      weights.nodeWeights.set(bonusNodeAddress(recipient, interval), amount);
+      weights.nodeWeightsT.set(bonusNodeAddress(recipient, interval), amount);
     }
   }
-  weights.edgeWeights.set(BONUS_EDGE_PREFIX, BONUS_EDGE_WEIGHT);
+  weights.edgeWeightsT.set(BONUS_EDGE_PREFIX, BONUS_EDGE_WEIGHT);
   return {graph, weights};
 }
 
@@ -202,7 +203,7 @@ export type MintInterval = {|
 export function _computeMintIntervals(
   wg: WeightedGraphT
 ): $ReadOnlyArray<MintInterval> {
-  const nwe = nodeWeightEvaluator(wg.weights);
+  const nwe = nodeWeightEvaluator(wg.weights.nodeWeightsT);
   const partition = partitionGraph(wg.graph);
   return partition.map(({interval, nodes}) => {
     let totalMint = 0;

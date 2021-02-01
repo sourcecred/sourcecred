@@ -1,6 +1,6 @@
 // @flow
 
-import * as Weights from "./weights";
+import * as WeightsT from "./weights/weightsT";
 import {Graph, NodeAddress, EdgeAddress} from "./graph";
 import * as WeightedGraph from "./weightedGraph";
 import * as GraphTest from "./graphTestUtil";
@@ -18,7 +18,7 @@ describe("core/weightedGraph", () => {
     it("empty produces an empty WeightedGraph", () => {
       const {weights, graph} = WeightedGraph.empty();
       expect(graph.equals(new Graph())).toBe(true);
-      expect(weights).toEqual(Weights.empty());
+      expect(weights).toEqual(WeightsT.empty());
     });
   });
 
@@ -32,8 +32,8 @@ describe("core/weightedGraph", () => {
     it("works for a non-empty WeightedGraph", () => {
       const node = GraphTest.node("foo");
       const graph = new Graph().addNode(node);
-      const weights = Weights.empty();
-      weights.nodeWeights.set(node.address, 5);
+      const weights = WeightsT.empty();
+      weights.nodeWeightsT.set(node.address, 5);
       const wg = {graph, weights};
       const wgJSON = WeightedGraph.toJSON(wg);
       const wg_ = WeightedGraph.fromJSON(wgJSON);
@@ -48,14 +48,14 @@ describe("core/weightedGraph", () => {
       // are tested more thoroughly.
       const g1 = new Graph().addNode(foo);
       const g2 = new Graph().addNode(bar);
-      const w1 = Weights.empty();
-      w1.nodeWeights.set(foo.address, 1);
-      const w2 = Weights.empty();
-      w2.nodeWeights.set(bar.address, 2);
+      const w1 = WeightsT.empty();
+      w1.nodeWeightsT.set(foo.address, 1);
+      const w2 = WeightsT.empty();
+      w2.nodeWeightsT.set(bar.address, 2);
       const wg1 = {graph: g1, weights: w1};
       const wg2 = {graph: g2, weights: w2};
       const g = Graph.merge([g1, g2]);
-      const w = Weights.merge([w1, w2]);
+      const w = WeightsT.merge([w1, w2]);
       const wg = WeightedGraph.merge([wg1, wg2]);
       const wg_ = {weights: w, graph: g};
       expectEqual(wg, wg_);
@@ -65,32 +65,35 @@ describe("core/weightedGraph", () => {
   describe("overrideWeights", () => {
     const example = () => {
       const graph = new Graph().addNode(foo).addNode(bar);
-      const weights = Weights.empty();
-      weights.nodeWeights.set(NodeAddress.empty, 0);
-      weights.nodeWeights.set(foo.address, 1);
-      weights.edgeWeights.set(foobar.address, {forwards: 2, backwards: 2});
-      weights.edgeWeights.set(EdgeAddress.empty, {forwards: 3, backwards: 3});
+      const weights = WeightsT.empty();
+      weights.nodeWeightsT.set(NodeAddress.empty, 0);
+      weights.nodeWeightsT.set(foo.address, 1);
+      weights.edgeWeightsT.set(foobar.address, {forwards: 2, backwards: 2});
+      weights.edgeWeightsT.set(EdgeAddress.empty, {forwards: 3, backwards: 3});
       return {graph, weights};
     };
     it("has no effect if the overrides are empty", () => {
       const g1 = example();
-      const g2 = WeightedGraph.overrideWeights(g1, Weights.empty());
+      const g2 = WeightedGraph.overrideWeights(g1, WeightsT.empty());
       expectEqual(g1, g2);
     });
     it("takes weights from base and overrides, choosing overrides on conflicts", () => {
-      const overrides = Weights.empty();
-      overrides.nodeWeights.set(foo.address, 101);
-      overrides.nodeWeights.set(bar.address, 102);
-      overrides.edgeWeights.set(foobar.address, {
+      const overrides = WeightsT.empty();
+      overrides.nodeWeightsT.set(foo.address, 101);
+      overrides.nodeWeightsT.set(bar.address, 102);
+      overrides.edgeWeightsT.set(foobar.address, {
         forwards: 103,
         backwards: 103,
       });
-      const expected = Weights.empty();
-      expected.nodeWeights.set(NodeAddress.empty, 0);
-      expected.nodeWeights.set(foo.address, 101);
-      expected.nodeWeights.set(bar.address, 102);
-      expected.edgeWeights.set(foobar.address, {forwards: 103, backwards: 103});
-      expected.edgeWeights.set(EdgeAddress.empty, {forwards: 3, backwards: 3});
+      const expected = WeightsT.empty();
+      expected.nodeWeightsT.set(NodeAddress.empty, 0);
+      expected.nodeWeightsT.set(foo.address, 101);
+      expected.nodeWeightsT.set(bar.address, 102);
+      expected.edgeWeightsT.set(foobar.address, {
+        forwards: 103,
+        backwards: 103,
+      });
+      expected.edgeWeightsT.set(EdgeAddress.empty, {forwards: 3, backwards: 3});
       const actual = WeightedGraph.overrideWeights(example(), overrides)
         .weights;
       expect(expected).toEqual(actual);

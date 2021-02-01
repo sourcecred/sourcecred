@@ -4,7 +4,14 @@ import React, {type Node as ReactNode} from "react";
 import * as NullUtil from "../../util/null";
 import {Grid} from "@material-ui/core";
 import {type NodeAddressT, type EdgeAddressT} from "../../core/graph";
-import {type EdgeWeight, type NodeWeight} from "../../core/weights";
+import {
+  type NodeWeight,
+  type NodeWeightsT,
+} from "../../core/weights/nodeWeights";
+import {
+  type EdgeWeight,
+  type EdgeWeightsT,
+} from "../../core/weights/edgeWeights";
 import {type NodeType, type EdgeType} from "../../analysis/types";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {NodeTypeConfig} from "./NodeTypeConfig";
@@ -13,10 +20,10 @@ import {EdgeTypeConfig, styledVariable} from "./EdgeTypeConfig";
 type Props = {|
   +declarations: $ReadOnlyArray<PluginDeclaration>,
   // Map from NodeType prefix to weight.
-  +nodeWeights: Map<NodeAddressT, NodeWeight>,
+  +nodeWeightsT: NodeWeightsT,
   // Map from EdgeType prefix to weight.
-  +edgeWeights: Map<EdgeAddressT, EdgeWeight>,
-  +onNodeWeightChange: (NodeAddressT, number) => void,
+  +edgeWeightsT: EdgeWeightsT,
+  +onNodeWeightChange: (NodeAddressT, NodeWeight) => void,
   +onEdgeWeightChange: (EdgeAddressT, EdgeWeight) => void,
 |};
 
@@ -35,8 +42,8 @@ type Props = {|
 export class WeightConfig extends React.Component<Props> {
   _nodeConfig(type: NodeType): ReactNode {
     const {prefix, defaultWeight} = type;
-    const {onNodeWeightChange, nodeWeights} = this.props;
-    const weight = NullUtil.orElse(nodeWeights.get(prefix), defaultWeight);
+    const {onNodeWeightChange, nodeWeightsT} = this.props;
+    const weight = NullUtil.orElse(nodeWeightsT.get(prefix), defaultWeight);
     const onChange = (weight) => onNodeWeightChange(prefix, weight);
     return (
       <NodeTypeConfig
@@ -50,8 +57,8 @@ export class WeightConfig extends React.Component<Props> {
 
   _edgeConfig(type: EdgeType): ReactNode {
     const {prefix, defaultWeight} = type;
-    const {onEdgeWeightChange, edgeWeights} = this.props;
-    const weight = NullUtil.orElse(edgeWeights.get(prefix), defaultWeight);
+    const {onEdgeWeightChange, edgeWeightsT} = this.props;
+    const weight = NullUtil.orElse(edgeWeightsT.get(prefix), defaultWeight);
     const onChange = (weight) => onEdgeWeightChange(prefix, weight);
     return (
       <EdgeTypeConfig

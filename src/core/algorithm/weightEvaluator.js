@@ -1,7 +1,8 @@
 // @flow
 
 import type {NodeAddressT, EdgeAddressT} from "../graph";
-import type {WeightsT, EdgeWeight, NodeWeight} from "../weights";
+import type {NodeWeight, NodeWeightsT} from "../weights/nodeWeights";
+import type {EdgeWeight, EdgeWeightsT} from "../weights/edgeWeights";
 import {NodeTrie, EdgeTrie} from "../trie";
 
 export type NodeWeightEvaluator = (NodeAddressT) => NodeWeight;
@@ -20,9 +21,11 @@ export type EdgeWeightEvaluator = (EdgeAddressT) => EdgeWeight;
  * legacy affordance; shortly we will remove the NodeTypes and require that the
  * plugins provide the type weights when the Weights object is constructed.
  */
-export function nodeWeightEvaluator(weights: WeightsT): NodeWeightEvaluator {
+export function nodeWeightEvaluator(
+  nodeWeightsT: NodeWeightsT
+): NodeWeightEvaluator {
   const nodeTrie: NodeTrie<NodeWeight> = new NodeTrie();
-  for (const [prefix, weight] of weights.nodeWeights.entries()) {
+  for (const [prefix, weight] of nodeWeightsT.entries()) {
     nodeTrie.add(prefix, weight);
   }
   return function nodeWeight(a: NodeAddressT): NodeWeight {
@@ -45,9 +48,11 @@ export function nodeWeightEvaluator(weights: WeightsT): NodeWeightEvaluator {
  * directly in the weights object, so that producing weight evaluators will no
  * longer depend on having plugin declarations on hand.
  */
-export function edgeWeightEvaluator(weights: WeightsT): EdgeWeightEvaluator {
+export function edgeWeightEvaluator(
+  edgeWeightsT: EdgeWeightsT
+): EdgeWeightEvaluator {
   const edgeTrie: EdgeTrie<EdgeWeight> = new EdgeTrie();
-  for (const [prefix, weight] of weights.edgeWeights.entries()) {
+  for (const [prefix, weight] of edgeWeightsT.entries()) {
     edgeTrie.add(prefix, weight);
   }
   return function evaluator(address: EdgeAddressT): EdgeWeight {

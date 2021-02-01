@@ -10,7 +10,7 @@ import {
   toJSON,
   fromJSON,
 } from "./pluginDeclaration";
-import * as Weights from "../core/weights";
+import * as WeightsT from "../core/weights/weightsT";
 
 describe("analysis/pluginDeclaration", () => {
   const nodeType: NodeType = deepFreeze({
@@ -45,12 +45,12 @@ describe("analysis/pluginDeclaration", () => {
   });
   describe("weightsForDeclaration", () => {
     it("works for an empty declaration", () => {
-      expect(weightsForDeclaration(emptyDeclaration)).toEqual(Weights.empty());
+      expect(weightsForDeclaration(emptyDeclaration)).toEqual(WeightsT.empty());
     });
     it("works for a non-empty declaration", () => {
-      const expected = Weights.empty();
-      expected.nodeWeights.set(nodeType.prefix, nodeType.defaultWeight);
-      expected.edgeWeights.set(edgeType.prefix, edgeType.defaultWeight);
+      const expected = WeightsT.empty();
+      expected.nodeWeightsT.set(nodeType.prefix, nodeType.defaultWeight);
+      expected.edgeWeightsT.set(edgeType.prefix, edgeType.defaultWeight);
       const actual = weightsForDeclaration(nonEmptyDeclaration);
       expect(expected).toEqual(actual);
     });

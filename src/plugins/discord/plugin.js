@@ -12,7 +12,7 @@ import {Fetcher} from "./fetcher";
 import {Mirror} from "./mirror";
 import type {ReferenceDetector} from "../../core/references";
 import type {WeightedGraph} from "../../core/weightedGraph";
-import {merge as mergeWeights} from "../../core/weights";
+import {merge as mergeWeightsT} from "../../core/weights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph} from "./createGraph";
 import * as Model from "./models";
@@ -74,7 +74,7 @@ export class DiscordPlugin implements Plugin {
 
     const declarationWeights = weightsForDeclaration(declaration);
     // Add in the type-level weights from the plugin spec
-    const combinedWeights = mergeWeights([
+    const combinedWeights = mergeWeightsT([
       weightedGraph.weights,
       declarationWeights,
     ]);

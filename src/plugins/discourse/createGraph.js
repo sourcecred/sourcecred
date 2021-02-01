@@ -1,7 +1,7 @@
 // @flow
 
 import {Graph, type Node, type Edge} from "../../core/graph";
-import {type NodeWeight} from "../../core/weights";
+import {type NodeWeight} from "../../core/weights/nodeWeights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type WeightedGraph} from "../../core/weightedGraph";
 import {
@@ -209,12 +209,12 @@ export function _graphFromData({
     g.addNode(like.node);
     g.addEdge(like.createsLike);
     g.addEdge(like.likes);
-    weights.nodeWeights.set(like.node.address, like.weight);
+    weights.nodeWeightsT.set(like.node.address, like.weight);
   }
 
   for (const {edge, weight} of topicHasLikedPosts) {
     g.addEdge(edge);
-    weights.edgeWeights.set(edge.address, {forwards: weight, backwards: 0});
+    weights.edgeWeightsT.set(edge.address, {forwards: weight, backwards: 0});
   }
   return {graph: g, weights};
 }

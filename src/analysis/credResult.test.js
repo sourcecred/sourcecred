@@ -2,7 +2,7 @@
 
 import stringify from "json-stable-stringify";
 import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
-import * as Weights from "../core/weights";
+import * as WeightsT from "../core/weights/weightsT";
 import type {NodeType, EdgeType} from "./types";
 import type {PluginDeclaration} from "./pluginDeclaration";
 import {defaultParams} from "./timeline/params";
@@ -46,7 +46,7 @@ describe("analysis/credResult", () => {
           description: "n2",
           timestampMs: 110000,
         });
-      const weights = Weights.empty();
+      const weights = WeightsT.empty();
       const wg = {graph, weights};
       const params = defaultParams();
       const result = await compute(wg, params, [declaration], []);

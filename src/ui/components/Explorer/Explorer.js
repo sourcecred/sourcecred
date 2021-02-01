@@ -29,7 +29,7 @@ import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 import {
   type WeightsT,
   copy as weightsCopy,
-  empty as emptyWeights,
+  empty as emptyWeightsT,
 } from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
@@ -236,15 +236,15 @@ const WeightsConfigSection = ({
         <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
           <WeightConfig
             declarations={credView.plugins()}
-            nodeWeights={weights.nodeWeights}
-            edgeWeights={weights.edgeWeights}
+            nodeWeightsT={weights.nodeWeightsT}
+            edgeWeightsT={weights.edgeWeightsT}
             onNodeWeightChange={(prefix, weight) => {
-              weights.nodeWeights.set(prefix, weight);
+              weights.nodeWeightsT.set(prefix, weight);
 
               setWeightsState({weights});
             }}
             onEdgeWeightChange={(prefix, weight) => {
-              weights.edgeWeights.set(prefix, weight);
+              weights.edgeWeightsT.set(prefix, weight);
               setWeightsState({weights});
             }}
           />
@@ -302,7 +302,7 @@ export const Explorer = ({
   }, [filterState.filter, credView]);
 
   const [{weights}, setWeightsState] = useState<{weights: WeightsT}>({
-    weights: credView ? weightsCopy(credView.weights()) : emptyWeights(),
+    weights: credView ? weightsCopy(credView.weights()) : emptyWeightsT(),
   });
   const [params, setParams] = useState<TimelineCredParameters>({
     ...(credView ? credView.params() : defaultParams()),

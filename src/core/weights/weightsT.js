@@ -1,34 +1,34 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
-import * as MapUtil from "../util/map";
-import * as C from "../util/combo";
 import {
   type NodeAddressT,
   type EdgeAddressT,
   NodeAddress,
   EdgeAddress,
-} from "../core/graph";
-import {toCompat, type Compatible, compatibleParser} from "../util/compat";
+} from "../graph";
+import * as C from "../../util/combo";
+import {toCompat, type Compatible, compatibleParser} from "../../util/compat";
+import * as MapUtil from "../../util/map";
+import {
+  type NodeWeight,
+  type NodeOperator,
+  type NodeWeightsT,
+  empty as emptyNodeWeightsT,
+  copy as copyNodeWeightsT,
+} from "./nodeWeights";
+import {
+  type EdgeWeight,
+  type EdgeOperator,
+  type EdgeWeightsT,
+  empty as emptyEdgeWeightsT,
+  copy as copyEdgeWeightsT,
+} from "./edgeWeights";
 
-/**
- * Represents the weight for a particular Node (or node address prefix).
- * Weight 1 is the default value and signifies normal importance.
- * Weights are linear, so 2 is twice as important as 1.
- */
-export type NodeWeight = number;
-
-export type NodeOperator = (NodeWeight, NodeWeight) => NodeWeight;
-
-/**
- * Represents the forwards and backwards weights for a particular Edge (or
- * edge address prefix).
- * Weight 1 is the default value and signifies normal importance.
- * Weights are linear, so 2 is twice as important as 1.
- */
-export type EdgeWeight = {|+forwards: number, +backwards: number|};
-
-export type EdgeOperator = (EdgeWeight, EdgeWeight) => EdgeWeight;
+export type WeightsTResolvers = {|
+  +nodeResolver: NodeOperator,
+  +edgeResolver: EdgeOperator,
+|};
 
 /**
  * Represents the weights for nodes and edges.
@@ -37,25 +37,38 @@ export type EdgeOperator = (EdgeWeight, EdgeWeight) => EdgeWeight;
  * to a given node or edge.
  */
 export type WeightsT = {|
-  nodeWeights: Map<NodeAddressT, NodeWeight>,
+  nodeWeightsT: NodeWeightsT,
   // Map from an edge prefix or address to a weight
-  edgeWeights: Map<EdgeAddressT, EdgeWeight>,
+  edgeWeightsT: EdgeWeightsT,
 |};
+
+/**
+ * Transform NodeWeightsT and EdgeWeightsT into WeightsT.
+ */
+export function toWeightsT(
+  nodeWeightsT: NodeWeightsT,
+  edgeWeightsT: EdgeWeightsT
+): WeightsT {
+  return {
+    nodeWeightsT,
+    edgeWeightsT,
+  };
+}
 
 /**
  * Creates new, empty weights.
  */
 export function empty(): WeightsT {
   return {
-    nodeWeights: new Map(),
-    edgeWeights: new Map(),
+    nodeWeightsT: emptyNodeWeightsT(),
+    edgeWeightsT: emptyEdgeWeightsT(),
   };
 }
 
 export function copy(w: WeightsT): WeightsT {
   return {
-    nodeWeights: new Map(w.nodeWeights),
-    edgeWeights: new Map(w.edgeWeights),
+    nodeWeightsT: copyNodeWeightsT(w.nodeWeightsT),
+    edgeWeightsT: copyEdgeWeightsT(w.edgeWeightsT),
   };
 }
 
@@ -74,7 +87,7 @@ export function copy(w: WeightsT): WeightsT {
  */
 export function merge(
   ws: $ReadOnlyArray<WeightsT>,
-  resolvers: ?{|+nodeResolver: NodeOperator, +edgeResolver: EdgeOperator|}
+  resolvers: ?WeightsTResolvers
 ): WeightsT {
   if (resolvers == null) {
     const nodeResolver = (_unused_a, _unused_b) => {
@@ -90,28 +103,28 @@ export function merge(
     resolvers = {nodeResolver, edgeResolver};
   }
   const weights: WeightsT = empty();
-  const {nodeWeights, edgeWeights} = weights;
+  const {nodeWeightsT, edgeWeightsT} = weights;
   const {nodeResolver, edgeResolver} = resolvers;
   for (const w of ws) {
-    for (const [addr, val] of w.nodeWeights.entries()) {
-      const existing = nodeWeights.get(addr);
+    for (const [addr, val] of w.nodeWeightsT.entries()) {
+      const existing = nodeWeightsT.get(addr);
       if (existing == null) {
-        nodeWeights.set(addr, val);
+        nodeWeightsT.set(addr, val);
       } else {
         try {
-          nodeWeights.set(addr, nodeResolver(existing, val));
+          nodeWeightsT.set(addr, nodeResolver(existing, val));
         } catch (e) {
           throw new Error(`${e} when resolving ${NodeAddress.toString(addr)}`);
         }
       }
     }
-    for (const [addr, val] of w.edgeWeights.entries()) {
-      const existing = edgeWeights.get(addr);
+    for (const [addr, val] of w.edgeWeightsT.entries()) {
+      const existing = edgeWeightsT.get(addr);
       if (existing == null) {
-        edgeWeights.set(addr, val);
+        edgeWeightsT.set(addr, val);
       } else {
         try {
-          edgeWeights.set(addr, edgeResolver(existing, val));
+          edgeWeightsT.set(addr, edgeResolver(existing, val));
         } catch (e) {
           throw new Error(
             `Error ${e} when resolving ${EdgeAddress.toString(addr)}`
@@ -124,29 +137,29 @@ export function merge(
 }
 
 export type SerializedWeights_0_2_0 = {|
-  +nodeWeights: {[NodeAddressT]: NodeWeight},
-  +edgeWeights: {[EdgeAddressT]: EdgeWeight},
+  +nodeWeightsT: {[NodeAddressT]: NodeWeight},
+  +edgeWeightsT: {[EdgeAddressT]: EdgeWeight},
 |};
 
 function serialize_0_2_0(weights: WeightsT): SerializedWeights_0_2_0 {
   return {
-    nodeWeights: MapUtil.toObject(weights.nodeWeights),
-    edgeWeights: MapUtil.toObject(weights.edgeWeights),
+    nodeWeightsT: MapUtil.toObject(weights.nodeWeightsT),
+    edgeWeightsT: MapUtil.toObject(weights.edgeWeightsT),
   };
 }
 
 function deserialize_0_2_0(weights: SerializedWeights_0_2_0): WeightsT {
   return {
-    nodeWeights: MapUtil.fromObject(weights.nodeWeights),
-    edgeWeights: MapUtil.fromObject(weights.edgeWeights),
+    nodeWeightsT: MapUtil.fromObject(weights.nodeWeightsT),
+    edgeWeightsT: MapUtil.fromObject(weights.edgeWeightsT),
   };
 }
 
 const Parse_0_2_0: C.Parser<SerializedWeights_0_2_0> = (() => {
   const parseEdgeWeight = C.object({forwards: C.number, backwards: C.number});
   return C.object({
-    nodeWeights: C.dict(C.number, NodeAddress.parser),
-    edgeWeights: C.dict(parseEdgeWeight, EdgeAddress.parser),
+    nodeWeightsT: C.dict(C.number, NodeAddress.parser),
+    edgeWeightsT: C.dict(parseEdgeWeight, EdgeAddress.parser),
   });
 })();
 
@@ -185,7 +198,7 @@ export type WeightsComparison = {|
   +edgeWeightDiffs: $ReadOnlyArray<EdgeWeightDiff>,
 |};
 
-export function compareWeights(
+export function compareWeightsT(
   firstWeights: WeightsT,
   secondWeights: WeightsT
 ): WeightsComparison {
@@ -193,12 +206,12 @@ export function compareWeights(
   const edgeWeightDiffs = [];
 
   const nodeAddresses = new Set([
-    ...firstWeights.nodeWeights.keys(),
-    ...secondWeights.nodeWeights.keys(),
+    ...firstWeights.nodeWeightsT.keys(),
+    ...secondWeights.nodeWeightsT.keys(),
   ]);
   for (const address of nodeAddresses) {
-    const first = firstWeights.nodeWeights.get(address);
-    const second = secondWeights.nodeWeights.get(address);
+    const first = firstWeights.nodeWeightsT.get(address);
+    const second = secondWeights.nodeWeightsT.get(address);
     if (!deepEqual(first, second)) {
       nodeWeightDiffs.push({
         address,
@@ -208,12 +221,12 @@ export function compareWeights(
     }
   }
   const edgeAddresses = new Set([
-    ...firstWeights.edgeWeights.keys(),
-    ...secondWeights.edgeWeights.keys(),
+    ...firstWeights.edgeWeightsT.keys(),
+    ...secondWeights.edgeWeightsT.keys(),
   ]);
   for (const address of edgeAddresses) {
-    const first = firstWeights.edgeWeights.get(address);
-    const second = secondWeights.edgeWeights.get(address);
+    const first = firstWeights.edgeWeightsT.get(address);
+    const second = secondWeights.edgeWeightsT.get(address);
     if (!deepEqual(first, second)) {
       edgeWeightDiffs.push({
         address,

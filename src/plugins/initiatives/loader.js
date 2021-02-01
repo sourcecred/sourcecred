@@ -2,7 +2,7 @@
 
 import {TaskReporter} from "../../util/taskReporter";
 import {type WeightedGraph} from "../../core/weightedGraph";
-import * as Weights from "../../core/weights";
+import * as WeightsT from "../../core/weights/weightsT";
 import {type ReferenceDetector} from "../../core/references";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type InitiativeRepository} from "./initiative";
@@ -43,6 +43,6 @@ export async function createGraph(
 ): Promise<WeightedGraph> {
   const {graph, weights} = createWeightedGraph(repo, refs);
   const declarationWeights = weightsForDeclaration(declaration);
-  const combinedWeights = Weights.merge([weights, declarationWeights]);
+  const combinedWeights = WeightsT.merge([weights, declarationWeights]);
   return {graph, weights: combinedWeights};
 }

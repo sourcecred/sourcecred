@@ -1,7 +1,7 @@
 // @flow
 
 import {type URL} from "../../core/references";
-import {type NodeWeight} from "../../core/weights";
+import {type NodeWeight} from "../../core/weights/nodeWeights";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type TimestampMs, type TimestampISO} from "../../util/timestamp";
 import * as Timestamp from "../../util/timestamp";
