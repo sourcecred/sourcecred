@@ -34,6 +34,13 @@ const theme = createMuiTheme({
   palette: {
     type: "dark",
     primary: pink,
+    blueish: "#6174CC",
+    orange: "#FFAA3D",
+    lavender: "#C5A2C5",
+    peach: "#FFDDC6",
+    white: "#FAFBFD",
+    pink: "#FDBBD1",
+    green: "#4BD76D",
   },
   overrides: {
     MuiChip: {
