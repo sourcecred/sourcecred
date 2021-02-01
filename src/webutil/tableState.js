@@ -186,9 +186,9 @@ export function useTableState<T>(
   const [filterFns, setFilterFns] = useState<FilterFns<T>>({});
 
   const sortedArray = useMemo(() => {
-    const array = data.slice();
+    let array = data.slice();
     if (sortFn) {
-      sortBy(array, sortFn);
+      array = sortBy(array, sortFn);
       if (sortOrder === SortOrders.DESC) array.reverse();
     }
     return array;
