@@ -35,12 +35,24 @@ const theme = createMuiTheme({
     type: "dark",
     primary: pink,
     blueish: "#6174CC",
-    orange: "#FFAA3D",
     lavender: "#C5A2C5",
-    peach: "#FFDDC6",
+    orange: "#FFDDC6",
+    peach: "#FFF1E8",
     white: "#FAFBFD",
-    pink: "#FDBBD1",
+    scPink: "#FDBBD1",
     green: "#4BD76D",
+    sunset: "#FFE9DB",
+    salmon: "#FFE5E1",
+    coral: "#F9D1CB",
+    pink: "#FEDDE8",
+    blue: "#728DFF",
+    purple: "#C5A2C5",
+    violet: "#EDDAEE",
+    warning: "#FFAA3D",
+    danger: "#FF594D",
+    text: {
+      link: "#31AAEE",
+    },
   },
   overrides: {
     MuiChip: {
@@ -102,7 +114,7 @@ const customRoutes = (
       <LedgerAdmin />
     </Route>,
     <Route key="explorer-home" exact path="/explorer-home">
-      <ExplorerHome initialView={credGrainView} />
+      <ExplorerHome initialView={credGrainView} currency={currency} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
       <Transfer currency={currency} />
