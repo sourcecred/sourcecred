@@ -120,7 +120,7 @@ const GRAIN_SORT = deepFreeze({
   name: Symbol("Grain"),
   fn: (n) => n.grainEarned,
 });
-const PAGINATION_OPTIONS = deepFreeze([25, 50, 100]);
+const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
 
 type ExplorerHomeProps = {|
   +initialView: CredGrainView | null,
@@ -413,10 +413,7 @@ export const ExplorerHome = ({
               <TableFooter>
                 <TableRow>
                   <TablePagination
-                    rowsPerPageOptions={[
-                      ...PAGINATION_OPTIONS,
-                      {label: "All", value: Number.MAX_SAFE_INTEGER},
-                    ]}
+                    rowsPerPageOptions={PAGINATION_OPTIONS}
                     colSpan={4}
                     count={tsParticipants.length}
                     rowsPerPage={tsParticipants.rowsPerPage}
