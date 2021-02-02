@@ -29,6 +29,7 @@ import {
   SortOrders,
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
+import type {CurrencyDetails} from "../../../api/currencyConfig";
 import CredTimeline from "./CredTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
 
@@ -101,10 +102,10 @@ const useStyles = makeStyles((theme) => ({
     borderColor: theme.palette.blueish,
   },
   grainCircle: {
-    borderColor: theme.palette.orange,
+    borderColor: theme.palette.warning.main,
   },
   participantCircle: {
-    borderColor: theme.palette.pink,
+    borderColor: theme.palette.scPink,
   },
   grainPerCredCircle: {
     borderColor: theme.palette.green,
@@ -123,9 +124,13 @@ const PAGINATION_OPTIONS = deepFreeze([25, 50, 100]);
 
 type ExplorerHomeProps = {|
   +initialView: CredGrainView | null,
+  +currency: CurrencyDetails,
 |};
 
-export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
+export const ExplorerHome = ({
+  initialView,
+  currency: {suffix: currencySuffix, name: currencyName},
+}: ExplorerHomeProps): ReactNode => {
   if (!initialView) return null;
 
   const classes = useStyles();
@@ -142,15 +147,7 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
     [initialView.participants()]
   );
 
-  const summaryInfo = [
-    {title: "Cred This Week", value: 610},
-    {title: "Grain Harvested", value: "6,765g"},
-    {title: "Active Participants", value: allParticipants.length},
-    {title: "Grain per Cred", value: "22g"},
-  ];
-
-  // sort by cred amount, highest to lowest
-  const nodes = useTableState(allParticipants, {
+  const tsParticipants = useTableState(allParticipants, {
     initialRowsPerPage: PAGINATION_OPTIONS[0],
     initialSort: {
       sortName: CRED_SORT.name,
@@ -159,24 +156,53 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
     },
   });
 
-  // create an array of 0s for the cred summary graph at the top of the page
-  let credTimelineSummary = initialView.intervals().map(() => 0);
+  let credTimelineSummary = [];
+  const credAndGrainSummary = {
+    totalCred: 0,
+    totalGrain: 0,
+    avgCred: 0,
+    avgGrain: 0,
+  };
 
-  const rows = nodes.currentPage.map((node) => {
-    const {credPerInterval} = node;
-
+  // do the summaries of the current page of participants
+  for (const participant of tsParticipants.currentPage) {
     // add this node's cred to the summary graph
-    credTimelineSummary = credTimelineSummary.map(
-      (total, i) => credPerInterval[i] + total
+    credTimelineSummary = participant.credPerInterval.map(
+      (total, i) => (credTimelineSummary[i] || 0) + total
     );
 
-    return {
-      username: node.identity.name,
-      cred: node.cred,
-      grain: node.grainEarned,
-      chart: credPerInterval,
-    };
-  });
+    credAndGrainSummary.totalCred += participant.cred;
+    credAndGrainSummary.totalGrain += Number(participant.grainEarned);
+  }
+
+  if (tsParticipants.currentPage.length > 0) {
+    credAndGrainSummary.avgCred =
+      credAndGrainSummary.totalCred / tsParticipants.currentPage.length;
+    credAndGrainSummary.avgGrain =
+      credAndGrainSummary.totalGrain / tsParticipants.currentPage.length;
+  } else {
+    credAndGrainSummary.avgCred = 0;
+    credAndGrainSummary.avgGrain = 0;
+  }
+
+  const summaryInfo = [
+    {title: "Cred This Week", value: 610, className: classes.credCircle},
+    {
+      title: `${currencyName}`,
+      value: `6,765${currencySuffix}`,
+      className: classes.grainCircle,
+    },
+    {
+      title: "Active Participants",
+      value: allParticipants.length,
+      className: classes.participantCircle,
+    },
+    {
+      title: `${currencyName} per Cred`,
+      value: `22${currencySuffix}`,
+      className: classes.grainPerCredCircle,
+    },
+  ];
 
   const filterIdentities = (event: SyntheticInputEvent<HTMLInputElement>) => {
     // fuzzy match letters "in order, but not necessarily sequentially"
@@ -187,7 +213,7 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
       .join("+.*");
     const regex = new RegExp(filterString);
 
-    nodes.createOrUpdateFilterFn("filterIdentities", (participant) =>
+    tsParticipants.createOrUpdateFilterFn("filterIdentities", (participant) =>
       regex.test(participant.identity.name.toLowerCase())
     );
   };
@@ -204,20 +230,20 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
     );
 
     if (includedTypes.length === 0) {
-      nodes.createOrUpdateFilterFn("identityType", () => true);
+      tsParticipants.createOrUpdateFilterFn("identityType", () => true);
     } else {
-      nodes.createOrUpdateFilterFn("identityType", (participant) =>
+      tsParticipants.createOrUpdateFilterFn("identityType", (participant) =>
         includedTypes.includes(participant.identity.subtype)
       );
     }
   };
 
   const handleChangePage = (event, newIndex) => {
-    nodes.setPageIndex(newIndex);
+    tsParticipants.setPageIndex(newIndex);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    nodes.setRowsPerPage(Number(event.target.value));
+    tsParticipants.setRowsPerPage(Number(event.target.value));
   };
 
   const makeCircle = (
@@ -227,6 +253,7 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
   ) => (
     <div
       className={`${classes.centerRow} ${classes.circleWrapper} ${className}`}
+      key={`${title}-${value}`}
     >
       <div className={`${classes.centerRow} ${classes.circle} ${className}`}>
         {value}
@@ -269,25 +296,8 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
         </Tabs>
       </div>
       <div className={classes.centerRow}>
-        {makeCircle(
-          summaryInfo[0].value,
-          summaryInfo[0].title,
-          classes.credCircle
-        )}
-        {makeCircle(
-          summaryInfo[1].value,
-          summaryInfo[1].title,
-          classes.grainCircle
-        )}
-        {makeCircle(
-          summaryInfo[2].value,
-          summaryInfo[2].title,
-          classes.participantCircle
-        )}
-        {makeCircle(
-          summaryInfo[3].value,
-          summaryInfo[3].title,
-          classes.grainPerCredCircle
+        {summaryInfo.map((circle) =>
+          makeCircle(circle.value, circle.title, circle.className)
         )}
       </div>
       <div className={classes.row}>
@@ -316,14 +326,14 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                   </TableCell>
                   <TableCell>
                     <TableSortLabel
-                      active={nodes.sortName === CRED_SORT.name}
+                      active={tsParticipants.sortName === CRED_SORT.name}
                       direction={
-                        nodes.sortName === CRED_SORT.name
-                          ? nodes.sortOrder
+                        tsParticipants.sortName === CRED_SORT.name
+                          ? tsParticipants.sortOrder
                           : DEFAULT_SORT
                       }
                       onClick={() =>
-                        nodes.setSortFn(CRED_SORT.name, CRED_SORT.fn)
+                        tsParticipants.setSortFn(CRED_SORT.name, CRED_SORT.fn)
                       }
                     >
                       <b>{CRED_SORT.name.description}</b>
@@ -331,17 +341,17 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                   </TableCell>
                   <TableCell>
                     <TableSortLabel
-                      active={nodes.sortName === GRAIN_SORT.name}
+                      active={tsParticipants.sortName === GRAIN_SORT.name}
                       direction={
-                        nodes.sortName === GRAIN_SORT.name
-                          ? nodes.sortOrder
+                        tsParticipants.sortName === GRAIN_SORT.name
+                          ? tsParticipants.sortOrder
                           : DEFAULT_SORT
                       }
                       onClick={() =>
-                        nodes.setSortFn(GRAIN_SORT.name, GRAIN_SORT.fn)
+                        tsParticipants.setSortFn(GRAIN_SORT.name, GRAIN_SORT.fn)
                       }
                     >
-                      <b>{GRAIN_SORT.name.description}</b>
+                      <b>{currencyName}</b>
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
@@ -350,24 +360,38 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.username}>
-                    <TableCell component="th" scope="row">
-                      {row.username}
-                    </TableCell>
-                    <TableCell>{row.cred}</TableCell>
-                    <TableCell>{row.grain}</TableCell>
-                    <TableCell align="right">
-                      <CredTimeline data={row.chart} />
+                {tsParticipants.currentPage.length > 0 ? (
+                  tsParticipants.currentPage.map((row) => (
+                    <TableRow key={row.identity.name}>
+                      <TableCell component="th" scope="row">
+                        {row.identity.name}
+                      </TableCell>
+                      <TableCell>{Math.round(row.cred)}</TableCell>
+                      <TableCell>
+                        {Number(row.grainEarned).toFixed(2) + currencySuffix}
+                      </TableCell>
+                      <TableCell align="right">
+                        <CredTimeline data={row.credPerInterval} />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow key="no-results">
+                    <TableCell colSpan={4} align="center">
+                      No results
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
                 <TableRow key="average">
                   <TableCell component="th" scope="row">
                     Average
                   </TableCell>
-                  <TableCell>42</TableCell>
-                  <TableCell>88.9g</TableCell>
+                  <TableCell>
+                    {credAndGrainSummary.avgCred.toFixed(1)}
+                  </TableCell>
+                  <TableCell>
+                    {credAndGrainSummary.avgGrain.toFixed(2) + currencySuffix}
+                  </TableCell>
                   <TableCell align="right" />
                 </TableRow>
                 <TableRow key="total">
@@ -375,10 +399,13 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                     <b>TOTAL</b>
                   </TableCell>
                   <TableCell>
-                    <b>610</b>
+                    <b>{credAndGrainSummary.totalCred.toFixed(1)}</b>
                   </TableCell>
                   <TableCell>
-                    <b>2097g</b>
+                    <b>
+                      {credAndGrainSummary.totalGrain.toFixed(2) +
+                        currencySuffix}
+                    </b>
                   </TableCell>
                   <TableCell align="right" />
                 </TableRow>
@@ -391,16 +418,15 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                       {label: "All", value: Number.MAX_SAFE_INTEGER},
                     ]}
                     colSpan={4}
-                    count={nodes.length}
-                    rowsPerPage={nodes.rowsPerPage}
-                    page={nodes.pageIndex}
+                    count={tsParticipants.length}
+                    rowsPerPage={tsParticipants.rowsPerPage}
+                    page={tsParticipants.pageIndex}
                     SelectProps={{
                       inputProps: {"aria-label": "rows per page"},
                       native: true,
                     }}
                     onChangePage={handleChangePage}
                     onChangeRowsPerPage={handleChangeRowsPerPage}
-                    // ActionsComponent={TablePaginationActions}
                   />
                 </TableRow>
               </TableFooter>

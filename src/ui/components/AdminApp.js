@@ -48,7 +48,9 @@ const theme = createMuiTheme({
     blue: "#728DFF",
     purple: "#C5A2C5",
     violet: "#EDDAEE",
-    warning: "#FFAA3D",
+    warning: {
+      main: "#FFAA3D",
+    },
     danger: "#FF594D",
     text: {
       link: "#31AAEE",
