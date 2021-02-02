@@ -64,7 +64,7 @@ export type User = {|
 
 export type GuildMember = {|
   +user: User,
-  +nick: string | null,
+  +nick: ?string,
   +roles: $ReadOnlyArray<Snowflake>,
 |};
 

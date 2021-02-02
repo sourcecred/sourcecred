@@ -7,8 +7,8 @@ import {memberAddress} from "./createGraph";
 import {type IdentityProposal} from "../../core/ledger/identityProposal";
 import {coerce, nameFromString} from "../../core/identity/name";
 
-export function _createIdentity(member: Model.GuildMember): IdentityProposal {
-  let name = member.nick !== null ? member.nick : member.user.username;
+export function createIdentity(member: Model.GuildMember): IdentityProposal {
+  let name = member.nick || member.user.username;
   // Discord allows very long names. Let's ensure the length is reasonable.
   name = name.slice(0, 39);
   const description = `discord/${escape(name)}#${member.user.discriminator}`;
@@ -28,5 +28,5 @@ export function _createIdentity(member: Model.GuildMember): IdentityProposal {
 export function createIdentities(
   repo: SqliteMirrorRepository
 ): $ReadOnlyArray<IdentityProposal> {
-  return repo.members().map((m) => _createIdentity(m));
+  return repo.members().map((m) => createIdentity(m));
 }
