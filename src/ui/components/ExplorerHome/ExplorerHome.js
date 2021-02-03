@@ -30,6 +30,7 @@ import {
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
+import {format, add, div, fromInteger} from "../../../core/ledger/grain";
 import CredTimeline from "./CredTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
 
@@ -122,6 +123,14 @@ const GRAIN_SORT = deepFreeze({
 });
 const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
 
+let credTimelineSummary = [];
+const credAndGrainSummary = {
+  totalCred: 0,
+  totalGrain: fromInteger(0),
+  avgCred: 0,
+  avgGrain: fromInteger(0),
+};
+
 type ExplorerHomeProps = {|
   +initialView: CredGrainView | null,
   +currency: CurrencyDetails,
@@ -156,34 +165,36 @@ export const ExplorerHome = ({
     },
   });
 
-  let credTimelineSummary = [];
-  const credAndGrainSummary = {
-    totalCred: 0,
-    totalGrain: 0,
-    avgCred: 0,
-    avgGrain: 0,
-  };
-
-  // do the summaries of the current page of participants
-  for (const participant of tsParticipants.currentPage) {
-    // add this node's cred to the summary graph
-    credTimelineSummary = participant.credPerInterval.map(
-      (total, i) => (credTimelineSummary[i] || 0) + total
-    );
-
-    credAndGrainSummary.totalCred += participant.cred;
-    credAndGrainSummary.totalGrain += Number(participant.grainEarned);
-  }
-
-  if (tsParticipants.currentPage.length > 0) {
-    credAndGrainSummary.avgCred =
-      credAndGrainSummary.totalCred / tsParticipants.currentPage.length;
-    credAndGrainSummary.avgGrain =
-      credAndGrainSummary.totalGrain / tsParticipants.currentPage.length;
-  } else {
+  useMemo(() => {
+    // reset all values for next aggregation calculation
+    credTimelineSummary = [];
+    credAndGrainSummary.totalCred = 0;
+    credAndGrainSummary.totalGrain = fromInteger(0);
     credAndGrainSummary.avgCred = 0;
-    credAndGrainSummary.avgGrain = 0;
-  }
+    credAndGrainSummary.avgGrain = fromInteger(0);
+
+    if (tsParticipants.currentPage.length > 0) {
+      for (const participant of tsParticipants.currentPage) {
+        // add this node's cred to the summary graph
+        credTimelineSummary = participant.credPerInterval.map(
+          (total, i) => (credTimelineSummary[i] || 0) + total
+        );
+
+        credAndGrainSummary.totalCred += participant.cred;
+        credAndGrainSummary.totalGrain = add(
+          participant.grainEarned,
+          credAndGrainSummary.totalGrain
+        );
+      }
+
+      credAndGrainSummary.avgCred =
+        credAndGrainSummary.totalCred / tsParticipants.currentPage.length;
+      credAndGrainSummary.avgGrain = div(
+        credAndGrainSummary.totalGrain,
+        fromInteger(tsParticipants.currentPage.length)
+      );
+    }
+  }, [tsParticipants.currentPage]);
 
   const summaryInfo = [
     {title: "Cred This Week", value: 610, className: classes.credCircle},
@@ -191,11 +202,6 @@ export const ExplorerHome = ({
       title: `${currencyName}`,
       value: `6,765${currencySuffix}`,
       className: classes.grainCircle,
-    },
-    {
-      title: "Active Participants",
-      value: allParticipants.length,
-      className: classes.participantCircle,
     },
     {
       title: `${currencyName} per Cred`,
@@ -390,7 +396,7 @@ export const ExplorerHome = ({
                     {credAndGrainSummary.avgCred.toFixed(1)}
                   </TableCell>
                   <TableCell>
-                    {credAndGrainSummary.avgGrain.toFixed(2) + currencySuffix}
+                    {format(credAndGrainSummary.avgGrain, 2, currencySuffix)}
                   </TableCell>
                   <TableCell align="right" />
                 </TableRow>
@@ -403,8 +409,11 @@ export const ExplorerHome = ({
                   </TableCell>
                   <TableCell>
                     <b>
-                      {credAndGrainSummary.totalGrain.toFixed(2) +
-                        currencySuffix}
+                      {format(
+                        credAndGrainSummary.totalGrain,
+                        2,
+                        currencySuffix
+                      )}
                     </b>
                   </TableCell>
                   <TableCell align="right" />
