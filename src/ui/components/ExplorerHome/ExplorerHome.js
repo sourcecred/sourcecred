@@ -372,7 +372,7 @@ export const ExplorerHome = ({
                       </TableCell>
                       <TableCell>{Math.round(row.cred)}</TableCell>
                       <TableCell>
-                        {Number(row.grainEarned).toFixed(2) + currencySuffix}
+                        {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
                       <TableCell align="right">
                         <CredTimeline data={row.credPerInterval} />
