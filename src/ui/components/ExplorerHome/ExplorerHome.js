@@ -123,14 +123,6 @@ const GRAIN_SORT = deepFreeze({
 });
 const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
 
-let credTimelineSummary = [];
-const credAndGrainSummary = {
-  totalCred: 0,
-  totalGrain: fromInteger(0),
-  avgCred: 0,
-  avgGrain: fromInteger(0),
-};
-
 type ExplorerHomeProps = {|
   +initialView: CredGrainView | null,
   +currency: CurrencyDetails,
@@ -165,35 +157,41 @@ export const ExplorerHome = ({
     },
   });
 
-  useMemo(() => {
-    // reset all values for next aggregation calculation
-    credTimelineSummary = [];
-    credAndGrainSummary.totalCred = 0;
-    credAndGrainSummary.totalGrain = fromInteger(0);
-    credAndGrainSummary.avgCred = 0;
-    credAndGrainSummary.avgGrain = fromInteger(0);
+  const {credTimelineSummary, credAndGrainSummary} = useMemo(() => {
+    let credTimelineAggregator = [];
+    const credAndGrainAggregator = {
+      totalCred: 0,
+      totalGrain: fromInteger(0),
+      avgCred: 0,
+      avgGrain: fromInteger(0),
+    };
 
     if (tsParticipants.currentPage.length > 0) {
       for (const participant of tsParticipants.currentPage) {
         // add this node's cred to the summary graph
-        credTimelineSummary = participant.credPerInterval.map(
-          (total, i) => (credTimelineSummary[i] || 0) + total
+        credTimelineAggregator = participant.credPerInterval.map(
+          (total, i) => (credTimelineAggregator[i] || 0) + total
         );
 
-        credAndGrainSummary.totalCred += participant.cred;
-        credAndGrainSummary.totalGrain = add(
+        credAndGrainAggregator.totalCred += participant.cred;
+        credAndGrainAggregator.totalGrain = add(
           participant.grainEarned,
-          credAndGrainSummary.totalGrain
+          credAndGrainAggregator.totalGrain
         );
       }
 
-      credAndGrainSummary.avgCred =
-        credAndGrainSummary.totalCred / tsParticipants.currentPage.length;
-      credAndGrainSummary.avgGrain = div(
-        credAndGrainSummary.totalGrain,
+      credAndGrainAggregator.avgCred =
+        credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
+      credAndGrainAggregator.avgGrain = div(
+        credAndGrainAggregator.totalGrain,
         fromInteger(tsParticipants.currentPage.length)
       );
     }
+
+    return {
+      credTimelineSummary: credTimelineAggregator,
+      credAndGrainSummary: credAndGrainAggregator,
+    };
   }, [tsParticipants.currentPage]);
 
   const summaryInfo = [
