@@ -1,5 +1,5 @@
 // @flow
-import React, {useState, type Node as ReactNode} from "react";
+import React, {useState, useMemo, type Node as ReactNode} from "react";
 import {
   Checkbox,
   Container,
@@ -14,14 +14,25 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
+import TableSortLabel from "@material-ui/core/TableSortLabel";
+import deepFreeze from "deep-freeze";
 import {CredGrainView} from "../../../core/credGrainView";
-import sortBy from "../../../util/sortBy";
+import {
+  useTableState,
+  SortOrders,
+  DEFAULT_SORT,
+} from "../../../webutil/tableState";
+import type {CurrencyDetails} from "../../../api/currencyConfig";
+import {format, add, div, fromInteger} from "../../../core/ledger/grain";
 import CredTimeline from "./CredTimeline";
+import {IdentityTypes} from "../../../core/identity/identityType";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -76,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
     height: "150px",
   },
   barChartWrapper: {flexGrow: 1, flexBasis: 0, margin: "20px"},
-  tableWrapper: {flexGrow: 3, flexBasis: 0, margin: "20px"},
+  tableWrapper: {flexGrow: 0, flexBasis: 0, margin: "20px auto"},
   checklabel: {
     margin: "5px",
   },
@@ -88,77 +99,167 @@ const useStyles = makeStyles((theme) => ({
   element: {flex: 1, margin: "20px"},
   arrowInput: {width: "40%", display: "inline-block"},
   pageHeader: {color: theme.palette.text.primary},
+  credCircle: {
+    borderColor: theme.palette.blueish,
+  },
+  grainCircle: {
+    borderColor: theme.palette.warning.main,
+  },
+  participantCircle: {
+    borderColor: theme.palette.scPink,
+  },
+  grainPerCredCircle: {
+    borderColor: theme.palette.green,
+  },
 }));
+
+const CRED_SORT = deepFreeze({
+  name: Symbol("Cred"),
+  fn: (n) => n.cred,
+});
+const GRAIN_SORT = deepFreeze({
+  name: Symbol("Grain"),
+  fn: (n) => n.grainEarned,
+});
+const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
 
 type ExplorerHomeProps = {|
   +initialView: CredGrainView | null,
+  +currency: CurrencyDetails,
 |};
 
-export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
+export const ExplorerHome = ({
+  initialView,
+  currency: {suffix: currencySuffix, name: currencyName},
+}: ExplorerHomeProps): ReactNode => {
   if (!initialView) return null;
 
   const classes = useStyles();
   const [tab, setTab] = useState<number>(1);
   const [checkboxes, setCheckboxes] = useState({
-    participants: false,
-    organizations: false,
-    bots: false,
-    projects: false,
+    [IdentityTypes.USER]: false,
+    [IdentityTypes.ORGANIZATION]: false,
+    [IdentityTypes.BOT]: false,
+    [IdentityTypes.PROJECT]: false,
   });
-  const {participants, organizations, bots, projects} = checkboxes;
 
-  const handleChange = (event) => {
-    setCheckboxes({...checkboxes, [event.target.name]: event.target.checked});
-  };
+  const allParticipants = useMemo(
+    () => Array.from(initialView.participants()),
+    [initialView.participants()]
+  );
 
-  const data = [
-    {title: "Cred This Week", value: 610},
-    {title: "Grain Harvested", value: "6,765g"},
-    {title: "Active Participants", value: 13},
-    {title: "Grain per Cred", value: "22g"},
+  const tsParticipants = useTableState(allParticipants, {
+    initialRowsPerPage: PAGINATION_OPTIONS[0],
+    initialSort: {
+      sortName: CRED_SORT.name,
+      sortOrder: SortOrders.DESC,
+      sortFn: CRED_SORT.fn,
+    },
+  });
+
+  const {credTimelineSummary, credAndGrainSummary} = useMemo(() => {
+    let credTimelineAggregator = [];
+    const credAndGrainAggregator = {
+      totalCred: 0,
+      totalGrain: fromInteger(0),
+      avgCred: 0,
+      avgGrain: fromInteger(0),
+    };
+
+    if (tsParticipants.currentPage.length > 0) {
+      for (const participant of tsParticipants.currentPage) {
+        // add this node's cred to the summary graph
+        credTimelineAggregator = participant.credPerInterval.map(
+          (total, i) => (credTimelineAggregator[i] || 0) + total
+        );
+
+        credAndGrainAggregator.totalCred += participant.cred;
+        credAndGrainAggregator.totalGrain = add(
+          participant.grainEarned,
+          credAndGrainAggregator.totalGrain
+        );
+      }
+
+      credAndGrainAggregator.avgCred =
+        credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
+      credAndGrainAggregator.avgGrain = div(
+        credAndGrainAggregator.totalGrain,
+        fromInteger(tsParticipants.currentPage.length)
+      );
+    }
+
+    return {
+      credTimelineSummary: credTimelineAggregator,
+      credAndGrainSummary: credAndGrainAggregator,
+    };
+  }, [tsParticipants.currentPage]);
+
+  const summaryInfo = [
+    {title: "Cred This Week", value: 610, className: classes.credCircle},
+    {
+      title: `${currencyName}`,
+      value: `6,765${currencySuffix}`,
+      className: classes.grainCircle,
+    },
+    {
+      title: `${currencyName} per Cred`,
+      value: `22${currencySuffix}`,
+      className: classes.grainPerCredCircle,
+    },
   ];
 
-  const createData = (username, cred, grain, chart) => ({
-    username,
-    cred,
-    grain,
-    chart,
-  });
+  const filterIdentities = (event: SyntheticInputEvent<HTMLInputElement>) => {
+    // fuzzy match letters "in order, but not necessarily sequentially"
+    const filterString = event.target.value
+      .trim()
+      .toLowerCase()
+      .split("")
+      .join("+.*");
+    const regex = new RegExp(filterString);
 
-  // sort by cred amount, highest to lowest
-  const nodes = sortBy(initialView.participants(), (n) => -n.cred);
-  // create an array of 0s for the cred summary graph at the top of the page
-  let credTimelineSummary = initialView.intervals().map(() => 0);
+    tsParticipants.createOrUpdateFilterFn("filterIdentities", (participant) =>
+      regex.test(participant.identity.name.toLowerCase())
+    );
+  };
 
-  const rows = nodes.map((node) => {
-    const {credPerInterval} = node;
+  const handleCheckboxFilter = (event) => {
+    const newCheckboxes = {
+      ...checkboxes,
+      [event.target.name]: event.target.checked,
+    };
+    setCheckboxes(newCheckboxes);
 
-    // add this node's cred to the summary graph
-    credTimelineSummary = credTimelineSummary.map(
-      (total, i) => credPerInterval[i] + total
+    const includedTypes = Object.keys(newCheckboxes).filter(
+      (type) => newCheckboxes[type] === true
     );
 
-    return createData(
-      node.identity.name,
-      node.cred,
-      node.grainEarned,
-      credPerInterval
-    );
-  });
+    if (includedTypes.length === 0) {
+      tsParticipants.createOrUpdateFilterFn("identityType", () => true);
+    } else {
+      tsParticipants.createOrUpdateFilterFn("identityType", (participant) =>
+        includedTypes.includes(participant.identity.subtype)
+      );
+    }
+  };
+
+  const handleChangePage = (event, newIndex) => {
+    tsParticipants.setPageIndex(newIndex);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    tsParticipants.setRowsPerPage(Number(event.target.value));
+  };
 
   const makeCircle = (
     value: string | number,
     title: string,
-    borderColor: string
+    className: string
   ) => (
     <div
-      className={`${classes.centerRow} ${classes.circleWrapper}`}
-      style={{color: borderColor}}
+      className={`${classes.centerRow} ${classes.circleWrapper} ${className}`}
+      key={`${title}-${value}`}
     >
-      <div
-        className={`${classes.centerRow} ${classes.circle}`}
-        style={{borderColor}}
-      >
+      <div className={`${classes.centerRow} ${classes.circle} ${className}`}>
         {value}
       </div>
       <div>{title}</div>
@@ -199,10 +300,9 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
         </Tabs>
       </div>
       <div className={classes.centerRow}>
-        {makeCircle(data[0].value, data[0].title, "#6174CC")}
-        {makeCircle(data[1].value, data[1].title, "#FFAA3D")}
-        {makeCircle(data[2].value, data[2].title, "#FDBBD1")}
-        {makeCircle(data[3].value, data[3].title, "#4BD76D")}
+        {summaryInfo.map((circle) =>
+          makeCircle(circle.value, circle.title, circle.className)
+        )}
       </div>
       <div className={classes.row}>
         <div className={classes.tableWrapper} style={{flexDirection: "column"}}>
@@ -215,7 +315,11 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
             }}
           >
             <span style={{fontSize: "24px"}}>Last Week&apos;s Activity</span>
-            <TextField label="Filter Names" variant="outlined" />
+            <TextField
+              label="Filter Names"
+              variant="outlined"
+              onChange={filterIdentities}
+            />
           </div>
           <TableContainer component={Paper}>
             <Table aria-label="simple table">
@@ -225,10 +329,34 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                     <b>Participant</b>
                   </TableCell>
                   <TableCell>
-                    <b>Cred</b>
+                    <TableSortLabel
+                      active={tsParticipants.sortName === CRED_SORT.name}
+                      direction={
+                        tsParticipants.sortName === CRED_SORT.name
+                          ? tsParticipants.sortOrder
+                          : DEFAULT_SORT
+                      }
+                      onClick={() =>
+                        tsParticipants.setSortFn(CRED_SORT.name, CRED_SORT.fn)
+                      }
+                    >
+                      <b>{CRED_SORT.name.description}</b>
+                    </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <b>Grain</b>
+                    <TableSortLabel
+                      active={tsParticipants.sortName === GRAIN_SORT.name}
+                      direction={
+                        tsParticipants.sortName === GRAIN_SORT.name
+                          ? tsParticipants.sortOrder
+                          : DEFAULT_SORT
+                      }
+                      onClick={() =>
+                        tsParticipants.setSortFn(GRAIN_SORT.name, GRAIN_SORT.fn)
+                      }
+                    >
+                      <b>{currencyName}</b>
+                    </TableSortLabel>
                   </TableCell>
                   <TableCell>
                     <b>Contributions Chart (ALL TIME)</b>
@@ -236,24 +364,38 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.username}>
-                    <TableCell component="th" scope="row">
-                      {row.username}
-                    </TableCell>
-                    <TableCell>{row.cred}</TableCell>
-                    <TableCell>{row.grain}</TableCell>
-                    <TableCell align="right">
-                      <CredTimeline data={row.chart} />
+                {tsParticipants.currentPage.length > 0 ? (
+                  tsParticipants.currentPage.map((row) => (
+                    <TableRow key={row.identity.name}>
+                      <TableCell component="th" scope="row">
+                        {row.identity.name}
+                      </TableCell>
+                      <TableCell>{Math.round(row.cred)}</TableCell>
+                      <TableCell>
+                        {format(row.grainEarned, 2, currencySuffix)}
+                      </TableCell>
+                      <TableCell align="right">
+                        <CredTimeline data={row.credPerInterval} />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow key="no-results">
+                    <TableCell colSpan={4} align="center">
+                      No results
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
                 <TableRow key="average">
                   <TableCell component="th" scope="row">
                     Average
                   </TableCell>
-                  <TableCell>42</TableCell>
-                  <TableCell>88.9g</TableCell>
+                  <TableCell>
+                    {credAndGrainSummary.avgCred.toFixed(1)}
+                  </TableCell>
+                  <TableCell>
+                    {format(credAndGrainSummary.avgGrain, 2, currencySuffix)}
+                  </TableCell>
                   <TableCell align="right" />
                 </TableRow>
                 <TableRow key="total">
@@ -261,14 +403,37 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
                     <b>TOTAL</b>
                   </TableCell>
                   <TableCell>
-                    <b>610</b>
+                    <b>{credAndGrainSummary.totalCred.toFixed(1)}</b>
                   </TableCell>
                   <TableCell>
-                    <b>2097g</b>
+                    <b>
+                      {format(
+                        credAndGrainSummary.totalGrain,
+                        2,
+                        currencySuffix
+                      )}
+                    </b>
                   </TableCell>
                   <TableCell align="right" />
                 </TableRow>
               </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={PAGINATION_OPTIONS}
+                    colSpan={4}
+                    count={tsParticipants.length}
+                    rowsPerPage={tsParticipants.rowsPerPage}
+                    page={tsParticipants.pageIndex}
+                    SelectProps={{
+                      inputProps: {"aria-label": "rows per page"},
+                      native: true,
+                    }}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
             </Table>
           </TableContainer>
           <FormGroup row className={classes.rightRow}>
@@ -278,25 +443,29 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={participants}
-                  onChange={handleChange}
-                  name="participants"
+                  checked={checkboxes[IdentityTypes.USER]}
+                  onChange={handleCheckboxFilter}
+                  name={IdentityTypes.USER}
                 />
               }
               label="Participants"
             />
             <FormControlLabel
               control={
-                <Checkbox checked={bots} onChange={handleChange} name="bots" />
+                <Checkbox
+                  checked={checkboxes[IdentityTypes.BOT]}
+                  onChange={handleCheckboxFilter}
+                  name={IdentityTypes.BOT}
+                />
               }
               label="Bots"
             />
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={projects}
-                  onChange={handleChange}
-                  name="projects"
+                  checked={checkboxes[IdentityTypes.PROJECT]}
+                  onChange={handleCheckboxFilter}
+                  name={IdentityTypes.PROJECT}
                 />
               }
               label="Projects"
@@ -304,21 +473,14 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps): ReactNode => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={organizations}
-                  onChange={handleChange}
-                  name="organizations"
+                  checked={checkboxes[IdentityTypes.ORGANIZATION]}
+                  onChange={handleCheckboxFilter}
+                  name={IdentityTypes.ORGANIZATION}
                 />
               }
               label="Organizations"
             />
           </FormGroup>
-        </div>
-        <div
-          className={classes.barChartWrapper}
-          style={{flexDirection: "column"}}
-        >
-          <h2>Cred By Plugin</h2>
-          <div className={classes.barChart}>Bar Chart</div>
         </div>
       </div>
     </Container>
