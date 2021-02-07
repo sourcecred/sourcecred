@@ -1,6 +1,7 @@
 // @flow
 
 import type {$Response as ExpressResponse} from "express";
+import cors from "cors";
 
 import type {Command} from "./command";
 import {loadInstanceConfig} from "./common";
@@ -29,6 +30,7 @@ const serveCommand: Command = async (args, std) => {
   }
 
   const server = express();
+  server.use(cors());
 
   // override static config to enable ledger updates
   server.get(
