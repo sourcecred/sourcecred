@@ -1,5 +1,10 @@
 // @flow
-import React, {useState, useMemo, type Node as ReactNode} from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  type Node as ReactNode,
+} from "react";
 import {
   Checkbox,
   Container,
@@ -33,6 +38,8 @@ import type {CurrencyDetails} from "../../../api/currencyConfig";
 import {format, add, div, fromInteger} from "../../../core/ledger/grain";
 import CredTimeline from "./CredTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
+import {type Interval, type IntervalSequence} from "../../../core/interval";
+import {formatTimestamp} from "../../utils/dateHelpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -122,6 +129,48 @@ const GRAIN_SORT = deepFreeze({
   fn: (n) => n.grainEarned,
 });
 const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
+const TIMEFRAME_OPTIONS: Array<{|
+  +tabLabel: string,
+  +tableLabel: string,
+  +selector: (IntervalSequence) => Interval,
+|}> = deepFreeze([
+  {
+    tabLabel: "This Week",
+    tableLabel: "This Week’s Activity",
+    selector: (intervals) => intervals[intervals.length - 1],
+  },
+  {
+    tabLabel: "Last Week",
+    tableLabel: "Last Week’s Activity",
+    selector: (intervals) =>
+      intervals.length === 1 ? intervals[0] : intervals[intervals.length - 2],
+  },
+  {
+    tabLabel: "This Month",
+    tableLabel: "This Month’s Activity",
+    selector: (intervals) =>
+      intervals.length < 5
+        ? {
+            startTimeMs: intervals[0].startTimeMs,
+            endTimeMs: intervals[intervals.length - 1].endTimeMs,
+          }
+        : {
+            startTimeMs: intervals[intervals.length - 5].startTimeMs,
+            endTimeMs: intervals[intervals.length - 2].endTimeMs,
+          },
+  },
+  {
+    tabLabel: "All Time",
+    tableLabel: "All Time Activity",
+    selector: (intervals) =>
+      intervals.length === 1
+        ? intervals[0]
+        : {
+            startTimeMs: intervals[0].startTimeMs,
+            endTimeMs: intervals[intervals.length - 1].endTimeMs,
+          },
+  },
+]);
 
 type ExplorerHomeProps = {|
   +initialView: CredGrainView | null,
@@ -135,7 +184,25 @@ export const ExplorerHome = ({
   if (!initialView) return null;
 
   const classes = useStyles();
-  const [tab, setTab] = useState<number>(1);
+  const [tab, setTab] = useState<number>(TIMEFRAME_OPTIONS.length - 1);
+  const [selectedInterval, setSelectedInterval] = useState<Interval>(
+    TIMEFRAME_OPTIONS[TIMEFRAME_OPTIONS.length - 1].selector(
+      initialView.intervals()
+    )
+  );
+  useEffect(() => {
+    setSelectedInterval(
+      TIMEFRAME_OPTIONS[tab].selector(initialView.intervals())
+    );
+  }, [tab]);
+  const timeScopedCredGrainView = useMemo(
+    () =>
+      initialView.withTimeScope(
+        selectedInterval.startTimeMs,
+        selectedInterval.endTimeMs
+      ),
+    [selectedInterval]
+  );
   const [checkboxes, setCheckboxes] = useState({
     [IdentityTypes.USER]: false,
     [IdentityTypes.ORGANIZATION]: false,
@@ -144,18 +211,21 @@ export const ExplorerHome = ({
   });
 
   const allParticipants = useMemo(
-    () => Array.from(initialView.participants()),
-    [initialView.participants()]
+    () => Array.from(timeScopedCredGrainView.participants()),
+    [timeScopedCredGrainView]
   );
 
-  const tsParticipants = useTableState(allParticipants, {
-    initialRowsPerPage: PAGINATION_OPTIONS[0],
-    initialSort: {
-      sortName: CRED_SORT.name,
-      sortOrder: SortOrders.DESC,
-      sortFn: CRED_SORT.fn,
-    },
-  });
+  const tsParticipants = useTableState(
+    {data: allParticipants},
+    {
+      initialRowsPerPage: PAGINATION_OPTIONS[0],
+      initialSort: {
+        sortName: CRED_SORT.name,
+        sortOrder: SortOrders.DESC,
+        sortFn: CRED_SORT.fn,
+      },
+    }
+  );
 
   const {credTimelineSummary, credAndGrainSummary} = useMemo(() => {
     let credTimelineAggregator = [];
@@ -266,6 +336,22 @@ export const ExplorerHome = ({
     </div>
   );
 
+  const formatInterval = (interval) =>
+    formatTimestamp(interval.startTimeMs, {
+      month: "short",
+      day: "numeric",
+      hour: undefined,
+      minute: undefined,
+      year: "numeric",
+    }) +
+    " to " +
+    formatTimestamp(interval.endTimeMs, {
+      month: "short",
+      day: "numeric",
+      hour: undefined,
+      minute: undefined,
+      year: "numeric",
+    });
   // const makeBarChart = () => {
   //   const margin = 60;
   //   const width = 1000 - 2 * margin;
@@ -293,10 +379,9 @@ export const ExplorerHome = ({
           textColor="primary"
           onChange={(_, val) => setTab(val)}
         >
-          <Tab label="This Week" />
-          <Tab label="Last Week" />
-          <Tab label="This Month" />
-          <Tab label="All Time" />
+          {TIMEFRAME_OPTIONS.map(({tabLabel}) => (
+            <Tab key={tabLabel} label={tabLabel} />
+          ))}
         </Tabs>
       </div>
       <div className={classes.centerRow}>
@@ -314,7 +399,12 @@ export const ExplorerHome = ({
               marginBottom: "20px",
             }}
           >
-            <span style={{fontSize: "24px"}}>Last Week&apos;s Activity</span>
+            <span style={{fontSize: "1.5rem"}}>
+              {TIMEFRAME_OPTIONS[tab].tableLabel}
+            </span>
+            <span style={{fontSize: "1rem"}}>
+              {formatInterval(selectedInterval)}
+            </span>
             <TextField
               label="Filter Names"
               variant="outlined"
