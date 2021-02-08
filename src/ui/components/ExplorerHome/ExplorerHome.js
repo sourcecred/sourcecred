@@ -18,10 +18,11 @@ import {
   TableRow,
   TextField,
 } from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import {makeStyles, withStyles} from "@material-ui/core/styles";
 import {CredView} from "../../../analysis/credView";
 import sortBy from "../../../util/sortBy";
 import CredTimeline from "./CredTimeline";
+import MultiTimeline from "./MultiTimeline";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,8 +67,24 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     alignItems: "center",
   },
+  legendWrapper: {
+    margin: "13px",
+  },
+  legendSquare: {
+    display: 'inline-block',
+    height: '1em',
+    width: '1em',
+    margin: '0.5em'
+  },
+  leftRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
   rightRow: {
     display: "flex",
+    flexGrow: 1,
+    flexBasis: 0,
     alignItems: "center",
     justifyContent: "flex-end",
   },
@@ -90,9 +107,39 @@ const useStyles = makeStyles((theme) => ({
   pageHeader: {color: theme.palette.text.primary},
 }));
 
+const StyledTableCell = withStyles((theme) => ({
+  head: {
+    backgroundColor: theme.palette.common.black,
+  },
+  body: {
+    backgroundColor: theme.palette.common.black,
+    fontSize: 14,
+  },
+}))(TableCell);
+
 type ExplorerHomeProps = {|
   +initialView: CredView,
 |};
+
+// dummy data:
+const circleData = [
+  {title: "Cred This Week", value: 610},
+  {title: "Grain Harvested", value: "6,765g"},
+  // TODO: add active participants later when we have data
+  // {title: "Active Participants", value: 13},
+  {title: "Grain per Cred", value: "22g"},
+];
+
+// TODO: Add Bar chart for cred by plugin at a later date:
+/* const makeBarChart = () => {
+  const margin = 60;
+  const width = 1000 - 2 * margin;
+  const height = 600 - 2 * margin;
+
+  const svg = d3.select('svg');
+  const chart = svg.append('g')
+  .attr('transform', `translate(${margin}, ${margin})`);
+} */
 
 export const ExplorerHome = ({initialView}: ExplorerHomeProps) => {
   const classes = useStyles();
@@ -109,19 +156,37 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps) => {
     setCheckboxes({...checkboxes, [event.target.name]: event.target.checked});
   };
 
-  const data = [
-    {title: "Cred This Week", value: 610},
-    {title: "Grain Harvested", value: "6,765g"},
-    {title: "Active Participants", value: 13},
-    {title: "Grain per Cred", value: "22g"},
-  ];
+  const makeCircle = (
+    value: string | number,
+    title: string,
+    color: string
+  ) => (
+    <div
+      className={`${classes.centerRow} ${classes.circleWrapper}`}
+      style={{color}}
+    >
+      <div
+        className={`${classes.centerRow} ${classes.circle}`}
+        style={{borderColor: color, color}}
+      >
+        {value}
+      </div>
+      <div>{title}</div>
+    </div>
+  );
 
-  const createData = (username, cred, grain, chart) => ({
-    username,
-    cred,
-    grain,
-    chart,
-  });
+  const makeLegend = (
+    name: string,
+    color: string
+  ) => (
+    <div
+      className={`${classes.leftRow} ${classes.legendWrapper}`}
+      style={{ alignSelf: 'flex-start'}}
+    >
+      <div className={classes.legendSquare} style={{ backgroundColor: color }}></div>
+      <div className={classes.centerRow}>{name}</div>
+    </div>
+  );
 
   const nodes = initialView.userNodes();
   // TODO: Allow sorting/displaying only recent cred...
@@ -130,42 +195,14 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps) => {
     node.credOverTime === null ? null : node.credOverTime.cred
   );
 
+  // dummy data:
   const rows = [
-    createData("Frozen yoghurt", 159, 6.0, credTimelines[1]),
-    createData("Ice cream sandwich", 237, 9.0, credTimelines[2]),
-    createData("Eclair", 262, 16.0, credTimelines[3]),
-    createData("Cupcake", 305, 3.7, credTimelines[4]),
-    createData("Gingerbread", 356, 16.0, credTimelines[5]),
+    { username: "Frozen yoghurt", cred: 159, grain: 6.0, chart: credTimelines[1] },
+    { username: "Ice cream sandwich", cred: 237, grain: 9.0, chart: credTimelines[2] },
+    { username: "Eclair", cred: 262, grain: 16.0, chart: credTimelines[3] },
+    { username: "Cupcake", cred: 305, grain: 3.7, chart: credTimelines[4] },
+    { username: "Gingerbread", cred: 356, grain: 16.0, chart: credTimelines[5] },
   ];
-
-  const makeCircle = (
-    value: string | number,
-    title: string,
-    borderColor: string
-  ) => (
-    <div
-      className={`${classes.centerRow} ${classes.circleWrapper}`}
-      style={{color: borderColor}}
-    >
-      <div
-        className={`${classes.centerRow} ${classes.circle}`}
-        style={{borderColor}}
-      >
-        {value}
-      </div>
-      <div>{title}</div>
-    </div>
-  );
-
-  // const makeBarChart = () => {
-  //   const margin = 60;
-  //   const width = 1000 - 2 * margin;
-  //   const height = 600 - 2 * margin;
-
-  //   const svg = d3.select('svg');
-  //   const chart = svg.append('g')
-  //   .attr('transform', `translate(${margin}, ${margin})`);
-  // }
 
   return (
     <Container className={classes.root}>
@@ -173,28 +210,34 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps) => {
         Explorer Home
       </h1>
       <div className={`${classes.centerRow} ${classes.graph}`}>
-        <CredTimeline height={150} width={1000} data={credTimelines[0]} />
+        <MultiTimeline height={150} width={1000} cred={credTimelines[0]} grain={credTimelines[1]}/>
       </div>
       <Divider style={{margin: 20}} />
-      <div className={`${classes.rightRow}`}>
-        <Tabs
-          className={classes.rightRow}
-          value={tab}
-          indicatorColor="primary"
-          textColor="primary"
-          onChange={(_, val) => setTab(val)}
-        >
-          <Tab label="This Week" />
-          <Tab label="Last Week" />
-          <Tab label="This Month" />
-          <Tab label="All Time" />
-        </Tabs>
+      <div style={{ display: "flex"}}>
+        <div className={classes.leftRow}>
+          {makeLegend('cred', '#6174CC')}
+          {makeLegend('grain', '#FFAA3D')}
+        </div>
+        <div style={{ flexGrow: 3, flexBasis: 0}}></div>
+        <div className={classes.rightRow}>
+          <Tabs
+            className={classes.rightRow}
+            value={tab}
+            indicatorColor="primary"
+            textColor="primary"
+            onChange={(_, val) => setTab(val)}
+          >
+            <Tab label="This Week" />
+            <Tab label="Last Week" />
+            <Tab label="This Month" />
+            <Tab label="All Time" />
+          </Tabs>
+        </div>
       </div>
       <div className={classes.centerRow}>
-        {makeCircle(data[0].value, data[0].title, "#6174CC")}
-        {makeCircle(data[1].value, data[1].title, "#FFAA3D")}
-        {makeCircle(data[2].value, data[2].title, "#FDBBD1")}
-        {makeCircle(data[3].value, data[3].title, "#4BD76D")}
+        {makeCircle(circleData[0].value, circleData[0].title, "#6174CC")}
+        {makeCircle(circleData[1].value, circleData[1].title, "#FFAA3D")}
+        {makeCircle(circleData[2].value, circleData[2].title, "#4BD76D")}
       </div>
       <div className={classes.row}>
         <div className={classes.tableWrapper} style={{flexDirection: "column"}}>
@@ -206,59 +249,59 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps) => {
               marginBottom: "20px",
             }}
           >
-            <span style={{fontSize: "24px"}}>Last Week&aposs Activity</span>
+            <span style={{fontSize: "24px"}}>Last Week's Activity</span>
             <TextField label="Filter Names" variant="outlined" />
           </div>
           <TableContainer component={Paper}>
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell>
+                  <StyledTableCell>
                     <b>Participant</b>
-                  </TableCell>
-                  <TableCell>
+                  </StyledTableCell>
+                  <StyledTableCell>
                     <b>Cred</b>
-                  </TableCell>
-                  <TableCell>
+                  </StyledTableCell>
+                  <StyledTableCell>
                     <b>Grain</b>
-                  </TableCell>
-                  <TableCell>
-                    <b>Contributions Chart (ALL TIME)</b>
-                  </TableCell>
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <b>Contributions Chart (All Time)</b>
+                  </StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {rows.map((row) => (
                   <TableRow key={row.username}>
-                    <TableCell component="th" scope="row">
+                    <StyledTableCell component="th" scope="row">
                       {row.username}
-                    </TableCell>
-                    <TableCell>{row.cred}</TableCell>
-                    <TableCell>{row.grain}</TableCell>
-                    <TableCell align="right">
+                    </StyledTableCell>
+                    <StyledTableCell>{row.cred}</StyledTableCell>
+                    <StyledTableCell>{row.grain}</StyledTableCell>
+                    <StyledTableCell align="right">
                       <CredTimeline data={row.chart} />
-                    </TableCell>
+                    </StyledTableCell>
                   </TableRow>
                 ))}
                 <TableRow key="average">
-                  <TableCell component="th" scope="row">
+                  <StyledTableCell component="th" scope="row">
                     Average
-                  </TableCell>
-                  <TableCell>42</TableCell>
-                  <TableCell>88.9g</TableCell>
-                  <TableCell align="right" />
+                  </StyledTableCell>
+                  <StyledTableCell>42</StyledTableCell>
+                  <StyledTableCell>88.9g</StyledTableCell>
+                  <StyledTableCell align="right" />
                 </TableRow>
                 <TableRow key="total">
-                  <TableCell component="th" scope="row">
+                  <StyledTableCell component="th" scope="row">
                     <b>TOTAL</b>
-                  </TableCell>
-                  <TableCell>
+                  </StyledTableCell>
+                  <StyledTableCell>
                     <b>610</b>
-                  </TableCell>
-                  <TableCell>
+                  </StyledTableCell>
+                  <StyledTableCell>
                     <b>2097g</b>
-                  </TableCell>
-                  <TableCell align="right" />
+                  </StyledTableCell>
+                  <StyledTableCell align="right" />
                 </TableRow>
               </TableBody>
             </Table>
@@ -305,13 +348,13 @@ export const ExplorerHome = ({initialView}: ExplorerHomeProps) => {
             />
           </FormGroup>
         </div>
-        <div
+        {/* <div
           className={classes.barChartWrapper}
           style={{flexDirection: "column"}}
         >
           <h2>Cred By Plugin</h2>
           <div className={classes.barChart}>Bar Chart</div>
-        </div>
+        </div> */}
       </div>
     </Container>
   );
