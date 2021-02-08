@@ -8,6 +8,8 @@ import deepFreeze from "deep-freeze";
 import * as discourseAddress from "../plugins/discourse/address";
 import * as discourseDeclaration from "../plugins/discourse/declaration";
 import * as discordDeclaration from "../plugins/discord/declaration";
+import * as discordUtils from "../plugins/discord/utils";
+
 import * as initiativesDeclaration from "../plugins/initiatives/declaration";
 import * as githubDeclaration from "../plugins/github/declaration";
 import * as githubEdges from "../plugins/github/edges";
@@ -67,6 +69,7 @@ const api = {
     },
     discord: {
       declaration: discordDeclaration,
+      utils: discordUtils,
     },
     initiatives: {
       declaration: initiativesDeclaration,
