@@ -2,6 +2,7 @@
 
 import fetch from "isomorphic-fetch";
 import * as Model from "./models";
+import {type TaskReporter} from "../../util/taskReporter";
 
 export interface DiscordApi {
   guilds(): Promise<$ReadOnlyArray<Model.Guild>>;
@@ -35,12 +36,14 @@ type FetcherOptions = {|
 
 export class Fetcher implements DiscordApi {
   +_options: FetcherOptions;
+  _timeout: number;
 
   constructor(opts?: $Shape<FetcherOptions>) {
     this._options = {...fetcherDefaults, ...opts};
     if (!this._options.token) {
       throw new Error("A BotToken is required");
     }
+    this._timeout = 0;
   }
 
   _fetch(endpoint: string): Promise<Response> {
@@ -59,31 +62,37 @@ export class Fetcher implements DiscordApi {
     return this._options.fetch(url, requestOptions);
   }
 
-  async _fetchJson(endpoint: string): Promise<any> {
-    const res = await this._fetch(endpoint);
+  async _wait() {
+    const currentTime = Date.now();
+    if (currentTime < this._timeout) {
+      const restartDate = new Date(this._timeout);
+      console.warn(
+        `Discord Rate limit reached. Waiting until ${restartDate.toLocaleString()}`
+      );
+      const waitTime = this._timeout - currentTime;
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+    }
+  }
 
-    /* 
-      The discord API returns this header to indicate we are about to hit out rate-limit.
-      0 = hit rate-limit, we must stop.
-     */
+  _checkRateLimit(res: Response) {
+    // The discord API returns this header to indicate we are about to hit out rate-limit.
     const rateLimitRemaining = Number(res.headers.get("x-ratelimit-remaining"));
 
-    // Get our current epoch time.
-    const currentTime = Math.round(Date.now() / 1000);
+    // The discord API returns this value (in seconds) to let us know at what epoch time we can continue.
+    const rateLimitReset = Number(res.headers.get("x-ratelimit-reset")) * 1000;
 
-    // The discord API returns this header to let us know at what epoch time we can continue.
-    const rateLimitReset = Number(res.headers.get("x-ratelimit-reset"));
-
-    // The difference between these two will give us the time to wait.
-    const waitTime = rateLimitReset - currentTime;
-
-    // Once we hit rate limit, let's wait (included an additional 50ms).
+    // Once we hit rate limit, let's wait
     if (rateLimitRemaining === 0) {
-      await new Promise((resolve) => setTimeout(resolve, waitTime * 1000 + 50));
+      this._timeout = rateLimitReset * 1000;
     }
+  }
 
+  async _fetchJson(endpoint: string): Promise<any> {
+    this._wait();
+    const res = await this._fetch(endpoint);
     failIfMissing(res);
     failForNotOk(res);
+    this._checkRateLimit(res);
     return await res.json();
   }
 

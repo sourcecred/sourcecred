@@ -1,6 +1,7 @@
 // @flow
 
 import {snapshotFetcher} from "./mockSnapshotFetcher";
+import {Fetcher} from "./fetcher";
 
 describe("plugins/discord/fetcher", () => {
   describe("snapshot testing", () => {
@@ -36,6 +37,24 @@ describe("plugins/discord/fetcher", () => {
       expect(
         await snapshotFetcher().reactions(channelId, messageId, emoji)
       ).toMatchSnapshot();
+    });
+  });
+  describe("_fetchJson", () => {
+    it("waits when no calls remain", async () => {
+      const spy = jest.spyOn(global.console, "warn");
+      const currentTime = Math.round(Date.now());
+      const mockRes = new Response(null, {
+        headers: {
+          "x-ratelimit-remaining": "0",
+          "x-ratelimit-reset": `${currentTime + 5}`,
+        },
+      });
+      const mockToken = "XYZ";
+      const fetcher = new Fetcher({token: mockToken});
+      fetcher._checkRateLimit(mockRes);
+      await fetcher._wait();
+      expect(console.warn).toBeCalled();
+      spy.mockRestore();
     });
   });
 });
