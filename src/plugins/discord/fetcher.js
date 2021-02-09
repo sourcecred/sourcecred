@@ -2,7 +2,6 @@
 
 import fetch from "isomorphic-fetch";
 import * as Model from "./models";
-import {type TaskReporter} from "../../util/taskReporter";
 
 export interface DiscordApi {
   guilds(): Promise<$ReadOnlyArray<Model.Guild>>;
