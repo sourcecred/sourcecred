@@ -37,6 +37,7 @@ const theme = createMuiTheme({
     blueish: "#6174CC",
     lavender: "#C5A2C5",
     orange: "#FFDDC6",
+    darkOrange: "#FFAA3D",
     peach: "#FFF1E8",
     white: "#FAFBFD",
     scPink: "#FDBBD1",

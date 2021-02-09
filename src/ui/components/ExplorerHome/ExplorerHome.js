@@ -118,6 +118,24 @@ const useStyles = makeStyles((theme) => ({
   grainPerCredCircle: {
     borderColor: theme.palette.green,
   },
+  [`label-${IdentityTypes.BOT}`]: {
+    color: theme.palette.purple,
+  },
+  [`label-${IdentityTypes.PROJECT}`]: {
+    color: theme.palette.orange,
+  },
+  [`label-${IdentityTypes.ORGANIZATION}`]: {
+    color: theme.palette.orange,
+  },
+  labelCred: {
+    color: theme.palette.blueish,
+  },
+  labelGrain: {
+    color: theme.palette.darkOrange,
+  },
+  rowAverage: {
+    fontStyle: "italic",
+  },
 }));
 
 const CRED_SORT = deepFreeze({
@@ -457,11 +475,17 @@ export const ExplorerHome = ({
                 {tsParticipants.currentPage.length > 0 ? (
                   tsParticipants.currentPage.map((row) => (
                     <TableRow key={row.identity.name}>
-                      <TableCell component="th" scope="row">
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        className={classes[`label-${row.identity.subtype}`]}
+                      >
                         {row.identity.name}
                       </TableCell>
-                      <TableCell>{Math.round(row.cred)}</TableCell>
-                      <TableCell>
+                      <TableCell className={classes.labelCred}>
+                        {Math.round(row.cred)}
+                      </TableCell>
+                      <TableCell className={classes.labelGrain}>
                         {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
                       <TableCell align="right">
@@ -476,7 +500,7 @@ export const ExplorerHome = ({
                     </TableCell>
                   </TableRow>
                 )}
-                <TableRow key="average">
+                <TableRow key="average" className={classes.rowAverage}>
                   <TableCell component="th" scope="row">
                     Average
                   </TableCell>
