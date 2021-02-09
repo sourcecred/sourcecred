@@ -12,7 +12,7 @@ const getClientEnvironment = require("./env");
 
 const env = getClientEnvironment(null);
 
-module.exports = ({
+const baseConfig = {
   // Don't attempt to continue if there are any errors.
   bail: true,
   node: {
@@ -73,4 +73,26 @@ module.exports = ({
     new webpack.DefinePlugin(env.individuallyStringified),
   ],
   mode: process.env.NODE_ENV,
-} /*: any */);
+};
+
+const client = {
+  ...baseConfig,
+  target: "web",
+  output: {
+    ...baseConfig.output,
+    path: `${paths.apiBuild}/client`,
+    libraryTarget: "umd",
+  },
+};
+
+const server = {
+  ...baseConfig,
+  target: "node",
+  output: {
+    ...baseConfig.output,
+    path: `${paths.apiBuild}/server`,
+    libraryTarget: "commonjs",
+  },
+};
+
+module.exports = ([client, server] /*: Array<any>*/);

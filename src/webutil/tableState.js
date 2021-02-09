@@ -141,8 +141,8 @@ type FilterFns<T> = {[string]: null | ((T) => boolean)};
   It encapsulates Sort, Pagination, and Filtering.
  */
 export function useTableState<T>(
-  // The base array. It should ideally be memoized before being passed in.
-  data: Array<T>,
+  // The base array. The `data` attribute should ideally be memoized before being passed in.
+  dataWrapper: {data: Array<T>},
   initialOptions?: {
     // The initial rows per page. Defaults to unpaginated.
     initialRowsPerPage?: number,
@@ -159,6 +159,7 @@ export function useTableState<T>(
     },
   }
 ): TableState<T> {
+  const data = useMemo(() => dataWrapper.data, [dataWrapper.data]);
   const optionDefaults = {
     initialRowsPerPage: Infinity,
     initialSort: {},

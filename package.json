@@ -16,6 +16,7 @@
     "bottleneck": "^2.19.5",
     "chalk": "^4.0.0",
     "commonmark": "0.29.1",
+    "cross-fetch": "^3.0.6",
     "d3-array": "^2.4.0",
     "d3-format": "^2.0.0",
     "d3-scale": "^3.2.1",
@@ -167,7 +168,8 @@
     "!src/**/*.test.js?(.snap)",
     "!src/ui"
   ],
-  "main": "dist/api.js",
+  "main": "dist/server/api.js",
+  "browser": "dist/client/api.js",
   "module": "src/api/index.js",
   "bin": "./bin/sourcecred.js"
 }
