@@ -93,14 +93,17 @@ export const LedgerViewer = ({
   }, []);
 
   const eventLog = useMemo(() => [...ledger.eventLog()], [ledger]);
-  const ts = useTableState(eventLog, {
-    initialRowsPerPage: PAGINATION_OPTIONS[0],
-    initialSort: {
-      sortName: DATE_SORT.name,
-      sortOrder: SortOrders.DESC,
-      sortFn: DATE_SORT.fn,
-    },
-  });
+  const ts = useTableState(
+    {data: eventLog},
+    {
+      initialRowsPerPage: PAGINATION_OPTIONS[0],
+      initialSort: {
+        sortName: DATE_SORT.name,
+        sortOrder: SortOrders.DESC,
+        sortFn: DATE_SORT.fn,
+      },
+    }
+  );
 
   return (
     <Paper className={classes.container}>
