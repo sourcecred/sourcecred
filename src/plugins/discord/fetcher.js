@@ -63,31 +63,36 @@ export class Fetcher implements DiscordApi {
 
   async _wait() {
     const currentTime = Date.now();
+    // if timeout hasn't passed, we wait until it does
     if (currentTime < this._timeout) {
       const restartDate = new Date(this._timeout);
-      console.warn(
-        `Discord Rate limit reached. Waiting until ${restartDate.toLocaleString()}`
-      );
       const waitTime = this._timeout - currentTime;
+      console.warn(
+        `Discord Rate limit reached. Waiting for ${
+          waitTime / 1000
+        } seconds (until ${restartDate.toLocaleString()})`
+      );
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   }
 
   _checkRateLimit(res: Response) {
-    // The discord API returns this header to indicate we are about to hit out rate-limit.
+    // The discord API returns this header to indicate how many requests remain
+    // before hitting a cooldown.
     const rateLimitRemaining = Number(res.headers.get("x-ratelimit-remaining"));
 
-    // The discord API returns this value (in seconds) to let us know at what epoch time we can continue.
+    // The discord API returns this epoc time (in seconds) to let us know
+    // when we can continue.
     const rateLimitReset = Number(res.headers.get("x-ratelimit-reset")) * 1000;
 
-    // Once we hit rate limit, let's wait
+    // wait until the timeout passes  before attempting another query
     if (rateLimitRemaining === 0) {
-      this._timeout = rateLimitReset * 1000;
+      this._timeout = rateLimitReset;
     }
   }
 
   async _fetchJson(endpoint: string): Promise<any> {
-    this._wait();
+    await this._wait();
     const res = await this._fetch(endpoint);
     failIfMissing(res);
     failForNotOk(res);

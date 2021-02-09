@@ -39,21 +39,23 @@ describe("plugins/discord/fetcher", () => {
       ).toMatchSnapshot();
     });
   });
-  describe("_fetchJson", () => {
-    it("waits when no calls remain", async () => {
-      const spy = jest.spyOn(global.console, "warn");
-      const currentTime = Math.round(Date.now());
+  describe("_checkRateLimit", () => {
+    it("waits when no calls remain", () => {
+      const spy = jest.spyOn(global, "setTimeout");
+      const currentTime = Math.round(Date.now()) / 1000;
       const mockRes = new Response(null, {
         headers: {
           "x-ratelimit-remaining": "0",
-          "x-ratelimit-reset": `${currentTime + 5}`,
+          "x-ratelimit-reset": `${currentTime + 2}`,
         },
       });
       const mockToken = "XYZ";
       const fetcher = new Fetcher({token: mockToken});
       fetcher._checkRateLimit(mockRes);
-      await fetcher._wait();
-      expect(console.warn).toBeCalled();
+      //  testing async is flaky, so we just ensure a timeout is actually set
+      fetcher._wait();
+      expect(setTimeout).toBeCalled();
+      expect(spy.mock.calls[0][1]).toBeGreaterThan(0);
       spy.mockRestore();
     });
   });
