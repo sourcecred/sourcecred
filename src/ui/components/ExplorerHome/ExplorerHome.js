@@ -197,12 +197,10 @@ export const ExplorerHome = ({
   if (!initialView) return null;
 
   const classes = useStyles();
-  // default view is Last Week's Activity
+  // default view is Last Week's Activity (array index 1)
   const [tab, setTab] = useState<number>(1);
   const [selectedInterval, setSelectedInterval] = useState<Interval>(
-    TIMEFRAME_OPTIONS[TIMEFRAME_OPTIONS.length - 1].selector(
-      initialView.intervals()
-    )
+    TIMEFRAME_OPTIONS[1].selector(initialView.intervals())
   );
   const updateTimeframe = (index) => {
     setTab(index);
