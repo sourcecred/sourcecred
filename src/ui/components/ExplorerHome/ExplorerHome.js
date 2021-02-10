@@ -370,20 +370,16 @@ export const ExplorerHome = ({
 
     const isTodayOrLater = (someDate) => {
       const today = new Date();
-      today.setHours(0);
-      today.setMinutes(0);
-      today.setSeconds(0);
-      today.setMilliseconds(0);
+      today.setHours(0, 0, 0, 0);
 
       return someDate >= today;
     };
 
-    const currentYear = new Date().getFullYear();
     const startDate = new Date(interval.startTimeMs);
     const endDate = new Date(interval.endTimeMs);
 
     const startTime =
-      startDate.getFullYear() === currentYear
+      startDate.getFullYear() === endDate.getFullYear()
         ? formatWithoutYear(interval.startTimeMs)
         : formatWithYear(interval.startTimeMs);
 
