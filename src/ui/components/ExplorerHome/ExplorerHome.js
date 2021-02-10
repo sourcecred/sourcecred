@@ -202,17 +202,19 @@ export const ExplorerHome = ({
   if (!initialView) return null;
 
   const classes = useStyles();
-  const [tab, setTab] = useState<number>(TIMEFRAME_OPTIONS.length - 1);
+  // default view is Last Week's Activity
+  const [tab, setTab] = useState<number>(1);
   const [selectedInterval, setSelectedInterval] = useState<Interval>(
     TIMEFRAME_OPTIONS[TIMEFRAME_OPTIONS.length - 1].selector(
       initialView.intervals()
     )
   );
-  useEffect(() => {
+  const updateTimeframe = (index) => {
+    setTab(index);
     setSelectedInterval(
-      TIMEFRAME_OPTIONS[tab].selector(initialView.intervals())
+      TIMEFRAME_OPTIONS[index].selector(initialView.intervals())
     );
-  }, [tab]);
+  };
   const timeScopedCredGrainView = useMemo(
     () =>
       initialView.withTimeScope(
@@ -354,22 +356,51 @@ export const ExplorerHome = ({
     </div>
   );
 
-  const formatInterval = (interval) =>
-    formatTimestamp(interval.startTimeMs, {
-      month: "short",
-      day: "numeric",
-      hour: undefined,
-      minute: undefined,
-      year: "numeric",
-    }) +
-    " to " +
-    formatTimestamp(interval.endTimeMs, {
-      month: "short",
-      day: "numeric",
-      hour: undefined,
-      minute: undefined,
-      year: "numeric",
-    });
+  const formatInterval = (interval) => {
+    const formatWithYear = (timestamp) =>
+      formatTimestamp(timestamp, {
+        month: "short",
+        day: "numeric",
+        hour: undefined,
+        minute: undefined,
+        year: "numeric",
+      });
+
+    const formatWithoutYear = (timestamp) =>
+      formatTimestamp(timestamp, {
+        month: "short",
+        day: "numeric",
+        hour: undefined,
+        minute: undefined,
+        year: undefined,
+      });
+
+    const isTodayOrLater = (someDate) => {
+      const today = new Date();
+      today.setHours(0);
+      today.setMinutes(0);
+      today.setSeconds(0);
+      today.setMilliseconds(0);
+
+      return someDate >= today;
+    };
+
+    const currentYear = new Date().getFullYear();
+    const startDate = new Date(interval.startTimeMs);
+    const endDate = new Date(interval.endTimeMs);
+
+    const startTime =
+      startDate.getFullYear() === currentYear
+        ? formatWithoutYear(interval.startTimeMs)
+        : formatWithYear(interval.startTimeMs);
+
+    const endTime = isTodayOrLater(endDate)
+      ? "Today"
+      : formatWithYear(interval.endTimeMs);
+
+    return `${startTime} to ${endTime}`;
+  };
+
   // const makeBarChart = () => {
   //   const margin = 60;
   //   const width = 1000 - 2 * margin;
@@ -395,7 +426,7 @@ export const ExplorerHome = ({
           value={tab}
           indicatorColor="primary"
           textColor="primary"
-          onChange={(_, val) => setTab(val)}
+          onChange={(_, val) => updateTimeframe(val)}
         >
           {TIMEFRAME_OPTIONS.map(({tabLabel}) => (
             <Tab key={tabLabel} label={tabLabel} />
