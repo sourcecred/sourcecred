@@ -101,7 +101,12 @@ export type Message = {|
   // We could filter based on which types of emoji have been added though.
   +reactionEmoji: $ReadOnlyArray<Emoji>,
   // Snowflake of user IDs.
-  +mentions: $ReadOnlyArray<Snowflake>,
+  +mentions: $ReadOnlyArray<Mention>,
+|};
+
+export type Mention = {|
+  +userId: Snowflake,
+  +count: number,
 |};
 
 export type Reaction = {|

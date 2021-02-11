@@ -28,7 +28,7 @@ describe("plugins/discord/reactionWeights", () => {
     timestampMs: 1,
     content: "hello world",
     reactionEmoji: [heartEmoji, sourcecredEmoji],
-    mentions: [reacterId],
+    mentions: [{userId: reacterId, count: 1}],
   });
 
   const authorMember: GuildMember = deepFreeze({
