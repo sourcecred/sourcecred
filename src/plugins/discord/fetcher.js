@@ -35,12 +35,14 @@ type FetcherOptions = {|
 
 export class Fetcher implements DiscordApi {
   +_options: FetcherOptions;
+  _timeout: number;
 
   constructor(opts?: $Shape<FetcherOptions>) {
     this._options = {...fetcherDefaults, ...opts};
     if (!this._options.token) {
       throw new Error("A BotToken is required");
     }
+    this._timeout = 0;
   }
 
   _fetch(endpoint: string): Promise<Response> {
@@ -59,10 +61,42 @@ export class Fetcher implements DiscordApi {
     return this._options.fetch(url, requestOptions);
   }
 
+  async _wait() {
+    const currentTime = Date.now();
+    // if timeout hasn't passed, we wait until it does
+    if (currentTime < this._timeout) {
+      const restartDate = new Date(this._timeout);
+      const waitTime = this._timeout - currentTime;
+      console.warn(
+        `Discord Rate limit reached. Waiting for ${
+          waitTime / 1000
+        } seconds (until ${restartDate.toLocaleString()})`
+      );
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+    }
+  }
+
+  _checkRateLimit(res: Response) {
+    // The discord API returns this header to indicate how many requests remain
+    // before hitting a cooldown.
+    const rateLimitRemaining = Number(res.headers.get("x-ratelimit-remaining"));
+
+    // The discord API returns this epoc time (in seconds) to let us know
+    // when we can continue.
+    const rateLimitReset = Number(res.headers.get("x-ratelimit-reset")) * 1000;
+
+    // wait until the timeout passes  before attempting another query
+    if (rateLimitRemaining === 0) {
+      this._timeout = rateLimitReset;
+    }
+  }
+
   async _fetchJson(endpoint: string): Promise<any> {
+    await this._wait();
     const res = await this._fetch(endpoint);
     failIfMissing(res);
     failForNotOk(res);
+    this._checkRateLimit(res);
     return await res.json();
   }
 

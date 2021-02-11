@@ -1,6 +1,7 @@
 // @flow
 
 import {snapshotFetcher} from "./mockSnapshotFetcher";
+import {Fetcher} from "./fetcher";
 
 describe("plugins/discord/fetcher", () => {
   describe("snapshot testing", () => {
@@ -36,6 +37,26 @@ describe("plugins/discord/fetcher", () => {
       expect(
         await snapshotFetcher().reactions(channelId, messageId, emoji)
       ).toMatchSnapshot();
+    });
+  });
+  describe("_checkRateLimit", () => {
+    it("waits when no calls remain", () => {
+      const spy = jest.spyOn(global, "setTimeout");
+      const currentTime = Math.round(Date.now()) / 1000;
+      const mockRes = new Response(null, {
+        headers: {
+          "x-ratelimit-remaining": "0",
+          "x-ratelimit-reset": `${currentTime + 2}`,
+        },
+      });
+      const mockToken = "XYZ";
+      const fetcher = new Fetcher({token: mockToken});
+      fetcher._checkRateLimit(mockRes);
+      //  testing async is flaky, so we just ensure a timeout is actually set
+      fetcher._wait();
+      expect(setTimeout).toBeCalled();
+      expect(spy.mock.calls[0][1]).toBeGreaterThan(0);
+      spy.mockRestore();
     });
   });
 });
