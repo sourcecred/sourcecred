@@ -117,6 +117,7 @@ export class SqliteMirrorRepository {
             channel_id TEXT NOT NULL,
             message_id TEXT NOT NULL,
             user_id TEXT NOT NULL,
+            count INTEGER NOT NULL,
             CONSTRAINT value_object PRIMARY KEY (channel_id, message_id, user_id)
         )
       `,
@@ -251,17 +252,17 @@ export class SqliteMirrorRepository {
   mentions(
     channel: Model.Snowflake,
     message: Model.Snowflake
-  ): $ReadOnlyArray<Model.Snowflake> {
+  ): $ReadOnlyArray<Model.Mention> {
     return this._db
       .prepare(
         dedent`\
-        SELECT user_id
+        SELECT user_id, count
         FROM message_mentions
         WHERE channel_id = :channel_id
           AND message_id = :message_id`
       )
       .all({channel_id: channel, message_id: message})
-      .map((res) => res.user_id);
+      .map((res) => ({userId: res.user_id, count: res.count}));
   }
 
   reactionEmoji(
@@ -358,8 +359,8 @@ export class SqliteMirrorRepository {
         content: message.content,
       });
 
-    for (const user of message.mentions) {
-      this.addMention(message, user);
+    for (const mention of message.mentions) {
+      this.addMention(message, mention);
     }
   }
 
@@ -388,25 +389,28 @@ export class SqliteMirrorRepository {
       });
   }
 
-  addMention(message: Model.Message, user: Model.Snowflake) {
+  addMention(message: Model.Message, mention: Model.Mention) {
     this._db
       .prepare(
         dedent`\
           INSERT OR IGNORE INTO message_mentions (
               channel_id,
               message_id,
-              user_id
+              user_id,
+              count
           ) VALUES (
               :channel_id,
               :message_id,
-              :user_id
+              :user_id,
+              :count
           )
         `
       )
       .run({
         channel_id: message.channelId,
         message_id: message.id,
-        user_id: user,
+        user_id: mention.userId,
+        count: mention.count,
       });
   }
 

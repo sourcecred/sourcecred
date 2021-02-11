@@ -212,6 +212,11 @@ export type GraphReaction = {|
   +reactingMember: Model.GuildMember,
 |};
 
+export type GraphMention = {|
+  +member: Model.GuildMember,
+  +count: number,
+|};
+
 /**
  * All of the information necessary to add a message to
  * the graph, along with its reactions and its mentions.
@@ -220,7 +225,7 @@ export type GraphMessage = {|
   +message: Model.Message,
   +author: Model.GuildMember | null,
   +reactions: $ReadOnlyArray<GraphReaction>,
-  +mentions: $ReadOnlyArray<Model.GuildMember>,
+  +mentions: $ReadOnlyArray<GraphMention>,
   // Included so we can apply any channel-based rules (e.g. creating props
   // edges instead of mentions edges) at graph construction time.
   +channelId: Model.Snowflake,
@@ -255,14 +260,14 @@ export function* findGraphMessages(
       }
 
       const mentions = [];
-      for (const userId of message.mentions) {
+      for (const {userId, count} of message.mentions) {
         const mentionedMember = memberMap.get(userId);
         if (!mentionedMember) {
           // Probably this user left the server.
           // We'll skip this mention (keeping the rest of the message)
           continue;
         }
-        mentions.push(mentionedMember);
+        mentions.push({member: mentionedMember, count});
       }
       if (mentions.length === 0 && reactions.length === 0) {
         // No valid mentions or reactions, meaning this message won't have real Cred effects.
@@ -332,13 +337,20 @@ export function _createGraphFromMessages(
       );
     }
 
-    for (const mentionedMember of mentions) {
-      wg.graph.addNode(memberNode(mentionedMember));
+    for (const {member, count} of mentions) {
+      wg.graph.addNode(memberNode(member));
+      let edge;
       if (propsChannels.has(channelId)) {
-        wg.graph.addEdge(propsEdge(message, mentionedMember));
+        edge = propsEdge(message, member);
       } else {
-        wg.graph.addEdge(mentionsEdge(message, mentionedMember));
+        edge = mentionsEdge(message, member);
       }
+      wg.graph.addEdge(edge);
+      if (count > 1)
+        wg.weights.edgeWeights.set(edge.address, {
+          forwards: count,
+          backwards: 1,
+        });
     }
   }
 

@@ -182,7 +182,10 @@ export class Fetcher implements DiscordApi {
       content: x.content,
       reactionEmoji: (x.reactions || []).map((r) => r.emoji),
       nonUserAuthor: x.webhook_id != null || false,
-      mentions: (x.mentions || []).map((user) => user.id),
+      mentions: (x.mentions || []).map((user) => ({
+        userId: user.id,
+        count: Array.from(x.content.matchAll(`<@!?${user.id}>`)).length,
+      })),
     }));
   }
 
