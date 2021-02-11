@@ -23,6 +23,7 @@ import {
 import {makeStyles} from "@material-ui/core/styles";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import deepFreeze from "deep-freeze";
+import bigInt from "big-integer";
 import {CredGrainView} from "../../../core/credGrainView";
 import {
   useTableState,
@@ -139,7 +140,7 @@ const CRED_SORT = deepFreeze({
 });
 const GRAIN_SORT = deepFreeze({
   name: Symbol("Grain"),
-  fn: (n) => n.grainEarned,
+  fn: (n) => bigInt(n.grainEarned),
 });
 const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
 const TIMEFRAME_OPTIONS: Array<{|
