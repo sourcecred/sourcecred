@@ -12,7 +12,6 @@ import {type Account} from "../../core/ledger/ledger";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import * as G from "../../core/ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
-import findLast from "lodash.findlast";
 import {formatTimestamp} from "../utils/dateHelpers";
 import {makeStyles} from "@material-ui/core/styles";
 
@@ -32,15 +31,13 @@ export const AccountOverview = ({
   const {ledger} = useLedger();
   const classes = useStyles();
 
-  const accounts = ledger.accounts();
-  const lastPayoutEvent = findLast(
-    ledger.eventLog(),
-    (event) => event.action.type === "DISTRIBUTE_GRAIN"
-  );
-  const lastPayoutMessage = lastPayoutEvent
-    ? `Last distribution: ${formatTimestamp(lastPayoutEvent.ledgerTimestamp)}`
-    : "";
+  const lastDistributionTimestamp = ledger.lastDistributionTimestamp();
+  const lastPayoutMessage =
+    lastDistributionTimestamp === -Infinity
+      ? ""
+      : `Last distribution: ${formatTimestamp(lastDistributionTimestamp)}`;
 
+  const accounts = ledger.accounts();
   function comparator(a: Account, b: Account) {
     if (a.balance === b.balance) {
       return 0;
