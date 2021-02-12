@@ -20,22 +20,22 @@ import {
   TableRow,
   TextField,
 } from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import deepFreeze from "deep-freeze";
 import bigInt from "big-integer";
-import {CredGrainView} from "../../../core/credGrainView";
+import { CredGrainView } from "../../../core/credGrainView";
 import {
   useTableState,
   SortOrders,
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
-import type {CurrencyDetails} from "../../../api/currencyConfig";
-import {format, add, div, fromInteger} from "../../../core/ledger/grain";
+import type { CurrencyDetails } from "../../../api/currencyConfig";
+import { format, add, div, fromInteger, Grain } from "../../../core/ledger/grain";
 import CredTimeline from "./CredTimeline";
-import {IdentityTypes} from "../../../core/identity/identityType";
-import {type Interval, type IntervalSequence} from "../../../core/interval";
-import {formatTimestamp} from "../../utils/dateHelpers";
+import { IdentityTypes } from "../../../core/identity/identityType";
+import { type Interval, type IntervalSequence } from "../../../core/interval";
+import { formatTimestamp } from "../../utils/dateHelpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -85,12 +85,12 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "flex-end",
   },
-  row: {display: "flex"},
+  row: { display: "flex" },
   graph: {
     height: "150px",
   },
-  barChartWrapper: {flexGrow: 1, flexBasis: 0, margin: "20px"},
-  tableWrapper: {flexGrow: 0, flexBasis: 0, margin: "20px auto"},
+  barChartWrapper: { flexGrow: 1, flexBasis: 0, margin: "20px" },
+  tableWrapper: { flexGrow: 0, flexBasis: 0, margin: "20px auto" },
   checklabel: {
     margin: "5px",
   },
@@ -99,9 +99,9 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     background: "grey",
   },
-  element: {flex: 1, margin: "20px"},
-  arrowInput: {width: "40%", display: "inline-block"},
-  pageHeader: {color: theme.palette.text.primary},
+  element: { flex: 1, margin: "20px" },
+  arrowInput: { width: "40%", display: "inline-block" },
+  pageHeader: { color: theme.palette.text.primary },
   credCircle: {
     borderColor: theme.palette.blueish,
   },
@@ -146,45 +146,45 @@ const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
 const TIMEFRAME_OPTIONS: Array<{|
   +tabLabel: string,
   +tableLabel: string,
-  +selector: (IntervalSequence) => Interval,
+    +selector: (IntervalSequence) => Interval,
 |}> = deepFreeze([
-  {
-    tabLabel: "This Week",
-    tableLabel: "This Week’s Activity",
-    selector: (intervals) => intervals[intervals.length - 1],
-  },
-  {
-    tabLabel: "Last Week",
-    tableLabel: "Last Week’s Activity",
-    selector: (intervals) =>
-      intervals.length === 1 ? intervals[0] : intervals[intervals.length - 2],
-  },
-  {
-    tabLabel: "This Month",
-    tableLabel: "This Month’s Activity",
-    selector: (intervals) =>
-      intervals.length < 5
-        ? {
-            startTimeMs: intervals[0].startTimeMs,
-            endTimeMs: intervals[intervals.length - 1].endTimeMs,
-          }
-        : {
-            startTimeMs: intervals[intervals.length - 5].startTimeMs,
-            endTimeMs: intervals[intervals.length - 2].endTimeMs,
-          },
-  },
-  {
-    tabLabel: "All Time",
-    tableLabel: "All Time Activity",
-    selector: (intervals) =>
-      intervals.length === 1
-        ? intervals[0]
-        : {
-            startTimeMs: intervals[0].startTimeMs,
-            endTimeMs: intervals[intervals.length - 1].endTimeMs,
-          },
-  },
-]);
+      {
+        tabLabel: "This Week",
+        tableLabel: "This Week’s Activity",
+        selector: (intervals) => intervals[intervals.length - 1],
+      },
+      {
+        tabLabel: "Last Week",
+        tableLabel: "Last Week’s Activity",
+        selector: (intervals) =>
+          intervals.length === 1 ? intervals[0] : intervals[intervals.length - 2],
+      },
+      {
+        tabLabel: "This Month",
+        tableLabel: "This Month’s Activity",
+        selector: (intervals) =>
+          intervals.length < 5
+            ? {
+              startTimeMs: intervals[0].startTimeMs,
+              endTimeMs: intervals[intervals.length - 1].endTimeMs,
+            }
+            : {
+              startTimeMs: intervals[intervals.length - 5].startTimeMs,
+              endTimeMs: intervals[intervals.length - 2].endTimeMs,
+            },
+      },
+      {
+        tabLabel: "All Time",
+        tableLabel: "All Time Activity",
+        selector: (intervals) =>
+          intervals.length === 1
+            ? intervals[0]
+            : {
+              startTimeMs: intervals[0].startTimeMs,
+              endTimeMs: intervals[intervals.length - 1].endTimeMs,
+            },
+      },
+    ]);
 
 type ExplorerHomeProps = {|
   +initialView: CredGrainView | null,
@@ -193,7 +193,7 @@ type ExplorerHomeProps = {|
 
 export const ExplorerHome = ({
   initialView,
-  currency: {suffix: currencySuffix, name: currencyName},
+  currency: { suffix: currencySuffix, name: currencyName },
 }: ExplorerHomeProps): ReactNode => {
   if (!initialView) return null;
 
@@ -237,8 +237,19 @@ export const ExplorerHome = ({
     [timeScopedCredGrainView]
   );
 
+  const { credTotalsTimeline, grainTotalsTimeline } = useMemo(() => {
+    let credTimeline = Array<number>(timeScopedCredGrainView._intervals.length);
+    let grainTimeline = Array<Grain>(timeScopedCredGrainView._intervals.length);
+
+    allParticipants.forEach((participant, i) => {
+      credTimeline[i] += participant.credPerInterval[i];
+      let currentGrain : Grain = participant.grainEarnedPerInterval[i]
+      grainTimeline[i] = add(currentGrain, grainTimeline[i]);
+    });
+  }, [allParticipants]);
+
   const tsParticipants = useTableState(
-    {data: allParticipants},
+    { data: allParticipants },
     {
       initialRowsPerPage: PAGINATION_OPTIONS[0],
       initialSort: {
@@ -249,7 +260,7 @@ export const ExplorerHome = ({
     }
   );
 
-  const {credTimelineSummary, credAndGrainSummary} = useMemo(() => {
+  const { credTimelineSummary, credAndGrainSummary } = useMemo(() => {
     let credTimelineAggregator = [];
     const credAndGrainAggregator = {
       totalCred: 0,
@@ -260,9 +271,8 @@ export const ExplorerHome = ({
 
     if (tsParticipants.currentPage.length > 0) {
       for (const participant of tsParticipants.currentPage) {
-        // add this node's cred to the summary graph
-        credTimelineAggregator = participant.credPerInterval.map(
-          (total, i) => (credTimelineAggregator[i] || 0) + total
+        participant.credPerInterval.forEach((cred, i) =>
+          credTimelineAggregator[i] = (credTimelineAggregator[i] || 0) + cred
         );
 
         credAndGrainAggregator.totalCred += participant.cred;
@@ -287,7 +297,7 @@ export const ExplorerHome = ({
   }, [tsParticipants.currentPage]);
 
   const summaryInfo = [
-    {title: "Cred This Week", value: 610, className: classes.credCircle},
+    { title: "Cred This Week", value: 610, className: classes.credCircle },
     {
       title: `${currencyName}`,
       value: `6,765${currencySuffix}`,
@@ -415,9 +425,9 @@ export const ExplorerHome = ({
         Explorer Home
       </h1>
       <div className={`${classes.centerRow} ${classes.graph}`}>
-        <CredTimeline height={150} width={1000} data={credTimelineSummary} />
+        <DataTimeline height={150} width={1000} data={credTimelineSummary} />
       </div>
-      <Divider style={{margin: 20}} />
+      <Divider style={{ margin: 20 }} />
       <div className={`${classes.rightRow}`}>
         <Tabs
           className={classes.rightRow}
@@ -426,7 +436,7 @@ export const ExplorerHome = ({
           textColor="primary"
           onChange={(_, val) => updateTimeframe(val)}
         >
-          {TIMEFRAME_OPTIONS.map(({tabLabel}) => (
+          {TIMEFRAME_OPTIONS.map(({ tabLabel }) => (
             <Tab key={tabLabel} label={tabLabel} />
           ))}
         </Tabs>
@@ -437,7 +447,7 @@ export const ExplorerHome = ({
         )}
       </div>
       <div className={classes.row}>
-        <div className={classes.tableWrapper} style={{flexDirection: "column"}}>
+        <div className={classes.tableWrapper} style={{ flexDirection: "column" }}>
           <div
             style={{
               display: "flex",
@@ -446,10 +456,10 @@ export const ExplorerHome = ({
               marginBottom: "20px",
             }}
           >
-            <span style={{fontSize: "1.5rem"}}>
+            <span style={{ fontSize: "1.5rem" }}>
               {TIMEFRAME_OPTIONS[tab].tableLabel}
             </span>
-            <span style={{fontSize: "1rem"}}>
+            <span style={{ fontSize: "1rem" }}>
               {formatInterval(selectedInterval)}
             </span>
             <TextField
@@ -527,12 +537,12 @@ export const ExplorerHome = ({
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow key="no-results">
-                    <TableCell colSpan={4} align="center">
-                      No results
+                    <TableRow key="no-results">
+                      <TableCell colSpan={4} align="center">
+                        No results
                     </TableCell>
-                  </TableRow>
-                )}
+                    </TableRow>
+                  )}
                 <TableRow key="average" className={classes.rowAverage}>
                   <TableCell component="th" scope="row">
                     Average
@@ -573,7 +583,7 @@ export const ExplorerHome = ({
                     rowsPerPage={tsParticipants.rowsPerPage}
                     page={tsParticipants.pageIndex}
                     SelectProps={{
-                      inputProps: {"aria-label": "rows per page"},
+                      inputProps: { "aria-label": "rows per page" },
                       native: true,
                     }}
                     onChangePage={handleChangePage}
