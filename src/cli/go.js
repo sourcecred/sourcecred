@@ -5,6 +5,7 @@ import dedent from "../util/dedent";
 
 import load from "./load";
 import graph from "./graph";
+import credrank from "./credrank";
 import score from "./score";
 
 function die(std, message) {
@@ -23,14 +24,15 @@ const goCommand: Command = async (args, std) => {
   }
 
   const commandSequence = [
-    {name: "load", command: load},
-    {name: "graph", command: graph},
-    {name: "score", command: score},
+    {name: "load", command: load, args: []},
+    {name: "graph", command: graph, args: []},
+    {name: "credrank", command: credrank, args: ["--stealth"]},
+    {name: "score", command: score, args: []},
   ];
 
-  for (const {name, command} of commandSequence) {
+  for (const {name, command, args} of commandSequence) {
     if (name === "load" && noLoad) continue;
-    const ret = await command([], std);
+    const ret = await command(args, std);
     if (ret !== 0) {
       return die(std, `go: failed on command ${name}`);
     }

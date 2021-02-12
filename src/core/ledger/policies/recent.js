@@ -73,3 +73,11 @@ export function toDiscount(n: number): Discount {
 
   return n;
 }
+
+export function toString(policy: RecentPolicy): string {
+  return [
+    policy.policyType + " Policy",
+    "Budget " + G.format(policy.budget, 3),
+    "Discount: " + policy.discount,
+  ].join(`\n`);
+}

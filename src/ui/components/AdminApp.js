@@ -1,6 +1,11 @@
 // @flow
 
-import React, {type Node as ReactNode, useEffect, useState} from "react";
+import React, {
+  type Node as ReactNode,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
@@ -11,6 +16,7 @@ import {Explorer} from "./Explorer/Explorer";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
+import {CredGrainView} from "../../core/credGrainView";
 import {AccountOverview} from "./AccountOverview";
 import {Transfer} from "./Transfer";
 import {SpecialDistribution} from "./SpecialDistribution";
@@ -28,6 +34,28 @@ const theme = createMuiTheme({
   palette: {
     type: "dark",
     primary: pink,
+    blueish: "#6174CC",
+    lavender: "#C5A2C5",
+    orange: "#FFDDC6",
+    darkOrange: "#FFAA3D",
+    peach: "#FFF1E8",
+    white: "#FAFBFD",
+    scPink: "#FDBBD1",
+    green: "#4BD76D",
+    sunset: "#FFE9DB",
+    salmon: "#FFE5E1",
+    coral: "#F9D1CB",
+    pink: "#FEDDE8",
+    blue: "#728DFF",
+    purple: "#C5A2C5",
+    violet: "#EDDAEE",
+    warning: {
+      main: "#FFAA3D",
+    },
+    danger: "#FF594D",
+    text: {
+      link: "#31AAEE",
+    },
   },
   overrides: {
     MuiChip: {
@@ -67,7 +95,8 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
 const customRoutes = (
   credView: CredView | null,
   hasBackend: Boolean,
-  currency: CurrencyDetails
+  currency: CurrencyDetails,
+  credGrainView: CredGrainView | null
 ) => {
   const routes = [
     <Route key="explorer" exact path="/explorer">
@@ -88,7 +117,7 @@ const customRoutes = (
       <LedgerAdmin />
     </Route>,
     <Route key="explorer-home" exact path="/explorer-home">
-      <ExplorerHome initialView={credView} />
+      <ExplorerHome initialView={credGrainView} currency={currency} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
       <Transfer currency={currency} />
@@ -120,6 +149,7 @@ const AdminApp = (): ReactNode => {
         <div>
           <h1>Load Failure</h1>
           <p>Check console for details.</p>
+          <p>{loadResult.error}</p>
         </div>
       );
     case "SUCCESS":
@@ -137,10 +167,20 @@ const AdminApp = (): ReactNode => {
  */
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
+  const credGrainView = useMemo(
+    () =>
+      loadSuccess.credGraph
+        ? new CredGrainView(
+            loadSuccess.credGraph,
+            loadSuccess.ledgerManager.ledger
+          )
+        : null,
+    [loadSuccess.credGraph, loadSuccess.ledgerManager.ledger]
+  );
 
   return (
     // TODO (@topocount) create context for read-only instance state
-    <LedgerProvider initialLedger={loadSuccess.ledger}>
+    <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
       <Admin
         layout={createAppLayout(loadSuccess)}
         theme={theme}
@@ -149,7 +189,8 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
         customRoutes={customRoutes(
           loadSuccess.credView,
           loadSuccess.hasBackend,
-          loadSuccess.currency
+          loadSuccess.currency,
+          credGrainView
         )}
       >
         {/*

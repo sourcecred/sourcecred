@@ -288,7 +288,7 @@ describe("core/ledger/ledger", () => {
       it("fails on invalid type", () => {
         const ledger = new Ledger();
         const fooId = ledger.createIdentity("USER", "foo");
-        // $FlowExpectedError[incompatible-call]
+        // $FlowExpectedError[prop-missing]
         const thunk = () => ledger.changeIdentityType(fooId, "ENTITY");
         failsWithoutMutation(ledger, thunk, "invalid type ENTITY");
       });
@@ -839,7 +839,11 @@ describe("core/ledger/ledger", () => {
       describe("when the distribution has a single allocation", () => {
         let ledger;
         const allocation = {
-          policy: {policyType: "IMMEDIATE", budget: nng("10")},
+          policy: {
+            policyType: "IMMEDIATE",
+            budget: nng("10"),
+            numIntervalsLookback: 1,
+          },
           id: allocationId1,
           receipts: [
             {amount: g("3"), id: id1},
@@ -901,7 +905,11 @@ describe("core/ledger/ledger", () => {
       describe("when the distribution has multiple allocations", () => {
         let ledger;
         const allocation1 = {
-          policy: {policyType: "IMMEDIATE", budget: nng("10")},
+          policy: {
+            policyType: "IMMEDIATE",
+            budget: nng("10"),
+            numIntervalsLookback: 1,
+          },
           id: allocationId1,
           receipts: [
             {amount: g("3"), id: id1},
@@ -988,7 +996,11 @@ describe("core/ledger/ledger", () => {
       describe("when there are multiple distributions", () => {
         let ledger;
         const allocation1 = {
-          policy: {policyType: "IMMEDIATE", budget: nng("10")},
+          policy: {
+            policyType: "IMMEDIATE",
+            budget: nng("10"),
+            numIntervalsLookback: 1,
+          },
           id: allocationId1,
           receipts: [
             {amount: g("3"), id: id1},
@@ -1085,7 +1097,11 @@ describe("core/ledger/ledger", () => {
       it("fails if any receipt has invalid id", () => {
         const ledger = ledgerWithActiveIdentities();
         const allocation = {
-          policy: {policyType: "IMMEDIATE", budget: nng("7")},
+          policy: {
+            policyType: "IMMEDIATE",
+            budget: nng("7"),
+            numIntervalsLookback: 1,
+          },
           id: uuid.random(),
           receipts: [
             {id: id1, amount: g("3")},
@@ -1103,7 +1119,11 @@ describe("core/ledger/ledger", () => {
       it("fails if any receipt has invalid amount", () => {
         const ledger = ledgerWithActiveIdentities();
         const allocation = {
-          policy: {policyType: "IMMEDIATE", budget: nng("7")},
+          policy: {
+            policyType: "IMMEDIATE",
+            budget: nng("7"),
+            numIntervalsLookback: 1,
+          },
           id: uuid.random(),
           receipts: [
             {id: id1, amount: g("3")},
@@ -1122,7 +1142,11 @@ describe("core/ledger/ledger", () => {
         const ledger = ledgerWithIdentities();
         ledger.activate(id1);
         const allocation = {
-          policy: {policyType: "IMMEDIATE", budget: nng("7")},
+          policy: {
+            policyType: "IMMEDIATE",
+            budget: nng("7"),
+            numIntervalsLookback: 1,
+          },
           id: uuid.random(),
           receipts: [
             {id: id1, amount: g("3")},
@@ -1425,7 +1449,11 @@ describe("core/ledger/ledger", () => {
         allocations: [
           {
             id: allocationId,
-            policy: {policyType: "IMMEDIATE", budget: nng("100")},
+            policy: {
+              policyType: "IMMEDIATE",
+              budget: nng("100"),
+              numIntervalsLookback: 1,
+            },
             receipts: [
               {id: id1, amount: g("50")},
               {id: id2, amount: g("50")},

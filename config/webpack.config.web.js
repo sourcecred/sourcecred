@@ -13,7 +13,7 @@ const webpack = require("webpack");
 
 const RemoveBuildDirectoryPlugin = require("./RemoveBuildDirectoryPlugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const ManifestPlugin = require("webpack-manifest-plugin");
+const {WebpackManifestPlugin} = require("webpack-manifest-plugin");
 const StaticSiteGeneratorPlugin = require("static-site-generator-webpack-plugin");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const paths = require("./paths");
@@ -21,10 +21,7 @@ const getClientEnvironment = require("./env");
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
-
-async function makeConfig(
-  mode /*: "production" | "development" */
-) /*: Promise<mixed> */ {
+function makeConfig(mode /*: "production" | "development" */) /*: Object */ {
   return {
     // Don't attempt to continue if there are any errors.
     bail: true,
@@ -44,9 +41,9 @@ async function makeConfig(
       before: (app /*: ExpressApp<ExpressRequest, ExpressResponse> */) => {
         let developmentInstancePath /*: ?string */ =
           process.env["SOURCECRED_DEV_INSTANCE"];
-        const argv = process.argv;
-        if (argv[argv.length - 2] === "--instance") {
-          developmentInstancePath = argv[argv.length - 1];
+        const instance /*: ?string */ = process.env["INSTANCE"];
+        if (instance != null) {
+          developmentInstancePath = instance;
         }
         if (developmentInstancePath == null) {
           developmentInstancePath = "sharness/__snapshots__/test-instance";
@@ -248,7 +245,7 @@ async function makeConfig(
         },
       ],
     },
-    plugins: await plugins(mode),
+    plugins: plugins(mode),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
     node: {
@@ -262,7 +259,7 @@ async function makeConfig(
   };
 }
 
-async function plugins(mode /*: "development" | "production" */) {
+function plugins(mode /*: "development" | "production" */) {
   // TODO: When we have switched fully to the instance system, we can remove
   // the projectIds argument.
   const env = getClientEnvironment(null);
@@ -286,7 +283,7 @@ async function plugins(mode /*: "development" | "production" */) {
     // Generate a manifest file which contains a mapping of all asset filenames
     // to their corresponding output file so that tools can pick it up without
     // having to parse `index.html`.
-    new ManifestPlugin({
+    new WebpackManifestPlugin({
       fileName: "asset-manifest.json",
     }),
     // Moment.js is an extremely popular library that bundles large locale files

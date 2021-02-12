@@ -103,15 +103,14 @@ on our Discord. You can also come to our weekly dev meeting, on Mondays at 12pm 
 
 ### Dependencies
 
-- Install [Node] (tested on v12.x.x and v10.x.x).
-- Install [Yarn] (tested on v1.7.0).
+- Install [Node] (tested on v14.x.x, v12.x.x and v10.x.x).
+- Install [Yarn] (tested on v1.7.0-v1.22.10).
 - For macOS users: Ensure that your environment provides GNU
-  coreutils. [See this comment for details about what, how, and
-  why.][macos-gnu]
+  coreutils. [See this comment for instructions.][macos-gnu]
 
 [node]: https://nodejs.org/en/
 [yarn]: https://yarnpkg.com/lang/en/
-[macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
+[macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-504217874
 
 If you want to work on the GitHub plugin, you should
 create a [GitHub API token]. No special permissions are required.

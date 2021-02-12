@@ -12,7 +12,7 @@ const getClientEnvironment = require("./env");
 
 const env = getClientEnvironment(null);
 
-module.exports = ({
+const baseConfig = {
   // Don't attempt to continue if there are any errors.
   bail: true,
   node: {
@@ -33,6 +33,7 @@ module.exports = ({
     chunkFilename: "[name].[chunkhash:8].chunk.js",
     libraryTarget: "umd",
     library: "sourcecred",
+    libraryExport: "default",
     // Use `this` for compatibility with both Node and browser.
     globalObject: "this",
   },
@@ -72,4 +73,26 @@ module.exports = ({
     new webpack.DefinePlugin(env.individuallyStringified),
   ],
   mode: process.env.NODE_ENV,
-} /*: any */);
+};
+
+const client = {
+  ...baseConfig,
+  target: "web",
+  output: {
+    ...baseConfig.output,
+    path: `${paths.apiBuild}/client`,
+    libraryTarget: "umd",
+  },
+};
+
+const server = {
+  ...baseConfig,
+  target: "node",
+  output: {
+    ...baseConfig.output,
+    path: `${paths.apiBuild}/server`,
+    libraryTarget: "commonjs",
+  },
+};
+
+module.exports = ([client, server] /*: Array<any>*/);

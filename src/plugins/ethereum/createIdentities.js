@@ -6,7 +6,7 @@ import {JsonLog} from "../../util/jsonLog";
 import {type EthAddress} from "./ethAddress";
 import {nodeAddressForEthAddress} from "./ethAddressNode";
 
-export function _createIdentity(address: EthAddress): IdentityProposal {
+export function createIdentity(address: EthAddress): IdentityProposal {
   const alias = {
     description: address,
     address: nodeAddressForEthAddress(address),
@@ -23,5 +23,5 @@ export function _createIdentity(address: EthAddress): IdentityProposal {
 export function createIdentities(
   ethAddresses: JsonLog<EthAddress>
 ): $ReadOnlyArray<IdentityProposal> {
-  return Array.from(ethAddresses.values()).map(_createIdentity);
+  return Array.from(ethAddresses.values()).map(createIdentity);
 }

@@ -59,7 +59,9 @@ export function processIdentities(
     };
   });
   if (!hasPositiveCred) {
-    throw new Error("cred is zero");
+    throw new Error(
+      "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
+    );
   }
   return results;
 }

@@ -23,7 +23,11 @@ describe("core/credGrainView", () => {
     const id1 = GraphUtil.participant1.id;
     const id2 = GraphUtil.participant2.id;
     const allocation1 = {
-      policy: {policyType: "IMMEDIATE", budget: nng("10")},
+      policy: {
+        policyType: "IMMEDIATE",
+        budget: nng("10"),
+        numIntervalsLookback: 1,
+      },
       id: allocationId1,
       receipts: [
         {amount: g("3"), id: id1},
@@ -289,7 +293,11 @@ describe("core/credGrainView", () => {
     const id1 = GraphUtil.participant1.id;
     const id2 = GraphUtil.participant2.id;
     const allocation1 = {
-      policy: {policyType: "IMMEDIATE", budget: nng("10")},
+      policy: {
+        policyType: "IMMEDIATE",
+        budget: nng("10"),
+        numIntervalsLookback: 1,
+      },
       id: allocationId1,
       receipts: [
         {amount: g("3"), id: id1},

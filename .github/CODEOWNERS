@@ -1,17 +1,23 @@
 # Reference: https://bit.ly/2XlscBF
+
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence
-* @decentralion @hammadj @blueridger @topocount
+# https://github.com/orgs/sourcecred/teams/sourcecred-reviewers
+* @sourcecred/sourcecred-reviewers
 
 # Core libraries
-/src/util/ @decentralion @blueridger
-/src/core/ @decentralion @blueridger
-/src/analysis/ @decentralion @blueridger
+# https://github.com/orgs/sourcecred/teams/core-reviewers
+/src/util/ @sourcecred/core-reviewers
+/src/core/ @sourcecred/core-reviewers
+/src/analysis/ @sourcecred/core-reviewers
 /src/graphql/ @wchargin
-/src/core/credrank/ @decentralion @blueridger @wchargin
+# https://github.com/orgs/sourcecred/teams/credrank-reviewers
+/src/core/credrank/ @sourcecred/credrank-reviewers
 
-# Ledger
-/src/ledger/ @decentralion @blueridger @topocount
+# Grain Policies
+# https://github.com/orgs/sourcecred/teams/grain-reviewers
+/src/core/ledger/policies/ @sourcecred/grain-reviewers
 
 # UI
-/src/ui/ @topocount @hammadj @KuraFire
+# https://github.com/orgs/sourcecred/teams/ui-reviewers
+/src/ui/ @sourcecred/ui-reviewers @KuraFire

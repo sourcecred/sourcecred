@@ -9,7 +9,7 @@ import {
   reactionWeight,
 } from "./reactionWeights";
 
-describe("plugins/experimental-discord/reactionWeights", () => {
+describe("plugins/discord/reactionWeights", () => {
   const channelId = "1";
   const messageId = "2";
   const authorId = "4";
@@ -28,7 +28,7 @@ describe("plugins/experimental-discord/reactionWeights", () => {
     timestampMs: 1,
     content: "hello world",
     reactionEmoji: [heartEmoji, sourcecredEmoji],
-    mentions: [reacterId],
+    mentions: [{userId: reacterId, count: 1}],
   });
 
   const authorMember: GuildMember = deepFreeze({

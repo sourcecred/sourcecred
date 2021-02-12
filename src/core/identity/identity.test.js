@@ -35,7 +35,7 @@ describe("core/identity/identity", () => {
       expect(fail).toThrowError("invalid name");
     });
     it("errors on invalid subtype", () => {
-      // $FlowExpectedError[incompatible-call]
+      // $FlowExpectedError[prop-missing]
       const fail = () => newIdentity("FOO", "name");
       expect(fail).toThrowError("invalid identity subtype: ");
     });

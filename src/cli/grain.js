@@ -9,17 +9,27 @@ import {Ledger} from "../core/ledger/ledger";
 import {applyDistributions} from "../core/ledger/applyDistributions";
 import {computeCredAccounts} from "../core/ledger/credAccounts";
 import stringify from "json-stable-stringify";
-import * as G from "../core/ledger/grain";
 import dedent from "../util/dedent";
-
 import * as GrainConfig from "../api/grainConfig";
 import type {Command} from "./command";
+import {distributionMarkdownSummary} from "../core/ledger/distributionSummary/distributionSummary";
+import {loadCurrencyDetails} from "../cli/common";
+import {type CurrencyDetails} from "../api/currencyConfig";
+import {allocationMarkdownSummary} from "../core/ledger/distributionSummary/allocationSummary";
+import * as G from "../core/ledger/grain";
 
 function die(std, message) {
   std.err("fatal: " + message);
   return 1;
 }
 
+/**
+ * The grain command is soon to be deprecated, as part of a transition
+ * to @blueridger's `CredGrainView`.  This original grain command uses
+ * `CredView`, which will be deprecated.
+ *
+ * grain2 forks this command and eliminates the dependence on `CredView`
+ */
 const grainCommand: Command = async (args, std) => {
   let simulation = false;
   if (args.length === 1 && (args[0] === "--simulation" || args[0] === "-s")) {
@@ -41,6 +51,11 @@ const grainCommand: Command = async (args, std) => {
   const ledgerPath = join(baseDir, "data", "ledger.json");
   const ledger = Ledger.parse(
     await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
+  );
+
+  const currencyDetailsPath = join(baseDir, "config", "currencyDetails.json");
+  const currencyDetails: CurrencyDetails = await loadCurrencyDetails(
+    currencyDetailsPath
   );
 
   const distributions = applyDistributions(
@@ -65,8 +80,16 @@ const grainCommand: Command = async (args, std) => {
     simulation ? `——SIMULATED DISTRIBUTION——\n` : ``,
     `Distributed ${G.format(totalDistributed)} to ${
       recipientIdentities.size
-    } identities in ${distributions.length} distributions`
+    } identities in ${distributions.length} distributions`,
+    `\n`
   );
+
+  distributions.map((d) => {
+    console.log(distributionMarkdownSummary(d, ledger, currencyDetails));
+    d.allocations.map((a) => {
+      console.log(allocationMarkdownSummary(d, a, ledger));
+    });
+  });
 
   if (!simulation) {
     await fs.writeFile(ledgerPath, ledger.serialize());
