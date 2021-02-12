@@ -203,12 +203,26 @@ export const ExplorerHome = ({
   const [selectedInterval, setSelectedInterval] = useState<Interval>(
     TIMEFRAME_OPTIONS[1].selector(initialView.intervals())
   );
+  const [checkboxes, setCheckboxes] = useState({
+    [IdentityTypes.USER]: false,
+    [IdentityTypes.ORGANIZATION]: false,
+    [IdentityTypes.BOT]: false,
+    [IdentityTypes.PROJECT]: false,
+  });
+
   const updateTimeframe = (index) => {
     setTab(index);
     setSelectedInterval(
       TIMEFRAME_OPTIONS[index].selector(initialView.intervals())
     );
   };
+
+  const allTimeContributionCharts = {};
+  for (const participant of initialView.participants()) {
+    allTimeContributionCharts[String(participant.identity.id)] =
+      participant.credPerInterval;
+  }
+
   const timeScopedCredGrainView = useMemo(
     () =>
       initialView.withTimeScope(
@@ -217,12 +231,6 @@ export const ExplorerHome = ({
       ),
     [selectedInterval]
   );
-  const [checkboxes, setCheckboxes] = useState({
-    [IdentityTypes.USER]: false,
-    [IdentityTypes.ORGANIZATION]: false,
-    [IdentityTypes.BOT]: false,
-    [IdentityTypes.PROJECT]: false,
-  });
 
   const allParticipants = useMemo(
     () => Array.from(timeScopedCredGrainView.participants()),
@@ -510,7 +518,11 @@ export const ExplorerHome = ({
                         {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
                       <TableCell align="right">
-                        <CredTimeline data={row.credPerInterval} />
+                        <CredTimeline
+                          data={
+                            allTimeContributionCharts[String(row.identity.id)]
+                          }
+                        />
                       </TableCell>
                     </TableRow>
                   ))
