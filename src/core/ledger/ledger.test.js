@@ -3,6 +3,15 @@
 import {NodeAddress} from "../graph";
 import {Ledger} from "./ledger";
 import {newIdentity} from "../identity";
+import {
+  parseAddress as parseEthAddress,
+  ETH_CURRENCY_ADDRESS,
+} from "../../plugins/ethereum/ethAddress";
+import {
+  type EvmChainId,
+  parseEvmChainId,
+  protocolSymbolParser,
+} from "./currency";
 import * as G from "./grain";
 import * as uuid from "../../util/uuid";
 import {
@@ -52,6 +61,7 @@ describe("core/ledger/ledger", () => {
           paid: "0",
           balance: "0",
           active: false,
+          payoutAddresses: new Map(),
           identity,
           allocationHistory: [],
         });
@@ -520,6 +530,75 @@ describe("core/ledger/ledger", () => {
         expect(before.id).toEqual(after.id);
         expect(before.name).toEqual(after.name);
       });
+      it("preserve's base account's payout address when a conflict exists", () => {
+        const fullAddress = parseEthAddress(
+          "0xffffffffffffffffffffffffffffffffffffffff"
+        );
+        const nearlyFullAddress = parseEthAddress(
+          "0xfffffffffffffffffffffffffffffffffffffff0"
+        );
+        const ledger = ledgerWithActiveIdentities();
+        ledger.setPayoutAddress(
+          id1,
+          fullAddress,
+          parseEvmChainId("1"),
+          ETH_CURRENCY_ADDRESS
+        );
+        ledger.setPayoutAddress(
+          id2,
+          nearlyFullAddress,
+          parseEvmChainId("1"),
+          ETH_CURRENCY_ADDRESS
+        );
+        const before = ledger.account(id1).payoutAddresses;
+        ledger.mergeIdentities({base: id1, target: id2});
+        const after = ledger.account(id1).payoutAddresses;
+        expect(before).toEqual(after);
+      });
+      it("preserves target account's nonconflicting Payout Address", () => {
+        const nearlyFullAddress = parseEthAddress(
+          "0xfffffffffffffffffffffffffffffffffffffff0"
+        );
+        const ledger = ledgerWithActiveIdentities();
+        ledger.setPayoutAddress(
+          id2,
+          nearlyFullAddress,
+          parseEvmChainId("1"),
+          ETH_CURRENCY_ADDRESS
+        );
+        const before = ledger.account(id2).payoutAddresses;
+        ledger.mergeIdentities({base: id1, target: id2});
+        const after = ledger.account(id1).payoutAddresses;
+        expect(before).toEqual(after);
+      });
+      it("merges non-conflicting payoutAddresses", () => {
+        const fullAddress = parseEthAddress(
+          "0xffffffffffffffffffffffffffffffffffffffff"
+        );
+        const nearlyFullAddress = parseEthAddress(
+          "0xfffffffffffffffffffffffffffffffffffffff0"
+        );
+        const ledger = ledgerWithActiveIdentities();
+        ledger.setPayoutAddress(
+          id1,
+          fullAddress,
+          parseEvmChainId("2"),
+          ETH_CURRENCY_ADDRESS
+        );
+        ledger.setPayoutAddress(
+          id2,
+          nearlyFullAddress,
+          parseEvmChainId("1"),
+          ETH_CURRENCY_ADDRESS
+        );
+        const mergedAddresses = new Map([
+          ...ledger.account(id2).payoutAddresses.entries(),
+          ...ledger.account(id1).payoutAddresses.entries(),
+        ]);
+        ledger.mergeIdentities({base: id1, target: id2});
+        const after = ledger.account(id1).payoutAddresses;
+        expect(mergedAddresses).toEqual(after);
+      });
       it("fails without mutation when base identity doesn't exist", () => {
         const ledger = ledgerWithActiveIdentities();
         failsWithoutMutation(
@@ -628,6 +707,7 @@ describe("core/ledger/ledger", () => {
         balance: "0",
         active: true,
         allocationHistory: [],
+        payoutAddresses: new Map(),
       });
       expect(ledger.eventLog()).toEqual([
         expect.anything(),
@@ -651,6 +731,7 @@ describe("core/ledger/ledger", () => {
         balance: "0",
         active: false,
         allocationHistory: [],
+        payoutAddresses: new Map(),
       });
       expect(ledger.eventLog()).toEqual([
         expect.anything(),
@@ -722,6 +803,7 @@ describe("core/ledger/ledger", () => {
             allocationId: allocationId1,
           },
         ],
+        payoutAddresses: new Map(),
       });
     });
 
@@ -799,6 +881,70 @@ describe("core/ledger/ledger", () => {
         expect(ledger.accountByName("target")).toEqual(null);
       });
     });
+
+    describe("setPayoutAddress", () => {
+      const ethAddress = parseEthAddress(
+        "0x0000000000000000000000000000000000000000"
+      );
+      const fullAddress = parseEthAddress(
+        "0xffffffffffffffffffffffffffffffffffffffff"
+      );
+      const evmChainId: EvmChainId = parseEvmChainId("1");
+
+      const btcChainId = protocolSymbolParser.parseOrThrow("BTC");
+
+      const evmId = {
+        type: "EVM",
+        chainId: evmChainId,
+        tokenAddress: ethAddress,
+      };
+      const protocolId = {type: "PROTOCOL", chainId: btcChainId};
+
+      const setupLedgerwithPayoutAddress = (): Ledger => {
+        const ledger = ledgerWithIdentities();
+        ledger.setPayoutAddress(id1, fullAddress, evmChainId, ethAddress);
+        return ledger;
+      };
+
+      it("can set a payout address for an existing user", () => {
+        const ledger = setupLedgerwithPayoutAddress();
+        const account = ledger.account(id1);
+        expect(account.payoutAddresses.get(JSON.stringify(evmId))).toBe(
+          fullAddress
+        );
+      });
+      it("can delete a payout address for an existing user", () => {
+        const ledger = setupLedgerwithPayoutAddress();
+        ledger.setPayoutAddress(id1, null, evmChainId, ethAddress);
+        const account = ledger.account(id1);
+        expect(account.payoutAddresses.get(evmId.toString())).toBe(undefined);
+      });
+      it("cannot set an address for a non-existent user", () => {
+        const badId = uuid.random();
+        const ledger = setupLedgerwithPayoutAddress();
+        const thunk = () =>
+          ledger.setPayoutAddress(badId, fullAddress, evmChainId, ethAddress);
+
+        expect(thunk).toThrow(
+          `setPayoutAddress: no identity matches id ${badId}`
+        );
+      });
+      it("cannot set a payable address with an invalid EthAddress", () => {
+        const ledger = setupLedgerwithPayoutAddress();
+        const thunk = () =>
+          // $FlowExpectedError[incompatible-call]
+          ledger.setPayoutAddress(id1, "0x0", evmChainId, ethAddress);
+        expect(thunk).toThrow("setPayoutAddress: invalid payout address: 0x0");
+      });
+      it("works with a non-EVM protocol Id", () => {
+        const ledger = ledgerWithIdentities();
+        ledger.setPayoutAddress(id1, fullAddress, btcChainId);
+        const account = ledger.account(id1);
+        expect(account.payoutAddresses.get(JSON.stringify(protocolId))).toBe(
+          fullAddress
+        );
+      });
+    });
   });
 
   describe("grain updates", () => {
@@ -867,6 +1013,7 @@ describe("core/ledger/ledger", () => {
             balance: g("3"),
             paid: g("3"),
             active: true,
+            payoutAddresses: new Map(),
             allocationHistory: [
               {
                 grainReceipt: {id: id1, amount: g("3")},
@@ -880,6 +1027,7 @@ describe("core/ledger/ledger", () => {
             balance: g("7"),
             paid: g("7"),
             active: true,
+            payoutAddresses: new Map(),
             allocationHistory: [
               {
                 grainReceipt: {id: id2, amount: g("7")},
@@ -941,6 +1089,7 @@ describe("core/ledger/ledger", () => {
             balance: g("13"),
             paid: g("13"),
             active: true,
+            payoutAddresses: new Map(),
             allocationHistory: [
               {
                 grainReceipt: {id: id1, amount: g("3")},
@@ -959,6 +1108,7 @@ describe("core/ledger/ledger", () => {
             balance: g("17"),
             paid: g("17"),
             active: true,
+            payoutAddresses: new Map(),
             allocationHistory: [
               {
                 grainReceipt: {id: id2, amount: g("7")},
@@ -1038,6 +1188,7 @@ describe("core/ledger/ledger", () => {
             balance: g("13"),
             paid: g("13"),
             active: true,
+            payoutAddresses: new Map(),
             allocationHistory: [
               {
                 grainReceipt: {id: id1, amount: g("3")},
@@ -1056,6 +1207,7 @@ describe("core/ledger/ledger", () => {
             balance: g("17"),
             paid: g("17"),
             active: true,
+            payoutAddresses: new Map(),
             allocationHistory: [
               {
                 grainReceipt: {id: id2, amount: g("7")},
@@ -1230,6 +1382,7 @@ describe("core/ledger/ledger", () => {
               allocationId: allocationId1,
             },
           ],
+          payoutAddresses: new Map(),
         };
         const account2 = {
           identity: identity2(),
@@ -1243,6 +1396,7 @@ describe("core/ledger/ledger", () => {
               allocationId: allocationId2,
             },
           ],
+          payoutAddresses: new Map(),
         };
         expect(ledger.account(id1)).toEqual(account1);
         expect(ledger.account(id2)).toEqual(account2);
@@ -1314,6 +1468,7 @@ describe("core/ledger/ledger", () => {
               allocationId: allocationId1,
             },
           ],
+          payoutAddresses: new Map(),
         };
         expect(ledger.account(id1)).toEqual(account);
       });

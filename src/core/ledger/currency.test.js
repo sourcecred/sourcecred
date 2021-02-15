@@ -1,6 +1,7 @@
 // @flow
 
-import {parseEvmChainId} from "./currency";
+import {parseEvmChainId, buildCurrency} from "./currency";
+import {ETH_CURRENCY_ADDRESS} from "../../plugins/ethereum/ethAddress";
 
 describe("core/ledger/currency", () => {
   describe("parseEvmChainId", () => {
@@ -19,6 +20,23 @@ describe("core/ledger/currency", () => {
         expect(() => parseEvmChainId(x.toString())).toThrow(
           `Invalid EVM chainId value: ${x}`
         );
+      });
+    });
+  });
+  describe("buildCurrency", () => {
+    it("can build an evmId", () => {
+      const result = buildCurrency(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS);
+      expect(result).toEqual({
+        type: "EVM",
+        chainId: "1",
+        tokenAddress: ETH_CURRENCY_ADDRESS,
+      });
+    });
+    it("can build a Protocol Identifier", () => {
+      const result = buildCurrency("BTC");
+      expect(result).toEqual({
+        type: "PROTOCOL",
+        chainId: "BTC",
       });
     });
   });

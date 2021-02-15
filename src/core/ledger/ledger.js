@@ -21,6 +21,12 @@ import {
   identityParser,
   identityTypeParser,
 } from "../identity";
+import {
+  type Currency,
+  type ChainId,
+  currencyParser,
+  buildCurrency,
+} from "./currency";
 import {type NodeAddressT, NodeAddress} from "../graph";
 import {type TimestampMs} from "../../util/timestamp";
 import * as NullUtil from "../../util/null";
@@ -30,6 +36,10 @@ import {
   type DistributionId,
   parser as distributionParser,
 } from "./distribution";
+import {
+  ethAddressParser,
+  type EthAddress,
+} from "../../plugins/ethereum/ethAddress";
 import * as G from "./grain";
 import {JsonLog} from "../../util/jsonLog";
 import * as C from "../../util/combo";
@@ -65,8 +75,29 @@ type MutableAccount = {|
   // may not receive or transfer Grain. Accounts start inactive, and must
   // be explicitly activated.
   active: boolean,
+  // key-value store of blockchain addresses the account receives grain to
+  payoutAddresses: PayableAddressStore,
 |};
 export type Account = $ReadOnly<MutableAccount>;
+
+/**
+ * The Currency key must be stringified to ensure the data is retrievable.
+ * Keying on the raw Currency object means keying on the object reference,
+ * rather than the contents of the object.
+ */
+type CurrencyId = string;
+
+// Only Eth Addresses are supported at the moment
+type PayoutAddress = EthAddress;
+
+/**
+ * PayableAddressStore maps currencies to a participant's
+ * address capable of accepting the currency. This structure exists to
+ * accomodate safe migration for grain/payout token changes. Users must verify
+ * themselves that the address they are supplying is capable of receiving their
+ * share of a grain distribution.
+ */
+type PayableAddressStore = Map<CurrencyId, PayoutAddress>;
 
 /**
  * The Ledger is an append-only auditable data store which tracks
@@ -287,6 +318,7 @@ export class Ledger {
       identity,
       active: false,
       allocationHistory: [],
+      payoutAddresses: new Map(),
     });
   }
 
@@ -346,6 +378,12 @@ export class Ledger {
     baseAccount.allocationHistory = baseAccount.allocationHistory
       .concat(targetAccount.allocationHistory)
       .sort((a, b) => a.credTimestampMs - b.credTimestampMs);
+    // merge payout payoutAddresses under one account, but don't overwrite base
+    // account entries
+    baseAccount.payoutAddresses = new Map([
+      ...targetAccount.payoutAddresses.entries(),
+      ...baseAccount.payoutAddresses.entries(),
+    ]);
     baseAccount.balance = G.add(baseAccount.balance, targetAccount.balance);
     this._accounts.delete(targetIdentity.id);
     this._nameToId.delete(targetIdentity.name);
@@ -663,6 +701,61 @@ export class Ledger {
   }
 
   /**
+   * setPayoutAddress allows participants to set a payable address to collect
+   * grain. These addresses are keyed on a specific currency, which ensures that
+   * users don't erroneously receive a grain distribution to an address that
+   * cannot handle it (such as a custodial wallet, or rigidly-designed
+   * contract) and effectively lose that reward.
+   *
+   * An address may be deleted by passing in `null` for the
+   * `payoutAddress` parameter. This is useful in case the underlying private key
+   * is compromised or the exchange hosting a custodial account is hacked.
+   */
+  setPayoutAddress(
+    id: IdentityId,
+    payoutAddress: PayoutAddress | null,
+    chainId: ChainId,
+    tokenAddress?: EthAddress
+  ): Ledger {
+    this._createAndProcessEvent({
+      type: "SET_PAYOUT_ADDRESS",
+      id,
+      payoutAddress,
+      currency: buildCurrency(chainId, tokenAddress),
+    });
+    return this;
+  }
+  _setPayoutAddress({id, currency, payoutAddress}: SetPayoutAddress) {
+    if (!this._accounts.has(id)) {
+      throw new Error(`setPayoutAddress: no identity matches id ${id}`);
+    }
+    const account = this._mutableAccount(id);
+    const currencyResult = currencyParser.parse(currency);
+    if (!currencyResult.ok) {
+      throw new Error(
+        `Invalid chainId or tokenAddress:
+        ${currencyResult.err}`
+      );
+    }
+    if (payoutAddress !== null) {
+      const addressResult = ethAddressParser.parse(payoutAddress);
+      if (!addressResult.ok) {
+        throw new Error(
+          `setPayoutAddress: invalid payout address: ${payoutAddress}`
+        );
+      }
+      // Mutations! Method must not fail below this comment.
+      account.payoutAddresses.set(
+        JSON.stringify(currencyResult.value),
+        payoutAddress
+      );
+      return;
+    }
+    // else (payoutAddress === null) and we delete the entry
+    account.payoutAddresses.delete(JSON.stringify(currencyResult.value));
+  }
+
+  /**
    * Retrieve the log of all actions in the Ledger's history.
    *
    * May be used to reconstruct the Ledger after serialization.
@@ -735,6 +828,9 @@ export class Ledger {
       case "CHANGE_IDENTITY_TYPE":
         this._changeIdentityType(action);
         break;
+      case "SET_PAYOUT_ADDRESS":
+        this._setPayoutAddress(action);
+        break;
       // istanbul ignore next: unreachable per Flow
       default:
         throw new Error(`Unknown type: ${(action.type: empty)}`);
@@ -801,7 +897,8 @@ type Action =
   | ToggleActivation
   | DistributeGrain
   | TransferGrain
-  | ChangeIdentityType;
+  | ChangeIdentityType
+  | SetPayoutAddress;
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
@@ -881,6 +978,21 @@ export type TransferGrain = {|
   +amount: G.Grain,
   +memo: string | null,
 |};
+
+type SetPayoutAddress = {|
+  +type: "SET_PAYOUT_ADDRESS",
+  +id: IdentityId,
+  +currency: Currency,
+  +payoutAddress: EthAddress | null,
+|};
+
+const setPayoutAddressParser: C.Parser<SetPayoutAddress> = C.object({
+  type: C.exactly(["SET_PAYOUT_ADDRESS"]),
+  id: uuid.parser,
+  currency: currencyParser,
+  payoutAddress: ethAddressParser,
+});
+
 const transferGrainParser: C.Parser<TransferGrain> = C.object({
   type: C.exactly(["TRANSFER_GRAIN"]),
   from: uuid.parser,
@@ -898,6 +1010,7 @@ const actionParser: C.Parser<Action> = C.orElse([
   toggleActivationParser,
   distributeGrainParser,
   transferGrainParser,
+  setPayoutAddressParser,
 ]);
 
 const ledgerEventParser: C.Parser<LedgerEvent> = C.object({
