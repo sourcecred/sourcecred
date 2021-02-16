@@ -1571,9 +1571,15 @@ describe("core/ledger/ledger", () => {
         failsWithoutMutation(ledger, thunk, "invalid timestamp");
       }
     });
+    it("lastDistributionTimestamp returns -Infinity if there have not been any distributions", () => {
+      // consider changing this behavior; see
+      // https://github.com/sourcecred/sourcecred/issues/2744
+      const ledger = new Ledger();
+      expect(ledger.lastDistributionTimestamp()).toEqual(-Infinity);
+    });
   });
 
-  describe("timestamps", () => {
+  describe("uuids", () => {
     it("ledger events have uuids", () => {
       const ledger = new Ledger();
       resetFakeUuid();

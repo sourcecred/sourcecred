@@ -797,8 +797,15 @@ export class Ledger {
    *
    * We provide this because we may want to have a policy that issues one
    * distribution for each interval in the history of the project.
+   *
+   * If there were never any distributions, then -Infinity will be returned.
    */
   lastDistributionTimestamp(): TimestampMs {
+    // TODO(#2744): Amend interface to return null instead of -Infinity
+    // This will be a better interface primarily because in flow checking, it's
+    // easy for the client to not realize that -Infinity could get returned, and
+    // making an explicit return `TimestampMs | null` type will encourage callers
+    // to handle the edge case explicitly.
     return this._lastDistributionTimestamp;
   }
 
