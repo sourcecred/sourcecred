@@ -4,7 +4,11 @@
         "autoInjectStartingPeriodWeight": 0.05,
         "id": "2zWwkGHnBGXmEcYneeWAzw",
         "name": "SourceCred",
-        "periods": [{"startTime": "2019-01-01", "weight": 0.05}]
+        "periods": [
+            {
+                "startTime": "2019-01-01",
+                "weight": 0.05
+            }
+        ]
     }
 ]
-
