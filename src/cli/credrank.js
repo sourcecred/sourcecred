@@ -1,20 +1,16 @@
 // @flow
 
-import fs from "fs-extra";
-import stringify from "json-stable-stringify";
-import {join as pathJoin} from "path";
 import {sum} from "d3-array";
 import {format} from "d3-format";
 
 import sortBy from "../util/sortBy";
-import {credrank} from "../core/credrank/compute";
+import {credrank} from "../api/credrank";
 import {CredGraph, type Participant} from "../core/credrank/credGraph";
 import {LoggingTaskReporter} from "../util/taskReporter";
-import {computeBonusMinting, createBonusGraph} from "../core/bonusMinting";
 import type {Command} from "./command";
-import {loadInstanceConfig, prepareCredData, loadCredGraph} from "./common";
-import {merge} from "../core/weightedGraph";
 import {type Uuid} from "../util/uuid";
+import {Instance} from "../api/instance/instance";
+import {LocalInstance} from "../api/instance/localInstance";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -51,28 +47,21 @@ const credrankCommand: Command = async (args, std) => {
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("credrank");
 
-  const baseDir = process.cwd();
-  const config = await loadInstanceConfig(baseDir);
-
   taskReporter.start("load data");
-  const {weightedGraph, ledger, dependencies} = await prepareCredData(
-    baseDir,
-    config
-  );
-  const bonusGraph = createBonusGraph(
-    computeBonusMinting(weightedGraph, dependencies)
-  );
-  const combinedWeightedGraph = merge([weightedGraph, bonusGraph]);
+  const baseDir = process.cwd();
+  const instance: Instance = await new LocalInstance(baseDir);
+  const credrankInput = await instance.readCredrankInput();
   taskReporter.finish("load data");
 
   taskReporter.start("run CredRank");
-  const credGraph = await credrank(combinedWeightedGraph, ledger);
+  const credrankOutput = await credrank(credrankInput);
+  const {credGraph} = credrankOutput;
   taskReporter.finish("run CredRank");
 
   if (shouldIncludeDiff) {
     taskReporter.start("load prior graph");
     try {
-      const priorCredGraph = await loadCredGraph(baseDir);
+      const priorCredGraph = await instance.readCredGraph();
       printCredDiffTable(credGraph, priorCredGraph);
     } catch (e) {
       console.log(
@@ -86,11 +75,9 @@ const credrankCommand: Command = async (args, std) => {
   }
 
   if (!isSimulation) {
-    taskReporter.start("write cred graph");
-    const cgJson = stringify(credGraph.toJSON());
-    const outputPath = pathJoin(baseDir, "output", "credGraph.json");
-    await fs.writeFile(outputPath, cgJson);
-    taskReporter.finish("write cred graph");
+    taskReporter.start("writing changes");
+    instance.writeCredrankOutput(credrankOutput);
+    taskReporter.finish("writing changes");
   }
 
   taskReporter.finish("credrank");
