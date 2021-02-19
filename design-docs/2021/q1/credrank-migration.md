@@ -35,7 +35,7 @@ Presently, the Explorer (src/ui/components/Explorer/Explorer.js) depends on the
 new overview page that depends on `CredGrainView` instead.
 
 We could just port the existing UI over to use `CredGrainView` or we could
-implement the new ExplorerHome frontend described in [#2227]. Due to the tight coupling between the CredView and the old Explorer and the `CredGrainView`, we 
+implement the new ExplorerHome frontend described in [#2227]. Due to the tight coupling between the CredView and the old Explorer and the `CredGrainView`, we
 will proceeed with the latter, implementing the new ExplorerHome and deprecating
 the old Explorer.
 
@@ -48,10 +48,10 @@ exists, and manually ran the cli `credrank` command first.
 
 By deprecating the old Explorer, we'll no longer be able to attribute Cred
 scores to any concrete contributions in the UI, and we'll no longer be able to
-use the weight simulator, at least until we build their replacements. This is 
-not ideal, however the existing contribution list feature is barely functional 
-due to lack of context (it doesn't group contributions by type or time, it only 
-shows the top few individual contributions, which badly misses the forest for a 
+use the weight simulator, at least until we build their replacements. This is
+not ideal, however the existing contribution list feature is barely functional
+due to lack of context (it doesn't group contributions by type or time, it only
+shows the top few individual contributions, which badly misses the forest for a
 few individual trees), and the weight simulator ui is difficult to interpret.
 We'll want to re-implement a better versions of these as part of the frontend
 UI redesign.
@@ -67,21 +67,20 @@ which uses the `CredGrainView` instead.
 Once the new Grain command is available, it should be wired in to the CLI for
 testing, but not actively used until the migration.
 
-
 ## Rollout Steps
 
 This rollout will have two phases:
 
-### 1) Preview of ExplorerHome
+### 1) Preview of ExplorerHome [DONE/CANCELED]
 
 This step will give us some more time to figure out how we will replace the
 weight simulator and contribution explorer features, and to guage user reaction.
-These steps should occur in a single PR and should be followed with a minor 
+These steps should occur in a single PR and should be followed with a minor
 version release.
 
-1. Make the new ExplorerHome visible in the menu to users with a message at
-the top detailing how it uses the new algorithm, is for preview purposes only,
-and does not affect grain payouts yet.
+1. ~~Make the new ExplorerHome visible in the menu to users with a message at
+   the top detailing how it uses the new algorithm, is for preview purposes only,
+   and does not affect grain payouts yet.~~
 2. In src/cli/go.js, update the `go` command to run both `score` and `credrank`
 
 ### 2) Full Rollout
