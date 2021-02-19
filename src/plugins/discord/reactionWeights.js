@@ -30,10 +30,15 @@ export function reactionWeight(
   weights: WeightConfig,
   message: Model.Message,
   reaction: Model.Reaction,
-  reactingMember: Model.GuildMember
+  reactingMember: Model.GuildMember,
+  propsChannels: Set<Model.Snowflake>
 ): NodeWeight {
-  if (message.authorId === reaction.authorId) {
-    // Self-reactions do not mint Cred.
+  if (
+    message.authorId === reaction.authorId &&
+    !propsChannels.has(message.channelId)
+  ) {
+    // Self-reactions do not mint Cred
+    // on channels that are not props channels
     return 0;
   }
 
