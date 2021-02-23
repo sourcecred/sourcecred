@@ -1,5 +1,5 @@
 // @flow
-import React, {useState, type Node as ReactNode} from "react";
+import React, {useEffect, useState, type Node as ReactNode} from "react";
 import {Button, Container, TextField, useMediaQuery} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, format, gt, lt, fromFloatString} from "../../core/ledger/grain";
@@ -62,6 +62,10 @@ const useStyles = makeStyles((theme) => ({
     margin: "0 auto",
     padding: "0 1em 1em",
   },
+  saveButtonContainer:{
+    display: "flex",
+    flexDirection: "column",
+  },
   element: {flex: 1, margin: "20px"},
   arrowInput: {width: "40%", display: "inline-block"},
   pageHeader: {color: theme.palette.text.primary},
@@ -79,7 +83,12 @@ export const Transfer = ({
   const [receiver, setReceiver] = useState<Account | null>(null);
   const [amount, setAmount] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
+  const [isSavedToLedger, setIsSavedToLedger] = useState<boolean>(false);
   const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
+
+  // const handler = (event) => {
+  //   event.preventDefault().
+  // };
 
   const isDisabled =
     !Number(amount) ||
@@ -97,11 +106,25 @@ export const Transfer = ({
       });
       updateLedger(nextLedger);
       setAmount("");
+      setIsSavedToLedger(!isSavedToLedger);
       setSender(nextLedger.account(sender.identity.id));
       setReceiver(nextLedger.account(receiver.identity.id));
       setMemo("");
     }
   };
+
+  const handleSaveToDisk = _ => {
+    setIsSavedToLedger(!isSavedToLedger);
+    saveToDisk();
+  }
+
+  // useEffect(() => {
+  //   window.addEventListener("beforeunload", handler);
+
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handler);
+  //   };
+  // }, []);
 
   return (
     <Container
@@ -187,15 +210,22 @@ export const Transfer = ({
         >
           transfer grain
         </Button>
+        <div
+        >
+        <div>
+        Changes not yet saved to ledger!
+        </div>
         <Button
           size="large"
           color="primary"
           variant="contained"
           className={classes.element}
-          onClick={saveToDisk}
+          onClick={handleSaveToDisk}
+          disabled={!isSavedToLedger}
         >
           save ledger to disk
         </Button>
+        </div>
       </div>
     </Container>
   );
