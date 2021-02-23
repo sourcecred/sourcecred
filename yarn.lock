@@ -8652,10 +8652,10 @@ querystringify@^2.1.1:
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.1.1.tgz#60e5a5fd64a7f8bfa4d2ab2ed6fdf4c85bad154e"
   integrity sha512-w7fLxIRCRT7U8Qu53jQnJyPkYZIaR4n5151KMfcJlO/A9397Wxb1amJvROTK6TOnp7PfoAmg/qXiNHI+08jRfA==
 
-ra-core@^3.12.2:
-  version "3.12.2"
-  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.12.2.tgz#0c506033c6abc39dd5a0551caaed7ab7b0007693"
-  integrity sha512-L9iwVpnuEU/juUMphHjvC7QLO/rwJSFJ2taYbeWQKNBUJITWdKzV9R9w6YY2fvcPflI4iz1tDDe3t3ZQI0OSlA==
+ra-core@^3.12.5:
+  version "3.12.5"
+  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.12.5.tgz#02f1daf45493aad4d6c1c404030446a950c2e05d"
+  integrity sha512-81OKsDM9hH91Od9REFAYmEUK8IaapuPbBbOQUAcZbhHNUWLhuZsKFJKpRBof5Ua/vCButDRINAYPGb7UoRwZ9g==
   dependencies:
     "@testing-library/react" "^11.2.3"
     classnames "~2.2.5"
@@ -8674,25 +8674,25 @@ ra-data-fakerest@^3.6.2:
   dependencies:
     fakerest "^2.2.0"
 
-ra-i18n-polyglot@^3.12.2:
-  version "3.12.2"
-  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.12.2.tgz#144225d10402271a73f1460bff96cc9a5d519de4"
-  integrity sha512-/EYxZkXbvnVSHS5nIFUDcMb5HPgABHsS+h1vnc1Rgo5ZS1D5gfcxUvdUwp9Qg8iMGoVc3+tkmCZzRX/bTiIyjg==
+ra-i18n-polyglot@^3.12.5:
+  version "3.12.5"
+  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.12.5.tgz#d79c4e769b05065bb6fbf1cbb62698a31b8f5bc1"
+  integrity sha512-GOlGC3TdmahuLdwUisOCfZTHR4Gckrh5OfXmEyz+whddJaiiS3EIT+e50wO3WgSNPrknl6R1kouRHm1hwnQk5A==
   dependencies:
     node-polyglot "^2.2.2"
-    ra-core "^3.12.2"
+    ra-core "^3.12.5"
 
-ra-language-english@^3.12.2:
-  version "3.12.2"
-  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.12.2.tgz#ccd1a4f3ad7136a966467a79ecbf77666be1c335"
-  integrity sha512-WBsM4AbTLFffG7QvYTvU2a+uKke+Br3qIhoGeIYWbF173Fko5ykD6iq4hQObWaNsSMZhO+qeGROcAOLmrvEAoQ==
+ra-language-english@^3.12.5:
+  version "3.12.5"
+  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.12.5.tgz#51aae6a133b9b0b447866b0149ecdda3e30e2626"
+  integrity sha512-mcsgWQz2LsKfqrfMsleG0QaN/8s4PnVNAvolPUYm7zySZbLoTzhVWJl2L0Ez5vymrb3YoGTAYN4z+cWMJjlRNQ==
   dependencies:
-    ra-core "^3.12.2"
+    ra-core "^3.12.5"
 
-ra-ui-materialui@^3.12.2:
-  version "3.12.2"
-  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.12.2.tgz#b0115efe0caaebc13c88506ed517aa96def315ad"
-  integrity sha512-xGS2BdergeES3wzbUVQf/E8VpGt+W5/FPv0UixeIc57dYmxZWlzY0pNDNBRt0wWFCYI9VxaVyPlTi+PGGuwqNg==
+ra-ui-materialui@^3.12.5:
+  version "3.12.5"
+  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.12.5.tgz#47db2ee9ddeee6a7eba9f452b119c86174529175"
+  integrity sha512-YGV4otSC4Q/eruOD4TL3QUN7bE/lzvdwf1SkAGp7W5najcQKUeZYZAiCbfYQzgpAyLojq21c8AbmSs3ahUQFSg==
   dependencies:
     autosuggest-highlight "^3.1.1"
     classnames "~2.2.5"
@@ -8778,9 +8778,9 @@ rc@^1.2.7:
     strip-json-comments "~2.0.1"
 
 react-admin@^3.6.2:
-  version "3.12.2"
-  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.12.2.tgz#33cefaf3307dcb9b2ec0d6486d2c3aabe0a720f7"
-  integrity sha512-WOQNvHvwjEQPHfsPKZRZdfMK8LlzHSmVSiN4Byj1TU2xrGeQXjV6RjVDfds1OFPFYBNUnnI7xq00WAtXqRBhcA==
+  version "3.12.5"
+  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.12.5.tgz#74e85d72bac97d972b1f8e2361318025764b3988"
+  integrity sha512-F9R3gLV+OkkuXwy9o9a8y3+FlLV9+9GyQkHrAw6JyjxdWmGz1GDk9gvpmNJUwP3tyRxYJQM3wsEpbSrhJ3RPMA==
   dependencies:
     "@material-ui/core" "^4.11.2"
     "@material-ui/icons" "^4.11.2"
@@ -8788,10 +8788,10 @@ react-admin@^3.6.2:
     connected-react-router "^6.5.2"
     final-form "^4.20.0"
     final-form-arrays "^3.0.1"
-    ra-core "^3.12.2"
-    ra-i18n-polyglot "^3.12.2"
-    ra-language-english "^3.12.2"
-    ra-ui-materialui "^3.12.2"
+    ra-core "^3.12.5"
+    ra-i18n-polyglot "^3.12.5"
+    ra-language-english "^3.12.5"
+    ra-ui-materialui "^3.12.5"
     react-final-form "^6.3.3"
     react-final-form-arrays "^3.1.1"
     react-redux "^7.1.0"
