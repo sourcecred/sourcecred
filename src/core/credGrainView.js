@@ -40,7 +40,7 @@ export type ParticipantCredGrain = {|
   // Total Grain earned during the time scope.
   +grainEarned: Grain,
   // Grain earned in each interval within the time scope.
-  +grainEarnedPerInterval: $ReadOnlyArray<?Grain>,
+  +grainEarnedPerInterval: $ReadOnlyArray<Grain>, 
 |};
 
 /**
@@ -88,7 +88,7 @@ export class CredGrainView {
     );
   }
 
-  _calculateGrainEarnedPerInterval(account: Account): $ReadOnlyArray<?Grain> {
+  _calculateGrainEarnedPerInterval(account: Account): $ReadOnlyArray<Grain> {
     return this._intervals.map((interval) => {
       let grain = G.ZERO;
       account.allocationHistory.forEach((allocationReceipt) => {

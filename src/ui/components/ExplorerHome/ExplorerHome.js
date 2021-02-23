@@ -238,15 +238,28 @@ export const ExplorerHome = ({
   );
 
   const { credTotalsTimeline, grainTotalsTimeline } = useMemo(() => {
-    let credTimeline = Array<number>(timeScopedCredGrainView._intervals.length);
-    let grainTimeline = Array<Grain>(timeScopedCredGrainView._intervals.length);
-
-    allParticipants.forEach((participant, i) => {
-      credTimeline[i] += participant.credPerInterval[i];
-      let currentGrain : Grain = participant.grainEarnedPerInterval[i]
-      grainTimeline[i] = add(currentGrain, grainTimeline[i]);
+    const allParticipantsCred : Array<Array<number>> = allParticipants.map((participant) => {
+      return participant.credPerInterval.slice();
     });
-  }, [allParticipants]);
+    const allParticipantsGrain : Array<Array<Grain>> = allParticipants.map((participant) => {
+      return participant.grainEarnedPerInterval.slice();
+    });
+    const credAccumulator = (credTimelineAccumalator : Array<number>, participantCred) => 
+    credTimelineAccumalator.map(
+        (intervalTotal, i) => intervalTotal + participantCred[i]
+    );
+    const grainAccumulator = (grainTimelineAccumalator : Array<Grain>, participantGrain) => 
+        grainTimelineAccumalator.map(
+          (intervalTotal, i) => add(intervalTotal, participantGrain[i])
+    );
+    const credTimeline : Array<number> = allParticipantsCred.reduce(credAccumulator);
+    const grainTimeline : Array<Grain> = allParticipantsGrain.reduce(grainAccumulator);
+
+    return {
+      credTotalsTimeline: credTimeline,
+      grainTotalsTimeline: grainTimeline  
+    };
+  }, [timeScopedCredGrainView]);
 
   const tsParticipants = useTableState(
     { data: allParticipants },
