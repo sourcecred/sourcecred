@@ -78,7 +78,7 @@
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-react": "7.22.0",
     "file-loader": "^6.0.0",
-    "flow-bin": "^0.135.0",
+    "flow-bin": "^0.145.0",
     "jest": "^26.0.1",
     "jest-fetch-mock": "^3.0.2",
     "jsdoc": "^3.6.6",
