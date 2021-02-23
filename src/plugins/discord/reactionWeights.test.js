@@ -123,7 +123,13 @@ describe("plugins/discord/reactionWeights", () => {
       const channelWeights = {defaultWeight: 1, weights: {[channelId]: 6}};
       const weights = {emojiWeights, roleWeights, channelWeights};
       expect(
-        reactionWeight(weights, message, reacterReaction, reacterMember)
+        reactionWeight(
+          weights,
+          message,
+          reacterReaction,
+          reacterMember,
+          new Set()
+        )
       ).toEqual(4 * 5 * 6);
     });
     it("sets the weight to 0 for a self-reaction", () => {
@@ -132,8 +138,30 @@ describe("plugins/discord/reactionWeights", () => {
       const channelWeights = {defaultWeight: 1, weights: {}};
       const weights = {emojiWeights, roleWeights, channelWeights};
       expect(
-        reactionWeight(weights, message, authorSelfReaction, authorMember)
+        reactionWeight(
+          weights,
+          message,
+          authorSelfReaction,
+          authorMember,
+          new Set()
+        )
       ).toEqual(0);
+    });
+    it("sets a  nonzero-weight for a self-reaction in a props channel", () => {
+      const emojiWeights = {defaultWeight: 5, weights: {}};
+      const roleWeights = {defaultWeight: 2, weights: {}};
+      const channelWeights = {defaultWeight: 3, weights: {}};
+      const weights = {emojiWeights, roleWeights, channelWeights};
+      const propsChannelSet = new Set([message.channelId]);
+      expect(
+        reactionWeight(
+          weights,
+          message,
+          authorSelfReaction,
+          authorMember,
+          propsChannelSet
+        )
+      ).toEqual(5 * 2 * 3);
     });
   });
 });

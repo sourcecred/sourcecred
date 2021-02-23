@@ -327,7 +327,13 @@ export function _createGraphFromMessages(
       const node = reactionNode(reaction, message.timestampMs, guildId);
       wg.weights.nodeWeights.set(
         node.address,
-        reactionWeight(weights, message, reaction, reactingMember)
+        reactionWeight(
+          weights,
+          message,
+          reaction,
+          reactingMember,
+          propsChannels
+        )
       );
       wg.graph.addNode(node);
       wg.graph.addNode(memberNode(reactingMember));
