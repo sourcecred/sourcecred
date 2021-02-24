@@ -1,5 +1,5 @@
 // @flow
-import React, {useEffect, useState, type Node as ReactNode} from "react";
+import React, {useState, type Node as ReactNode} from "react";
 import {Button, Container, TextField, useMediaQuery} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, format, gt, lt, fromFloatString} from "../../core/ledger/grain";
@@ -23,6 +23,10 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     width: "200px",
+  },
+  saveToLedgerAlert: {
+    textAlign: "right",
+    marginRight: "24px",
   },
   triangle: {
     width: 0,
@@ -62,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     margin: "0 auto",
     padding: "0 1em 1em",
   },
-  saveButtonContainer:{
+  saveButtonContainer: {
     display: "flex",
     flexDirection: "column",
   },
@@ -85,10 +89,6 @@ export const Transfer = ({
   const [memo, setMemo] = useState<string>("");
   const [isSavedToLedger, setIsSavedToLedger] = useState<boolean>(false);
   const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
-
-  // const handler = (event) => {
-  //   event.preventDefault().
-  // };
 
   const isDisabled =
     !Number(amount) ||
@@ -113,18 +113,25 @@ export const Transfer = ({
     }
   };
 
-  const handleSaveToDisk = _ => {
+  const handleSaveToDisk = (_) => {
     setIsSavedToLedger(!isSavedToLedger);
     saveToDisk();
-  }
+  };
 
-  // useEffect(() => {
-  //   window.addEventListener("beforeunload", handler);
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handler);
-  //   };
-  // }, []);
+  const handleSaveToLedgerWarning = (_) => {
+    if (
+      isSavedToLedger ||
+      sender !== null ||
+      receiver !== null ||
+      amount !== null
+    ) {
+      return (
+        <div className={classes.saveToLedgerAlert}>
+          Changes not saved to ledger
+        </div>
+      );
+    }
+  };
 
   return (
     <Container
@@ -195,6 +202,7 @@ export const Transfer = ({
           onChange={(e) => setMemo(e.currentTarget.value)}
         />
       </div>
+      {handleSaveToLedgerWarning()}
       <div
         className={`${classes.centerRow} ${
           isXSmall ? classes.verticalElementMobileLayout : ""
@@ -210,21 +218,17 @@ export const Transfer = ({
         >
           transfer grain
         </Button>
-        <div
-        >
         <div>
-        Changes not yet saved to ledger!
-        </div>
-        <Button
-          size="large"
-          color="primary"
-          variant="contained"
-          className={classes.element}
-          onClick={handleSaveToDisk}
-          disabled={!isSavedToLedger}
-        >
-          save ledger to disk
-        </Button>
+          <Button
+            size="large"
+            color="primary"
+            variant="contained"
+            className={classes.element}
+            onClick={handleSaveToDisk}
+            disabled={!isSavedToLedger}
+          >
+            save ledger to disk
+          </Button>
         </div>
       </div>
     </Container>
