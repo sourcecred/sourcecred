@@ -25,24 +25,29 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   const intervals = props.timelines.cred.length;
   const xScale = scaleLinear().domain([0, intervals]).range([0, width]);
 
-  const credRange= extent(props.timelines.cred);
-  // below, we may need an operation to make this scale meaningful between both Grain and Cred. 
-  // such an op may look like converting Grain to a num and then doing something mysterious, perhaps logarithmic y axis for both, 
-  // which would also mean the larger unit line may be un-interestingly flat. 
-  const credYScale = scaleLinear().domain(credRange).range([height, 0]);
-
-  let grainRange, grainYScale, grainAsNumber;
+  let grainRange, grainYScale, grainAsNumber, credRange, grainValues;
   if (grainExists) {
     grainAsNumber = props.timelines.grain.map((g) => { 
-      // console.log(g)
-      // console.log(Number(g))
       return Number(g);
     });
-    //
-    grainRange = extent(grainAsNumber);
-    grainYScale = scaleLinear().domain(grainRange).range([height, 0]);
+    grainRange = extent(grainAsNumber); // we might not need this?
+    grainYScale = scaleLinear().domain(grainRange).range([height, 0]); // we might not need this either
+
+    const credAndGrain = props.timelines.cred.concat(grainAsNumber);
+    credRange = extent(credAndGrain);
+
+    // This is a temporary/quick fix to ensure that the timeline lines fill the entire x-axis
+    // and ensures that a line is displayed when there is only one interval.
+    grainValues = grainAsNumber.concat(grainAsNumber[intervals - 1]);
+  } else {
+    credRange = extent(props.timelines.cred);
   }
 
+  const credYScale = scaleLinear().domain(credRange).range([height, 0]);
+
+  // This is a temporary/quick fix to ensure that the timeline lines fill the entire x-axis
+  // and ensures that a line is displayed when there is only one interval.
+  const credValues = props.timelines.cred.concat(props.timelines.cred[intervals - 1]);
 
   const generateCredLine = line()
     .x((_, i) => xScale(i))
