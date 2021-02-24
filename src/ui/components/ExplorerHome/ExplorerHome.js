@@ -31,8 +31,9 @@ import {
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
 import type { CurrencyDetails } from "../../../api/currencyConfig";
-import { format, add, div, fromInteger, Grain } from "../../../core/ledger/grain";
-import CredTimeline from "./CredTimeline";
+import { format, add, div, fromInteger, type Grain } from "../../../core/ledger/grain";
+import * as G from "../../../core/ledger/grain";
+import ExplorerTimeline from "./CredTimeline";
 import { IdentityTypes } from "../../../core/identity/identityType";
 import { type Interval, type IntervalSequence } from "../../../core/interval";
 import { formatTimestamp } from "../../utils/dateHelpers";
@@ -254,6 +255,10 @@ export const ExplorerHome = ({
     );
     const credTimeline : Array<number> = allParticipantsCred.reduce(credAccumulator);
     const grainTimeline : Array<Grain> = allParticipantsGrain.reduce(grainAccumulator);
+    console.log("grainTimeline");
+    console.log(grainTimeline);
+    console.log("allParticipantsGrain");
+    console.log(allParticipantsGrain);
 
     return {
       credTotalsTimeline: credTimeline,
@@ -273,28 +278,21 @@ export const ExplorerHome = ({
     }
   );
 
-  const { credTimelineSummary, credAndGrainSummary } = useMemo(() => {
-    let credTimelineAggregator = [];
+  const { credAndGrainSummary } = useMemo(() => {
     const credAndGrainAggregator = {
       totalCred: 0,
       totalGrain: fromInteger(0),
       avgCred: 0,
       avgGrain: fromInteger(0),
     };
-
     if (tsParticipants.currentPage.length > 0) {
       for (const participant of tsParticipants.currentPage) {
-        participant.credPerInterval.forEach((cred, i) =>
-          credTimelineAggregator[i] = (credTimelineAggregator[i] || 0) + cred
-        );
-
         credAndGrainAggregator.totalCred += participant.cred;
         credAndGrainAggregator.totalGrain = add(
           participant.grainEarned,
           credAndGrainAggregator.totalGrain
         );
       }
-
       credAndGrainAggregator.avgCred =
         credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
       credAndGrainAggregator.avgGrain = div(
@@ -302,10 +300,8 @@ export const ExplorerHome = ({
         fromInteger(tsParticipants.currentPage.length)
       );
     }
-
     return {
-      credTimelineSummary: credTimelineAggregator,
-      credAndGrainSummary: credAndGrainAggregator,
+      credAndGrainSummary: credAndGrainAggregator
     };
   }, [tsParticipants.currentPage]);
 
@@ -438,7 +434,7 @@ export const ExplorerHome = ({
         Explorer Home
       </h1>
       <div className={`${classes.centerRow} ${classes.graph}`}>
-        <DataTimeline height={150} width={1000} data={credTimelineSummary} />
+        <ExplorerTimeline height={150} width={1000} timelines={{cred: credTotalsTimeline, grain: grainTotalsTimeline}} />
       </div>
       <Divider style={{ margin: 20 }} />
       <div className={`${classes.rightRow}`}>
@@ -541,11 +537,7 @@ export const ExplorerHome = ({
                         {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
                       <TableCell align="right">
-                        <CredTimeline
-                          data={
-                            allTimeContributionCharts[String(row.identity.id)]
-                          }
-                        />
+                        <ExplorerTimeline timelines={{cred: allTimeContributionCharts[String(row.identity.id)]}} />
                       </TableCell>
                     </TableRow>
                   ))
