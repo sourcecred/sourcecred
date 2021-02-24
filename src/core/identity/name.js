@@ -7,7 +7,7 @@ import * as C from "../../util/combo";
  * - It consists of alphanumeric ASCII and of dashes, which makes it suitable
  *   for including in urls (so we can give each contributor a hardcoded URL
  *   showing their contributions, Cred, and Grain).
- * - It is unique within an instance. Also, no two identites may have names that both
+ * - It is unique within an instance. Also, no two identities may have names that both
  *   have the same lowercase representation.
  * - It's chosen by (and changeable by) the owner of the identity.
  */
