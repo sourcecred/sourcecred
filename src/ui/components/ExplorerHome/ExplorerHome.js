@@ -434,9 +434,13 @@ export const ExplorerHome = ({
         Explorer Home
       </h1>
       <div className={`${classes.centerRow} ${classes.graph}`}>
-        <ExplorerTimeline height={150} width={1000} timelines={{cred: credTotalsTimeline, grain: grainTotalsTimeline}} />
+        <ExplorerTimeline 
+          height={100} 
+          width={1000} 
+          timelines={{cred: credTotalsTimeline, grain: grainTotalsTimeline}} 
+          hasLegend={true}
+          responsive={true}/>
       </div>
-      <Divider style={{ margin: 20 }} />
       <div className={`${classes.rightRow}`}>
         <Tabs
           className={classes.rightRow}

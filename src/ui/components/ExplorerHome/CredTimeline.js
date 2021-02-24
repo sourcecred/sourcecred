@@ -12,6 +12,8 @@ type ExplorerTimelineProps = {|
   },
   +width?: number,
   +height?: number,
+  +hasLegend?: boolean,
+  +responsive?: boolean,
 |};
 // TODO change file name
 const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
@@ -24,6 +26,8 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   const viewBox = `0 0 ${width} ${height}`;
   const intervals = props.timelines.cred.length;
   const xScale = scaleLinear().domain([0, intervals]).range([0, width]);
+  const credLineColor = "#6174CC";
+  const grainLineColor = "#FFAA3D";
 
   let grainRange, grainYScale, grainAsNumber, credRange, grainValues;
   if (grainExists) {
@@ -56,17 +60,37 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
     .x((_, i) => xScale(i))
     .y((d) => (props.timelines.grain? credYScale(d) : null));
 
+
   function drawGrain(grainExists) {
-  if (!grainExists) {
-    return <></>;
+    if (!grainExists) {
+      return <></>;
+    }
+    return <path d={generateGrainLine(grainValues)} stroke={grainLineColor} fill="none" stokewidth={1} />;
   }
-  return <path d={generateGrainLine(props.timelines.grain)} stroke="#FFAA3D" fill="none" stokewidth={1} />;
-  }
+
+  const legendTextStyles = {
+    fontSize: '10px',
+    fill: '#fff',
+  };
   
   return (
-    <svg viewBox={viewBox}>
-      <path d={generateCredLine(props.timelines.cred)} stroke="cyan" fill="none" stokewidth={1} />
-      {drawGrain(grainExists)}
+    <svg viewBox={props.responsive ? viewBox : null}  
+      width={props.responsive ? null : width} 
+      height={props.responsive ? null : height} 
+      style={{overflow: 'visible'}} >
+      <path d={generateCredLine(credValues)} stroke={credLineColor} fill="none" stokewidth={1} />
+      { drawGrain(grainExists) }
+      { props.hasLegend 
+        ? <g> 
+          <line x1="0" y1="110" x2={props.width} y2="110" stroke="#fff" stroke-opacity="0.1"/>
+          <circle r="5"  cx="5" cy="125" fill={credLineColor}/>
+          <circle r="5"  cx="70" cy="125" fill={grainLineColor}/>
+          <text x="15" y="128" style={legendTextStyles}>cred</text>
+          <text x="80" y="128" style={legendTextStyles}>grain</text>
+        </g>
+
+        
+        : <></> }
     </svg>
   );
 };
