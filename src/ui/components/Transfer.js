@@ -124,7 +124,7 @@ export const Transfer = ({
 
   const handleSaveToLedgerWarning = (_) => {
     if (
-      isSavedToLedger || 
+      isSavedToLedger ||
       sender !== null ||
       receiver !== null ||
       amount !== ""
