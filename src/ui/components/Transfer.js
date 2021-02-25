@@ -113,17 +113,21 @@ export const Transfer = ({
     }
   };
 
-  const handleSaveToDisk = (_) => {
+  const handleSaveToDisk = () => {
     setIsSavedToLedger(!isSavedToLedger);
     saveToDisk();
+    setMemo("");
+    setReceiver(null);
+    setSender(null);
+    setAmount("");
   };
 
   const handleSaveToLedgerWarning = (_) => {
     if (
-      isSavedToLedger ||
+      isSavedToLedger || 
       sender !== null ||
       receiver !== null ||
-      amount !== null
+      amount !== ""
     ) {
       return (
         <div className={classes.saveToLedgerAlert}>
