@@ -163,6 +163,7 @@ export const args: () => MarkovProcessGraphArguments = () => ({
   parameters,
   intervals,
   participants: [participant1, participant2],
+  personalAttributions: [],
 });
 export const markovProcessGraph: () => MarkovProcessGraph = () =>
   MarkovProcessGraph.new(args());
