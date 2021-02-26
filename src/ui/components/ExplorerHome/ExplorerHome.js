@@ -149,7 +149,7 @@ const TIMEFRAME_OPTIONS: Array<{|
   +tableLabel: string,
   +selector: (IntervalSequence) => Interval,
 |}> = deepFreeze([
-    {
+  {
     tabLabel: "This Week",
     tableLabel: "This Week’s Activity",
     selector: (intervals) => intervals[intervals.length - 1],
@@ -544,9 +544,9 @@ export const ExplorerHome = ({
                   <TableRow key="no-results">
                     <TableCell colSpan={4} align="center">
                       No results
+                    </TableCell>
                   </TableRow>
                 )}
-                  )}
                 <TableRow key="average" className={classes.rowAverage}>
                   <TableCell component="th" scope="row">
                     Average
