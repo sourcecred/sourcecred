@@ -13,8 +13,8 @@ const CRED_COLOR = "#6174CC";
 const GRAIN_COLOR = "#FFAA3D";
 type ExplorerTimelineProps = {|
   +timelines: {
-    cred: $ReadOnlyArray<number>,
-    grain?: $ReadOnlyArray<Grain>,
+    cred: Array<number>,
+    grain?: Array<Grain>,
   },
   +width?: number,
   +height?: number,
