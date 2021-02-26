@@ -33,7 +33,8 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   const intervals = props.timelines.cred.length;
   let grainAsNumber, range, grainValues;
   if (grainExists) {
-    grainAsNumber = props.timelines.grain.map((g) => { 
+    let grain = props.timelines.grain || [];
+    grainAsNumber = grain.map((g) => { 
       return Number(g);
     });
     const credAndGrain = props.timelines.cred.concat(grainAsNumber);
