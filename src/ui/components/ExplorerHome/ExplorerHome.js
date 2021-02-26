@@ -3,7 +3,6 @@ import React, {useState, useMemo, type Node as ReactNode} from "react";
 import {
   Checkbox,
   Container,
-  Divider,
   FormControlLabel,
   FormGroup,
   FormLabel,
@@ -31,8 +30,14 @@ import {
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
-import {format, add, div, fromInteger} from "../../../core/ledger/grain";
-import CredTimeline from "./CredTimeline";
+import {
+  format,
+  add,
+  div,
+  fromInteger,
+  type Grain,
+} from "../../../core/ledger/grain";
+import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
 import {type Interval, type IntervalSequence} from "../../../core/interval";
 import {formatTimestamp} from "../../utils/dateHelpers";
@@ -237,6 +242,43 @@ export const ExplorerHome = ({
     [timeScopedCredGrainView]
   );
 
+  const {credTotalsTimeline, grainTotalsTimeline} = useMemo(() => {
+    const allParticipantsCred: Array<Array<number>> = allParticipants.map(
+      (participant) => {
+        return participant.credPerInterval.slice();
+      }
+    );
+    const allParticipantsGrain: Array<Array<Grain>> = allParticipants.map(
+      (participant) => {
+        return participant.grainEarnedPerInterval.slice();
+      }
+    );
+    const credAccumulator = (
+      credTimelineAccumalator: Array<number>,
+      participantCred
+    ) =>
+      credTimelineAccumalator.map(
+        (intervalTotal, i) => intervalTotal + participantCred[i]
+      );
+    const grainAccumulator = (
+      grainTimelineAccumalator: Array<Grain>,
+      participantGrain
+    ) =>
+      grainTimelineAccumalator.map((intervalTotal, i) =>
+        add(intervalTotal, participantGrain[i])
+      );
+    const credTimeline: Array<number> = allParticipantsCred.reduce(
+      credAccumulator
+    );
+    const grainTimeline: Array<Grain> = allParticipantsGrain.reduce(
+      grainAccumulator
+    );
+    return {
+      credTotalsTimeline: credTimeline,
+      grainTotalsTimeline: grainTimeline,
+    };
+  }, [timeScopedCredGrainView]);
+
   const tsParticipants = useTableState(
     {data: allParticipants},
     {
@@ -249,29 +291,21 @@ export const ExplorerHome = ({
     }
   );
 
-  const {credTimelineSummary, credAndGrainSummary} = useMemo(() => {
-    let credTimelineAggregator = [];
+  const {credAndGrainSummary} = useMemo(() => {
     const credAndGrainAggregator = {
       totalCred: 0,
       totalGrain: fromInteger(0),
       avgCred: 0,
       avgGrain: fromInteger(0),
     };
-
     if (tsParticipants.currentPage.length > 0) {
       for (const participant of tsParticipants.currentPage) {
-        // add this node's cred to the summary graph
-        credTimelineAggregator = participant.credPerInterval.map(
-          (total, i) => (credTimelineAggregator[i] || 0) + total
-        );
-
         credAndGrainAggregator.totalCred += participant.cred;
         credAndGrainAggregator.totalGrain = add(
           participant.grainEarned,
           credAndGrainAggregator.totalGrain
         );
       }
-
       credAndGrainAggregator.avgCred =
         credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
       credAndGrainAggregator.avgGrain = div(
@@ -279,9 +313,7 @@ export const ExplorerHome = ({
         fromInteger(tsParticipants.currentPage.length)
       );
     }
-
     return {
-      credTimelineSummary: credTimelineAggregator,
       credAndGrainSummary: credAndGrainAggregator,
     };
   }, [tsParticipants.currentPage]);
@@ -415,9 +447,14 @@ export const ExplorerHome = ({
         Explorer Home
       </h1>
       <div className={`${classes.centerRow} ${classes.graph}`}>
-        <CredTimeline height={150} width={1000} data={credTimelineSummary} />
+        <ExplorerTimeline
+          height={100}
+          width={1000}
+          timelines={{cred: credTotalsTimeline, grain: grainTotalsTimeline}}
+          hasLegend={true}
+          responsive={true}
+        />
       </div>
-      <Divider style={{margin: 20}} />
       <div className={`${classes.rightRow}`}>
         <Tabs
           className={classes.rightRow}
@@ -518,10 +555,13 @@ export const ExplorerHome = ({
                         {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
                       <TableCell align="right">
-                        <CredTimeline
-                          data={
-                            allTimeContributionCharts[String(row.identity.id)]
-                          }
+                        <ExplorerTimeline
+                          timelines={{
+                            cred:
+                              allTimeContributionCharts[
+                                String(row.identity.id)
+                              ],
+                          }}
                         />
                       </TableCell>
                     </TableRow>
