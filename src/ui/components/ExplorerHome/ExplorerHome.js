@@ -33,7 +33,7 @@ import {
 import type { CurrencyDetails } from "../../../api/currencyConfig";
 import { format, add, div, fromInteger, type Grain } from "../../../core/ledger/grain";
 import * as G from "../../../core/ledger/grain";
-import ExplorerTimeline from "./CredTimeline";
+import ExplorerTimeline from "./ExplorerTimeline";
 import { IdentityTypes } from "../../../core/identity/identityType";
 import { type Interval, type IntervalSequence } from "../../../core/interval";
 import { formatTimestamp } from "../../utils/dateHelpers";
