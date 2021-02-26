@@ -40,7 +40,7 @@ export type ParticipantCredGrain = {|
   // Total Grain earned during the time scope.
   +grainEarned: Grain,
   // Grain earned in each interval within the time scope.
-  +grainEarnedPerInterval: $ReadOnlyArray<Grain>, 
+  +grainEarnedPerInterval: $ReadOnlyArray<Grain>,
 |};
 
 /**
