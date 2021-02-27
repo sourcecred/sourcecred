@@ -83,7 +83,7 @@
     "jest-fetch-mock": "^3.0.2",
     "jsdoc": "^3.6.6",
     "jsdoc-babel": "^0.5.0",
-    "jsdoc-to-markdown": "^6.0.1",
+    "jsdoc-to-markdown": "^7.0.0",
     "npm-run-all": "^4.1.5",
     "null-loader": "^4.0.0",
     "postinstall-postinstall": "^2.1.0",
