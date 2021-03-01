@@ -60,14 +60,14 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
         d={drawLine(credValues, range, height, width)}
         stroke={CRED_COLOR}
         fill="none"
-        stokewidth={1}
+        strokeWidth={1}
       />
       {grainExists && (
         <path
           d={drawLine(grainValues, range, height, width)}
           stroke={GRAIN_COLOR}
           fill="none"
-          stokewidth={1}
+          strokeWidth={1}
         />
       )}
       {props.hasLegend ? (
