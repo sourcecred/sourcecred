@@ -281,13 +281,17 @@ export const ExplorerHome = ({
   }, [timeScopedCredGrainView]);
 
   // create summary values for stat circles
-  const totalCredThisPeriod = credTotalsTimeline.reduce(
-    (total, cred) => total + cred,
-    0
+  const totalCredThisPeriod = useMemo(
+    () => credTotalsTimeline.reduce((total, cred) => total + cred, 0),
+    [credTotalsTimeline]
   );
-  const totalGrainThisPeriod = grainTotalsTimeline.reduce(
-    (total, grain) => add(total, grain),
-    fromInteger(0)
+  const totalGrainThisPeriod = useMemo(
+    () =>
+      grainTotalsTimeline.reduce(
+        (total, grain) => add(total, grain),
+        fromInteger(0)
+      ),
+    [grainTotalsTimeline]
   );
 
   const statCircleInfo = [
