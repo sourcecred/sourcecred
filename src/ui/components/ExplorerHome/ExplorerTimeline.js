@@ -30,10 +30,10 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   const height = props.height || 25;
   const viewBox = `0 0 ${width} ${height}`;
   const intervals = props.timelines.cred.length;
-  let grainAsNumber, range, grainValues;
+  let range, grainValues;
   if (grainExists) {
     const grain = props.timelines.grain || [];
-    grainAsNumber = grain.map((g) => {
+    const grainAsNumber = grain.map((g) => {
       return Number(g);
     });
     const credAndGrain = props.timelines.cred.concat(grainAsNumber);
