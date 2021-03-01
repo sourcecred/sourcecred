@@ -109,15 +109,15 @@ const useStyles = makeStyles((theme) => ({
   pageHeader: {color: theme.palette.text.primary},
   credCircle: {
     borderColor: theme.palette.blueish,
+    "& .title": {
+      color: theme.palette.blueish,
+    },
   },
   grainCircle: {
     borderColor: theme.palette.warning.main,
-  },
-  participantCircle: {
-    borderColor: theme.palette.scPink,
-  },
-  grainPerCredCircle: {
-    borderColor: theme.palette.green,
+    "& .title": {
+      color: theme.palette.warning.main,
+    },
   },
   [`label-${IdentityTypes.BOT}`]: {
     color: theme.palette.purple,
@@ -318,17 +318,16 @@ export const ExplorerHome = ({
     };
   }, [tsParticipants.currentPage]);
 
-  const summaryInfo = [
-    {title: "Cred This Week", value: 610, className: classes.credCircle},
+  const statCircleInfo = [
     {
-      title: `${currencyName}`,
-      value: `6,765${currencySuffix}`,
-      className: classes.grainCircle,
+      title: `Cred ${TIMEFRAME_OPTIONS[tab].tabLabel}`,
+      value: Math.round(credAndGrainSummary.totalCred).toLocaleString(),
+      className: classes.credCircle,
     },
     {
-      title: `${currencyName} per Cred`,
-      value: `22${currencySuffix}`,
-      className: classes.grainPerCredCircle,
+      title: `${currencyName}`,
+      value: format(credAndGrainSummary.totalGrain, 0, currencySuffix),
+      className: classes.grainCircle,
     },
   ];
 
@@ -386,7 +385,7 @@ export const ExplorerHome = ({
       <div className={`${classes.centerRow} ${classes.circle} ${className}`}>
         {value}
       </div>
-      <div>{title}</div>
+      <div className="title">{title}</div>
     </div>
   );
 
@@ -469,7 +468,7 @@ export const ExplorerHome = ({
         </Tabs>
       </div>
       <div className={classes.centerRow}>
-        {summaryInfo.map((circle) =>
+        {statCircleInfo.map((circle) =>
           makeCircle(circle.value, circle.title, circle.className)
         )}
       </div>
@@ -549,7 +548,7 @@ export const ExplorerHome = ({
                         {row.identity.name}
                       </TableCell>
                       <TableCell className={classes.labelCred}>
-                        {Math.round(row.cred)}
+                        {Math.round(row.cred).toLocaleString()}
                       </TableCell>
                       <TableCell className={classes.labelGrain}>
                         {format(row.grainEarned, 2, currencySuffix)}
