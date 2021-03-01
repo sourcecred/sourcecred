@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Something broken in SourceCred? Let us know!
 title: ''
 labels: ''
 assignees: ''
@@ -8,31 +8,26 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+Please be brief & specific: 
 
-**To Reproduce**
-Steps to reproduce the behavior:
+**Steps to reproduce**
+What sequence of actions results in this error?  e.g.:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
+What you expected to happen instead of the bug.
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+Please add screenshots of your problem with a brief description of each (alt text). 
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Technical Details:**
+These are important!
+ - OS & version: [e.g. Catalina 10.15.7]
+ - Browser & version [e.g. chrome, safari, check "about" in your browser menu for version info]
+ - Link to your SourceCred Instance: [e.g. SC, 1Hive, etc]
 
 **Additional context**
-Add any other context about the problem here.
+If there are known issues, Discourse topics, etc., that we should cross-reference, please note them here.
