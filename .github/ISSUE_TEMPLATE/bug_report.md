@@ -26,8 +26,8 @@ Please add screenshots of your problem with a brief description of each (alt tex
 **Technical Details:**
 These are important!
  - OS & version: [e.g. Catalina 10.15.7]
- - Browser [e.g. chrome, safari, check "about" in your browser menu for version info]
- - SC Instance [e.g. SC, 1Hive, etc]
+ - Browser & version [e.g. chrome, safari, check "about" in your browser menu for version info]
+ - Link to your SourceCred Instance: [e.g. SC, 1Hive, etc]
 
 **Additional context**
 If there are known issues, Discourse topics, etc., that we should cross-reference, please note them here.
