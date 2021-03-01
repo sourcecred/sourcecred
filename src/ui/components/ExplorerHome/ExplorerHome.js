@@ -242,6 +242,7 @@ export const ExplorerHome = ({
     [timeScopedCredGrainView]
   );
 
+  // build structures for timelines at the top of the page
   const {credTotalsTimeline, grainTotalsTimeline} = useMemo(() => {
     const allParticipantsCred: Array<Array<number>> = allParticipants.map(
       (participant) => {
@@ -279,6 +280,29 @@ export const ExplorerHome = ({
     };
   }, [timeScopedCredGrainView]);
 
+  // create summary values for stat circles
+  const totalCredThisPeriod = credTotalsTimeline.reduce(
+    (total, cred) => total + cred,
+    0
+  );
+  const totalGrainThisPeriod = grainTotalsTimeline.reduce(
+    (total, grain) => add(total, grain),
+    fromInteger(0)
+  );
+
+  const statCircleInfo = [
+    {
+      title: `Cred ${TIMEFRAME_OPTIONS[tab].tabLabel}`,
+      value: Math.round(totalCredThisPeriod).toLocaleString(),
+      className: classes.credCircle,
+    },
+    {
+      title: `${currencyName}`,
+      value: format(totalGrainThisPeriod, 0, currencySuffix),
+      className: classes.grainCircle,
+    },
+  ];
+
   const tsParticipants = useTableState(
     {data: allParticipants},
     {
@@ -291,6 +315,7 @@ export const ExplorerHome = ({
     }
   );
 
+  // create summary values for bottom of table
   const {credAndGrainSummary} = useMemo(() => {
     const credAndGrainAggregator = {
       totalCred: 0,
@@ -317,19 +342,6 @@ export const ExplorerHome = ({
       credAndGrainSummary: credAndGrainAggregator,
     };
   }, [tsParticipants.currentPage]);
-
-  const statCircleInfo = [
-    {
-      title: `Cred ${TIMEFRAME_OPTIONS[tab].tabLabel}`,
-      value: Math.round(credAndGrainSummary.totalCred).toLocaleString(),
-      className: classes.credCircle,
-    },
-    {
-      title: `${currencyName}`,
-      value: format(credAndGrainSummary.totalGrain, 0, currencySuffix),
-      className: classes.grainCircle,
-    },
-  ];
 
   const filterIdentities = (event: SyntheticInputEvent<HTMLInputElement>) => {
     // fuzzy match letters "in order, but not necessarily sequentially"
