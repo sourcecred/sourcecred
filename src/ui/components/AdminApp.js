@@ -182,6 +182,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
     // TODO (@topocount) create context for read-only instance state
     <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
       <Admin
+        disableTelemetry
         layout={createAppLayout(loadSuccess)}
         theme={theme}
         dataProvider={dataProvider}
