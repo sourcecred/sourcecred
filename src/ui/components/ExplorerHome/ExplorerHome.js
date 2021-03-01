@@ -109,15 +109,15 @@ const useStyles = makeStyles((theme) => ({
   pageHeader: {color: theme.palette.text.primary},
   credCircle: {
     borderColor: theme.palette.blueish,
+    "& .title": {
+      color: theme.palette.blueish,
+    },
   },
   grainCircle: {
     borderColor: theme.palette.warning.main,
-  },
-  participantCircle: {
-    borderColor: theme.palette.scPink,
-  },
-  grainPerCredCircle: {
-    borderColor: theme.palette.green,
+    "& .title": {
+      color: theme.palette.warning.main,
+    },
   },
   [`label-${IdentityTypes.BOT}`]: {
     color: theme.palette.purple,
@@ -242,6 +242,7 @@ export const ExplorerHome = ({
     [timeScopedCredGrainView]
   );
 
+  // build structures for timelines at the top of the page
   const {credTotalsTimeline, grainTotalsTimeline} = useMemo(() => {
     const allParticipantsCred: Array<Array<number>> = allParticipants.map(
       (participant) => {
@@ -279,6 +280,33 @@ export const ExplorerHome = ({
     };
   }, [timeScopedCredGrainView]);
 
+  // create summary values for stat circles
+  const totalCredThisPeriod = useMemo(
+    () => credTotalsTimeline.reduce((total, cred) => total + cred, 0),
+    [credTotalsTimeline]
+  );
+  const totalGrainThisPeriod = useMemo(
+    () =>
+      grainTotalsTimeline.reduce(
+        (total, grain) => add(total, grain),
+        fromInteger(0)
+      ),
+    [grainTotalsTimeline]
+  );
+
+  const statCircleInfo = [
+    {
+      title: `Cred ${TIMEFRAME_OPTIONS[tab].tabLabel}`,
+      value: Math.round(totalCredThisPeriod).toLocaleString(),
+      className: classes.credCircle,
+    },
+    {
+      title: `${currencyName}`,
+      value: format(totalGrainThisPeriod, 0, currencySuffix),
+      className: classes.grainCircle,
+    },
+  ];
+
   const tsParticipants = useTableState(
     {data: allParticipants},
     {
@@ -291,6 +319,7 @@ export const ExplorerHome = ({
     }
   );
 
+  // create summary values for bottom of table
   const {credAndGrainSummary} = useMemo(() => {
     const credAndGrainAggregator = {
       totalCred: 0,
@@ -317,20 +346,6 @@ export const ExplorerHome = ({
       credAndGrainSummary: credAndGrainAggregator,
     };
   }, [tsParticipants.currentPage]);
-
-  const summaryInfo = [
-    {title: "Cred This Week", value: 610, className: classes.credCircle},
-    {
-      title: `${currencyName}`,
-      value: `6,765${currencySuffix}`,
-      className: classes.grainCircle,
-    },
-    {
-      title: `${currencyName} per Cred`,
-      value: `22${currencySuffix}`,
-      className: classes.grainPerCredCircle,
-    },
-  ];
 
   const filterIdentities = (event: SyntheticInputEvent<HTMLInputElement>) => {
     // fuzzy match letters "in order, but not necessarily sequentially"
@@ -386,7 +401,7 @@ export const ExplorerHome = ({
       <div className={`${classes.centerRow} ${classes.circle} ${className}`}>
         {value}
       </div>
-      <div>{title}</div>
+      <div className="title">{title}</div>
     </div>
   );
 
@@ -469,7 +484,7 @@ export const ExplorerHome = ({
         </Tabs>
       </div>
       <div className={classes.centerRow}>
-        {summaryInfo.map((circle) =>
+        {statCircleInfo.map((circle) =>
           makeCircle(circle.value, circle.title, circle.className)
         )}
       </div>
@@ -549,7 +564,7 @@ export const ExplorerHome = ({
                         {row.identity.name}
                       </TableCell>
                       <TableCell className={classes.labelCred}>
-                        {Math.round(row.cred)}
+                        {Math.round(row.cred).toLocaleString()}
                       </TableCell>
                       <TableCell className={classes.labelGrain}>
                         {format(row.grainEarned, 2, currencySuffix)}
