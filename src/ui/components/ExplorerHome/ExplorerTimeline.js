@@ -30,20 +30,19 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   const height = props.height || 25;
   const viewBox = `0 0 ${width} ${height}`;
   const intervals = props.timelines.cred.length;
-  let grainAsNumber, range, grainValues;
+
+  let grainValues;
   if (grainExists) {
     const grain = props.timelines.grain || [];
-    grainAsNumber = grain.map((g) => {
+    const grainAsNumber = grain.map((g) => {
       return Number(g);
     });
-    const credAndGrain = props.timelines.cred.concat(grainAsNumber);
-    range = extent(credAndGrain);
+
     // This is a temporary/quick fix to ensure that the timeline lines fill the entire x-axis
     // and ensures that a line is displayed when there is only one interval.
     grainValues = grainAsNumber.concat(grainAsNumber[intervals - 1]);
-  } else {
-    range = extent(props.timelines.cred);
   }
+
   // This is a temporary/quick fix to ensure that the timeline lines fill the entire x-axis
   // and ensures that a line is displayed when there is only one interval.
   const credValues = props.timelines.cred.concat(
@@ -57,17 +56,17 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
       style={{overflow: "visible"}}
     >
       <path
-        d={drawLine(credValues, range, height, width)}
+        d={drawLine(credValues, height, width)}
         stroke={CRED_COLOR}
         fill="none"
-        stokewidth={1}
+        strokeWidth={1}
       />
       {grainExists && (
         <path
-          d={drawLine(grainValues, range, height, width)}
+          d={drawLine(grainValues, height, width)}
           stroke={GRAIN_COLOR}
           fill="none"
-          stokewidth={1}
+          strokeWidth={1}
         />
       )}
       {props.hasLegend ? (
@@ -96,10 +95,11 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   );
 };
 
-function drawLine(data, range, height, width) {
+function drawLine(data, height, width) {
   if (!data) {
     return null;
   }
+  const range = extent(data);
   const xScale = scaleLinear()
     .domain([0, data.length - 1])
     .range([0, width]);

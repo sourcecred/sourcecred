@@ -262,10 +262,10 @@ export const ExplorerHome = ({
         (intervalTotal, i) => intervalTotal + participantCred[i]
       );
     const grainAccumulator = (
-      grainTimelineAccumalator: Array<Grain>,
+      grainTimelineAccumulator: Array<Grain>,
       participantGrain
     ) =>
-      grainTimelineAccumalator.map((intervalTotal, i) =>
+      grainTimelineAccumulator.map((intervalTotal, i) =>
         add(intervalTotal, participantGrain[i])
       );
     const credTimeline: Array<number> = allParticipantsCred.reduce(
