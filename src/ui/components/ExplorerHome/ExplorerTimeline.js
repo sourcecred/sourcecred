@@ -29,25 +29,18 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   const width = props.width || 300;
   const height = props.height || 25;
   const viewBox = `0 0 ${width} ${height}`;
-  const intervals = props.timelines.cred.length;
 
   let grainValues;
   if (grainExists) {
     const grain = props.timelines.grain || [];
-    const grainAsNumber = grain.map((g) => {
+    grainValues = grain.map((g) => {
       return Number(g);
     });
-
-    // This is a temporary/quick fix to ensure that the timeline lines fill the entire x-axis
-    // and ensures that a line is displayed when there is only one interval.
-    grainValues = grainAsNumber.concat(grainAsNumber[intervals - 1]);
+    if (grainValues.length === 1) grainValues.push(grainValues[0]);
   }
 
-  // This is a temporary/quick fix to ensure that the timeline lines fill the entire x-axis
-  // and ensures that a line is displayed when there is only one interval.
-  const credValues = props.timelines.cred.concat(
-    props.timelines.cred[intervals - 1]
-  );
+  const credValues = props.timelines.cred;
+  if (credValues.length === 1) credValues.push(credValues[0]);
   return (
     <svg
       viewBox={props.responsive ? viewBox : null}
