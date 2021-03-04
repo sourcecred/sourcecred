@@ -1,6 +1,5 @@
 // @flow
 
-import fs from "fs-extra";
 import {join} from "path";
 import {loadFileWithDefault, loadJson} from "../util/disk";
 import {Ledger} from "../core/ledger/ledger";
@@ -9,7 +8,9 @@ import {computeCredAccounts2} from "../core/ledger/credAccounts";
 import stringify from "json-stable-stringify";
 import * as G from "../core/ledger/grain";
 import dedent from "../util/dedent";
-import {loadCredGraph} from "./common";
+import {loadCredGraph, saveLedger} from "./common";
+import {DiskStorage} from "../core/storage/disk";
+import {encode} from "../core/storage/textEncoding";
 
 import * as GrainConfig from "../api/grainConfig";
 import type {Command} from "./command";
@@ -35,13 +36,20 @@ const grain2Command: Command = async (args, std) => {
   }
 
   const baseDir = process.cwd();
-  const grainConfigPath = join(baseDir, "config", "grain.json");
-  const grainConfig = await loadJson(grainConfigPath, GrainConfig.parser);
+  const diskStorage = new DiskStorage(baseDir);
+  const grainConfigPath = join("config", "grain.json");
+  const grainConfig = await loadJson(
+    diskStorage,
+    grainConfigPath,
+    GrainConfig.parser
+  );
   const distributionPolicy = GrainConfig.toDistributionPolicy(grainConfig);
 
   const ledgerPath = join(baseDir, "data", "ledger.json");
   const ledger = Ledger.parse(
-    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
+    await loadFileWithDefault(diskStorage, ledgerPath, () =>
+      new Ledger().serialize()
+    )
   );
 
   const credGraph = await loadCredGraph(baseDir);
@@ -72,11 +80,11 @@ const grain2Command: Command = async (args, std) => {
   );
 
   if (!simulation) {
-    await fs.writeFile(ledgerPath, ledger.serialize());
+    await saveLedger(baseDir, ledger);
 
     const credAccounts = computeCredAccounts2(ledger, credGraph);
-    const accountsPath = join(baseDir, "output", "accounts.json");
-    await fs.writeFile(accountsPath, stringify(credAccounts));
+    const accountsPath = join("output", "accounts.json");
+    await diskStorage.set(accountsPath, encode(stringify(credAccounts)));
   }
 
   return 0;

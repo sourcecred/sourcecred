@@ -7,6 +7,8 @@ import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 
 import {type BonusPolicy} from "../core/bonusMinting";
+import {DiskStorage} from "../core/storage/disk";
+import {WritableDataStorage} from "../core/storage/index";
 import type {PluginDirectoryContext} from "../api/plugin";
 import {
   parser as configParser,
@@ -38,8 +40,9 @@ import {defaultCurrencyConfig} from "../api/currencyConfig";
 import * as Weights from "../core/weights";
 
 export function loadInstanceConfig(baseDir: string): Promise<InstanceConfig> {
-  const projectFilePath = pathJoin(baseDir, "sourcecred.json");
-  return loadJson(projectFilePath, configParser);
+  const storage = new DiskStorage(baseDir);
+  const projectFilePath = pathJoin("sourcecred.json");
+  return loadJson(storage, projectFilePath, configParser);
 }
 
 export function makePluginDir(
@@ -123,8 +126,10 @@ async function loadDependenciesAndWriteChanges(
   baseDir: string,
   ledger: Ledger
 ): Promise<$ReadOnlyArray<BonusPolicy>> {
-  const dependenciesPath = pathJoin(baseDir, "config", "dependencies.json");
+  const storage = new DiskStorage(baseDir);
+  const dependenciesPath = pathJoin("config", "dependencies.json");
   const dependencies = await loadJsonWithDefault(
+    storage,
     dependenciesPath,
     dependenciesParser,
     () => []
@@ -173,8 +178,10 @@ export async function loadAndMergePluginWeigtedGraphs(
 
   // TODO(@decentralion): This is snapshot tested via TimelineCred, add unit
   // tests?
-  const weightsPath = pathJoin(baseDir, "config", "weights.json");
+  const storage = new DiskStorage(baseDir);
+  const weightsPath = pathJoin("config", "weights.json");
   const weights = await loadJsonWithDefault(
+    storage,
     weightsPath,
     Weights.parser,
     Weights.empty
@@ -183,14 +190,18 @@ export async function loadAndMergePluginWeigtedGraphs(
 }
 
 export async function loadCredGraph(baseDir: string): Promise<CredGraph> {
-  const credGraphPath = pathJoin(baseDir, "output", "credGraph.json");
-  return await loadJson(credGraphPath, credGraphParser);
+  const storage = new DiskStorage(baseDir);
+  const credGraphPath = pathJoin("output", "credGraph.json");
+  return await loadJson(storage, credGraphPath, credGraphParser);
 }
 
 export async function loadLedger(baseDir: string): Promise<Ledger> {
-  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
+  const ledgerPath = pathJoin("data", "ledger.json");
+  const storage = new DiskStorage(baseDir);
   return Ledger.parse(
-    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
+    await loadFileWithDefault(storage, ledgerPath, () =>
+      new Ledger().serialize()
+    )
   );
 }
 
@@ -203,8 +214,14 @@ export async function saveLedger(
 }
 
 function loadPluginBudget(baseDir: string): Promise<Budget | null> {
-  const budgetPath = pathJoin(baseDir, "config", "pluginBudgets.json");
-  return loadJsonWithDefault(budgetPath, pluginBudgetParser, () => null);
+  const storage = new DiskStorage(baseDir);
+  const budgetPath = pathJoin("config", "pluginBudgets.json");
+  return loadJsonWithDefault(
+    storage,
+    budgetPath,
+    pluginBudgetParser,
+    () => null
+  );
 }
 
 /**
@@ -212,9 +229,11 @@ function loadPluginBudget(baseDir: string): Promise<Budget | null> {
  * if need be.
  */
 export async function loadCurrencyDetails(
+  storage: WritableDataStorage,
   currencyDetailsPath: string
 ): Promise<CurrencyDetails> {
   return await loadJsonWithDefault(
+    storage,
     currencyDetailsPath,
     currencyConfigParser,
     defaultCurrencyConfig

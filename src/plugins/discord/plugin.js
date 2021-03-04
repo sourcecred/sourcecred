@@ -22,6 +22,7 @@ import {
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
+import {DiskStorage} from "../../core/storage/disk";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
@@ -29,8 +30,8 @@ async function loadConfig(
   dirContext: PluginDirectoryContext
 ): Promise<DiscordConfig> {
   const dirname = dirContext.configDirectory();
-  const path = pathJoin(dirname, "config.json");
-  return loadJson(path, parser);
+  const storage = new DiskStorage(dirname);
+  return loadJson(storage, "config.json", parser);
 }
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_DISCORD_TOKEN";

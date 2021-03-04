@@ -1,9 +1,7 @@
 // @flow
 
-import fs from "fs-extra";
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
-import {join as pathJoin} from "path";
 
 import {Ledger} from "../core/ledger/ledger";
 import * as NullUtil from "../util/null";
@@ -34,6 +32,8 @@ import {
   type WeightedGraph,
 } from "../core/weightedGraph";
 import * as pluginId from "../api/pluginId";
+import {DiskStorage} from "../core/storage/disk";
+import {encode} from "../core/storage/textEncoding";
 import {ensureIdentityExists} from "../core/ledger/identityProposal";
 
 function die(std, message) {
@@ -123,10 +123,12 @@ const graphCommand: Command = async (args, std) => {
     if (!isSimulation) {
       const writeTask = `${name}: writing graph`;
       taskReporter.start(writeTask);
-      const serializedGraph = stringify(weightedGraphToJSON(weightedGraph));
+      const serializedGraph = encode(
+        stringify(weightedGraphToJSON(weightedGraph))
+      );
       const outputDir = makePluginDir(baseDir, graphOutputPrefix, name);
-      const outputPath = pathJoin(outputDir, "graph.json");
-      await fs.writeFile(outputPath, serializedGraph);
+      const graphStorage = new DiskStorage(outputDir);
+      await graphStorage.set("graph.json", serializedGraph);
       taskReporter.finish(writeTask);
     }
   }

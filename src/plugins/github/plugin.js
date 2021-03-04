@@ -27,6 +27,7 @@ import {
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
 import {createIdentities} from "./createIdentities";
+import {DiskStorage} from "../../core/storage/disk";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
@@ -35,8 +36,8 @@ async function loadConfig(
   dirContext: PluginDirectoryContext
 ): Promise<GithubConfig> {
   const dirname = dirContext.configDirectory();
-  const path = pathJoin(dirname, "config.json");
-  return loadJson(path, parser);
+  const storage = new DiskStorage(dirname);
+  return loadJson(storage, "config.json", parser);
 }
 
 // Shim to interface with `fetchGithubRepo`; TODO: refactor that to just

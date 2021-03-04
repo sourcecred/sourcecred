@@ -32,6 +32,8 @@ import {
   CredGraph,
   parser as credGraphParser,
 } from "../../core/credrank/credGraph";
+import {DiskStorage} from "../../core/storage/disk";
+import {encode} from "../../core/storage/textEncoding";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -54,9 +56,11 @@ on the local disk.
  */
 export class LocalInstance implements Instance {
   _baseDirectory: string;
+  _storage: DiskStorage;
 
   constructor(baseDirectory: string) {
     this._baseDirectory = baseDirectory;
+    this._storage = new DiskStorage(baseDirectory);
   }
 
   //////////////////////////////
@@ -95,8 +99,8 @@ export class LocalInstance implements Instance {
   }
 
   async readCredGraph(): Promise<CredGraph> {
-    const credGraphPath = pathJoin(this._baseDirectory, ...CREDGRAPH_PATH);
-    return await loadJson(credGraphPath, credGraphParser);
+    const credGraphPath = pathJoin(...CREDGRAPH_PATH);
+    return await loadJson(this._storage, credGraphPath, credGraphParser);
   }
 
   //////////////////////////////
@@ -104,18 +108,17 @@ export class LocalInstance implements Instance {
   //////////////////////////////
 
   async readLedger(): Promise<Ledger> {
-    const ledgerPath = pathJoin(this._baseDirectory, ...LEDGER_PATH);
+    const ledgerPath = pathJoin(...LEDGER_PATH);
     return Ledger.parse(
-      await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
+      await loadFileWithDefault(this._storage, ledgerPath, () =>
+        new Ledger().serialize()
+      )
     );
   }
 
   async readInstanceConfig(): Promise<InstanceConfig> {
-    const pluginsConfigPath = pathJoin(
-      this._baseDirectory,
-      ...INSTANCE_CONFIG_PATH
-    );
-    return loadJson(pluginsConfigPath, configParser);
+    const pluginsConfigPath = pathJoin(...INSTANCE_CONFIG_PATH);
+    return loadJson(this._storage, pluginsConfigPath, configParser);
   }
 
   async readPluginGraphs(): Promise<Array<WeightedGraph>> {
@@ -132,16 +135,19 @@ export class LocalInstance implements Instance {
   }
 
   async readWeightOverrides(): Promise<WeightsT> {
-    const weightsPath = pathJoin(this._baseDirectory, ...WEIGHT_OVERRIDES_PATH);
-    return loadJsonWithDefault(weightsPath, weightsParser, emptyWeights);
+    const weightsPath = pathJoin(...WEIGHT_OVERRIDES_PATH);
+    return loadJsonWithDefault(
+      this._storage,
+      weightsPath,
+      weightsParser,
+      emptyWeights
+    );
   }
 
   async readDependencies(): Promise<DependenciesConfig> {
-    const dependenciesPath = pathJoin(
-      this._baseDirectory,
-      ...DEPENDENCIES_PATH
-    );
+    const dependenciesPath = pathJoin(...DEPENDENCIES_PATH);
     return await loadJsonWithDefault(
+      this._storage,
       dependenciesPath,
       dependenciesParser,
       () => []
@@ -149,8 +155,13 @@ export class LocalInstance implements Instance {
   }
 
   async readPluginsBudget(): Promise<Budget | null> {
-    const budgetPath = pathJoin(this._baseDirectory, ...BUDGET_PATH);
-    return loadJsonWithDefault(budgetPath, pluginBudgetParser, () => null);
+    const budgetPath = pathJoin(...BUDGET_PATH);
+    return loadJsonWithDefault(
+      this._storage,
+      budgetPath,
+      pluginBudgetParser,
+      () => null
+    );
   }
 
   createPluginDirectory(pluginId: string): string {
@@ -169,24 +180,21 @@ export class LocalInstance implements Instance {
   }
 
   async writeLedger(ledger: Ledger): Promise<void> {
-    const ledgerPath = pathJoin(this._baseDirectory, ...LEDGER_PATH);
-    await fs.writeFile(ledgerPath, ledger.serialize());
+    const ledgerPath = pathJoin(...LEDGER_PATH);
+    await this._storage.set(ledgerPath, encode(ledger.serialize()));
   }
 
   async writeCredGraph(credGraph: CredGraph): Promise<void> {
     const cgJson = stringify(credGraph.toJSON());
-    const outputPath = pathJoin(this._baseDirectory, ...CREDGRAPH_PATH);
-    await fs.writeFile(outputPath, cgJson);
+    const outputPath = pathJoin(...CREDGRAPH_PATH);
+    await this._storage.set(outputPath, encode(cgJson));
   }
 
   async writeDependenciesConfig(
     dependenciesConfig: DependenciesConfig
   ): Promise<void> {
-    const dependenciesPath = pathJoin(
-      this._baseDirectory,
-      ...DEPENDENCIES_PATH
-    );
-    await fs.writeFile(
+    const dependenciesPath = pathJoin(...DEPENDENCIES_PATH);
+    await this._storage.set(
       dependenciesPath,
       stringify(dependenciesConfig, {space: 4})
     );

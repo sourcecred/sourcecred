@@ -1,6 +1,5 @@
 // @flow
 
-import fs from "fs-extra";
 import {join as pathJoin} from "path";
 import stringify from "json-stable-stringify";
 
@@ -17,6 +16,8 @@ import {
 import {CredView} from "../analysis/credView";
 import * as Params from "../analysis/timeline/params";
 import {computeCredAccounts} from "../core/ledger/credAccounts";
+import {DiskStorage} from "../core/storage/disk";
+import {encode} from "../core/storage/textEncoding";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -30,6 +31,8 @@ const scoreCommand: Command = async (args, std) => {
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("score");
   const baseDir = process.cwd();
+  const diskStorage = new DiskStorage(baseDir);
+  const encoder = new TextEncoder();
   const config = await loadInstanceConfig(baseDir);
 
   const {weightedGraph, ledger, dependencies} = await prepareCredData(
@@ -43,6 +46,7 @@ const scoreCommand: Command = async (args, std) => {
   // TODO(@decentralion): This is snapshot tested, add unit tests?
   const paramsPath = pathJoin(baseDir, "config", "params.json");
   const params = await loadJsonWithDefault(
+    diskStorage,
     paramsPath,
     Params.parser,
     Params.defaultParams
@@ -57,19 +61,19 @@ const scoreCommand: Command = async (args, std) => {
   // Throw away over-time data for all non-user nodes; we may not have that
   // information available once we merge CredRank, anyway.
   const stripped = stripOverTimeDataForNonUsers(credResult);
-  const credJSON = stringify(credResultToJSON(stripped));
-  const outputDir = pathJoin(baseDir, "output");
+  const credJSON = encode(stringify(credResultToJSON(stripped)));
+  const outputDir = pathJoin("output");
   mkdirx(outputDir);
   const outputPath = pathJoin(outputDir, "credResult.json");
-  await fs.writeFile(outputPath, credJSON);
+  await diskStorage.set(outputPath, credJSON);
 
   // Write out the account data for convenient usage.
   // Note: this is an experimental format and may change or get
   // removed in the future.
   const credView = new CredView(credResult);
   const credAccounts = computeCredAccounts(ledger, credView);
-  const accountsPath = pathJoin(baseDir, "output", "accounts.json");
-  await fs.writeFile(accountsPath, stringify(credAccounts));
+  const accountsPath = pathJoin("output", "accounts.json");
+  await diskStorage.set(accountsPath, encoder.encode(stringify(credAccounts)));
 
   taskReporter.finish("score");
   return 0;

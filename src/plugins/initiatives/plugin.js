@@ -16,12 +16,13 @@ import {loadJson} from "../../util/disk";
 import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
 import * as Weights from "../../core/weights";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
+import {DiskStorage} from "../../core/storage/disk";
 
 async function loadConfig(
   ctx: PluginDirectoryContext
 ): Promise<InitiativesConfig> {
-  const path = pathJoin(ctx.configDirectory(), "config.json");
-  return loadJson(path, parser);
+  const storage = new DiskStorage(ctx.configDirectory());
+  return loadJson(storage, "config.json", parser);
 }
 
 function getDirectoryFromContext(ctx: PluginDirectoryContext): string {
