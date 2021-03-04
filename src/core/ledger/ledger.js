@@ -77,6 +77,11 @@ type MutableAccount = {|
   active: boolean,
   // key-value store of blockchain addresses the account receives grain to
   payoutAddresses: PayableAddressStore,
+  // An array of IdentityIds from target accounts that have been merged into
+  // the account. This allows for reverse-lookups of IdentityIds if this
+  // account is ever a merge target, so those identityIds can be pointed
+  // towards the new base account.
+  mergedIdentityIds: Array<IdentityId>,
 |};
 export type Account = $ReadOnly<MutableAccount>;
 
@@ -319,6 +324,8 @@ export class Ledger {
       active: false,
       allocationHistory: [],
       payoutAddresses: new Map(),
+      // seed this array with the account's own identityId
+      mergedIdentityIds: [identity.id],
     });
   }
 
@@ -385,7 +392,10 @@ export class Ledger {
       ...baseAccount.payoutAddresses.entries(),
     ]);
     baseAccount.balance = G.add(baseAccount.balance, targetAccount.balance);
-    this._accounts.delete(targetIdentity.id);
+    targetAccount.mergedIdentityIds.forEach((id) => {
+      this._accounts.set(id, baseAccount);
+      baseAccount.mergedIdentityIds.push(id);
+    });
     this._nameToId.delete(targetIdentity.name);
     this._lowercaseNames.delete(targetIdentity.name.toLowerCase());
   }
