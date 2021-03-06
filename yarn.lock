@@ -8634,10 +8634,10 @@ querystringify@^2.1.1:
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.1.1.tgz#60e5a5fd64a7f8bfa4d2ab2ed6fdf4c85bad154e"
   integrity sha512-w7fLxIRCRT7U8Qu53jQnJyPkYZIaR4n5151KMfcJlO/A9397Wxb1amJvROTK6TOnp7PfoAmg/qXiNHI+08jRfA==
 
-ra-core@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.13.0.tgz#3e16a376b80da62223c16fe6a0e8e26d7bf9ce3a"
-  integrity sha512-aEThjqtEreQmWl4sCTP0D11wUAYXrf3ZgfFbOBIzrtm+MQ5EidTdMdbYZtyeB9Yu7pDs+TnQb3zxYz1QmePKYg==
+ra-core@^3.13.1:
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.13.1.tgz#1a6bf9d003a3f01ccd364da6f9172a6017460cc8"
+  integrity sha512-r9Y3N7U7Wz/br9irJvfRBfeFN6m9/+I1am7TDn/yrzr4BgwKsk0Rv2ITRGToGboe+ChvUZLHlQhcE4bFS4mABg==
   dependencies:
     classnames "~2.2.5"
     date-fns "^1.29.0"
@@ -8655,25 +8655,25 @@ ra-data-fakerest@^3.6.2:
   dependencies:
     fakerest "^2.2.0"
 
-ra-i18n-polyglot@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.13.0.tgz#b386026352593ea37262ed381abab34122c06f02"
-  integrity sha512-GJKvTMU1rpQpEiNQet1yKL5wnrjcNh5TH9039rBFG0UghiuVB5aISdDmfrTvnb1/wCBweSDpT4GluJ42D0Is/w==
+ra-i18n-polyglot@^3.13.1:
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.13.1.tgz#c8646345ac6b856ed89bbcc8af96d55f5e9e9c5c"
+  integrity sha512-Bfa+lD1jznSk1kubXd3qKDtpw01Cw1d7zMo9sr9QNGLQOEPFTNreaupl9N2SOtpPs0juk17F5Rtg0O/fIKajxw==
   dependencies:
     node-polyglot "^2.2.2"
-    ra-core "^3.13.0"
+    ra-core "^3.13.1"
 
-ra-language-english@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.13.0.tgz#91664b90eadc3cf46d6731b89d970a598c0d5ae8"
-  integrity sha512-qKGmQxMt+YMKxxfApEjfgoAIX3a3KoU2/AM7N+Xbvf8stva2db/Cxh48uwSean891s6zNyUgNeXVb2zCy/cVew==
+ra-language-english@^3.13.1:
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.13.1.tgz#d3de2f6e1565745613c6631cc546ca379b222c0a"
+  integrity sha512-O218BbV339NMoAmrnCdgv5wIPWlM9J9nnT7E1YhjaR7/n3s+1CEOnNj0fTUZK8AnnMHuf2h3v5Jxum8NRHz4sw==
   dependencies:
-    ra-core "^3.13.0"
+    ra-core "^3.13.1"
 
-ra-ui-materialui@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.13.0.tgz#0ba0b8c6208b19bdd7868a8d43fdb5d6c933fca1"
-  integrity sha512-6Mq/cBkm/lP23y0B5LM+ja77Z8UUHJ0EgwiBjEja3VVi1O9m1O535gbEnMNNm/tNOFmShhBM3ajBlD/G1uL+4w==
+ra-ui-materialui@^3.13.1:
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.13.1.tgz#5467b5d0a8af6469b12b040d2cc0a94621a11298"
+  integrity sha512-/nD19mDJQhRsZaaC+rLTXOAxVYP7DEVq1d2LfvGu464gE8bxzaF1504sPM5vbOJR4o6au5u4za3d3UV0h/AMdw==
   dependencies:
     autosuggest-highlight "^3.1.1"
     classnames "~2.2.5"
@@ -8759,9 +8759,9 @@ rc@^1.2.7:
     strip-json-comments "~2.0.1"
 
 react-admin@^3.6.2:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.13.0.tgz#6ffbb277a26875986a1dc323564446a521b39386"
-  integrity sha512-LqqPeSWGqDZ9mfM69rMBMj5Tf9uFFUG3JlnsaAtRFhmuxYd56d4h0pkuXETEFNabIwtayaJ+rMLODZxZJmQBmA==
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.13.1.tgz#568403428476f157323059095e11674c25c8d8f5"
+  integrity sha512-U644MKz5qMyI93DsnzohYU6HsLDohXl4Fa9EDv/YNU/dbcju7T1XX3sWFjXWv+HdTJ+El48bzEAFCfHRCSNDLQ==
   dependencies:
     "@material-ui/core" "^4.11.2"
     "@material-ui/icons" "^4.11.2"
@@ -8769,10 +8769,10 @@ react-admin@^3.6.2:
     connected-react-router "^6.5.2"
     final-form "^4.20.0"
     final-form-arrays "^3.0.1"
-    ra-core "^3.13.0"
-    ra-i18n-polyglot "^3.13.0"
-    ra-language-english "^3.13.0"
-    ra-ui-materialui "^3.13.0"
+    ra-core "^3.13.1"
+    ra-i18n-polyglot "^3.13.1"
+    ra-language-english "^3.13.1"
+    ra-ui-materialui "^3.13.1"
     react-final-form "^6.3.3"
     react-final-form-arrays "^3.1.1"
     react-redux "^7.1.0"
