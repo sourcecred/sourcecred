@@ -30,13 +30,7 @@ import {
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
-import {
-  format,
-  add,
-  div,
-  fromInteger,
-  type Grain,
-} from "../../../core/ledger/grain";
+import {format, add, div, fromInteger} from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
 import {type Interval, type IntervalSequence} from "../../../core/interval";
@@ -244,40 +238,37 @@ export const ExplorerHome = ({
 
   // build structures for timelines at the top of the page
   const {credTotalsTimeline, grainTotalsTimeline} = useMemo(() => {
-    const allParticipantsCred: Array<Array<number>> = allParticipants.map(
-      (participant) => {
-        return participant.credPerInterval.slice();
-      }
-    );
-    const allParticipantsGrain: Array<Array<Grain>> = allParticipants.map(
-      (participant) => {
-        return participant.grainEarnedPerInterval.slice();
-      }
-    );
-    const credAccumulator = (
-      credTimelineAccumalator: Array<number>,
-      participantCred
-    ) =>
-      credTimelineAccumalator.map(
-        (intervalTotal, i) => intervalTotal + participantCred[i]
-      );
-    const grainAccumulator = (
-      grainTimelineAccumalator: Array<Grain>,
-      participantGrain
-    ) =>
-      grainTimelineAccumalator.map((intervalTotal, i) =>
-        add(intervalTotal, participantGrain[i])
-      );
-    const credTimeline: Array<number> = allParticipantsCred.reduce(
-      credAccumulator
-    );
-    const grainTimeline: Array<Grain> = allParticipantsGrain.reduce(
-      grainAccumulator
-    );
-    return {
-      credTotalsTimeline: credTimeline,
-      grainTotalsTimeline: grainTimeline,
+    const totals = {
+      credTotalsTimeline: [],
+      grainTotalsTimeline: [],
     };
+
+    return allParticipants.reduce(
+      ({credTotalsTimeline, grainTotalsTimeline}, participant) => {
+        const {credPerInterval, grainEarnedPerInterval} = participant;
+        // find the longer array (if different) and iterate over both simultaneously
+        const length = Math.max(
+          credPerInterval.length,
+          grainEarnedPerInterval.length
+        );
+
+        for (let i = 0; i < length; i++) {
+          credTotalsTimeline[i] =
+            credPerInterval[i] + credTotalsTimeline[i] || 0;
+
+          grainTotalsTimeline[i] = add(
+            grainEarnedPerInterval[i],
+            grainTotalsTimeline[i]
+          );
+        }
+
+        return {
+          credTotalsTimeline,
+          grainTotalsTimeline,
+        };
+      },
+      totals
+    );
   }, [timeScopedCredGrainView]);
 
   // create summary values for stat circles
