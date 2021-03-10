@@ -209,10 +209,10 @@ export const ExplorerHome = ({
     TIMEFRAME_OPTIONS[1].selector(initialView.intervals())
   );
   const [checkboxes, setCheckboxes] = useState({
-    [IdentityTypes.USER]: false,
-    [IdentityTypes.ORGANIZATION]: false,
-    [IdentityTypes.BOT]: false,
-    [IdentityTypes.PROJECT]: false,
+    [IdentityTypes.USER]: true,
+    [IdentityTypes.ORGANIZATION]: true,
+    [IdentityTypes.BOT]: true,
+    [IdentityTypes.PROJECT]: true,
   });
 
   const updateTimeframe = (index) => {
@@ -372,13 +372,9 @@ export const ExplorerHome = ({
       (type) => newCheckboxes[type] === true
     );
 
-    if (includedTypes.length === 0) {
-      tsParticipants.createOrUpdateFilterFn("identityType", () => true);
-    } else {
-      tsParticipants.createOrUpdateFilterFn("identityType", (participant) =>
-        includedTypes.includes(participant.identity.subtype)
-      );
-    }
+    tsParticipants.createOrUpdateFilterFn("identityType", (participant) =>
+      includedTypes.includes(participant.identity.subtype)
+    );
   };
 
   const handleChangePage = (event, newIndex) => {
