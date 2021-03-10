@@ -526,6 +526,11 @@ describe("core/ledger/ledger", () => {
         expect(ledger.account(id2)).toEqual(ledger.account(id1));
         expect(ledger.account(newId)).toEqual(ledger.account(id1));
       });
+      it("accounts() returns only the new account", () => {
+        const ledger = ledgerWithActiveIdentities();
+        ledger.mergeIdentities({base: id1, target: id2});
+        expect(ledger.accounts()).toEqual([ledger.account(id1)]);
+      });
       it("does not change the base account's login or id", () => {
         const ledger = ledgerWithActiveIdentities();
         const before = ledger.account(id1).identity;
