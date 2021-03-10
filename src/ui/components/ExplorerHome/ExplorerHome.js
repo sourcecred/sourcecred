@@ -327,6 +327,7 @@ export const ExplorerHome = ({
       avgCred: 0,
       avgGrain: fromInteger(0),
     };
+
     if (tsParticipants.currentPage.length > 0) {
       for (const participant of tsParticipants.currentPage) {
         credAndGrainAggregator.totalCred += participant.cred;
@@ -339,7 +340,7 @@ export const ExplorerHome = ({
         credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
       credAndGrainAggregator.avgGrain = div(
         credAndGrainAggregator.totalGrain,
-        fromInteger(tsParticipants.currentPage.length)
+        tsParticipants.currentPage.length
       );
     }
     return {
