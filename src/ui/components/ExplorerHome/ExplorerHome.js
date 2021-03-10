@@ -35,7 +35,6 @@ import {
   add,
   div,
   fromInteger,
-  fromString,
   type Grain,
 } from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
@@ -340,7 +339,7 @@ export const ExplorerHome = ({
         credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
       credAndGrainAggregator.avgGrain = div(
         credAndGrainAggregator.totalGrain,
-        fromString(String(tsParticipants.currentPage.length))
+        tsParticipants.currentPage.length
       );
     }
     return {

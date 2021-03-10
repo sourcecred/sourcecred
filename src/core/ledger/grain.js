@@ -55,10 +55,10 @@ export function add(a: Grain, b: Grain): Grain {
 export function sub(a: Grain, b: Grain): Grain {
   return bigInt(a).subtract(bigInt(b)).toString();
 }
-export function mul(a: Grain, b: Grain): Grain {
+export function mul(a: Grain, b: Grain | number): Grain {
   return bigInt(a).times(bigInt(b)).toString();
 }
-export function div(a: Grain, b: Grain): Grain {
+export function div(a: Grain, b: Grain | number): Grain {
   return bigInt(a).divide(bigInt(b)).toString();
 }
 export function lt(a: Grain, b: Grain): boolean {
