@@ -62,6 +62,7 @@ describe("core/ledger/ledger", () => {
           balance: "0",
           active: false,
           payoutAddresses: new Map(),
+          mergedIdentityIds: [identity.id],
           identity,
           allocationHistory: [],
         });
@@ -515,12 +516,15 @@ describe("core/ledger/ledger", () => {
         expect(target.name).not.toEqual(target.name.toUpperCase());
         ledger.createIdentity("USER", target.name.toUpperCase());
       });
-      it("removes the target's account", () => {
+      it("target IdentityIDs point to correct base account after merges", () => {
         const ledger = ledgerWithActiveIdentities();
         ledger.mergeIdentities({base: id1, target: id2});
-        expect(() => ledger.account(id2)).toThrowError(
-          "no Account for identity"
-        );
+        expect(ledger.account(id2)).toEqual(ledger.account(id1));
+        const newId = ledger.createIdentity("PROJECT", "SourceCred");
+        ledger.activate(newId);
+        ledger.mergeIdentities({base: newId, target: id1});
+        expect(ledger.account(id2)).toEqual(ledger.account(id1));
+        expect(ledger.account(newId)).toEqual(ledger.account(id1));
       });
       it("does not change the base account's login or id", () => {
         const ledger = ledgerWithActiveIdentities();
@@ -708,6 +712,7 @@ describe("core/ledger/ledger", () => {
         active: true,
         allocationHistory: [],
         payoutAddresses: new Map(),
+        mergedIdentityIds: [identity1().id],
       });
       expect(ledger.eventLog()).toEqual([
         expect.anything(),
@@ -732,6 +737,7 @@ describe("core/ledger/ledger", () => {
         active: false,
         allocationHistory: [],
         payoutAddresses: new Map(),
+        mergedIdentityIds: [identity1().id],
       });
       expect(ledger.eventLog()).toEqual([
         expect.anything(),
@@ -804,6 +810,7 @@ describe("core/ledger/ledger", () => {
           },
         ],
         payoutAddresses: new Map(),
+        mergedIdentityIds: [identity1().id],
       });
     });
 
@@ -1014,6 +1021,7 @@ describe("core/ledger/ledger", () => {
             paid: g("3"),
             active: true,
             payoutAddresses: new Map(),
+            mergedIdentityIds: [identity1().id],
             allocationHistory: [
               {
                 grainReceipt: {id: id1, amount: g("3")},
@@ -1028,6 +1036,7 @@ describe("core/ledger/ledger", () => {
             paid: g("7"),
             active: true,
             payoutAddresses: new Map(),
+            mergedIdentityIds: [identity2().id],
             allocationHistory: [
               {
                 grainReceipt: {id: id2, amount: g("7")},
@@ -1090,6 +1099,7 @@ describe("core/ledger/ledger", () => {
             paid: g("13"),
             active: true,
             payoutAddresses: new Map(),
+            mergedIdentityIds: [identity1().id],
             allocationHistory: [
               {
                 grainReceipt: {id: id1, amount: g("3")},
@@ -1109,6 +1119,7 @@ describe("core/ledger/ledger", () => {
             paid: g("17"),
             active: true,
             payoutAddresses: new Map(),
+            mergedIdentityIds: [identity2().id],
             allocationHistory: [
               {
                 grainReceipt: {id: id2, amount: g("7")},
@@ -1189,6 +1200,7 @@ describe("core/ledger/ledger", () => {
             paid: g("13"),
             active: true,
             payoutAddresses: new Map(),
+            mergedIdentityIds: [identity1().id],
             allocationHistory: [
               {
                 grainReceipt: {id: id1, amount: g("3")},
@@ -1208,6 +1220,7 @@ describe("core/ledger/ledger", () => {
             paid: g("17"),
             active: true,
             payoutAddresses: new Map(),
+            mergedIdentityIds: [identity2().id],
             allocationHistory: [
               {
                 grainReceipt: {id: id2, amount: g("7")},
@@ -1383,6 +1396,7 @@ describe("core/ledger/ledger", () => {
             },
           ],
           payoutAddresses: new Map(),
+          mergedIdentityIds: [identity1().id],
         };
         const account2 = {
           identity: identity2(),
@@ -1397,6 +1411,7 @@ describe("core/ledger/ledger", () => {
             },
           ],
           payoutAddresses: new Map(),
+          mergedIdentityIds: [identity2().id],
         };
         expect(ledger.account(id1)).toEqual(account1);
         expect(ledger.account(id2)).toEqual(account2);
@@ -1469,6 +1484,7 @@ describe("core/ledger/ledger", () => {
             },
           ],
           payoutAddresses: new Map(),
+          mergedIdentityIds: [identity1().id],
         };
         expect(ledger.account(id1)).toEqual(account);
       });
