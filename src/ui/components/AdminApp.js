@@ -33,6 +33,7 @@ const dataProvider = fakeDataProvider({}, true);
 const theme = createMuiTheme({
   palette: {
     type: "dark",
+    backgroundColor: "#303030",
     primary: pink,
     blueish: "#6174CC",
     lavender: "#C5A2C5",
