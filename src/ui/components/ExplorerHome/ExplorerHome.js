@@ -246,11 +246,7 @@ export const ExplorerHome = ({
     return allParticipants.reduce(
       ({credTotalsTimeline, grainTotalsTimeline}, participant) => {
         const {credPerInterval, grainEarnedPerInterval} = participant;
-        // find the longer array (if different) and iterate over both simultaneously
-        const length = Math.max(
-          credPerInterval.length,
-          grainEarnedPerInterval.length
-        );
+        const length = credPerInterval.length;
 
         for (let i = 0; i < length; i++) {
           credTotalsTimeline[i] =
@@ -258,7 +254,7 @@ export const ExplorerHome = ({
 
           grainTotalsTimeline[i] = add(
             grainEarnedPerInterval[i],
-            grainTotalsTimeline[i]
+            grainTotalsTimeline[i] || 0
           );
         }
 
