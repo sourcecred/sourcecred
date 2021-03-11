@@ -159,7 +159,7 @@ export class Ledger {
    * Return all the Accounts in the ledger.
    */
   accounts(): $ReadOnlyArray<Account> {
-    return Array.from(this._accounts.values());
+    return Array.from(new Set(this._accounts.values()));
   }
 
   /**
