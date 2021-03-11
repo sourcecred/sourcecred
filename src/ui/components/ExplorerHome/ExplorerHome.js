@@ -262,7 +262,7 @@ export const ExplorerHome = ({
 
           grainTotalsTimeline[i] = add(
             grainEarnedPerInterval[i],
-            grainTotalsTimeline[i] || 0
+            grainTotalsTimeline[i] || fromInteger(0)
           );
         }
 
