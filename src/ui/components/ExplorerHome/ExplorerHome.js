@@ -31,7 +31,7 @@ import {
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
-import {format, add, div, fromInteger} from "../../../core/ledger/grain";
+import {format, add, div, fromInteger, ZERO} from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
 import {type Interval, type IntervalSequence} from "../../../core/interval";
@@ -254,15 +254,14 @@ export const ExplorerHome = ({
     return allParticipants.reduce(
       ({credTotalsTimeline, grainTotalsTimeline}, participant) => {
         const {credPerInterval, grainEarnedPerInterval} = participant;
-        const length = credPerInterval.length;
 
-        for (let i = 0; i < length; i++) {
+        for (let i = 0; i < credPerInterval.length; i++) {
           credTotalsTimeline[i] =
             credPerInterval[i] + credTotalsTimeline[i] || 0;
 
           grainTotalsTimeline[i] = add(
             grainEarnedPerInterval[i],
-            grainTotalsTimeline[i] || fromInteger(0)
+            grainTotalsTimeline[i] || ZERO
           );
         }
 
