@@ -132,4 +132,20 @@ function printCredDiffTable(credGraph: CredGraph, priorCredGraph: CredGraph) {
   console.table(sortedParticipants.slice(0, 20).map((n) => row(n)));
 }
 
+export const credRankHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred credrank [options] 
+
+      options:
+      -d                    outputs a comparison table between the current graph and the prior graph        
+      -s, --simulation      doesn't update the current graph and ledger json
+          --stealth         skip the output of the summary table
+
+      Calculate cred scores from existing graph
+      `.trimRight()
+  );
+  return 0;
+};
+
 export default credrankCommand;
