@@ -250,35 +250,13 @@ export const ExplorerHome = ({
     [timeScopedCredGrainView]
   );
 
-  // build structures for timelines at the top of the page
-  const {credTotalsTimeline, grainTotalsTimeline} = useMemo(() => {
-    const totals = {
-      credTotalsTimeline: [],
-      grainTotalsTimeline: [],
-    };
+  const credTotalsTimeline = useMemo(
+    () => timeScopedCredGrainView.totalCredPerInterval()
+  , [timeScopedCredGrainView]);
 
-    return allParticipants.reduce(
-      ({credTotalsTimeline, grainTotalsTimeline}, participant) => {
-        const {credPerInterval, grainEarnedPerInterval} = participant;
-
-        for (let i = 0; i < credPerInterval.length; i++) {
-          credTotalsTimeline[i] =
-            credPerInterval[i] + credTotalsTimeline[i] || 0;
-
-          grainTotalsTimeline[i] = add(
-            grainEarnedPerInterval[i],
-            grainTotalsTimeline[i] || ZERO
-          );
-        }
-
-        return {
-          credTotalsTimeline,
-          grainTotalsTimeline,
-        };
-      },
-      totals
-    );
-  }, [timeScopedCredGrainView]);
+  const grainTotalsTimeline = useMemo(
+    () => timeScopedCredGrainView.totalGrainPerInterval()
+  , [timeScopedCredGrainView]);
 
   // create summary values for stat circles
   const totalCredThisPeriod = useMemo(
