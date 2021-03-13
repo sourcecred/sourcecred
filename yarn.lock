@@ -4758,15 +4758,20 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
-final-form-arrays@^3.0.1:
+final-form-arrays@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/final-form-arrays/-/final-form-arrays-3.0.2.tgz#9f3bef778dec61432357744eb6f3abef7e7f3847"
   integrity sha512-TfO8aZNz3RrsZCDx8GHMQcyztDNpGxSSi9w4wpSNKlmv2PfFWVVM8P7Yj5tj4n0OWax+x5YwTLhT5BnqSlCi+w==
 
-final-form@^4.20.0:
-  version "4.20.1"
-  resolved "https://registry.yarnpkg.com/final-form/-/final-form-4.20.1.tgz#525a7f7f27f55c28d8994b157b24d6104fc560e9"
-  integrity sha512-IIsOK3JRxJrN72OBj7vFWZxtGt3xc1bYwJVPchjVWmDol9DlzMSAOPB+vwe75TUYsw1JaH0fTQnIgwSQZQ9Acg==
+final-form-submit-errors@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/final-form-submit-errors/-/final-form-submit-errors-0.1.2.tgz#1c59d10386d7b5a1a5e89f9389fa7cf85d1255c5"
+  integrity sha512-2EwHSdf9Sy80bnsGRrDKBLp5C2uY7hL65o8tpqK/FWxyBpXtT519SsIZC4etLpGen2kjFCpYrxYkzFUfbIEXsQ==
+
+final-form@^4.20.2:
+  version "4.20.2"
+  resolved "https://registry.yarnpkg.com/final-form/-/final-form-4.20.2.tgz#c820b37d7ebb73d71169480256a36c7e6e6c9155"
+  integrity sha512-5i0IxqwjjPG1nUNCjWhqPCvQJJ2R+QwTwaAnjPmFnLbyjIHWuBPU8u+Ps4G3TcX2Sjno+O5xCZJzYcMJEzzfCQ==
   dependencies:
     "@babel/runtime" "^7.10.0"
 
@@ -8634,10 +8639,10 @@ querystringify@^2.1.1:
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.1.1.tgz#60e5a5fd64a7f8bfa4d2ab2ed6fdf4c85bad154e"
   integrity sha512-w7fLxIRCRT7U8Qu53jQnJyPkYZIaR4n5151KMfcJlO/A9397Wxb1amJvROTK6TOnp7PfoAmg/qXiNHI+08jRfA==
 
-ra-core@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.13.0.tgz#3e16a376b80da62223c16fe6a0e8e26d7bf9ce3a"
-  integrity sha512-aEThjqtEreQmWl4sCTP0D11wUAYXrf3ZgfFbOBIzrtm+MQ5EidTdMdbYZtyeB9Yu7pDs+TnQb3zxYz1QmePKYg==
+ra-core@^3.13.3:
+  version "3.13.3"
+  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.13.3.tgz#6997f0c39d324214e4240bdbe8dbbf840706c91d"
+  integrity sha512-ryfulSlsAYqqwmrJFyIccdEJTGdwh855fIm6uRYJQGEgF5NbFdvCBIwOmvK2m9KjvW3cnNI9Bq9dAsnkRuuvUg==
   dependencies:
     classnames "~2.2.5"
     date-fns "^1.29.0"
@@ -8655,25 +8660,25 @@ ra-data-fakerest@^3.6.2:
   dependencies:
     fakerest "^2.2.0"
 
-ra-i18n-polyglot@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.13.0.tgz#b386026352593ea37262ed381abab34122c06f02"
-  integrity sha512-GJKvTMU1rpQpEiNQet1yKL5wnrjcNh5TH9039rBFG0UghiuVB5aISdDmfrTvnb1/wCBweSDpT4GluJ42D0Is/w==
+ra-i18n-polyglot@^3.13.3:
+  version "3.13.3"
+  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.13.3.tgz#013c25c222bf705cfde3b1ecc172d837b26de163"
+  integrity sha512-KvhoRttmUcea1e4GygaKVwJ9OO6Va24SuuzsGZ8Hh96aVq3CW5axB5rZnTXlyz8WF2Ybc/c0VnLrr4gSwQLMnA==
   dependencies:
     node-polyglot "^2.2.2"
-    ra-core "^3.13.0"
+    ra-core "^3.13.3"
 
-ra-language-english@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.13.0.tgz#91664b90eadc3cf46d6731b89d970a598c0d5ae8"
-  integrity sha512-qKGmQxMt+YMKxxfApEjfgoAIX3a3KoU2/AM7N+Xbvf8stva2db/Cxh48uwSean891s6zNyUgNeXVb2zCy/cVew==
+ra-language-english@^3.13.3:
+  version "3.13.3"
+  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.13.3.tgz#5eadedbdc7453e8134d06651be4eab50ceb99453"
+  integrity sha512-6ekNRB7BgIXtMFqMbTb+4YX+5uqlUnrybYO3/1h5iLByRGRzkXj3ZBwWZY3w+VrwUaFDuYtciaR14VaQpHNJQw==
   dependencies:
-    ra-core "^3.13.0"
+    ra-core "^3.13.3"
 
-ra-ui-materialui@^3.13.0:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.13.0.tgz#0ba0b8c6208b19bdd7868a8d43fdb5d6c933fca1"
-  integrity sha512-6Mq/cBkm/lP23y0B5LM+ja77Z8UUHJ0EgwiBjEja3VVi1O9m1O535gbEnMNNm/tNOFmShhBM3ajBlD/G1uL+4w==
+ra-ui-materialui@^3.13.3:
+  version "3.13.3"
+  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.13.3.tgz#d9357531e4291618e282dc42e3c30e37b179a261"
+  integrity sha512-f1K3PiS117yHk4tm3zoPw2lR5zj1a0uCVjRpunPkFG4grRuRB4yWta6dzcX62/w/icA1Hf7rUbSALcGmf9UZdg==
   dependencies:
     autosuggest-highlight "^3.1.1"
     classnames "~2.2.5"
@@ -8759,22 +8764,23 @@ rc@^1.2.7:
     strip-json-comments "~2.0.1"
 
 react-admin@^3.6.2:
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.13.0.tgz#6ffbb277a26875986a1dc323564446a521b39386"
-  integrity sha512-LqqPeSWGqDZ9mfM69rMBMj5Tf9uFFUG3JlnsaAtRFhmuxYd56d4h0pkuXETEFNabIwtayaJ+rMLODZxZJmQBmA==
+  version "3.13.3"
+  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.13.3.tgz#cee3d9431a3d3e5f3c1ce461ad142e3c2e9d99f3"
+  integrity sha512-MEP8dV00zv9lek5SB8IHX/SVSQZ9wxnGcW2CNtt5dbjVPLSdEOggiGHolSdp3/uyrZjkm63sbWseq47GBG1XoQ==
   dependencies:
     "@material-ui/core" "^4.11.2"
     "@material-ui/icons" "^4.11.2"
     "@material-ui/styles" "^4.11.2"
     connected-react-router "^6.5.2"
-    final-form "^4.20.0"
-    final-form-arrays "^3.0.1"
-    ra-core "^3.13.0"
-    ra-i18n-polyglot "^3.13.0"
-    ra-language-english "^3.13.0"
-    ra-ui-materialui "^3.13.0"
-    react-final-form "^6.3.3"
-    react-final-form-arrays "^3.1.1"
+    final-form "^4.20.2"
+    final-form-arrays "^3.0.2"
+    final-form-submit-errors "^0.1.2"
+    ra-core "^3.13.3"
+    ra-i18n-polyglot "^3.13.3"
+    ra-language-english "^3.13.3"
+    ra-ui-materialui "^3.13.3"
+    react-final-form "^6.5.2"
+    react-final-form-arrays "^3.1.3"
     react-redux "^7.1.0"
     react-router "^5.1.0"
     react-router-dom "^5.1.0"
@@ -8835,14 +8841,14 @@ react-error-overlay@^6.0.9:
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.9.tgz#3c743010c9359608c375ecd6bc76f35d93995b0a"
   integrity sha512-nQTTcUu+ATDbrSD1BZHr5kgSD4oF8OFjxun8uAaL8RwPBacGBNPf/yAuVVdx17N8XNzRDMrZ9XcKZHCjPW+9ew==
 
-react-final-form-arrays@^3.1.1:
+react-final-form-arrays@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/react-final-form-arrays/-/react-final-form-arrays-3.1.3.tgz#d3594c500495a4cf5e437070ada989da9624bba2"
   integrity sha512-dzBiLfbr9l1YRExARBpJ8uA/djBenCvFrbrsXjd362joDl3vT+WhmMKKr6HDQMJffjA8T4gZ3n5+G9M59yZfuQ==
   dependencies:
     "@babel/runtime" "^7.12.1"
 
-react-final-form@^6.3.3:
+react-final-form@^6.5.2:
   version "6.5.2"
   resolved "https://registry.yarnpkg.com/react-final-form/-/react-final-form-6.5.2.tgz#d04d1eb7d92eabc6f6c35206bb0eebfc4bfd924b"
   integrity sha512-c5l45FYOoxtfpvsvMFh3w2WW8KNxbuebBUrM16rUrooQkewTs0Zahmv0TuKFX5jsC9BKn5Fo84j3ZVXQdURS4w==
