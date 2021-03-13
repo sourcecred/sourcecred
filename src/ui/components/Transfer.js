@@ -87,7 +87,7 @@ export const Transfer = ({
   const [receiver, setReceiver] = useState<Account | null>(null);
   const [amount, setAmount] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
-  const [isSavedToLedger, setIsSavedToLedger] = useState<boolean>(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
 
   const isDisabled =
@@ -106,7 +106,7 @@ export const Transfer = ({
       });
       updateLedger(nextLedger);
       setAmount("");
-      setIsSavedToLedger(!isSavedToLedger);
+      setHasUnsavedChanges(!hasUnsavedChanges);
       setSender(nextLedger.account(sender.identity.id));
       setReceiver(nextLedger.account(receiver.identity.id));
       setMemo("");
@@ -114,7 +114,7 @@ export const Transfer = ({
   };
 
   const handleSaveToDisk = () => {
-    setIsSavedToLedger(!isSavedToLedger);
+    setHasUnsavedChanges(false);
     saveToDisk();
     setMemo("");
     setReceiver(null);
@@ -124,7 +124,7 @@ export const Transfer = ({
 
   const handleSaveToLedgerWarning = (_) => {
     if (
-      isSavedToLedger ||
+      hasUnsavedChanges ||
       sender !== null ||
       receiver !== null ||
       amount !== ""
@@ -229,7 +229,7 @@ export const Transfer = ({
             variant="contained"
             className={classes.element}
             onClick={handleSaveToDisk}
-            disabled={!isSavedToLedger}
+            disabled={!hasUnsavedChanges}
           >
             save ledger to disk
           </Button>
