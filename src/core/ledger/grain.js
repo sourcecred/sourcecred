@@ -55,10 +55,10 @@ export function add(a: Grain, b: Grain): Grain {
 export function sub(a: Grain, b: Grain): Grain {
   return bigInt(a).subtract(bigInt(b)).toString();
 }
-export function mul(a: Grain, b: Grain | number): Grain {
+export function mul(a: Grain, b: Grain): Grain {
   return bigInt(a).times(bigInt(b)).toString();
 }
-export function div(a: Grain, b: Grain | number): Grain {
+export function div(a: Grain, b: Grain): Grain {
   return bigInt(a).divide(bigInt(b)).toString();
 }
 export function lt(a: Grain, b: Grain): boolean {
@@ -200,6 +200,10 @@ export function multiplyFloat(grain: Grain, num: number): Grain {
 
   const floatProduct = Number(grain) * num;
   return bigInt(Math.floor(floatProduct)).toString();
+}
+
+export function divideFloat(dividend: Grain, divisor: number): Grain {
+  return multiplyFloat(dividend, 1 / divisor);
 }
 
 /**

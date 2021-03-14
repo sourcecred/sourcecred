@@ -33,7 +33,7 @@ import type {CurrencyDetails} from "../../../api/currencyConfig";
 import {
   format,
   add,
-  div,
+  divideFloat,
   fromInteger,
   type Grain,
 } from "../../../core/ledger/grain";
@@ -337,7 +337,7 @@ export const ExplorerHome = ({
       }
       credAndGrainAggregator.avgCred =
         credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
-      credAndGrainAggregator.avgGrain = div(
+      credAndGrainAggregator.avgGrain = divideFloat(
         credAndGrainAggregator.totalGrain,
         tsParticipants.currentPage.length
       );
@@ -593,7 +593,10 @@ export const ExplorerHome = ({
                     Average
                   </TableCell>
                   <TableCell>
-                    {credAndGrainSummary.avgCred.toFixed(1)}
+                    {credAndGrainSummary.avgCred.toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 1,
+                    })}
                   </TableCell>
                   <TableCell>
                     {format(credAndGrainSummary.avgGrain, 2, currencySuffix)}
@@ -605,7 +608,12 @@ export const ExplorerHome = ({
                     <b>TOTAL</b>
                   </TableCell>
                   <TableCell>
-                    <b>{credAndGrainSummary.totalCred.toFixed(1)}</b>
+                    <b>
+                      {credAndGrainSummary.totalCred.toLocaleString(undefined, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 1,
+                      })}
+                    </b>
                   </TableCell>
                   <TableCell>
                     <b>
