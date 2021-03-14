@@ -85,8 +85,14 @@ describe("core/credGrainView", () => {
       expect(credGrainView.participants()).toEqual(expectedParticipants);
     });
 
+    it("should have correct aggregates", () => {
+      expect(credGrainView.totalGrainPerInterval()).toEqual([g("10"), g("20")]);
+      // cred is not easily tested because of expectedParticipant2's cred is
+      // so small that it is lost to imprecision during addition.
+    });
+
     describe("when time scoped to exactly the last interval", () => {
-      it("should have participant data for the last interval", () => {
+      it("should have participant and aggregate data for the last interval", () => {
         const timeScopedCredGrainView = credGrainView.withTimeScope(
           GraphUtil.intervals[GraphUtil.intervals.length - 1].startTimeMs,
           GraphUtil.intervals[GraphUtil.intervals.length - 1].endTimeMs
@@ -119,11 +125,14 @@ describe("core/credGrainView", () => {
         expect(timeScopedCredGrainView.participants()).toEqual(
           expectedParticipants
         );
+        expect(timeScopedCredGrainView.totalGrainPerInterval()).toEqual([
+          g("20"),
+        ]);
       });
     });
 
     describe("when time scoped to exactly the first interval", () => {
-      it("should have participant data for the first interval", () => {
+      it("should have participant and aggregate data for the first interval", () => {
         const timeScopedCredGrainView = credGrainView.withTimeScope(
           GraphUtil.intervals[0].startTimeMs,
           GraphUtil.intervals[0].endTimeMs
@@ -154,6 +163,9 @@ describe("core/credGrainView", () => {
         expect(timeScopedCredGrainView.participants()).toEqual(
           expectedParticipants
         );
+        expect(timeScopedCredGrainView.totalGrainPerInterval()).toEqual([
+          g("10"),
+        ]);
       });
     });
 
