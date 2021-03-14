@@ -3,6 +3,7 @@
 import {sum} from "d3-array";
 import {format} from "d3-format";
 
+import dedent from "../util/dedent";
 import sortBy from "../util/sortBy";
 import {credrank} from "../api/credrank";
 import {CredGraph, type Participant} from "../core/credrank/credGraph";
