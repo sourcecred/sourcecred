@@ -21,6 +21,7 @@ import {
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
+import grey from "@material-ui/core/colors/grey";
 import deepFreeze from "deep-freeze";
 import bigInt from "big-integer";
 import {CredGrainView} from "../../../core/credGrainView";
@@ -35,7 +36,7 @@ import {
   add,
   divideFloat,
   fromInteger,
-  type Grain,
+  ZERO,
 } from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
@@ -137,6 +138,13 @@ const useStyles = makeStyles((theme) => ({
   rowAverage: {
     fontStyle: "italic",
   },
+  averageTotalsNotice: {
+    fontStyle: "italic",
+    color: grey[500],
+  },
+  paginator: {
+    backgroundColor: theme.palette.backgroundColor,
+  },
 }));
 
 const CRED_SORT = deepFreeze({
@@ -209,10 +217,10 @@ export const ExplorerHome = ({
     TIMEFRAME_OPTIONS[1].selector(initialView.intervals())
   );
   const [checkboxes, setCheckboxes] = useState({
-    [IdentityTypes.USER]: false,
-    [IdentityTypes.ORGANIZATION]: false,
-    [IdentityTypes.BOT]: false,
-    [IdentityTypes.PROJECT]: false,
+    [IdentityTypes.USER]: true,
+    [IdentityTypes.ORGANIZATION]: true,
+    [IdentityTypes.BOT]: true,
+    [IdentityTypes.PROJECT]: true,
   });
 
   const updateTimeframe = (index) => {
@@ -244,40 +252,32 @@ export const ExplorerHome = ({
 
   // build structures for timelines at the top of the page
   const {credTotalsTimeline, grainTotalsTimeline} = useMemo(() => {
-    const allParticipantsCred: Array<Array<number>> = allParticipants.map(
-      (participant) => {
-        return participant.credPerInterval.slice();
-      }
-    );
-    const allParticipantsGrain: Array<Array<Grain>> = allParticipants.map(
-      (participant) => {
-        return participant.grainEarnedPerInterval.slice();
-      }
-    );
-    const credAccumulator = (
-      credTimelineAccumalator: Array<number>,
-      participantCred
-    ) =>
-      credTimelineAccumalator.map(
-        (intervalTotal, i) => intervalTotal + participantCred[i]
-      );
-    const grainAccumulator = (
-      grainTimelineAccumulator: Array<Grain>,
-      participantGrain
-    ) =>
-      grainTimelineAccumulator.map((intervalTotal, i) =>
-        add(intervalTotal, participantGrain[i])
-      );
-    const credTimeline: Array<number> = allParticipantsCred.reduce(
-      credAccumulator
-    );
-    const grainTimeline: Array<Grain> = allParticipantsGrain.reduce(
-      grainAccumulator
-    );
-    return {
-      credTotalsTimeline: credTimeline,
-      grainTotalsTimeline: grainTimeline,
+    const totals = {
+      credTotalsTimeline: [],
+      grainTotalsTimeline: [],
     };
+
+    return allParticipants.reduce(
+      ({credTotalsTimeline, grainTotalsTimeline}, participant) => {
+        const {credPerInterval, grainEarnedPerInterval} = participant;
+
+        for (let i = 0; i < credPerInterval.length; i++) {
+          credTotalsTimeline[i] =
+            credPerInterval[i] + credTotalsTimeline[i] || 0;
+
+          grainTotalsTimeline[i] = add(
+            grainEarnedPerInterval[i],
+            grainTotalsTimeline[i] || ZERO
+          );
+        }
+
+        return {
+          credTotalsTimeline,
+          grainTotalsTimeline,
+        };
+      },
+      totals
+    );
   }, [timeScopedCredGrainView]);
 
   // create summary values for stat circles
@@ -327,6 +327,7 @@ export const ExplorerHome = ({
       avgCred: 0,
       avgGrain: fromInteger(0),
     };
+
     if (tsParticipants.currentPage.length > 0) {
       for (const participant of tsParticipants.currentPage) {
         credAndGrainAggregator.totalCred += participant.cred;
@@ -372,13 +373,9 @@ export const ExplorerHome = ({
       (type) => newCheckboxes[type] === true
     );
 
-    if (includedTypes.length === 0) {
-      tsParticipants.createOrUpdateFilterFn("identityType", () => true);
-    } else {
-      tsParticipants.createOrUpdateFilterFn("identityType", (participant) =>
-        includedTypes.includes(participant.identity.subtype)
-      );
-    }
+    tsParticipants.createOrUpdateFilterFn("identityType", (participant) =>
+      includedTypes.includes(participant.identity.subtype)
+    );
   };
 
   const handleChangePage = (event, newIndex) => {
@@ -514,6 +511,22 @@ export const ExplorerHome = ({
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={PAGINATION_OPTIONS}
+                    className={classes.paginator}
+                    colSpan={4}
+                    count={tsParticipants.length}
+                    rowsPerPage={tsParticipants.rowsPerPage}
+                    page={tsParticipants.pageIndex}
+                    SelectProps={{
+                      inputProps: {"aria-label": "rows per page"},
+                      native: true,
+                    }}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                  />
+                </TableRow>
+                <TableRow>
                   <TableCell>
                     <b>Participant</b>
                   </TableCell>
@@ -555,7 +568,7 @@ export const ExplorerHome = ({
               <TableBody>
                 {tsParticipants.currentPage.length > 0 ? (
                   tsParticipants.currentPage.map((row) => (
-                    <TableRow key={row.identity.name}>
+                    <TableRow key={row.identity.id}>
                       <TableCell
                         component="th"
                         scope="row"
@@ -588,6 +601,16 @@ export const ExplorerHome = ({
                     </TableCell>
                   </TableRow>
                 )}
+                <TableRow key="help-text">
+                  <TableCell
+                    colSpan={4}
+                    align="center"
+                    className={classes.averageTotalsNotice}
+                  >
+                    Average and Total numbers represent the list shown above
+                    only.
+                  </TableCell>
+                </TableRow>
                 <TableRow key="average" className={classes.rowAverage}>
                   <TableCell component="th" scope="row">
                     Average
@@ -631,6 +654,7 @@ export const ExplorerHome = ({
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={PAGINATION_OPTIONS}
+                    className={classes.paginator}
                     colSpan={4}
                     count={tsParticipants.length}
                     rowsPerPage={tsParticipants.rowsPerPage}

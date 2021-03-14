@@ -14,7 +14,7 @@ import {
 } from "./credrank/credGraph";
 import {type Identity, type IdentityId} from "./identity";
 import * as G from "./ledger/grain";
-import {type Grain} from "./ledger/grain";
+import {type Grain, add, ZERO} from "./ledger/grain";
 import {Ledger, type Account} from "./ledger/ledger";
 import {type TimestampMs} from "../util/timestamp";
 import findLastIndex from "lodash.findlastindex";
@@ -56,11 +56,15 @@ export class CredGrainView {
   _ledger: Ledger;
   _participants: $ReadOnlyArray<ParticipantCredGrain>;
   _intervals: IntervalSequence;
+  _credTotals: Array<number>;
+  _grainTotals: Array<Grain>;
 
   constructor(credGraph: CredGraph, ledger: Ledger) {
     this._credGraph = credGraph;
     this._ledger = ledger;
     this._intervals = deepFreeze(credGraph.intervals());
+    this._credTotals = [];
+    this._grainTotals = [];
 
     const graphParticipants = new Map<IdentityId, GraphParticipant>();
     for (const participant of credGraph.participants()) {
@@ -75,14 +79,25 @@ export class CredGrainView {
             `The graph is missing account [${account.identity.name}: ${account.identity.id}] that exists in the ledger.`
           );
 
+        const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
+          account
+        );
+        for (let i = 0; i < this._intervals.length; i++) {
+          this._credTotals[i] =
+            graphParticipant.credPerInterval[i] + this._credTotals[i] || 0;
+
+          this._grainTotals[i] = add(
+            grainEarnedPerInterval[i],
+            this._grainTotals[i] || ZERO
+          );
+        }
+
         return {
           identity: account.identity,
           cred: graphParticipant.cred,
           credPerInterval: graphParticipant.credPerInterval,
           grainEarned: account.paid,
-          grainEarnedPerInterval: this._calculateGrainEarnedPerInterval(
-            account
-          ),
+          grainEarnedPerInterval,
         };
       })
     );
@@ -106,12 +121,7 @@ export class CredGrainView {
     startTimeMs: TimestampMs,
     endTimeMs: TimestampMs
   ): TimeScopedCredGrainView {
-    return new TimeScopedCredGrainView(
-      this._participants,
-      this._intervals,
-      startTimeMs,
-      endTimeMs
-    );
+    return new TimeScopedCredGrainView(this, startTimeMs, endTimeMs);
   }
 
   intervals(): IntervalSequence {
@@ -120,6 +130,15 @@ export class CredGrainView {
 
   participants(): $ReadOnlyArray<ParticipantCredGrain> {
     return this._participants;
+  }
+
+  // This is imprecise, due to floating point rounding.
+  totalCredPerInterval(): $ReadOnlyArray<number> {
+    return this._credTotals;
+  }
+
+  totalGrainPerInterval(): $ReadOnlyArray<Grain> {
+    return this._grainTotals;
   }
 }
 
@@ -132,13 +151,15 @@ export class CredGrainView {
 export class TimeScopedCredGrainView {
   _participants: $ReadOnlyArray<ParticipantCredGrain>;
   _intervals: IntervalSequence;
+  _credTotals: $ReadOnlyArray<number>;
+  _grainTotals: $ReadOnlyArray<Grain>;
 
   constructor(
-    originalParticipants: $ReadOnlyArray<ParticipantCredGrain>,
-    originalIntervals: IntervalSequence,
+    credGrainView: CredGrainView,
     startTimeMs: TimestampMs,
     endTimeMs: TimestampMs
   ) {
+    const originalIntervals = credGrainView.intervals();
     let inclusiveStartIndex = originalIntervals.findIndex(
       (interval) => startTimeMs <= interval.startTimeMs
     );
@@ -157,7 +178,7 @@ export class TimeScopedCredGrainView {
       )
     );
     this._participants = deepFreeze(
-      originalParticipants.map((participant) => {
+      credGrainView.participants().map((participant) => {
         const credPerInterval = participant.credPerInterval.slice(
           inclusiveStartIndex,
           exclusiveEndIndex
@@ -178,6 +199,12 @@ export class TimeScopedCredGrainView {
         };
       })
     );
+    this._credTotals = credGrainView
+      .totalCredPerInterval()
+      .slice(inclusiveStartIndex, exclusiveEndIndex);
+    this._grainTotals = credGrainView
+      .totalGrainPerInterval()
+      .slice(inclusiveStartIndex, exclusiveEndIndex);
   }
 
   intervals(): IntervalSequence {
@@ -186,5 +213,14 @@ export class TimeScopedCredGrainView {
 
   participants(): $ReadOnlyArray<ParticipantCredGrain> {
     return this._participants;
+  }
+
+  // This is imprecise, due to floating point rounding.
+  totalCredPerInterval(): $ReadOnlyArray<number> {
+    return this._credTotals;
+  }
+
+  totalGrainPerInterval(): $ReadOnlyArray<Grain> {
+    return this._grainTotals;
   }
 }
