@@ -26,6 +26,7 @@ import * as markovChain from "../core/algorithm/markovChain";
 import * as credView from "../analysis/credView";
 import * as credData from "../analysis/credData";
 import * as credResult from "../analysis/credResult";
+import * as credGraph from "../core/credrank/credGraph";
 import * as ledger from "../core/ledger/ledger";
 import * as ledgerUtils from "../core/ledger/utils";
 import * as grain from "../core/ledger/grain";
@@ -33,8 +34,12 @@ import * as identity from "../core/identity";
 
 import * as manager from "./ledgerManager";
 import * as storage from "./ledgerStorage";
+import * as credrank from "./credrank";
 
 const api = {
+  api: {
+    credrank,
+  },
   core: {
     address,
     algorithm: {
@@ -44,6 +49,7 @@ const api = {
     graph,
     weightedGraph,
     weights,
+    credGraph,
   },
   analysis: {
     credView,
