@@ -225,7 +225,7 @@ const TIMEFRAME_OPTIONS: Array<{|
         startTimeMs: intervals[0].startTimeMs,
         endTimeMs: intervals[intervals.length - 1].endTimeMs,
       };
-    }
+    },
   },
 ]);
 
