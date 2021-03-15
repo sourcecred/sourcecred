@@ -36,7 +36,6 @@ import {
   add,
   divideFloat,
   fromInteger,
-  ZERO,
 } from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
@@ -160,17 +159,32 @@ const TIMEFRAME_OPTIONS: Array<{|
   +tabLabel: string,
   +tableLabel: string,
   +selector: (IntervalSequence) => Interval,
+  +chartSelector: (IntervalSequence) => Interval,
 |}> = deepFreeze([
   {
     tabLabel: "This Week",
     tableLabel: "This Week’s Activity",
     selector: (intervals) => intervals[intervals.length - 1],
+    chartSelector: (intervals) =>
+      intervals.length === 1
+        ? intervals[0]
+        : {
+            startTimeMs: intervals[intervals.length - 2].startTimeMs,
+            endTimeMs: intervals[intervals.length - 1].endTimeMs,
+          },
   },
   {
     tabLabel: "Last Week",
     tableLabel: "Last Week’s Activity",
     selector: (intervals) =>
       intervals.length === 1 ? intervals[0] : intervals[intervals.length - 2],
+    chartSelector: (intervals) =>
+      intervals.length <= 2
+        ? intervals[0]
+        : {
+            startTimeMs: intervals[intervals.length - 3].startTimeMs,
+            endTimeMs: intervals[intervals.length - 2].endTimeMs,
+          },
   },
   {
     tabLabel: "This Month",
@@ -185,17 +199,32 @@ const TIMEFRAME_OPTIONS: Array<{|
             startTimeMs: intervals[intervals.length - 5].startTimeMs,
             endTimeMs: intervals[intervals.length - 2].endTimeMs,
           },
+    chartSelector: (intervals) =>
+      intervals.length < 5
+        ? {
+            startTimeMs: intervals[0].startTimeMs,
+            endTimeMs: intervals[intervals.length - 1].endTimeMs,
+          }
+        : {
+            startTimeMs: intervals[intervals.length - 5].startTimeMs,
+            endTimeMs: intervals[intervals.length - 2].endTimeMs,
+          },
   },
   {
     tabLabel: "All Time",
     tableLabel: "All Time Activity",
-    selector: (intervals) =>
-      intervals.length === 1
-        ? intervals[0]
-        : {
-            startTimeMs: intervals[0].startTimeMs,
-            endTimeMs: intervals[intervals.length - 1].endTimeMs,
-          },
+    selector: (intervals) => {
+      return {
+        startTimeMs: intervals[0].startTimeMs,
+        endTimeMs: intervals[intervals.length - 1].endTimeMs,
+      };
+    },
+    chartSelector: (intervals) => {
+      return {
+        startTimeMs: intervals[0].startTimeMs,
+        endTimeMs: intervals[intervals.length - 1].endTimeMs,
+      };
+    },
   },
 ]);
 
@@ -216,6 +245,9 @@ export const ExplorerHome = ({
   const [selectedInterval, setSelectedInterval] = useState<Interval>(
     TIMEFRAME_OPTIONS[1].selector(initialView.intervals())
   );
+  const [selectedChartInterval, setSelectedChartInterval] = useState<Interval>(
+    TIMEFRAME_OPTIONS[1].chartSelector(initialView.intervals())
+  );
   const [checkboxes, setCheckboxes] = useState({
     [IdentityTypes.USER]: true,
     [IdentityTypes.ORGANIZATION]: true,
@@ -227,6 +259,9 @@ export const ExplorerHome = ({
     setTab(index);
     setSelectedInterval(
       TIMEFRAME_OPTIONS[index].selector(initialView.intervals())
+    );
+    setSelectedChartInterval(
+      TIMEFRAME_OPTIONS[index].chartSelector(initialView.intervals())
     );
   };
 
@@ -245,49 +280,49 @@ export const ExplorerHome = ({
     [selectedInterval]
   );
 
+  const chartCredGrainView = useMemo(
+    () =>
+      initialView.withTimeScope(
+        selectedChartInterval.startTimeMs,
+        selectedChartInterval.endTimeMs
+      ),
+    [selectedChartInterval]
+  );
+
   const allParticipants = useMemo(
     () => Array.from(timeScopedCredGrainView.participants()),
     [timeScopedCredGrainView]
   );
 
-  // build structures for timelines at the top of the page
-  const {credTotalsTimeline, grainTotalsTimeline} = useMemo(() => {
-    const totals = {
-      credTotalsTimeline: [],
-      grainTotalsTimeline: [],
-    };
+  const credTotalsTimeline = useMemo(
+    () => chartCredGrainView.totalCredPerInterval().slice(),
+    [chartCredGrainView]
+  );
 
-    return allParticipants.reduce(
-      ({credTotalsTimeline, grainTotalsTimeline}, participant) => {
-        const {credPerInterval, grainEarnedPerInterval} = participant;
+  const grainTotalsTimeline = useMemo(
+    () => chartCredGrainView.totalGrainPerInterval().slice(),
+    [chartCredGrainView]
+  );
 
-        for (let i = 0; i < credPerInterval.length; i++) {
-          credTotalsTimeline[i] =
-            credPerInterval[i] + credTotalsTimeline[i] || 0;
+  const credTotalsStats = useMemo(
+    () => timeScopedCredGrainView.totalCredPerInterval(),
+    [timeScopedCredGrainView]
+  );
 
-          grainTotalsTimeline[i] = add(
-            grainEarnedPerInterval[i],
-            grainTotalsTimeline[i] || ZERO
-          );
-        }
-
-        return {
-          credTotalsTimeline,
-          grainTotalsTimeline,
-        };
-      },
-      totals
-    );
-  }, [timeScopedCredGrainView]);
+  const grainTotalsStats = useMemo(
+    () => timeScopedCredGrainView.totalGrainPerInterval(),
+    [timeScopedCredGrainView]
+  );
 
   // create summary values for stat circles
   const totalCredThisPeriod = useMemo(
-    () => credTotalsTimeline.reduce((total, cred) => total + cred, 0),
+    () => credTotalsStats.reduce((total, cred) => total + cred, 0),
     [credTotalsTimeline]
   );
+
   const totalGrainThisPeriod = useMemo(
     () =>
-      grainTotalsTimeline.reduce(
+      grainTotalsStats.reduce(
         (total, grain) => add(total, grain),
         fromInteger(0)
       ),
