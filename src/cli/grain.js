@@ -3,11 +3,9 @@
 import fs from "fs-extra";
 import {join} from "path";
 import {loadFileWithDefault, loadJson} from "../util/disk";
-import {fromJSON as credResultFromJson} from "../analysis/credResult";
-import {CredView} from "../analysis/credView";
 import {Ledger} from "../core/ledger/ledger";
-import {applyDistributions} from "../core/ledger/applyDistributions";
-import {computeCredAccounts} from "../core/ledger/credAccounts";
+import {applyDistributions2 as applyDistributions} from "../core/ledger/applyDistributions";
+import {computeCredAccounts2 as computeCredAccounts} from "../core/ledger/credAccounts";
 import stringify from "json-stable-stringify";
 import dedent from "../util/dedent";
 import * as GrainConfig from "../api/grainConfig";
@@ -17,6 +15,7 @@ import {loadCurrencyDetails} from "../cli/common";
 import {type CurrencyDetails} from "../api/currencyConfig";
 import {allocationMarkdownSummary} from "../core/ledger/distributionSummary/allocationSummary";
 import * as G from "../core/ledger/grain";
+import {loadCredGraph} from "./common";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -43,11 +42,6 @@ const grainCommand: Command = async (args, std) => {
   const grainConfig = await loadJson(grainConfigPath, GrainConfig.parser);
   const distributionPolicy = GrainConfig.toDistributionPolicy(grainConfig);
 
-  const credResultPath = join(baseDir, "output", "credResult.json");
-  const credResultJson = JSON.parse(await fs.readFile(credResultPath));
-  const credResult = credResultFromJson(credResultJson);
-  const credView = new CredView(credResult);
-
   const ledgerPath = join(baseDir, "data", "ledger.json");
   const ledger = Ledger.parse(
     await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
@@ -58,9 +52,11 @@ const grainCommand: Command = async (args, std) => {
     currencyDetailsPath
   );
 
+  const credGraph = await loadCredGraph(baseDir);
+
   const distributions = applyDistributions(
     distributionPolicy,
-    credView,
+    credGraph,
     ledger,
     +Date.now()
   );
@@ -94,7 +90,7 @@ const grainCommand: Command = async (args, std) => {
   if (!simulation) {
     await fs.writeFile(ledgerPath, ledger.serialize());
 
-    const credAccounts = computeCredAccounts(ledger, credView);
+    const credAccounts = computeCredAccounts(ledger, credGraph);
     const accountsPath = join(baseDir, "output", "accounts.json");
     await fs.writeFile(accountsPath, stringify(credAccounts));
   }

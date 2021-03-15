@@ -20,7 +20,7 @@ const createMenu = (
     return (
       <>
         <MenuItemLink
-          to="/explorer"
+          to="/explorer-home"
           primaryText="Explorer"
           leftIcon={<ExplorerIcon />}
           onClick={onMenuClick}

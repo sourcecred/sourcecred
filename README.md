@@ -53,16 +53,16 @@ Once your instance is setup, you can update it with the following commands:
 
 - `yarn load`: Regenerate the cache
 - `yarn graph`: Recompute graphs from cache
-- `yarn score`: Re-run Cred calculations
+- `yarn credrank`: Re-run Cred calculations
 - `yarn site`: Regenerate the website (potentially upgrading it)
-- `yarn go`: Runs `load`, `graph` and `score` in sequence.
+- `yarn go`: Runs `load`, `graph` and `credrank` in sequence.
 
 If you want to update the data for just one plugin (e.g. `sourcecred/github`), you can use the following
 command sequence:
 
 - `yarn load sourcecred/github`
 - `yarn graph sourcecred/github`
-- `yarn score`
+- `yarn credrank`
 
 ## Contributing Guidelines
 
