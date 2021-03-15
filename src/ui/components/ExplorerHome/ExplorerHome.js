@@ -181,7 +181,7 @@ const TIMEFRAME_OPTIONS: Array<{|
       intervals.length === 1 ? intervals[0] : intervals[intervals.length - 2],
     chartSelector: (intervals) =>
       intervals.length <= 2
-        ? intervals[intervals.length - 1]
+        ? intervals[0]
         : {
             startTimeMs: intervals[intervals.length - 3].startTimeMs,
             endTimeMs: intervals[intervals.length - 2].endTimeMs,
