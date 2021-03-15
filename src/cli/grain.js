@@ -1,7 +1,7 @@
 // @flow
 
 import {join} from "path";
-import {loadFileWithDefault, loadJson} from "../util/disk";
+import {loadFileWithDefault, loadJson} from "../util/storage";
 import {Ledger} from "../core/ledger/ledger";
 import {applyDistributions2 as applyDistributions} from "../core/ledger/applyDistributions";
 import {computeCredAccounts2 as computeCredAccounts} from "../core/ledger/credAccounts";

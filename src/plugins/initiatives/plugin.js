@@ -12,7 +12,7 @@ import {
   type PluginId,
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
-import {loadJson} from "../../util/disk";
+import {loadJson} from "../../util/storage";
 import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
 import * as Weights from "../../core/weights";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";

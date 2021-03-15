@@ -12,7 +12,7 @@ import {
   type PluginId,
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
-import {loadJson} from "../../util/disk";
+import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {
   empty as emptyWeightedGraph,

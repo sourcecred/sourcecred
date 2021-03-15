@@ -21,7 +21,7 @@ import {
   initiativeFileURL,
   initiativeFileId,
 } from "./initiativeFile";
-import {loadJson} from "../../util/disk";
+import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {parser as initiativeParser} from "./parseInitiative";
 

@@ -19,7 +19,7 @@ import {
   type PluginId,
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
-import {loadJson} from "../../util/disk";
+import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
