@@ -214,20 +214,18 @@ const TIMEFRAME_OPTIONS: Array<{|
   {
     tabLabel: "All Time",
     tableLabel: "All Time Activity",
-    selector: (intervals) =>
-      intervals.length === 1
-        ? intervals[0]
-        : {
-            startTimeMs: intervals[0].startTimeMs,
-            endTimeMs: intervals[intervals.length - 1].endTimeMs,
-          },
-    chartSelector: (intervals) =>
-      intervals.length === 1
-        ? intervals[0]
-        : {
-            startTimeMs: intervals[0].startTimeMs,
-            endTimeMs: intervals[intervals.length - 1].endTimeMs,
-          },
+    selector: (intervals) => {
+      return {
+        startTimeMs: intervals[0].startTimeMs,
+        endTimeMs: intervals[intervals.length - 1].endTimeMs,
+      };
+    },
+    chartSelector: (intervals) => {
+      return {
+        startTimeMs: intervals[0].startTimeMs,
+        endTimeMs: intervals[intervals.length - 1].endTimeMs,
+      };
+    }
   },
 ]);
 
