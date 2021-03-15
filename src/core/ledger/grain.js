@@ -202,6 +202,10 @@ export function multiplyFloat(grain: Grain, num: number): Grain {
   return bigInt(Math.floor(floatProduct)).toString();
 }
 
+export function divideFloat(dividend: Grain, divisor: number): Grain {
+  return multiplyFloat(dividend, 1 / divisor);
+}
+
 /**
  * Convert an integer number (in floating-point representation) into a precise
  * Grain value.

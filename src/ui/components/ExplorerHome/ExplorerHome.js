@@ -31,7 +31,13 @@ import {
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
-import {format, add, div, fromInteger, ZERO} from "../../../core/ledger/grain";
+import {
+  format,
+  add,
+  divideFloat,
+  fromInteger,
+  ZERO,
+} from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
 import {type Interval, type IntervalSequence} from "../../../core/interval";
@@ -332,9 +338,9 @@ export const ExplorerHome = ({
       }
       credAndGrainAggregator.avgCred =
         credAndGrainAggregator.totalCred / tsParticipants.currentPage.length;
-      credAndGrainAggregator.avgGrain = div(
+      credAndGrainAggregator.avgGrain = divideFloat(
         credAndGrainAggregator.totalGrain,
-        fromInteger(tsParticipants.currentPage.length)
+        tsParticipants.currentPage.length
       );
     }
     return {
@@ -610,7 +616,10 @@ export const ExplorerHome = ({
                     Average
                   </TableCell>
                   <TableCell>
-                    {credAndGrainSummary.avgCred.toFixed(1)}
+                    {credAndGrainSummary.avgCred.toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 1,
+                    })}
                   </TableCell>
                   <TableCell>
                     {format(credAndGrainSummary.avgGrain, 2, currencySuffix)}
@@ -622,7 +631,12 @@ export const ExplorerHome = ({
                     <b>TOTAL</b>
                   </TableCell>
                   <TableCell>
-                    <b>{credAndGrainSummary.totalCred.toFixed(1)}</b>
+                    <b>
+                      {credAndGrainSummary.totalCred.toLocaleString(undefined, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 1,
+                      })}
+                    </b>
                   </TableCell>
                   <TableCell>
                     <b>
