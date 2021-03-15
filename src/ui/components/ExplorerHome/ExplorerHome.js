@@ -36,7 +36,6 @@ import {
   add,
   divideFloat,
   fromInteger,
-  ZERO,
 } from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
