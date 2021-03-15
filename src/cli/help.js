@@ -10,6 +10,7 @@ import {loadHelp} from "./load";
 import {scoreHelp} from "./score";
 import {serveHelp} from "./serve";
 import {siteHelp} from "./site";
+import {credRankHelp} from "./credrank";
 import dedent from "../util/dedent";
 
 const help: Command = async (args, std) => {
@@ -27,6 +28,7 @@ const help: Command = async (args, std) => {
     grain: grainHelp,
     grain2: grain2Help,
     site: siteHelp,
+    credrank: credRankHelp,
     serve: serveHelp,
   };
   if (subHelps[command] !== undefined) {
@@ -57,7 +59,7 @@ function usage(print: (string) => void): void {
       graph         build Cred graph from cached plugin data
       score         generate Cred Scores from from graph
       site          update your cred site with the latest changes
-
+      credrank      calculate cred scores from existing graph
       help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.

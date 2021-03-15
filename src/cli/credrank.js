@@ -3,6 +3,7 @@
 import {sum} from "d3-array";
 import {format} from "d3-format";
 
+import dedent from "../util/dedent";
 import sortBy from "../util/sortBy";
 import {credrank} from "../api/credrank";
 import {CredGraph, type Participant} from "../core/credrank/credGraph";
@@ -131,5 +132,21 @@ function printCredDiffTable(credGraph: CredGraph, priorCredGraph: CredGraph) {
   }
   console.table(sortedParticipants.slice(0, 20).map((n) => row(n)));
 }
+
+export const credRankHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred credrank [options] 
+
+      options:
+      -d                    outputs a comparison table between the current graph and the prior graph        
+      -s, --simulation      doesn't update the current graph and ledger json
+          --stealth         skip the output of the summary table
+
+      Calculate cred scores from existing graph
+      `.trimRight()
+  );
+  return 0;
+};
 
 export default credrankCommand;
