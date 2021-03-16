@@ -107,13 +107,19 @@ export class CredGrainView {
     let allocationIndex = 0;
     return this._intervals.map((interval) => {
       let grain = G.ZERO;
-        if (
-          interval.startTimeMs < account.allocationHistory[allocationIndex].credTimestampMs &&
-          account.allocationHistory[allocationIndex].credTimestampMs <= interval.endTimeMs
-        ) {
-          grain = G.add(grain, account.allocationHistory[allocationIndex ].grainReceipt.amount);
-          allocationIndex++;
-        }
+      if (
+        account.allocationHistory.length - 1 > allocationIndex &&
+        interval.startTimeMs <
+          account.allocationHistory[allocationIndex].credTimestampMs &&
+        account.allocationHistory[allocationIndex].credTimestampMs <=
+          interval.endTimeMs
+      ) {
+        grain = G.add(
+          grain,
+          account.allocationHistory[allocationIndex].grainReceipt.amount
+        );
+        allocationIndex++;
+      }
       return grain;
     });
   }
