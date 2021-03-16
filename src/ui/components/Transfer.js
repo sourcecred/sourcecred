@@ -24,6 +24,10 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     width: "200px",
   },
+  saveToLedgerAlert: {
+    textAlign: "right",
+    marginRight: "24px",
+  },
   triangle: {
     width: 0,
     height: 0,
@@ -62,6 +66,10 @@ const useStyles = makeStyles((theme) => ({
     margin: "0 auto",
     padding: "0 1em 1em",
   },
+  saveButtonContainer: {
+    display: "flex",
+    flexDirection: "column",
+  },
   element: {flex: 1, margin: "20px"},
   arrowInput: {width: "40%", display: "inline-block"},
   pageHeader: {color: theme.palette.text.primary},
@@ -79,6 +87,7 @@ export const Transfer = ({
   const [receiver, setReceiver] = useState<Account | null>(null);
   const [amount, setAmount] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
 
   const isDisabled =
@@ -97,9 +106,34 @@ export const Transfer = ({
       });
       updateLedger(nextLedger);
       setAmount("");
+      setHasUnsavedChanges(true);
       setSender(nextLedger.account(sender.identity.id));
       setReceiver(nextLedger.account(receiver.identity.id));
       setMemo("");
+    }
+  };
+
+  const handleSaveToDisk = () => {
+    setHasUnsavedChanges(false);
+    saveToDisk();
+    setMemo("");
+    setReceiver(null);
+    setSender(null);
+    setAmount("");
+  };
+
+  const handleSaveToLedgerWarning = (_) => {
+    if (
+      hasUnsavedChanges ||
+      sender !== null ||
+      receiver !== null ||
+      amount !== ""
+    ) {
+      return (
+        <div className={classes.saveToLedgerAlert}>
+          Changes not saved to ledger
+        </div>
+      );
     }
   };
 
@@ -172,6 +206,7 @@ export const Transfer = ({
           onChange={(e) => setMemo(e.currentTarget.value)}
         />
       </div>
+      {handleSaveToLedgerWarning()}
       <div
         className={`${classes.centerRow} ${
           isXSmall ? classes.verticalElementMobileLayout : ""
@@ -187,15 +222,18 @@ export const Transfer = ({
         >
           transfer grain
         </Button>
-        <Button
-          size="large"
-          color="primary"
-          variant="contained"
-          className={classes.element}
-          onClick={saveToDisk}
-        >
-          save ledger to disk
-        </Button>
+        <div>
+          <Button
+            size="large"
+            color="primary"
+            variant="contained"
+            className={classes.element}
+            onClick={handleSaveToDisk}
+            disabled={!hasUnsavedChanges}
+          >
+            save ledger to disk
+          </Button>
+        </div>
       </div>
     </Container>
   );
