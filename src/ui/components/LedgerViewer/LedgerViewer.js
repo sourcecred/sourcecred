@@ -42,6 +42,7 @@ import * as G from "../../../core/ledger/grain";
 import AddAlias from "./AddAlias";
 import TransferGrain from "./TransferGrain";
 import IdentityDetails from "./IdentityDetails";
+import LedgerEventRow from "./LedgerEventRow"
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -220,108 +221,3 @@ const GrainReceiptTable = memo(
 );
 
 GrainReceiptTable.displayName = "GrainReceiptTable";
-
-const LedgerEventRow = React.memo(
-  ({
-    event,
-    ledger,
-    currencySuffix,
-    handleClickOpen,
-  }: {
-    event: LedgerEvent,
-    ledger: Ledger,
-    currencySuffix: string,
-    handleClickOpen: (a: Allocation) => void,
-  }) => {
-    const classes = useStyles();
-    const {action} = event;
-    const getEventDetails = () => {
-      switch (action.type) {
-        case "CREATE_IDENTITY":
-          return (
-            <>
-              <IdentityDetails
-                id={action.identity.id}
-                name={action.identity.name}
-              />
-              <Chip
-                className={classes.chip}
-                label={action.identity.subtype}
-                size="small"
-              />
-            </>
-          );
-        case "ADD_ALIAS":
-          return <AddAlias action={action} ledger={ledger} classes={classes} />;
-        case "TOGGLE_ACTIVATION":
-          try {
-            const account = ledger.account(action.identityId);
-            return (
-              <IdentityDetails
-                id={account.identity.id}
-                name={account.identity.name}
-              />
-            );
-          } catch (e) {
-            console.warn("Unable to find account for action: ", action);
-            return (
-              <IdentityDetails
-                id={action.identityId}
-                name="[Unknown Account]"
-              />
-            );
-          }
-        case "DISTRIBUTE_GRAIN":
-          return action.distribution.allocations.map((a, i) => (
-            <Box mr={2} key={`${a.policy.policyType}-${i}`}>
-              <Chip
-                label={`${a.policy.policyType}: ${G.format(
-                  a.policy.budget,
-                  0,
-                  currencySuffix
-                )}`}
-                clickable
-                onClick={() => handleClickOpen(a)}
-                onDelete={() => handleClickOpen(a)}
-                size="small"
-                deleteIcon={<VisibilityIcon />}
-              />
-            </Box>
-          ));
-        case "TRANSFER_GRAIN":
-          return (
-            <TransferGrain action={action} ledger={ledger} classes={classes} />
-          );
-
-        default:
-          return "";
-      }
-    };
-
-    return (
-      <TableRow>
-        <TableCell component="th" scope="row">
-          <Typography variant="button">
-            {event.action.type.replace("_", " ")}
-          </Typography>
-        </TableCell>
-        <TableCell>
-          <Box
-            display="flex"
-            flex={1}
-            flexDirection="row"
-            alignItems="center"
-            flexWrap="wrap"
-          >
-            {getEventDetails()}
-          </Box>
-        </TableCell>
-        <TableCell align="right">
-          {formatTimestamp(event.ledgerTimestamp)}
-        </TableCell>
-      </TableRow>
-    );
-  }
-);
-
-LedgerEventRow.displayName = "LedgerEventRow";
