@@ -23,7 +23,10 @@ import Paper from "@material-ui/core/Paper";
 import {type LedgerEvent} from "../../../core/ledger/ledger";
 import {useLedger} from "../../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
-import type {Allocation} from "../../../core/ledger/grainAllocation";
+import type {
+  Allocation,
+  GrainReceipt,
+} from "../../../core/ledger/grainAllocation";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
 import {
   useTableState,
@@ -32,6 +35,8 @@ import {
 } from "../../../webutil/tableState";
 import LedgerEventRow from "./LedgerEventRow";
 import GrainReceiptTable from "./GrainReceiptTable";
+import * as G from "../../../core/ledger/grain";
+import IdentityDetails from "./IdentityDetails";
 
 const useStyles = makeStyles((theme) => {
   return {
