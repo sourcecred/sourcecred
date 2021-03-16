@@ -92,7 +92,7 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
 };
 
 const customRoutes = (
-  hasBackend: Boolean,
+  hasBackend: boolean,
   currency: CurrencyDetails,
   credGrainView: CredGrainView | null
 ) => {
