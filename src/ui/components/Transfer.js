@@ -106,7 +106,7 @@ export const Transfer = ({
       });
       updateLedger(nextLedger);
       setAmount("");
-      setHasUnsavedChanges(!hasUnsavedChanges);
+      setHasUnsavedChanges(true);
       setSender(nextLedger.account(sender.identity.id));
       setReceiver(nextLedger.account(receiver.identity.id));
       setMemo("");
