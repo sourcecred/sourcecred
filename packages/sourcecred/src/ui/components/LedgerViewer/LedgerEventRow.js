@@ -1,17 +1,44 @@
 // @flow
 
-import React, {type Node as ReactNode, useMemo} from "react";
+import React, {
+  memo,
+  type Node as ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
+import deepFreeze from "deep-freeze";
+import Table from "@material-ui/core/Table";
 import Typography from "@material-ui/core/Typography";
+import TablePagination from "@material-ui/core/TablePagination";
 import Box from "@material-ui/core/Box";
+import TableBody from "@material-ui/core/TableBody";
 import VisibilityIcon from "@material-ui/icons/Visibility";
+import Dialog from "@material-ui/core/Dialog";
+import Toolbar from "@material-ui/core/Toolbar";
+import DialogContent from "@material-ui/core/DialogContent";
 import Chip from "@material-ui/core/Chip";
+import TableSortLabel from "@material-ui/core/TableSortLabel";
 import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
 import {Ledger, type LedgerEvent} from "../../../core/ledger/ledger";
+import {useLedger} from "../../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
 import {formatTimestamp} from "../../utils/dateHelpers";
-import type {Allocation} from "../../../core/ledger/grainAllocation";
+import type {
+  Allocation,
+  GrainReceipt,
+} from "../../../core/ledger/grainAllocation";
+import type {CurrencyDetails} from "../../../api/currencyConfig";
+import {
+  useTableState,
+  SortOrders,
+  DEFAULT_SORT,
+} from "../../../webutil/tableState";
 import * as G from "../../../core/ledger/grain";
 import AddAlias from "./AddAlias";
 import TransferGrain from "./TransferGrain";
@@ -108,7 +135,10 @@ const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
         } catch (e) {
           console.warn("Unable to find account for action: ", action);
           return (
-            <IdentityDetails id={action.identityId} name="[Unknown Account]" />
+            <IdentityDetails
+              id={action.identityId}
+              name="[Unknown Account]"
+            />
           );
         }
       case "DISTRIBUTE_GRAIN":

@@ -37,6 +37,7 @@ import LedgerEventRow from "./LedgerEventRow";
 import GrainReceiptTable from "./GrainReceiptTable";
 import * as G from "../../../core/ledger/grain";
 import IdentityDetails from "./IdentityDetails";
+import LedgerEventRow from "./LedgerEventRow"
 
 const useStyles = makeStyles((theme) => {
   return {
