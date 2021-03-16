@@ -237,7 +237,15 @@ export const ExplorerHome = ({
   initialView,
   currency: {suffix: currencySuffix, name: currencyName},
 }: ExplorerHomeProps): ReactNode => {
-  if (!initialView) return null;
+  if (!initialView)
+    return (
+      <div className={useStyles.root}>
+        <p>
+          This page is unavailable because Cred information was unable to load.
+          Calculate cred through the CLI in order to use this page.
+        </p>
+      </div>
+    );
 
   const classes = useStyles();
   // default view is Last Week's Activity (array index 1)

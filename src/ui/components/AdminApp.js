@@ -12,10 +12,8 @@ import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import {makeStyles} from "@material-ui/core/styles";
 import fakeDataProvider from "ra-data-fakerest";
-import {Explorer} from "./Explorer/Explorer";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {LedgerAdmin} from "./LedgerAdmin";
-import {CredView} from "../../analysis/credView";
 import {CredGrainView} from "../../core/credGrainView";
 import {AccountOverview} from "./AccountOverview";
 import {Transfer} from "./Transfer";
@@ -94,17 +92,16 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
 };
 
 const customRoutes = (
-  credView: CredView | null,
   hasBackend: Boolean,
   currency: CurrencyDetails,
   credGrainView: CredGrainView | null
 ) => {
   const routes = [
-    <Route key="explorer" exact path="/explorer">
-      <Explorer initialView={credView} />
+    <Route key="explorer-home" exact path="/explorer-home">
+      <ExplorerHome initialView={credGrainView} currency={currency} />
     </Route>,
     <Route key="root" exact path="/">
-      <Redirect to={credView ? "/explorer" : "/accounts"} />
+      <Redirect to={credGrainView ? "/explorer-home" : "/accounts"} />
     </Route>,
     <Route key="accounts" exact path="/accounts">
       <AccountOverview currency={currency} />
@@ -116,9 +113,6 @@ const customRoutes = (
   const backendRoutes = [
     <Route key="admin" exact path="/admin">
       <LedgerAdmin />
-    </Route>,
-    <Route key="explorer-home" exact path="/explorer-home">
-      <ExplorerHome initialView={credGrainView} currency={currency} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
       <Transfer currency={currency} />
@@ -189,7 +183,6 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
         dataProvider={dataProvider}
         history={history}
         customRoutes={customRoutes(
-          loadSuccess.credView,
           loadSuccess.hasBackend,
           loadSuccess.currency,
           credGrainView

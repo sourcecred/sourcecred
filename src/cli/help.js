@@ -57,7 +57,6 @@ function usage(print: (string) => void): void {
       AUXILIARY
       load          load plugin data into cache
       graph         build Cred graph from cached plugin data
-      score         generate Cred Scores from from graph
       site          update your cred site with the latest changes
       credrank      calculate cred scores from existing graph
       help          show this help message
