@@ -22,6 +22,7 @@ import {
   initiativeFileId,
 } from "./initiativeFile";
 import {loadJson} from "../../util/disk";
+import {DiskStorage} from "../../core/storage/disk";
 import {parser as initiativeParser} from "./parseInitiative";
 
 /**
@@ -114,8 +115,8 @@ export async function _readFiles(
   // the order matters for equality throughout the system.
   const sortedFileNames = [...fileNames].sort();
   for (const fileName of sortedFileNames) {
-    const filePath = path.join(localPath, fileName);
-    const initiativeFile = await loadJson(filePath, initiativeParser);
+    const storage = new DiskStorage(localPath);
+    const initiativeFile = await loadJson(storage, fileName, initiativeParser);
     map.set(fileName, initiativeFile);
   }
 

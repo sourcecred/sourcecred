@@ -1,6 +1,7 @@
 // @flow
 
 import fs from "fs-extra";
+import {DataStorage} from "../core/storage";
 import * as P from "./combo";
 
 /**
@@ -23,11 +24,12 @@ export function mkdirx(path: string) {
  * If parsing fails, an error is thrown.
  */
 export async function loadJson<T>(
+  storage: DataStorage,
   path: string,
   parser: P.Parser<T>
 ): Promise<T> {
-  const contents = await fs.readFile(path);
-  return parser.parseOrThrow(JSON.parse(contents));
+  const contents = await storage.get(path);
+  return parser.parseOrThrow(JSON.parse(contents.toString()));
 }
 
 /**
@@ -50,13 +52,14 @@ export async function loadJson<T>(
  * If parsing fails, an error is thrown.
  */
 export async function loadJsonWithDefault<T>(
+  storage: DataStorage,
   path: string,
   parser: P.Parser<T>,
   def: () => T
 ): Promise<T> {
   try {
-    const contents = await fs.readFile(path);
-    return parser.parseOrThrow(JSON.parse(contents));
+    const contents = await storage.get(path);
+    return parser.parseOrThrow(JSON.parse(contents.toString()));
   } catch (e) {
     if (e.code === "ENOENT") {
       return def();
@@ -83,11 +86,12 @@ export async function loadJsonWithDefault<T>(
  * (e.g. the path actually is a directory), then the error is thrown.
  */
 export async function loadFileWithDefault(
+  storage: DataStorage,
   path: string,
   def: () => string
 ): Promise<string> {
   try {
-    return (await fs.readFile(path)).toString();
+    return (await storage.get(path)).toString();
   } catch (e) {
     if (e.code === "ENOENT") {
       return def();

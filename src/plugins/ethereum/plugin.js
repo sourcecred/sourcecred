@@ -13,7 +13,7 @@ import {
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
-import {join as pathJoin} from "path";
+import {DiskStorage} from "../../core/storage/disk";
 import {
   empty as emptyWeightedGraph,
   type WeightedGraph,
@@ -22,8 +22,8 @@ import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
 async function loadEthJson(ctx: PluginDirectoryContext) {
-  const path = pathJoin(ctx.configDirectory(), "ethereumAddresses.json");
-  return await loadJson(path, ethJsonParser);
+  const storage = new DiskStorage(ctx.configDirectory());
+  return await loadJson(storage, "ethereumAddresses.json", ethJsonParser);
 }
 
 export class EthereumPlugin implements Plugin {
