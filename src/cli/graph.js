@@ -33,6 +33,7 @@ import {
 } from "../core/weightedGraph";
 import * as pluginId from "../api/pluginId";
 import {DiskStorage} from "../core/storage/disk";
+import {WritableZipStorage} from "../core/storage/zip";
 import {encode} from "../core/storage/textEncoding";
 import {ensureIdentityExists} from "../core/ledger/identityProposal";
 
@@ -127,8 +128,8 @@ const graphCommand: Command = async (args, std) => {
         stringify(weightedGraphToJSON(weightedGraph))
       );
       const outputDir = makePluginDir(baseDir, graphOutputPrefix, name);
-      const graphStorage = new DiskStorage(outputDir);
-      await graphStorage.set("graph.json", serializedGraph);
+      const graphStorage = new WritableZipStorage(new DiskStorage(outputDir));
+      await graphStorage.set("graph.json.gzip", serializedGraph);
       taskReporter.finish(writeTask);
     }
   }

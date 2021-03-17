@@ -9,6 +9,7 @@ import stringify from "json-stable-stringify";
 
 import {type BonusPolicy} from "../core/bonusMinting";
 import {DiskStorage} from "../core/storage/disk";
+import {ZipStorage} from "../core/storage/zip";
 import {WritableDataStorage} from "../core/storage/index";
 import type {PluginDirectoryContext} from "../api/plugin";
 import {
@@ -191,8 +192,8 @@ export async function loadAndMergePluginWeigtedGraphs(
 }
 
 export async function loadCredGraph(baseDir: string): Promise<CredGraph> {
-  const storage = new DiskStorage(baseDir);
-  const credGraphPath = pathJoin("output", "credGraph.json");
+  const storage = new ZipStorage(new DiskStorage(baseDir));
+  const credGraphPath = pathJoin("output", "credGraph.json.gzip");
   return await loadJson(storage, credGraphPath, credGraphParser);
 }
 
