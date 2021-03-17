@@ -11,9 +11,11 @@ import {
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import {makeStyles} from "@material-ui/core/styles";
-import {CredView} from "../../../analysis/credView";
 import {type NodeAddressT} from "../../../core/graph";
-import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
+import {
+  type PluginDeclaration,
+  type PluginDeclarations,
+} from "../../../analysis/pluginDeclaration";
 
 const styles = makeStyles(() => ({
   menuHeader: {fontWeight: "bold"},
@@ -35,16 +37,14 @@ export const DEFAULT_FILTER: FilterState = {
 };
 
 const FilterSelect = ({
-  credView,
+  pluginDeclarations,
   filterState,
   setFilterState,
 }: {
-  credView: CredView,
+  pluginDeclarations: PluginDeclarations,
   filterState: FilterState,
   setFilterState: (FilterState) => void,
 }): ReactNode => {
-  const plugins = credView.plugins();
-
   const handleMenuClose = () =>
     setFilterState({...filterState, anchorEl: null});
 
@@ -135,7 +135,7 @@ const FilterSelect = ({
         >
           All users
         </MenuItem>
-        {plugins.map(optionGroup)}
+        {pluginDeclarations.map(optionGroup)}
       </Menu>
     </>
   );

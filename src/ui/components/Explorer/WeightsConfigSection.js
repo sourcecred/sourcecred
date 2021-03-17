@@ -3,7 +3,7 @@ import React, {type Node as ReactNode} from "react";
 import {Grid, Slider} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {format} from "d3-format";
-import {CredView} from "../../../analysis/credView";
+import {type PluginDeclarations} from "../../../analysis/pluginDeclaration";
 import {type TimelineCredParameters} from "../../../analysis/timeline/params";
 import {type WeightsT} from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
@@ -11,9 +11,10 @@ import {WeightsFileManager} from "../../weights/WeightsFileManager";
 
 export type WeightConfigSectionProps = {|
   show: boolean,
-  credView: CredView,
+  pluginDeclarations: PluginDeclarations,
   weights: WeightsT,
   setWeightsState: ({weights: WeightsT}) => void,
+  //TODO: change to use MarkovProcessGraph params instead
   params: TimelineCredParameters,
   setParams: (TimelineCredParameters) => void,
 |};
@@ -26,7 +27,7 @@ const useStyles = makeStyles(() => ({
 
 const WeightsConfigSection = ({
   show,
-  credView,
+  pluginDeclarations,
   weights,
   setWeightsState,
   params,
@@ -73,7 +74,7 @@ const WeightsConfigSection = ({
         </Grid>
         <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
           <WeightConfig
-            declarations={credView.plugins()}
+            declarations={pluginDeclarations}
             nodeWeights={weights.nodeWeights}
             edgeWeights={weights.edgeWeights}
             onNodeWeightChange={(prefix, weight) => {

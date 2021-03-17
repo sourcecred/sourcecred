@@ -23,9 +23,6 @@ import * as weightedGraph from "../core/weightedGraph";
 import * as weights from "../core/weights";
 import * as graphToMarkovChain from "../core/algorithm/graphToMarkovChain";
 import * as markovChain from "../core/algorithm/markovChain";
-import * as credView from "../analysis/credView";
-import * as credData from "../analysis/credData";
-import * as credResult from "../analysis/credResult";
 import * as credGraph from "../core/credrank/credGraph";
 import * as ledger from "../core/ledger/ledger";
 import * as ledgerUtils from "../core/ledger/utils";
@@ -50,11 +47,6 @@ const api = {
     weightedGraph,
     weights,
     credGraph,
-  },
-  analysis: {
-    credView,
-    credData,
-    credResult,
   },
   ledger: {
     ledger,
