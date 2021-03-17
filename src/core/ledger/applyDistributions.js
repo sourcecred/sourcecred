@@ -4,9 +4,8 @@ import {type TimestampMs} from "../../util/timestamp";
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {Ledger} from "./ledger";
 import {type AllocationPolicy} from "./policies";
-import {CredView} from "../../analysis/credView";
 import {CredGraph} from "../credrank/credGraph";
-import {computeCredAccounts, computeCredAccounts2} from "./credAccounts";
+import {computeCredAccounts} from "./credAccounts";
 import {computeDistribution} from "./computeDistribution";
 import {type Distribution} from "./distribution";
 
@@ -20,7 +19,7 @@ export type DistributionPolicy = {|
 |};
 
 /**
- * Iteratively compute and distribute Grain, based on the provided CredView,
+ * Iteratively compute and distribute Grain, based on the provided CredGraph,
  * into the provided Ledger, according to the specified DistributionPolicy.
  *
  * Here are some examples of how it works:
@@ -41,38 +40,6 @@ export type DistributionPolicy = {|
  */
 export function applyDistributions(
   policy: DistributionPolicy,
-  view: CredView,
-  ledger: Ledger,
-  currentTimestamp: TimestampMs
-): $ReadOnlyArray<Distribution> {
-  const credIntervals = view.intervals();
-  const distributionIntervals = _chooseDistributionIntervals(
-    credIntervals,
-    ledger.lastDistributionTimestamp(),
-    currentTimestamp,
-    policy.maxSimultaneousDistributions
-  );
-  return distributionIntervals.map((interval) => {
-    // Recompute for every endpoint because the Ledger will be in a different state
-    // (wrt paid balances)
-    const accountsData = computeCredAccounts(ledger, view);
-    const distribution = computeDistribution(
-      policy.allocationPolicies,
-      accountsData,
-      interval.endTimeMs
-    );
-    ledger.distributeGrain(distribution);
-    return distribution;
-  });
-}
-
-/**
- * applyDistributions2 is a fork of applyDistributions that
- * uses a CredGraph instead of a CredView, as part of a move
- * away from CredView in favor of CredGrainView.
- */
-export function applyDistributions2(
-  policy: DistributionPolicy,
   credGraph: CredGraph,
   ledger: Ledger,
   currentTimestamp: TimestampMs
@@ -87,7 +54,7 @@ export function applyDistributions2(
   return distributionIntervals.map((interval) => {
     // Recompute for every endpoint because the Ledger will be in a different state
     // (wrt paid balances)
-    const accountsData = computeCredAccounts2(ledger, credGraph);
+    const accountsData = computeCredAccounts(ledger, credGraph);
     const distribution = computeDistribution(
       policy.allocationPolicies,
       accountsData,

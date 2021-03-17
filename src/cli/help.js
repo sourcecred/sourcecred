@@ -4,10 +4,8 @@
 import type {Command} from "./command";
 import {goHelp} from "./go";
 import {grainHelp} from "./grain";
-import {grain2Help} from "./grain2";
 import {graphHelp} from "./graph";
 import {loadHelp} from "./load";
-import {scoreHelp} from "./score";
 import {serveHelp} from "./serve";
 import {siteHelp} from "./site";
 import {credRankHelp} from "./credrank";
@@ -24,9 +22,7 @@ const help: Command = async (args, std) => {
     go: goHelp,
     load: loadHelp,
     graph: graphHelp,
-    score: scoreHelp,
     grain: grainHelp,
-    grain2: grain2Help,
     site: siteHelp,
     credrank: credRankHelp,
     serve: serveHelp,

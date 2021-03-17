@@ -11,7 +11,6 @@
  */
 import {sum} from "d3-array";
 import {Ledger, type Account} from "./ledger";
-import {CredView} from "../../analysis/credView";
 import {NodeAddress, type NodeAddressT} from "../graph";
 import {type IntervalSequence} from "../interval";
 import {type Alias} from "../identity";
@@ -43,33 +42,6 @@ export type CredAccountData = {|
 |};
 
 export function computeCredAccounts(
-  ledger: Ledger,
-  credView: CredView
-): CredAccountData {
-  const grainAccounts = ledger.accounts();
-  const userlikeInfo = new Map();
-  const intervals = credView.intervals();
-  const noIntervals = intervals.length === 0;
-  for (const {address, credOverTime, description} of credView.userNodes()) {
-    if (noIntervals) {
-      userlikeInfo.set(address, {cred: [], description});
-    } else if (credOverTime === null) {
-      throw new Error(
-        `userlike ${NodeAddress.toString(address)} does not have detailed cred`
-      );
-    } else {
-      userlikeInfo.set(address, {cred: credOverTime.cred, description});
-    }
-  }
-  return _computeCredAccounts(grainAccounts, userlikeInfo, intervals);
-}
-
-/**
- * computeCredAccounts2 is a fork of applyDistributions that
- * uses a CredGraph instead of a CredView, as part of a move
- * away from CredView in favor of CredGrainView.
- */
-export function computeCredAccounts2(
   ledger: Ledger,
   credGraph: CredGraph
 ): CredAccountData {
