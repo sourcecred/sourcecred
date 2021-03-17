@@ -16,10 +16,10 @@ import {
 } from "../../core/weightedGraph";
 import {
   loadJson,
-  mkdirx,
   loadFileWithDefault,
   loadJsonWithDefault,
-} from "../../util/disk";
+} from "../../util/storage";
+import {mkdirx} from "../../util/disk";
 import {parser as configParser, type InstanceConfig} from "../instanceConfig";
 import {Ledger} from "../../core/ledger/ledger";
 import {

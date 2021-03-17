@@ -5,7 +5,8 @@ import stringify from "json-stable-stringify";
 
 import type {Command} from "./command";
 import {loadInstanceConfig, prepareCredData} from "./common";
-import {loadJsonWithDefault, mkdirx} from "../util/disk";
+import {mkdirx} from "../util/disk";
+import {loadJsonWithDefault} from "../util/storage";
 import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {

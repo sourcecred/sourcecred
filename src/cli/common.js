@@ -2,7 +2,8 @@
 
 import {join as pathJoin} from "path";
 import fs from "fs-extra";
-import {loadJson, mkdirx} from "../util/disk";
+import {mkdirx} from "../util/disk";
+import {loadJson} from "../util/storage";
 import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 
@@ -28,7 +29,7 @@ import {
   fromJSON as weightedGraphFromJSON,
 } from "../core/weightedGraph";
 import {CredGraph, parser as credGraphParser} from "../core/credrank/credGraph";
-import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
+import {loadFileWithDefault, loadJsonWithDefault} from "../util/storage";
 import {parser as pluginBudgetParser} from "../api/pluginBudgetConfig";
 import {applyBudget, type Budget} from "../core/mintBudget";
 import {
