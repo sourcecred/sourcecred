@@ -48,6 +48,8 @@ type LedgerEventRowProps = {|
   +handleClickOpen: (a: Allocation) => void,
 |};
 
+type EventRow = (LedgerEventRowProps) => ReactNode;
+
 const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
   const classes = useStyles();
   const {action} = props.event;
@@ -142,4 +144,4 @@ const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
   );
 };
 
-export default LedgerEventRow;
+export default ((React.memo(LedgerEventRow): any): EventRow);

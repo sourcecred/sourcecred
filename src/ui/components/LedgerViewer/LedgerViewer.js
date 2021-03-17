@@ -1,7 +1,6 @@
 // @flow
 
 import React, {
-  memo,
   type Node as ReactNode,
   useCallback,
   useMemo,
@@ -21,22 +20,18 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import {Ledger, type LedgerEvent} from "../../../core/ledger/ledger";
+import {type LedgerEvent} from "../../../core/ledger/ledger";
 import {useLedger} from "../../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
-import type {
-  Allocation,
-  GrainReceipt,
-} from "../../../core/ledger/grainAllocation";
+import type {Allocation} from "../../../core/ledger/grainAllocation";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
 import {
   useTableState,
   SortOrders,
   DEFAULT_SORT,
 } from "../../../webutil/tableState";
-import * as G from "../../../core/ledger/grain";
-import IdentityDetails from "./IdentityDetails";
 import LedgerEventRow from "./LedgerEventRow";
+import GrainReceiptTable from "./GrainReceiptTable";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -161,57 +156,3 @@ export const LedgerViewer = ({
     </Paper>
   );
 };
-
-function comparator(a: GrainReceipt, b: GrainReceipt) {
-  if (a.amount === b.amount) {
-    return 0;
-  }
-  return G.gt(a.amount, b.amount) ? -1 : 1;
-}
-
-const GrainReceiptTable = memo(
-  ({
-    allocation,
-    ledger,
-    currencySuffix,
-  }: {
-    allocation: Allocation | null,
-    ledger: Ledger,
-    currencySuffix: string,
-  }) => {
-    if (!allocation) return null;
-    return (
-      <Table stickyHeader size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Participant</TableCell>
-            <TableCell align="right">Amount</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {allocation
-            ? [...allocation.receipts].sort(comparator).map((r) => {
-                const account = ledger.account(r.id);
-
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell component="th" scope="row">
-                      <IdentityDetails
-                        id={account.identity.id}
-                        name={account.identity.name}
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      {G.format(r.amount, 4, currencySuffix)}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            : null}
-        </TableBody>
-      </Table>
-    );
-  }
-);
-
-GrainReceiptTable.displayName = "GrainReceiptTable";
