@@ -12,7 +12,7 @@ import {type CurrencyDetails} from "../../api/currencyConfig";
 type menuProps = {|onMenuClick: Function|};
 
 const createMenu = (
-  hasBackend: Boolean,
+  hasBackend: boolean,
   {name: currencyName}: CurrencyDetails
 ): ((menuProps) => ReactNode) => {
   const Menu = ({onMenuClick}: menuProps) => {
