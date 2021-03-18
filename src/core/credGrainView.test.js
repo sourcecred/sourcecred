@@ -44,7 +44,7 @@ describe("core/credGrainView", () => {
     };
     const distribution1 = {
       credTimestamp: 1,
-      allocations: [allocation1],
+      allocations: [allocation1, allocation2],
       id: uuid.random(),
     };
     const distribution2 = {
@@ -69,15 +69,15 @@ describe("core/credGrainView", () => {
           identity: identity1(id1),
           cred: GraphUtil.expectedParticipant1.cred,
           credPerInterval: GraphUtil.expectedParticipant1.credPerInterval,
-          grainEarned: g("13"),
-          grainEarnedPerInterval: [g("3"), g("10")],
+          grainEarned: g("23"),
+          grainEarnedPerInterval: [g("13"), g("10")],
         },
         {
           identity: identity2(id2),
           cred: GraphUtil.expectedParticipant2.cred,
           credPerInterval: GraphUtil.expectedParticipant2.credPerInterval,
-          grainEarned: g("17"),
-          grainEarnedPerInterval: [g("7"), g("10")],
+          grainEarned: g("27"),
+          grainEarnedPerInterval: [g("17"), g("10")],
         },
       ];
 
@@ -145,8 +145,8 @@ describe("core/credGrainView", () => {
             credPerInterval: [
               GraphUtil.expectedParticipant1.credPerInterval[0],
             ],
-            grainEarned: g("3"),
-            grainEarnedPerInterval: [g("3")],
+            grainEarned: g("13"),
+            grainEarnedPerInterval: [g("13")],
           },
           {
             identity: identity2(id2),
@@ -154,8 +154,8 @@ describe("core/credGrainView", () => {
             credPerInterval: [
               GraphUtil.expectedParticipant2.credPerInterval[0],
             ],
-            grainEarned: g("7"),
-            grainEarnedPerInterval: [g("7")],
+            grainEarned: g("17"),
+            grainEarnedPerInterval: [g("17")],
           },
         ];
 
@@ -183,8 +183,8 @@ describe("core/credGrainView", () => {
             credPerInterval: [
               GraphUtil.expectedParticipant1.credPerInterval[0],
             ],
-            grainEarned: g("3"),
-            grainEarnedPerInterval: [g("3")],
+            grainEarned: g("13"),
+            grainEarnedPerInterval: [g("13")],
           },
           {
             identity: identity2(id2),
@@ -192,8 +192,8 @@ describe("core/credGrainView", () => {
             credPerInterval: [
               GraphUtil.expectedParticipant2.credPerInterval[0],
             ],
-            grainEarned: g("7"),
-            grainEarnedPerInterval: [g("7")],
+            grainEarned: g("17"),
+            grainEarnedPerInterval: [g("17")],
           },
         ];
 
