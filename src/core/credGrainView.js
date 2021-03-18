@@ -104,15 +104,22 @@ export class CredGrainView {
   }
 
   _calculateGrainEarnedPerInterval(account: Account): $ReadOnlyArray<Grain> {
+    let allocationIndex = 0;
     return this._intervals.map((interval) => {
       let grain = G.ZERO;
-      account.allocationHistory.forEach((allocationReceipt) => {
-        if (
-          interval.startTimeMs < allocationReceipt.credTimestampMs &&
-          allocationReceipt.credTimestampMs <= interval.endTimeMs
-        )
-          grain = G.add(grain, allocationReceipt.grainReceipt.amount);
-      });
+      while (
+        account.allocationHistory.length - 1 >= allocationIndex &&
+        interval.startTimeMs <
+          account.allocationHistory[allocationIndex].credTimestampMs &&
+        account.allocationHistory[allocationIndex].credTimestampMs <=
+          interval.endTimeMs
+      ) {
+        grain = G.add(
+          grain,
+          account.allocationHistory[allocationIndex].grainReceipt.amount
+        );
+        allocationIndex++;
+      }
       return grain;
     });
   }
