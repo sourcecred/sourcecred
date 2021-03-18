@@ -86,7 +86,7 @@ describe("core/credGrainView", () => {
     });
 
     it("should have correct aggregates", () => {
-      expect(credGrainView.totalGrainPerInterval()).toEqual([g("10"), g("20")]);
+      expect(credGrainView.totalGrainPerInterval()).toEqual([g("30"), g("20")]);
       // cred is not easily tested because of expectedParticipant2's cred is
       // so small that it is lost to imprecision during addition.
     });
@@ -164,7 +164,7 @@ describe("core/credGrainView", () => {
           expectedParticipants
         );
         expect(timeScopedCredGrainView.totalGrainPerInterval()).toEqual([
-          g("10"),
+          g("30"),
         ]);
       });
     });
