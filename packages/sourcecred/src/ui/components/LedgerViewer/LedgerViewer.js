@@ -8,11 +8,9 @@ import React, {
 } from "react";
 import deepFreeze from "deep-freeze";
 import Table from "@material-ui/core/Table";
-import Typography from "@material-ui/core/Typography";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableBody from "@material-ui/core/TableBody";
 import Dialog from "@material-ui/core/Dialog";
-import Toolbar from "@material-ui/core/Toolbar";
 import DialogContent from "@material-ui/core/DialogContent";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import TableCell from "@material-ui/core/TableCell";
@@ -34,6 +32,7 @@ import LedgerEventRow from "./LedgerEventRow";
 import GrainReceiptTable from "./GrainReceiptTable";
 import * as G from "../../../core/ledger/grain";
 import IdentityDetails from "./IdentityDetails";
+import LedgerToolbar from "./LedgerToolbar"
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -99,11 +98,7 @@ export const LedgerViewer = ({
 
   return (
     <Paper className={classes.container}>
-      <Toolbar className={classes.toolbar}>
-        <Typography variant="h6" id="tableTitle" component="div">
-          Ledger Event History
-        </Typography>
-      </Toolbar>
+      <LedgerToolbar classes={classes} ts={ts}/>
       <TableContainer className={classes.table}>
         <Table stickyHeader size="small">
           <TableHead>
