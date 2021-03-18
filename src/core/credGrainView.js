@@ -108,7 +108,7 @@ export class CredGrainView {
     return this._intervals.map((interval) => {
       let grain = G.ZERO;
       if (
-        account.allocationHistory.length - 1 > allocationIndex &&
+        account.allocationHistory.length - 1 >= allocationIndex &&
         interval.startTimeMs <
           account.allocationHistory[allocationIndex].credTimestampMs &&
         account.allocationHistory[allocationIndex].credTimestampMs <=
