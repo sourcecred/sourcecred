@@ -29,7 +29,6 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
   const width = props.width || 300;
   const height = props.height || 25;
   const viewBox = `0 0 ${width} ${height}`;
-
   let grainValues;
   if (grainExists) {
     const grain = props.timelines.grain || [];
@@ -39,7 +38,7 @@ const ExplorerTimeline = (props: ExplorerTimelineProps): ReactNode => {
     if (grainValues.length === 1) grainValues.push(grainValues[0]);
   }
 
-  const credValues = props.timelines.cred;
+  const credValues = [...props.timelines.cred];
   if (credValues.length === 1) credValues.push(credValues[0]);
   return (
     <svg
