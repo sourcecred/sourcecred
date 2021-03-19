@@ -30,7 +30,7 @@ export class WritableZipStorage
     this._baseStorage = baseStorage;
   }
 
-  async set(key: string, value: Uint8Array) {
+  async set(key: string, value: Uint8Array): Promise<void> {
     this._baseStorage.set(key, deflate(value));
   }
 }

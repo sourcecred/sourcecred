@@ -14,6 +14,7 @@ import {rawParser as rawInstanceConfigParser} from "../api/rawInstanceConfig";
 import {createLedgerDiskStorage} from "./utils/ledgerDiskStorage";
 import * as Combo from "../util/combo";
 import {NetworkStorage} from "../core/storage/network";
+import {ZipStorage} from "../core/storage/zip";
 import {loadJson, loadJsonWithDefault} from "../util/storage";
 
 export type LoadResult = LoadSuccess | LoadFailure;
@@ -54,8 +55,8 @@ export async function load(): Promise<LoadResult> {
       defaultCurrencyConfig
     ),
     loadJsonWithDefault(
-      networkStorage,
-      "output/credGraph.json",
+      new ZipStorage(networkStorage),
+      "output/credGraph.json.gzip",
       Combo.fmap(credGraphJsonParser, (graphJson) =>
         CredGraph.fromJSON(graphJson)
       ),

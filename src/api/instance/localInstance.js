@@ -7,11 +7,11 @@ import {
   parser as weightsParser,
   empty as emptyWeights,
 } from "../../core/weights";
-import fs from "fs-extra";
 import {join as pathJoin} from "path";
 import stringify from "json-stable-stringify";
 import {
   type WeightedGraph,
+  type WeightedGraphJSON,
   fromJSON as weightedGraphFromJSON,
 } from "../../core/weightedGraph";
 import {
@@ -33,7 +33,9 @@ import {
   parser as credGraphParser,
 } from "../../core/credrank/credGraph";
 import {DiskStorage} from "../../core/storage/disk";
+import {WritableZipStorage} from "../../core/storage/zip";
 import {encode} from "../../core/storage/textEncoding";
+import * as Combo from "../../util/combo";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -45,9 +47,12 @@ const WEIGHT_OVERRIDES_PATH: $ReadOnlyArray<string> = [
 ];
 const BUDGET_PATH: $ReadOnlyArray<string> = ["config", "pluginBudgets.json"];
 const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
-const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph.json"];
+const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
+  "output",
+  "credGraph.json.gzip",
+];
 const GRAPHS_DIRECTORY: $ReadOnlyArray<string> = ["output", "graphs"];
-const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph.json"];
+const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph.json.gzip"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
 
 /**
@@ -128,7 +133,11 @@ export class LocalInstance implements Instance {
       pluginNames.map(async (name) => {
         const outputDir = this.createPluginDirectory(name);
         const outputPath = pathJoin(outputDir, ...GRAPHS_PATH);
-        const graphJSON = JSON.parse(await fs.readFile(outputPath));
+        const graphJSON = await loadJson(
+          new WritableZipStorage(this._storage),
+          outputPath,
+          ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
+        );
         return weightedGraphFromJSON(graphJSON);
       })
     );
@@ -176,7 +185,7 @@ export class LocalInstance implements Instance {
       path = pathJoin(path, pc);
       mkdirx(path);
     }
-    return path;
+    return pathJoin(...pathComponents);
   }
 
   async writeLedger(ledger: Ledger): Promise<void> {
@@ -187,7 +196,8 @@ export class LocalInstance implements Instance {
   async writeCredGraph(credGraph: CredGraph): Promise<void> {
     const cgJson = stringify(credGraph.toJSON());
     const outputPath = pathJoin(...CREDGRAPH_PATH);
-    await this._storage.set(outputPath, encode(cgJson));
+    const zipStorage = new WritableZipStorage(this._storage);
+    await zipStorage.set(outputPath, encode(cgJson));
   }
 
   async writeDependenciesConfig(
