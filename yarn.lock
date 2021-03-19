@@ -2391,10 +2391,10 @@ bn.js@4.11.6:
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.6.tgz#53344adb14617a13f6e8dd2ce28905d1c0ba3215"
   integrity sha1-UzRK2xRhehP26N0s4okF0cC6MhU=
 
-bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.11.6, bn.js@^4.11.9, bn.js@^4.4.0:
-  version "4.11.9"
-  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.9.tgz#26d556829458f9d1e81fc48952493d0ba3507828"
-  integrity sha512-E6QoYqCKZfgatHTdHzs1RRKP7ip4vvm+EyRUeE2RF0NblwVvb0p6jSVeNTOFxPn26QXN2o6SMfNxKp6kU8zQaw==
+bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.11.6, bn.js@^4.11.9:
+  version "4.12.0"
+  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.12.0.tgz#775b3f278efbb9718eec7361f483fb36fbbfea88"
+  integrity sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA==
 
 bn.js@^5.1.1:
   version "5.1.1"
@@ -2470,7 +2470,7 @@ braces@^3.0.1, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-brorand@^1.0.1:
+brorand@^1.0.1, brorand@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
@@ -3957,17 +3957,17 @@ electron-to-chromium@^1.3.564, electron-to-chromium@^1.3.649:
   integrity sha512-zPbaSv1c8LUKqQ+scNxJKv01RYFkVVF1xli+b+3Ty8ONujHjAMg+t/COmdZqrtnS1gT+g4hbSodHillymt1Lww==
 
 elliptic@^6.0.0, elliptic@^6.4.0, elliptic@^6.5.2:
-  version "6.5.3"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.3.tgz#cb59eb2efdaf73a0bd78ccd7015a62ad6e0f93d6"
-  integrity sha512-IMqzv5wNQf+E6aHeIqATs0tOLeOTwj1QKbRcS3jBbYkl5oLAserA8yJTT7/VyHUYG91PRmPyeQDObKLPpeS4dw==
+  version "6.5.4"
+  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.4.tgz#da37cebd31e79a1367e941b592ed1fbebd58abbb"
+  integrity sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==
   dependencies:
-    bn.js "^4.4.0"
-    brorand "^1.0.1"
+    bn.js "^4.11.9"
+    brorand "^1.1.0"
     hash.js "^1.0.0"
-    hmac-drbg "^1.0.0"
-    inherits "^2.0.1"
-    minimalistic-assert "^1.0.0"
-    minimalistic-crypto-utils "^1.0.0"
+    hmac-drbg "^1.0.1"
+    inherits "^2.0.4"
+    minimalistic-assert "^1.0.1"
+    minimalistic-crypto-utils "^1.0.1"
 
 emittery@^0.7.1:
   version "0.7.1"
@@ -5375,7 +5375,7 @@ history@^5.0.0:
   dependencies:
     "@babel/runtime" "^7.7.6"
 
-hmac-drbg@^1.0.0:
+hmac-drbg@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"
   integrity sha1-0nRXAQJabHdabFRXk+1QL8DGSaE=
@@ -7448,7 +7448,7 @@ minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
   integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
-minimalistic-crypto-utils@^1.0.0, minimalistic-crypto-utils@^1.0.1:
+minimalistic-crypto-utils@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
   integrity sha1-9sAMHAsIIkblxNmd+4x8CDsrWCo=
@@ -8712,10 +8712,10 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.2.tgz#abf64491e6ecf0f38a6502403d4cda04f372dfd3"
   integrity sha512-dB15eXv3p2jDlbOiNLyMabYg1/sXvppd8DP2J3EOCQ0AkuSXCW2tP7mnVouVLJKgUMY6yP0kcQDVpLCN13h4Xg==
 
-ra-core@^3.13.4:
-  version "3.13.4"
-  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.13.4.tgz#e023d04537c5accd3ac058c53427fdf316ca557e"
-  integrity sha512-9baz2bqlVvIIv8l3sUpBlrQ+IpUqeRjOUc7Da7oUYYU4qGn/si7yhI/d0I6N4PaFVNMRZDvtNx9+766bpqksAg==
+ra-core@^3.13.5:
+  version "3.13.5"
+  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-3.13.5.tgz#2b938e41e1561690c6a4a3a59830b71651766c6a"
+  integrity sha512-V/FKzKyDHtwjwvm03GMSxyvlq7dJ50qyUOb5LfZXFnCUHYW69xn8QVZ9hgFLfS0msqu4K3yAQI+CGlcyKrZVrg==
   dependencies:
     classnames "~2.2.5"
     date-fns "^1.29.0"
@@ -8733,25 +8733,25 @@ ra-data-fakerest@^3.6.2:
   dependencies:
     fakerest "^2.2.0"
 
-ra-i18n-polyglot@^3.13.4:
-  version "3.13.4"
-  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.13.4.tgz#4b9cdb1f227686c42fe69c9c4e7f7a92f9fd4e17"
-  integrity sha512-6aqn2sNLwE+tldr8edGj3kMwXmMW3AHYglNhGUvkIm/irFLesfyPYqH3pfTNhbnL3c7M1ucVU23Zcvm5DHBozQ==
+ra-i18n-polyglot@^3.13.5:
+  version "3.13.5"
+  resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-3.13.5.tgz#d14015397eb029f866f59c6967260254e0dbb5b2"
+  integrity sha512-YzFQ26m4BuhmUybG2QlDDGKGBo4uwMPbEI+AKuI6R3THHG0GWVYphfDOOMip+u8YH28gB+sBLsYLohc35jziug==
   dependencies:
     node-polyglot "^2.2.2"
-    ra-core "^3.13.4"
+    ra-core "^3.13.5"
 
-ra-language-english@^3.13.4:
-  version "3.13.4"
-  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.13.4.tgz#92e0bc4416a268bc1ce933f87a3075da9ad7add1"
-  integrity sha512-gdHGXFilpd0h3pCCkOwAjAR5XmKZC7WMOV9wzzyoc5PTnC8aZkI5V+sfpOrfUem8KZidewMwrf6/YStPHlSapQ==
+ra-language-english@^3.13.5:
+  version "3.13.5"
+  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.13.5.tgz#8e5765edb6228a3458896264d078362a9c270feb"
+  integrity sha512-KqAgqKbYYnSaq2KJT5BeEjgNLRuQ8/O1MYJqbfPU0noj5LctuVuxAjjtxUGXsiu9bGbd1OHZ7V1/G9weCP7HBQ==
   dependencies:
-    ra-core "^3.13.4"
+    ra-core "^3.13.5"
 
-ra-ui-materialui@^3.13.4:
-  version "3.13.4"
-  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.13.4.tgz#0089770854b9479088af72d99eaba4e2a62228d5"
-  integrity sha512-2DR/n7n/EjIe8NpZ5UOxD0ftgBI07QfUqq/8W0Wkt513tfo3M+LOb941e2Hk+dFzFSC1x45/DSmVrsHH/BPXfw==
+ra-ui-materialui@^3.13.5:
+  version "3.13.5"
+  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-3.13.5.tgz#15b18e9062422d9327c52cde08a2b0867c954746"
+  integrity sha512-1HXFnQ804HLbv2ct7DX6yMC3IL6C3gJubv3lQzbBJVCwDOZGKrNvK2k4sS+XFk8LUUYkhIDjz1q124PTHPB3Rg==
   dependencies:
     autosuggest-highlight "^3.1.1"
     classnames "~2.2.5"
@@ -8837,9 +8837,9 @@ rc@^1.2.7:
     strip-json-comments "~2.0.1"
 
 react-admin@^3.6.2:
-  version "3.13.4"
-  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.13.4.tgz#a8064b4edd3163c3e7c85eb468c299cc0441cfa0"
-  integrity sha512-nnV08mkBFiJdO1gBWM/jhJsWLxuQA3Gb9Sr0wuKOwt17W9f5X4eZCwgQCouZEsx+vyFZzTxKntwc99tyZWHG2w==
+  version "3.13.5"
+  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-3.13.5.tgz#dd764eec2df80f00edda24ac85a09882de34d7b4"
+  integrity sha512-d+1JzJ2IXMY5NIZ9UtiNcLAnxZg02LBtJpNgPmV1NvmPUs8sL1A51pSksN4DYE9zNoI/C7gjISBQ2lqIVOu1mg==
   dependencies:
     "@material-ui/core" "^4.11.2"
     "@material-ui/icons" "^4.11.2"
@@ -8848,10 +8848,10 @@ react-admin@^3.6.2:
     final-form "^4.20.2"
     final-form-arrays "^3.0.2"
     final-form-submit-errors "^0.1.2"
-    ra-core "^3.13.4"
-    ra-i18n-polyglot "^3.13.4"
-    ra-language-english "^3.13.4"
-    ra-ui-materialui "^3.13.4"
+    ra-core "^3.13.5"
+    ra-i18n-polyglot "^3.13.5"
+    ra-language-english "^3.13.5"
+    ra-ui-materialui "^3.13.5"
     react-final-form "^6.5.2"
     react-final-form-arrays "^3.1.3"
     react-redux "^7.1.0"
