@@ -125,6 +125,9 @@
     "prepublishOnly": "yarn build",
     "docs": "node ./scripts/build-docs.js"
   },
+  "engines": {
+    "node": ">=12"
+  },
   "license": "(MIT OR Apache-2.0)",
   "jest": {
     "collectCoverageFrom": [
