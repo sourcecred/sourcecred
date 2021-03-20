@@ -25,6 +25,7 @@ import {
 } from "../api/dependenciesConfig";
 import {
   type WeightedGraph,
+  type WeightedGraphJSON,
   merge,
   overrideWeights,
   fromJSON as weightedGraphFromJSON,
@@ -38,6 +39,8 @@ import {
   type CurrencyDetails,
 } from "../api/currencyConfig";
 import {defaultCurrencyConfig} from "../api/currencyConfig";
+import * as Combo from "../util/combo";
+import {fromString as verifyPluginId} from "../api/pluginId";
 
 import * as Weights from "../core/weights";
 
@@ -52,10 +55,28 @@ export function makePluginDir(
   prefix: $ReadOnlyArray<string>,
   pluginId: string
 ): string {
+  const {absolutePath} = _makeDirectories(baseDir, prefix, pluginId);
+  return absolutePath;
+}
+
+// For use with DataStorage implementations
+export function makeRelativePluginDir(
+  baseDir: string,
+  prefix: $ReadOnlyArray<string>,
+  pluginId: string
+): string {
+  const {relativePath} = _makeDirectories(baseDir, prefix, pluginId);
+  return relativePath;
+}
+
+function _makeDirectories(
+  baseDir: string,
+  prefix: $ReadOnlyArray<string>,
+  pluginId: string
+): {relativePath: string, absolutePath: string} {
+  verifyPluginId(pluginId);
   const idParts = pluginId.split("/");
-  if (idParts.length !== 2) {
-    throw new Error(`Bad plugin name: ${pluginId}`);
-  }
+
   const [pluginOwner, pluginName] = idParts;
   const pathComponents = [...prefix, pluginOwner, pluginName];
   let path = baseDir;
@@ -63,7 +84,8 @@ export function makePluginDir(
     path = pathJoin(path, pc);
     mkdirx(path);
   }
-  return path;
+
+  return {absolutePath: path, relativePath: pathJoin(...pathComponents)};
 }
 
 export function pluginDirectoryContext(
@@ -158,9 +180,18 @@ export async function loadWeightedGraphForPlugin(
   baseDir: string
 ): Promise<WeightedGraph> {
   const graphOutputPrefix = ["output", "graphs"];
-  const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
-  const outputPath = pathJoin(outputDir, "graph.json");
-  const graphJSON = JSON.parse(await fs.readFile(outputPath));
+  const outputDir = makeRelativePluginDir(
+    baseDir,
+    graphOutputPrefix,
+    pluginName
+  );
+  const outputPath = pathJoin(outputDir, "graph.json.gzip");
+  const graphJSON = await loadJson(
+    new ZipStorage(new DiskStorage(baseDir)),
+    outputPath,
+    ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
+  );
+
   return weightedGraphFromJSON(graphJSON);
 }
 
