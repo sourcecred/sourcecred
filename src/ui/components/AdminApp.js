@@ -13,6 +13,7 @@ import pink from "@material-ui/core/colors/pink";
 import {makeStyles} from "@material-ui/core/styles";
 import fakeDataProvider from "ra-data-fakerest";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
+import WeightsConfigSection from "./Explorer/WeightsConfigSection";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredGrainView} from "../../core/credGrainView";
 import {AccountOverview} from "./AccountOverview";
@@ -25,6 +26,8 @@ import AppBar from "./AppBar";
 import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
 import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
+import {type PluginDeclarations} from "../../analysis/pluginDeclaration";
+import {type WeightsT, empty as emptyWeights} from "../../core/weights";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -94,8 +97,12 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
 const customRoutes = (
   hasBackend: boolean,
   currency: CurrencyDetails,
-  credGrainView: CredGrainView | null
+  credGrainView: CredGrainView | null,
+  pluginDeclarations: PluginDeclarations
 ) => {
+  const [weightsState, setWeightsState] = useState<{weights: WeightsT}>({
+    weights: emptyWeights(),
+  });
   const routes = [
     <Route key="explorer-home" exact path="/explorer-home">
       <ExplorerHome initialView={credGrainView} currency={currency} />
@@ -119,6 +126,14 @@ const customRoutes = (
     </Route>,
     <Route key="special-distribution" exact path="/special-distribution">
       <SpecialDistribution currency={currency} />
+    </Route>,
+    <Route key="weight-config" exact path="/weight-config">
+      <WeightsConfigSection
+        show={true}
+        pluginDeclarations={pluginDeclarations}
+        weights={weightsState.weights}
+        setWeightsState={setWeightsState}
+      />
     </Route>,
   ];
   return routes.concat(hasBackend ? backendRoutes : []);
@@ -185,7 +200,8 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
         customRoutes={customRoutes(
           loadSuccess.hasBackend,
           loadSuccess.currency,
-          credGrainView
+          credGrainView,
+          Array.from(loadSuccess.bundledPlugins.values())
         )}
       >
         {/*
