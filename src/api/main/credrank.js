@@ -1,22 +1,22 @@
 // @flow
 
-import {CredGraph} from "../core/credrank/credGraph";
+import {CredGraph} from "../../core/credrank/credGraph";
 import {
   type WeightedGraph,
   merge,
   overrideWeights,
-} from "../core/weightedGraph";
+} from "../../core/weightedGraph";
 import {
   ensureIdentityExists,
   toBonusPolicy,
   type DependenciesConfig,
-} from "../api/dependenciesConfig";
-import {Ledger} from "../core/ledger/ledger";
-import {computeBonusMinting, createBonusGraph} from "../core/bonusMinting";
-import {applyBudget, type Budget} from "../core/mintBudget";
-import {type WeightsT} from "../core/weights";
-import {contractions as identityContractions} from "../core/identity";
-import {credrank as computeCredrank} from "../core/credrank/compute";
+} from "../../api/dependenciesConfig";
+import {Ledger} from "../../core/ledger/ledger";
+import {computeBonusMinting, createBonusGraph} from "../../core/bonusMinting";
+import {applyBudget, type Budget} from "../../core/mintBudget";
+import {type WeightsT} from "../../core/weights";
+import {contractions as identityContractions} from "../../core/identity";
+import {credrank as computeCredrank} from "../../core/credrank/compute";
 
 export type CredrankInput = {|
   +pluginGraphs: $ReadOnlyArray<WeightedGraph>,

@@ -31,7 +31,7 @@ import * as identity from "../core/identity";
 
 import * as manager from "./ledgerManager";
 import * as storage from "./ledgerStorage";
-import * as credrank from "./credrank";
+import * as credrank from "./main/credrank";
 
 const api = {
   api: {

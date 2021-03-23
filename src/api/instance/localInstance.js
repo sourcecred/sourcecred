@@ -1,7 +1,8 @@
 // @flow
 
 import {Instance} from "./instance";
-import {type CredrankInput, type CredrankOutput} from "../credrank";
+import {type CredrankInput, type CredrankOutput} from "../main/credrank";
+import {type GraphInput, type GraphOutput} from "../main/graph";
 import {
   type WeightsT,
   parser as weightsParser,
@@ -13,6 +14,7 @@ import {
   type WeightedGraph,
   type WeightedGraphJSON,
   fromJSON as weightedGraphFromJSON,
+  toJSON as weightedGraphToJSON,
 } from "../../core/weightedGraph";
 import {
   loadJson,
@@ -36,6 +38,7 @@ import {DiskStorage} from "../../core/storage/disk";
 import {WritableZipStorage} from "../../core/storage/zip";
 import {encode} from "../../core/storage/textEncoding";
 import * as Combo from "../../util/combo";
+import type {PluginDirectoryContext} from "../plugin";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -62,15 +65,35 @@ on the local disk.
 export class LocalInstance implements Instance {
   _baseDirectory: string;
   _storage: DiskStorage;
+  _zipStorage: WritableZipStorage;
 
   constructor(baseDirectory: string) {
     this._baseDirectory = baseDirectory;
     this._storage = new DiskStorage(baseDirectory);
+    this._zipStorage = new WritableZipStorage(this._storage);
   }
 
   //////////////////////////////
   //  Interface Functions
   //////////////////////////////
+
+  async readGraphInput(): Promise<GraphInput> {
+    const [instanceConfig, ledger] = await Promise.all([
+      this.readInstanceConfig(),
+      this.readLedger(),
+    ]);
+    const plugins = [];
+    for (const plugin of instanceConfig.bundledPlugins.values()) {
+      plugins.push({
+        plugin,
+        directoryContext: this.pluginDirectoryContext(plugin.id),
+      });
+    }
+    return {
+      plugins,
+      ledger,
+    };
+  }
 
   async readCredrankInput(): Promise<CredrankInput> {
     const [
@@ -95,12 +118,34 @@ export class LocalInstance implements Instance {
     };
   }
 
+  async writeGraphOutput(graphOutput: GraphOutput): Promise<void> {
+    await Promise.all([
+      this.writeLedger(graphOutput.ledger),
+      ...graphOutput.pluginGraphs.map(({pluginId, weightedGraph}) =>
+        this.writePluginGraph(pluginId, weightedGraph)
+      ),
+    ]);
+  }
+
   async writeCredrankOutput(credrankOutput: CredrankOutput): Promise<void> {
     await Promise.all([
       this.writeLedger(credrankOutput.ledger),
       this.writeCredGraph(credrankOutput.credGraph),
       this.writeDependenciesConfig(credrankOutput.dependencies),
     ]);
+  }
+
+  async readWeightedGraphForPlugin(pluginId: string): Promise<WeightedGraph> {
+    const outputPath = pathJoin(
+      this.createPluginGraphDirectory(pluginId),
+      "graph.json.gzip"
+    );
+    const graphJSON = await loadJson(
+      this._zipStorage,
+      outputPath,
+      ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
+    );
+    return weightedGraphFromJSON(graphJSON);
   }
 
   async readCredGraph(): Promise<CredGraph> {
@@ -131,10 +176,10 @@ export class LocalInstance implements Instance {
     const pluginNames = Array.from(instanceConfig.bundledPlugins.keys());
     return await Promise.all(
       pluginNames.map(async (name) => {
-        const outputDir = this.createPluginDirectory(name);
+        const outputDir = this.createPluginDirectory(GRAPHS_DIRECTORY, name);
         const outputPath = pathJoin(outputDir, ...GRAPHS_PATH);
         const graphJSON = await loadJson(
-          new WritableZipStorage(this._storage),
+          this._zipStorage,
           outputPath,
           ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
         );
@@ -173,19 +218,42 @@ export class LocalInstance implements Instance {
     );
   }
 
-  createPluginDirectory(pluginId: string): string {
+  createPluginDirectory(
+    components: $ReadOnlyArray<string>,
+    pluginId: string
+  ): string {
     const idParts = pluginId.split("/");
     if (idParts.length !== 2) {
       throw new Error(`Bad plugin name: ${pluginId}`);
     }
     const [pluginOwner, pluginName] = idParts;
-    const pathComponents = [...GRAPHS_DIRECTORY, pluginOwner, pluginName];
+    const pathComponents = [...components, pluginOwner, pluginName];
     let path = this._baseDirectory;
     for (const pc of pathComponents) {
       path = pathJoin(path, pc);
       mkdirx(path);
     }
     return pathJoin(...pathComponents);
+  }
+
+  createPluginGraphDirectory(pluginId: string): string {
+    return this.createPluginDirectory(GRAPHS_DIRECTORY, pluginId);
+  }
+
+  pluginDirectoryContext(pluginName: string): PluginDirectoryContext {
+    const cacheDir = this.createPluginDirectory(["cache"], pluginName);
+    const configDir = this.createPluginDirectory(
+      ["config", "plugins"],
+      pluginName
+    );
+    return {
+      configDirectory() {
+        return configDir;
+      },
+      cacheDirectory() {
+        return cacheDir;
+      },
+    };
   }
 
   async writeLedger(ledger: Ledger): Promise<void> {
@@ -196,8 +264,19 @@ export class LocalInstance implements Instance {
   async writeCredGraph(credGraph: CredGraph): Promise<void> {
     const cgJson = stringify(credGraph.toJSON());
     const outputPath = pathJoin(...CREDGRAPH_PATH);
-    const zipStorage = new WritableZipStorage(this._storage);
-    await zipStorage.set(outputPath, encode(cgJson));
+    await this._zipStorage.set(outputPath, encode(cgJson));
+  }
+
+  async writePluginGraph(
+    pluginId: string,
+    weightedGraph: WeightedGraph
+  ): Promise<void> {
+    const serializedGraph = encode(
+      stringify(weightedGraphToJSON(weightedGraph))
+    );
+    const outputDir = this.createPluginGraphDirectory(pluginId);
+    const outputPath = pathJoin(outputDir, ...GRAPHS_PATH);
+    await this._zipStorage.set(outputPath, serializedGraph);
   }
 
   async writeDependenciesConfig(
