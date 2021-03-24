@@ -63,16 +63,16 @@ const credrankCommand: Command = async (args, std) => {
     taskReporter.start("load prior graph");
     try {
       const priorCredGraph = await instance.readCredGraph();
-      printCredDiffTable(credGraph, priorCredGraph);
+      printCredDiffTable(credGraph, priorCredGraph, std);
     } catch (e) {
-      console.log(
+      std.out(
         `Could not load or compare existing credGraph.json. Skipping diff. Error: ${e.message}`
       );
-      printCredSummaryTable(credGraph);
+      printCredSummaryTable(credGraph, std);
     }
     taskReporter.finish("load prior graph");
   } else if (!shouldRunStealth) {
-    printCredSummaryTable(credGraph);
+    printCredSummaryTable(credGraph, std);
   }
 
   if (!isSimulation) {
@@ -85,11 +85,11 @@ const credrankCommand: Command = async (args, std) => {
   return 0;
 };
 
-function printCredSummaryTable(credGraph: CredGraph) {
-  console.log(`# Top Participants By Cred`);
-  console.log();
-  console.log(`| Description | Cred | % |`);
-  console.log(`| --- | --- | --- |`);
+function printCredSummaryTable(credGraph: CredGraph, std) {
+  std.out(`# Top Participants By Cred`);
+  std.out(``);
+  std.out(`| Description | Cred | % |`);
+  std.out(`| --- | --- | --- |`);
   const credParticipants = Array.from(credGraph.participants());
   const sortedParticipants = sortBy(credParticipants, (p) => -p.cred);
   const totalCred = sum(sortedParticipants, (p) => p.cred);
@@ -99,11 +99,15 @@ function printCredSummaryTable(credGraph: CredGraph) {
       1
     )}% |`;
   }
-  sortedParticipants.slice(0, 20).forEach((n) => console.log(row(n)));
+  sortedParticipants.slice(0, 20).forEach((n) => std.out(row(n)));
 }
 
-function printCredDiffTable(credGraph: CredGraph, priorCredGraph: CredGraph) {
-  console.log(`# Top Participants By New Cred`);
+function printCredDiffTable(
+  credGraph: CredGraph,
+  priorCredGraph: CredGraph,
+  std
+) {
+  std.out(`# Top Participants By New Cred`);
   const priorParticipants: Map<Uuid, Participant> = new Map();
   for (const participant of priorCredGraph.participants())
     priorParticipants.set(participant.id, participant);

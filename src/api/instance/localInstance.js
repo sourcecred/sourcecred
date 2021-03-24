@@ -3,6 +3,7 @@
 import {Instance} from "./instance";
 import {type CredrankInput, type CredrankOutput} from "../main/credrank";
 import {type GraphInput, type GraphOutput} from "../main/graph";
+import {type GrainInput} from "../main/grain";
 import {
   type WeightsT,
   parser as weightsParser,
@@ -39,6 +40,12 @@ import {WritableZipStorage} from "../../core/storage/zip";
 import {encode} from "../../core/storage/textEncoding";
 import * as Combo from "../../util/combo";
 import type {PluginDirectoryContext} from "../plugin";
+import {type GrainConfig, parser as grainConfigParser} from "../grainConfig";
+import {
+  parser as currencyConfigParser,
+  type CurrencyDetails,
+} from "../currencyConfig";
+import {defaultCurrencyConfig} from "../currencyConfig";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -49,6 +56,11 @@ const WEIGHT_OVERRIDES_PATH: $ReadOnlyArray<string> = [
   "weights.json",
 ];
 const BUDGET_PATH: $ReadOnlyArray<string> = ["config", "pluginBudgets.json"];
+const GRAIN_PATH: $ReadOnlyArray<string> = ["config", "grain.json"];
+const CURRENCY_PATH: $ReadOnlyArray<string> = [
+  "config",
+  "currencyDetails.json",
+];
 const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
 const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
   "output",
@@ -118,6 +130,44 @@ export class LocalInstance implements Instance {
     };
   }
 
+  async readGrainInput(): Promise<GrainInput> {
+    const [
+      credGraph,
+      ledger,
+      grainConfig,
+      currencyDetails,
+    ] = await Promise.all([
+      this.readCredGraph(),
+      this.readLedger(),
+      this.readGrainConfig(),
+      this.readCurrencyDetails(),
+    ]);
+    return {
+      credGraph,
+      ledger,
+      grainConfig,
+      currencyDetails,
+    };
+  }
+
+  async readWeightedGraphForPlugin(pluginId: string): Promise<WeightedGraph> {
+    const outputPath = pathJoin(
+      this.createPluginGraphDirectory(pluginId),
+      ...GRAPHS_PATH
+    );
+    const graphJSON = await loadJson(
+      this._zipStorage,
+      outputPath,
+      ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
+    );
+    return weightedGraphFromJSON(graphJSON);
+  }
+
+  async readCredGraph(): Promise<CredGraph> {
+    const credGraphPath = pathJoin(...CREDGRAPH_PATH);
+    return loadJson(this._zipStorage, credGraphPath, credGraphParser);
+  }
+
   async writeGraphOutput(graphOutput: GraphOutput): Promise<void> {
     await Promise.all([
       this.writeLedger(graphOutput.ledger),
@@ -135,22 +185,9 @@ export class LocalInstance implements Instance {
     ]);
   }
 
-  async readWeightedGraphForPlugin(pluginId: string): Promise<WeightedGraph> {
-    const outputPath = pathJoin(
-      this.createPluginGraphDirectory(pluginId),
-      "graph.json.gzip"
-    );
-    const graphJSON = await loadJson(
-      this._zipStorage,
-      outputPath,
-      ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
-    );
-    return weightedGraphFromJSON(graphJSON);
-  }
-
-  async readCredGraph(): Promise<CredGraph> {
-    const credGraphPath = pathJoin(...CREDGRAPH_PATH);
-    return await loadJson(this._storage, credGraphPath, credGraphParser);
+  async writeLedger(ledger: Ledger): Promise<void> {
+    const ledgerPath = pathJoin(...LEDGER_PATH);
+    return this._storage.set(ledgerPath, encode(ledger.serialize()));
   }
 
   //////////////////////////////
@@ -159,11 +196,9 @@ export class LocalInstance implements Instance {
 
   async readLedger(): Promise<Ledger> {
     const ledgerPath = pathJoin(...LEDGER_PATH);
-    return Ledger.parse(
-      await loadFileWithDefault(this._storage, ledgerPath, () =>
-        new Ledger().serialize()
-      )
-    );
+    return loadFileWithDefault(this._storage, ledgerPath, () =>
+      new Ledger().serialize()
+    ).then((result) => Ledger.parse(result));
   }
 
   async readInstanceConfig(): Promise<InstanceConfig> {
@@ -200,7 +235,7 @@ export class LocalInstance implements Instance {
 
   async readDependencies(): Promise<DependenciesConfig> {
     const dependenciesPath = pathJoin(...DEPENDENCIES_PATH);
-    return await loadJsonWithDefault(
+    return loadJsonWithDefault(
       this._storage,
       dependenciesPath,
       dependenciesParser,
@@ -215,6 +250,21 @@ export class LocalInstance implements Instance {
       budgetPath,
       pluginBudgetParser,
       () => null
+    );
+  }
+
+  async readGrainConfig(): Promise<GrainConfig> {
+    const grainConfigPath = pathJoin(...GRAIN_PATH);
+    return loadJson(this._storage, grainConfigPath, grainConfigParser);
+  }
+
+  async readCurrencyDetails(): Promise<CurrencyDetails> {
+    const currencyDetailsPath = pathJoin(...CURRENCY_PATH);
+    return loadJsonWithDefault(
+      this._storage,
+      currencyDetailsPath,
+      currencyConfigParser,
+      defaultCurrencyConfig
     );
   }
 
@@ -256,15 +306,10 @@ export class LocalInstance implements Instance {
     };
   }
 
-  async writeLedger(ledger: Ledger): Promise<void> {
-    const ledgerPath = pathJoin(...LEDGER_PATH);
-    await this._storage.set(ledgerPath, encode(ledger.serialize()));
-  }
-
   async writeCredGraph(credGraph: CredGraph): Promise<void> {
     const cgJson = stringify(credGraph.toJSON());
     const outputPath = pathJoin(...CREDGRAPH_PATH);
-    await this._zipStorage.set(outputPath, encode(cgJson));
+    return this._zipStorage.set(outputPath, encode(cgJson));
   }
 
   async writePluginGraph(
@@ -276,14 +321,14 @@ export class LocalInstance implements Instance {
     );
     const outputDir = this.createPluginGraphDirectory(pluginId);
     const outputPath = pathJoin(outputDir, ...GRAPHS_PATH);
-    await this._zipStorage.set(outputPath, serializedGraph);
+    return this._zipStorage.set(outputPath, serializedGraph);
   }
 
   async writeDependenciesConfig(
     dependenciesConfig: DependenciesConfig
   ): Promise<void> {
     const dependenciesPath = pathJoin(...DEPENDENCIES_PATH);
-    await this._storage.set(
+    return this._storage.set(
       dependenciesPath,
       stringify(dependenciesConfig, {space: 4})
     );

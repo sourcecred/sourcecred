@@ -74,9 +74,9 @@ const graphCommand: Command = async (args, std) => {
         const oldWeightedGraph = await instance.readWeightedGraphForPlugin(
           pluginId
         );
-        computeAndLogDiff(oldWeightedGraph, weightedGraph, pluginId);
+        computeAndLogDiff(oldWeightedGraph, weightedGraph, pluginId, std);
       } catch (error) {
-        console.log(
+        std.out(
           `Could not find or compare existing graph.json for ${pluginId}. ${error}`
         );
       }
@@ -114,7 +114,8 @@ export const graphHelp: Command = async (args, std) => {
 function computeAndLogDiff(
   oldWeightedGraph: WeightedGraph,
   newWeightedGraph: WeightedGraph,
-  pluginName: string
+  pluginName: string,
+  std
 ) {
   const graphDiff = compareGraphs(
     oldWeightedGraph.graph,
@@ -127,16 +128,16 @@ function computeAndLogDiff(
   const horizontalRule =
     "=============================================================";
   if (graphDiff.nodeDiffs.length > 0) {
-    console.log(
+    std.out(
       `${horizontalRule}\n  ${pluginName} - Node Diffs\n${horizontalRule}`
     );
     for (const nodeDiff of graphDiff.nodeDiffs) {
-      console.log(
+      std.out(
         `Old:\t${
           nodeDiff.first ? nodeToString(nodeDiff.first) : "No matching address"
         }`
       );
-      console.log(
+      std.out(
         `New:\t${
           nodeDiff.second
             ? nodeToString(nodeDiff.second)
@@ -146,19 +147,19 @@ function computeAndLogDiff(
     }
   }
   if (weightDiff.nodeWeightDiffs.length > 0) {
-    console.log(
+    std.out(
       `${horizontalRule}\n  ${pluginName} - Node Weight Diffs\n${horizontalRule}`
     );
     for (const nodeWeightDiff of weightDiff.nodeWeightDiffs) {
-      console.log(`${NodeAddress.toString(nodeWeightDiff.address)}`);
-      console.log(
+      std.out(`${NodeAddress.toString(nodeWeightDiff.address)}`);
+      std.out(
         `Old:\t${
           nodeWeightDiff.first != null
             ? nodeWeightDiff.first.toString()
             : "No matching address"
         }`
       );
-      console.log(
+      std.out(
         `New:\t${
           nodeWeightDiff.second != null
             ? nodeWeightDiff.second.toString()
@@ -168,16 +169,16 @@ function computeAndLogDiff(
     }
   }
   if (graphDiff.edgeDiffs.length > 0) {
-    console.log(
+    std.out(
       `${horizontalRule}\n  ${pluginName} - Edge Diffs\n${horizontalRule}`
     );
     for (const edgeDiff of graphDiff.edgeDiffs) {
-      console.log(
+      std.out(
         `Old:\t${
           edgeDiff.first ? edgeToString(edgeDiff.first) : "No matching address"
         }`
       );
-      console.log(
+      std.out(
         `New:\t${
           edgeDiff.second
             ? edgeToString(edgeDiff.second)
@@ -187,19 +188,19 @@ function computeAndLogDiff(
     }
   }
   if (weightDiff.edgeWeightDiffs.length > 0) {
-    console.log(
+    std.out(
       `${horizontalRule}\n  ${pluginName} - Edge Weight Diffs\n${horizontalRule}`
     );
     for (const edgeWeightDiff of weightDiff.edgeWeightDiffs) {
-      console.log(`${EdgeAddress.toString(edgeWeightDiff.address)}`);
-      console.log(
+      std.out(`${EdgeAddress.toString(edgeWeightDiff.address)}`);
+      std.out(
         `Old:\t${
           edgeWeightDiff.first
             ? stringify(edgeWeightDiff.first)
             : "No matching address"
         }`
       );
-      console.log(
+      std.out(
         `New:\t${
           edgeWeightDiff.second
             ? stringify(edgeWeightDiff.second)
@@ -209,11 +210,11 @@ function computeAndLogDiff(
     }
   }
   if (graphDiff.graphsAreEqual && weightDiff.weightsAreEqual)
-    console.log(
+    std.out(
       `${horizontalRule}\n  ${pluginName} - Unchanged\n${horizontalRule}`
     );
   else
-    console.log(`${horizontalRule}\n  ${pluginName} - Summary of Changes\n${horizontalRule}
+    std.out(`${horizontalRule}\n  ${pluginName} - Summary of Changes\n${horizontalRule}
 Node Diffs: ${graphDiff.nodeDiffs.length}
 Node Weight Diffs: ${weightDiff.nodeWeightDiffs.length}
 Edge Diffs: ${graphDiff.edgeDiffs.length}

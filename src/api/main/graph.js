@@ -47,6 +47,7 @@ export async function graph(
   }
   rds.push(_hackyIdentityNameReferenceDetector(input.ledger));
   const rd = new CascadingReferenceDetector(rds);
+  // Build graphs
   const pluginGraphs = [];
   for (const {plugin, directoryContext} of input.plugins) {
     if (scope.includes(plugin.id)) {

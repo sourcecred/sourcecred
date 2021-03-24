@@ -1,22 +1,13 @@
 // @flow
 
-import {join} from "path";
-import {loadFileWithDefault, loadJson} from "../util/storage";
-import {Ledger} from "../core/ledger/ledger";
-import {applyDistributions} from "../core/ledger/applyDistributions";
-import {computeCredAccounts} from "../core/ledger/credAccounts";
-import stringify from "json-stable-stringify";
 import dedent from "../util/dedent";
-import * as GrainConfig from "../api/grainConfig";
 import type {Command} from "./command";
 import {distributionMarkdownSummary} from "../core/ledger/distributionSummary/distributionSummary";
-import {loadCurrencyDetails, saveLedger} from "../cli/common";
-import {type CurrencyDetails} from "../api/currencyConfig";
 import {allocationMarkdownSummary} from "../core/ledger/distributionSummary/allocationSummary";
-import {DiskStorage} from "../core/storage/disk";
-import {encode} from "../core/storage/textEncoding";
 import * as G from "../core/ledger/grain";
-import {loadCredGraph} from "./common";
+import {Instance} from "../api/instance/instance";
+import {LocalInstance} from "../api/instance/localInstance";
+import {grain} from "../api/main/grain";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -39,36 +30,10 @@ const grainCommand: Command = async (args, std) => {
   }
 
   const baseDir = process.cwd();
-  const diskStorage = new DiskStorage(baseDir);
-  const grainConfigPath = join("config", "grain.json");
-  const grainConfig = await loadJson(
-    diskStorage,
-    grainConfigPath,
-    GrainConfig.parser
-  );
-  const distributionPolicy = GrainConfig.toDistributionPolicy(grainConfig);
+  const instance: Instance = new LocalInstance(baseDir);
+  const grainInput = await instance.readGrainInput();
 
-  const ledgerPath = join("data", "ledger.json");
-  const ledger = Ledger.parse(
-    await loadFileWithDefault(diskStorage, ledgerPath, () =>
-      new Ledger().serialize()
-    )
-  );
-
-  const currencyDetailsPath = join("config", "currencyDetails.json");
-  const currencyDetails: CurrencyDetails = await loadCurrencyDetails(
-    diskStorage,
-    currencyDetailsPath
-  );
-
-  const credGraph = await loadCredGraph(baseDir);
-
-  const distributions = applyDistributions(
-    distributionPolicy,
-    credGraph,
-    ledger,
-    +Date.now()
-  );
+  const {distributions, ledger} = await grain(grainInput);
 
   let totalDistributed = G.ZERO;
   const recipientIdentities = new Set();
@@ -81,27 +46,23 @@ const grainCommand: Command = async (args, std) => {
     }
   }
 
-  console.log(
-    simulation ? `——SIMULATED DISTRIBUTION——\n` : ``,
-    `Distributed ${G.format(totalDistributed)} to ${
-      recipientIdentities.size
-    } identities in ${distributions.length} distributions`,
-    `\n`
+  std.out(
+    (simulation ? `——SIMULATED DISTRIBUTION——\n` : ``) +
+      `Distributed ${G.format(totalDistributed)} to ${
+        recipientIdentities.size
+      } identities in ${distributions.length} distributions` +
+      `\n`
   );
 
   distributions.map((d) => {
-    console.log(distributionMarkdownSummary(d, ledger, currencyDetails));
+    std.out(distributionMarkdownSummary(d, ledger, grainInput.currencyDetails));
     d.allocations.map((a) => {
-      console.log(allocationMarkdownSummary(d, a, ledger));
+      std.out(allocationMarkdownSummary(d, a, ledger));
     });
   });
 
   if (!simulation) {
-    await saveLedger(baseDir, ledger);
-
-    const credAccounts = computeCredAccounts(ledger, credGraph);
-    const accountsPath = join("output", "accounts.json");
-    await diskStorage.set(accountsPath, encode(stringify(credAccounts)));
+    instance.writeLedger(ledger);
   }
 
   return 0;
