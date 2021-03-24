@@ -1,24 +1,9 @@
 // @flow
 
-import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
-
-import {Ledger} from "../core/ledger/ledger";
-import * as NullUtil from "../util/null";
 import {LoggingTaskReporter} from "../util/taskReporter";
-import {type ReferenceDetector} from "../core/references/referenceDetector";
-import {CascadingReferenceDetector} from "../core/references/cascadingReferenceDetector";
 import type {Command} from "./command";
 import dedent from "../util/dedent";
-import {type InstanceConfig} from "../api/instanceConfig";
-import {
-  makePluginDir,
-  loadInstanceConfig,
-  pluginDirectoryContext,
-  loadLedger,
-  saveLedger,
-  loadWeightedGraphForPlugin,
-} from "./common";
 import {
   compareGraphs,
   nodeToString,
@@ -27,15 +12,11 @@ import {
   EdgeAddress,
 } from "../core/graph";
 import {compareWeights} from "../core/weights";
-import {
-  toJSON as weightedGraphToJSON,
-  type WeightedGraph,
-} from "../core/weightedGraph";
+import {type WeightedGraph} from "../core/weightedGraph";
 import * as pluginId from "../api/pluginId";
-import {DiskStorage} from "../core/storage/disk";
-import {WritableZipStorage} from "../core/storage/zip";
-import {encode} from "../core/storage/textEncoding";
-import {ensureIdentityExists} from "../core/ledger/identityProposal";
+import {Instance} from "../api/instance/instance";
+import {LocalInstance} from "../api/instance/localInstance";
+import {graph} from "../api/main/graph";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -62,17 +43,17 @@ const graphCommand: Command = async (args, std) => {
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("graph");
   const baseDir = process.cwd();
-  const config: InstanceConfig = await loadInstanceConfig(baseDir);
+  const instance: Instance = await new LocalInstance(baseDir);
+  const graphInput = await instance.readGraphInput();
 
-  const ledger = await loadLedger(baseDir);
-
+  const availablePlugins = graphInput.plugins.map(({plugin}) => plugin.id);
   let pluginsToLoad = [];
   if (processedArgs.length === 0) {
-    pluginsToLoad = config.bundledPlugins.keys();
+    pluginsToLoad = availablePlugins;
   } else {
     for (const arg of processedArgs) {
       const id = pluginId.fromString(arg);
-      if (config.bundledPlugins.has(id)) {
+      if (availablePlugins.includes(id)) {
         pluginsToLoad.push(id);
       } else {
         return die(
@@ -83,101 +64,34 @@ const graphCommand: Command = async (args, std) => {
     }
   }
 
-  const graphOutputPrefix = ["output", "graphs"];
+  const graphOutput = await graph(graphInput, pluginsToLoad, taskReporter);
 
-  const rd = await buildReferenceDetector(
-    baseDir,
-    config,
-    taskReporter,
-    ledger
-  );
-  for (const name of pluginsToLoad) {
-    const generateGraphTask = `${name}: generating graph`;
-    taskReporter.start(generateGraphTask);
-    const plugin = NullUtil.get(config.bundledPlugins.get(name));
-    const dirContext = pluginDirectoryContext(baseDir, name);
-    const weightedGraph = await plugin.graph(dirContext, rd, taskReporter);
-
-    const identities = await plugin.identities(dirContext, taskReporter);
-    for (const identityProposal of identities) {
-      ensureIdentityExists(ledger, identityProposal);
-    }
-    taskReporter.finish(generateGraphTask);
-
-    if (shouldIncludeDiff) {
-      const diffTask = `${name}: diffing with existing graph`;
+  if (shouldIncludeDiff) {
+    for (const {pluginId, weightedGraph} of graphOutput.pluginGraphs) {
+      const diffTask = `${pluginId}: diffing with existing graph`;
       taskReporter.start(diffTask);
       try {
-        const oldWeightedGraph = await loadWeightedGraphForPlugin(
-          name,
-          baseDir
+        const oldWeightedGraph = await instance.readWeightedGraphForPlugin(
+          pluginId
         );
-        computeAndLogDiff(oldWeightedGraph, weightedGraph, name);
+        computeAndLogDiff(oldWeightedGraph, weightedGraph, pluginId);
       } catch (error) {
         console.log(
-          `Could not find or compare existing graph.json for ${name}. ${error}`
+          `Could not find or compare existing graph.json for ${pluginId}. ${error}`
         );
       }
       taskReporter.finish(diffTask);
     }
-
-    if (!isSimulation) {
-      const writeTask = `${name}: writing graph`;
-      taskReporter.start(writeTask);
-      const serializedGraph = encode(
-        stringify(weightedGraphToJSON(weightedGraph))
-      );
-      const outputDir = makePluginDir(baseDir, graphOutputPrefix, name);
-      const graphStorage = new WritableZipStorage(new DiskStorage(outputDir));
-      await graphStorage.set("graph.json.gzip", serializedGraph);
-      taskReporter.finish(writeTask);
-    }
   }
+
   if (!isSimulation) {
-    await saveLedger(baseDir, ledger);
+    taskReporter.start("writing files");
+    await instance.writeGraphOutput(graphOutput);
+    taskReporter.finish("writing files");
   }
   taskReporter.finish("graph");
   return 0;
 };
-
-async function buildReferenceDetector(baseDir, config, taskReporter, ledger) {
-  taskReporter.start("reference detector");
-  const rds = [];
-  for (const [name, plugin] of sortBy(
-    [...config.bundledPlugins],
-    ([k, _]) => k
-  )) {
-    const dirContext = pluginDirectoryContext(baseDir, name);
-    const task = `reference detector for ${name}`;
-    taskReporter.start(task);
-    const rd = await plugin.referenceDetector(dirContext, taskReporter);
-    rds.push(rd);
-    taskReporter.finish(task);
-  }
-  taskReporter.finish("reference detector");
-  rds.push(_hackyIdentityNameReferenceDetector(ledger));
-  return new CascadingReferenceDetector(rds);
-}
-
-// Hack to support old-school (deprecated) "initiatives files":
-// We need to be able to parse references to usernames, e.g. "@yalor", so
-// we need a reference detector that will match these to identities in the
-// Ledger. This isn't a robust addressing scheme, since identities are re-nameable;
-// in v2 the initiatives plugin will be re-written to use identity node addresses instead.
-// This hack can be safely deleted once we no longer support initiatives files that refer
-// to identities by their names instead of their IDs.
-export function _hackyIdentityNameReferenceDetector(
-  ledger: Ledger
-): ReferenceDetector {
-  const usernameToAddress = new Map(
-    ledger.accounts().map((a) => [a.identity.name, a.identity.address])
-  );
-  function addressFromUrl(potentialUsername: string) {
-    const prepped = potentialUsername.replace("@", "").toLowerCase();
-    return usernameToAddress.get(prepped);
-  }
-  return {addressFromUrl};
-}
 
 export const graphHelp: Command = async (args, std) => {
   std.out(

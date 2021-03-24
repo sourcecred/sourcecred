@@ -5,7 +5,7 @@ import {format} from "d3-format";
 
 import dedent from "../util/dedent";
 import sortBy from "../util/sortBy";
-import {credrank} from "../api/credrank";
+import {credrank} from "../api/main/credrank";
 import {CredGraph, type Participant} from "../core/credrank/credGraph";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";

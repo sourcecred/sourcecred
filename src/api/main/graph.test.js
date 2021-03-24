@@ -1,10 +1,10 @@
 // @flow
 
-import {get} from "../util/null";
-import {Ledger} from "../core/ledger/ledger";
+import {get} from "../../util/null";
+import {Ledger} from "../../core/ledger/ledger";
 import {_hackyIdentityNameReferenceDetector} from "./graph";
 
-describe("cli/graph", () => {
+describe("api/main/graph", () => {
   describe("hacky reference detector", () => {
     it("works", () => {
       const ledger = new Ledger();
