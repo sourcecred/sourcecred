@@ -32,10 +32,14 @@ import * as identity from "../core/identity";
 import * as manager from "./ledgerManager";
 import * as storage from "./ledgerStorage";
 import * as credrank from "./main/credrank";
+import * as graphApi from "./main/graph";
+import * as grainApi from "./main/grain";
 
 const api = {
   api: {
+    graph: graphApi,
     credrank,
+    grain: grainApi,
   },
   core: {
     address,
