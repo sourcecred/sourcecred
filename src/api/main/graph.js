@@ -3,6 +3,7 @@
 import {type WeightedGraph} from "../../core/weightedGraph";
 import {Ledger} from "../../core/ledger/ledger";
 import type {PluginDirectoryContext} from "../plugin";
+import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type PluginId} from "../pluginId";
 import {Plugin} from "../plugin";
 import {type TaskReporter, SilentTaskReporter} from "../../util/taskReporter";
@@ -19,9 +20,10 @@ export type GraphInput = {|
 |};
 
 export type GraphOutput = {|
-  +pluginGraphs: $ReadOnlyArray<{|
+  +pluginOutputs: $ReadOnlyArray<{|
     +pluginId: PluginId,
     +weightedGraph: WeightedGraph,
+    +declaration: PluginDeclaration,
   |}>,
   +ledger: Ledger,
 |};
@@ -48,14 +50,15 @@ export async function graph(
   rds.push(_hackyIdentityNameReferenceDetector(input.ledger));
   const rd = new CascadingReferenceDetector(rds);
   // Build graphs
-  const pluginGraphs = [];
+  const pluginOutputs = [];
   for (const {plugin, directoryContext} of input.plugins) {
     if (scope.includes(plugin.id)) {
       const task = `generating graph for ${plugin.id}`;
       taskReporter.start(task);
-      pluginGraphs.push({
+      pluginOutputs.push({
         pluginId: plugin.id,
         weightedGraph: await plugin.graph(directoryContext, rd, taskReporter),
+        declaration: plugin.declaration(),
       });
       const identities = await plugin.identities(
         directoryContext,
@@ -68,7 +71,7 @@ export async function graph(
     }
   }
   return {
-    pluginGraphs,
+    pluginOutputs,
     ledger: input.ledger,
   };
 }

@@ -46,10 +46,18 @@ import {
   type CurrencyDetails,
 } from "../currencyConfig";
 import {defaultCurrencyConfig} from "../currencyConfig";
+import {
+  toJSON as declarationToJSON,
+  type PluginDeclaration,
+} from "../../analysis/pluginDeclaration";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
   "dependencies.json",
+];
+const DECLARATIONS_PATH: $ReadOnlyArray<string> = [
+  "output",
+  "pluginDeclarations.json",
 ];
 const WEIGHT_OVERRIDES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -171,10 +179,13 @@ export class LocalInstance implements Instance {
   async writeGraphOutput(graphOutput: GraphOutput): Promise<void> {
     await Promise.all([
       this.writeLedger(graphOutput.ledger),
-      ...graphOutput.pluginGraphs.map(({pluginId, weightedGraph}) =>
+      ...graphOutput.pluginOutputs.map(({pluginId, weightedGraph}) =>
         this.writePluginGraph(pluginId, weightedGraph)
       ),
     ]);
+    await this.writePluginDeclarations(
+      graphOutput.pluginOutputs.map(({declaration}) => declaration)
+    );
   }
 
   async writeCredrankOutput(credrankOutput: CredrankOutput): Promise<void> {
@@ -322,6 +333,14 @@ export class LocalInstance implements Instance {
     const outputDir = this.createPluginGraphDirectory(pluginId);
     const outputPath = pathJoin(outputDir, ...GRAPHS_PATH);
     return this._zipStorage.set(outputPath, serializedGraph);
+  }
+
+  async writePluginDeclarations(
+    declarations: $ReadOnlyArray<PluginDeclaration>
+  ): Promise<void> {
+    const serialized = encode(stringify(declarations));
+    const outputPath = pathJoin(...DECLARATIONS_PATH);
+    return this._storage.set(outputPath, serialized);
   }
 
   async writeDependenciesConfig(

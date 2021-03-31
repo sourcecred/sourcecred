@@ -67,7 +67,7 @@ const graphCommand: Command = async (args, std) => {
   const graphOutput = await graph(graphInput, pluginsToLoad, taskReporter);
 
   if (shouldIncludeDiff) {
-    for (const {pluginId, weightedGraph} of graphOutput.pluginGraphs) {
+    for (const {pluginId, weightedGraph} of graphOutput.pluginOutputs) {
       const diffTask = `${pluginId}: diffing with existing graph`;
       taskReporter.start(diffTask);
       try {
