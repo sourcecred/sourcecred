@@ -48,6 +48,17 @@ describe("plugins/github/token", () => {
 
     it("should accept a personal access token format", () => {
       // Given
+      const token = "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";
+
+      // When
+      const validated = validateToken(token);
+
+      // Then
+      expect(token).toEqual(validated);
+    });
+
+    it("should accept an old personal access token format", () => {
+      // Given
       const token = "1bfb713d900c4962586ec615260b3902438b1d3c";
 
       // When
