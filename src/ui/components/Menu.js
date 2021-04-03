@@ -56,6 +56,13 @@ const createMenu = (
               onClick={onMenuClick}
               sidebarIsOpen={open}
             />
+            <MenuItemLink
+              to="/weight-config"
+              primaryText="Configure Weights"
+              leftIcon={<ExplorerIcon />}
+              onClick={onMenuClick}
+              sidebarIsOpen={open}
+            />
           </>
         )}
       </>

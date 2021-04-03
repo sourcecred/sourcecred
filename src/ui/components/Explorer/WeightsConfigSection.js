@@ -1,10 +1,8 @@
 // @flow
 import React, {type Node as ReactNode} from "react";
-import {Grid, Slider} from "@material-ui/core";
+import {Grid} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {format} from "d3-format";
 import {type PluginDeclarations} from "../../../analysis/pluginDeclaration";
-import {type TimelineCredParameters} from "../../../analysis/timeline/params";
 import {type WeightsT} from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
@@ -14,9 +12,6 @@ export type WeightConfigSectionProps = {|
   pluginDeclarations: PluginDeclarations,
   weights: WeightsT,
   setWeightsState: ({weights: WeightsT}) => void,
-  //TODO: change to use MarkovProcessGraph params instead
-  params: TimelineCredParameters,
-  setParams: (TimelineCredParameters) => void,
 |};
 
 const useStyles = makeStyles(() => ({
@@ -30,8 +25,6 @@ const WeightsConfigSection = ({
   pluginDeclarations,
   weights,
   setWeightsState,
-  params,
-  setParams,
 }: WeightConfigSectionProps): ReactNode => {
   if (!show) return [];
 
@@ -42,7 +35,13 @@ const WeightsConfigSection = ({
       <Grid container className={classes.weightConfig} spacing={2}>
         <Grid container item xs={12} direction="column">
           <Grid>
-            <Grid>Upload/Download weights:</Grid>
+            <Grid>
+              This page is not yet integrated with the rest of the site. If you
+              have an existing weights.json file, upload it here. Once you are
+              done configuring weights, download the file and put it in your
+              /config directory in your instance as weights.json. To see new
+              scores, re-calculate scores using the CLI.
+            </Grid>
             <Grid>
               <WeightsFileManager
                 weights={weights}
@@ -51,25 +50,6 @@ const WeightsConfigSection = ({
                 }}
               />
             </Grid>
-          </Grid>
-          <Grid container item spacing={2} alignItems="center">
-            <Grid>α</Grid>
-            <Grid item xs={2}>
-              <Slider
-                value={params.alpha}
-                min={0.05}
-                max={0.95}
-                step={0.05}
-                valueLabelDisplay="auto"
-                onChange={(_, val) => {
-                  setParams({
-                    ...params,
-                    alpha: val,
-                  });
-                }}
-              />
-            </Grid>
-            <Grid>{format(".2f")(params.alpha)}</Grid>
           </Grid>
         </Grid>
         <Grid spacing={2} container item xs={12} style={{display: "flex"}}>

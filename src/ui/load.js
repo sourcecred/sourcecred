@@ -16,12 +16,14 @@ import * as Combo from "../util/combo";
 import {OriginStorage} from "../core/storage/originStorage";
 import {ZipStorage} from "../core/storage/zip";
 import {loadJson, loadJsonWithDefault} from "../util/storage";
+import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import {upgradeRawInstanceConfig} from "../api/bundledDeclarations";
 
 export type LoadResult = LoadSuccess | LoadFailure;
 export type LoadSuccess = {|
   +type: "SUCCESS",
   +ledgerManager: LedgerManager,
-  +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
+  +bundledPlugins: $ReadOnlyMap<pluginId.PluginId, PluginDeclaration>,
   +hasBackend: boolean,
   +currency: CurrencyDetails,
   +credGraph: CredGraph | null,
@@ -65,7 +67,7 @@ export async function load(): Promise<LoadResult> {
   ];
   try {
     const [
-      {bundledPlugins},
+      rawInstanceConfig,
       {hasBackend},
       currency,
       credGraph,
@@ -78,6 +80,7 @@ export async function load(): Promise<LoadResult> {
         error: `Error processing ledger events: ${ledgerResult.error}`,
       };
     }
+    const bundledPlugins = upgradeRawInstanceConfig(rawInstanceConfig);
     return {
       type: "SUCCESS",
       bundledPlugins,
