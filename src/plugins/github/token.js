@@ -13,15 +13,16 @@ export opaque type GithubToken: string = string;
  * https://developer.github.com/v3/apps/#create-a-new-installation-token
  */
 export function validateToken(token: string): GithubToken {
-  const personalAccessTokenRE = /^[A-Fa-f0-9]{40}$/;
-  if (personalAccessTokenRE.test(token)) {
+  const accessTokenRE = /^gh[pousr]_[A-Za-z0-9_]*$/;
+  const oldAccessTokenRE = /^[A-Fa-f0-9]{40}$/;
+  if (accessTokenRE.test(token) || oldAccessTokenRE.test(token)) {
     return token;
   }
 
   // We're currently being lenient with installation tokens, since we're not completely
   // sure on the exact format. We're only warning on unexpected values but leave it up
   // to the GitHub API to reject the token if it's actually invalid.
-  const installationAccessTokenRE = /^(v\d+)\.([A-Fa-f0-9]+)$/;
+  const installationAccessTokenRE = /^(v\d+)\.([A-Za-z0-9_]+)$/;
   const matches = installationAccessTokenRE.exec(token);
   if (matches != null) {
     const [_, version, hexCode] = matches;
