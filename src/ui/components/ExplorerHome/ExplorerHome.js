@@ -6,6 +6,7 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
+  Hidden,
   Paper,
   Tab,
   Tabs,
@@ -608,7 +609,9 @@ export const ExplorerHome = ({
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <b>Contributions Chart (ALL TIME)</b>
+                    <Hidden xsDown>
+                      <b>Contributions Chart (ALL TIME)</b>
+                    </Hidden>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -630,15 +633,17 @@ export const ExplorerHome = ({
                         {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
                       <TableCell className={classes.timelineCell} align="right">
-                        <ExplorerTimeline
-                          timelines={{
-                            cred:
-                              allTimeContributionCharts[
-                                String(row.identity.id)
-                              ],
-                          }}
-                          responsive={true}
-                        />
+                        <Hidden xsDown>
+                          <ExplorerTimeline
+                            timelines={{
+                              cred:
+                                allTimeContributionCharts[
+                                  String(row.identity.id)
+                                ],
+                            }}
+                            responsive={true}
+                          />
+                        </Hidden>
                       </TableCell>
                     </TableRow>
                   ))
@@ -695,7 +700,7 @@ export const ExplorerHome = ({
                       )}
                     </b>
                   </TableCell>
-                  <TableCell align="right" />
+                  <TableCell />
                 </TableRow>
               </TableBody>
               <TableFooter>
