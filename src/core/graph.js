@@ -265,7 +265,6 @@ export class Graph {
         "Invariant violation: expected modification count in the future"
       );
     }
-    this._maybeCheckInvariants();
   }
 
   _markModification() {
