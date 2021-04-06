@@ -235,7 +235,11 @@ type ExplorerHomeProps = {|
 
 export const ExplorerHome = ({
   initialView,
-  currency: {suffix: currencySuffix, name: currencyName},
+  currency: {
+    name: currencyName,
+    suffix: currencySuffix,
+    decimals: decimalsToDisplay,
+  },
 }: ExplorerHomeProps): ReactNode => {
   if (!initialView)
     return (
@@ -623,7 +627,11 @@ export const ExplorerHome = ({
                         {Math.round(row.cred).toLocaleString()}
                       </TableCell>
                       <TableCell className={classes.labelGrain}>
-                        {format(row.grainEarned, 2, currencySuffix)}
+                        {format(
+                          row.grainEarned,
+                          decimalsToDisplay,
+                          currencySuffix
+                        )}
                       </TableCell>
                       <TableCell align="right">
                         <ExplorerTimeline

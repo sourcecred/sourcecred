@@ -26,7 +26,11 @@ const useStyles = makeStyles(() => {
 });
 
 export const AccountOverview = ({
-  currency: {name: currencyName, suffix: currencySuffix},
+  currency: {
+    name: currencyName,
+    suffix: currencySuffix,
+    decimals: decimalsToDisplay,
+  },
 }: OverviewProps): ReactNode => {
   const {ledger} = useLedger();
   const classes = useStyles();
@@ -59,7 +63,9 @@ export const AccountOverview = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedAccounts.map((a) => AccountRow(a, currencySuffix))}
+            {sortedAccounts.map((a) =>
+              AccountRow(a, currencySuffix, decimalsToDisplay)
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -68,13 +74,17 @@ export const AccountOverview = ({
   );
 };
 
-const AccountRow = (account: Account, suffix: string) => (
+const AccountRow = (account: Account, suffix: string, decimals: number) => (
   <TableRow key={account.identity.id}>
     <TableCell component="th" scope="row">
       {account.identity.name}
     </TableCell>
     <TableCell align="right">{account.active ? "✅" : "🛑"}</TableCell>
-    <TableCell align="right">{G.format(account.balance, 2, suffix)}</TableCell>
-    <TableCell align="right">{G.format(account.paid, 2, suffix)}</TableCell>
+    <TableCell align="right">
+      {G.format(account.balance, decimals, suffix)}
+    </TableCell>
+    <TableCell align="right">
+      {G.format(account.paid, decimals, suffix)}
+    </TableCell>
   </TableRow>
 );
