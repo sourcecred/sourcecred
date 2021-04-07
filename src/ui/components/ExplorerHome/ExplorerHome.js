@@ -6,7 +6,6 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
-  Hidden,
   Paper,
   Tab,
   Tabs,
@@ -23,6 +22,7 @@ import {
 import {makeStyles} from "@material-ui/core/styles";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import grey from "@material-ui/core/colors/grey";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 import deepFreeze from "deep-freeze";
 import bigInt from "big-integer";
 import {CredGrainView} from "../../../core/credGrainView";
@@ -127,7 +127,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.orange,
   },
   tab: {
-    minWidth: "100px !important",
+    minWidth: "100px",
   },
   labelCred: {
     color: theme.palette.blueish,
@@ -254,6 +254,7 @@ export const ExplorerHome = ({
     );
 
   const classes = useStyles();
+  const showTableChart = useMediaQuery("(min-width:740px)");
   // default view is Last Week's Activity (array index 1)
   const [tab, setTab] = useState<number>(1);
   const [selectedInterval, setSelectedInterval] = useState<Interval>(
@@ -609,9 +610,7 @@ export const ExplorerHome = ({
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <Hidden xsDown>
-                      <b>Contributions Chart (ALL TIME)</b>
-                    </Hidden>
+                    {showTableChart && <b>Contributions Chart (ALL TIME)</b>}
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -633,7 +632,7 @@ export const ExplorerHome = ({
                         {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
                       <TableCell className={classes.timelineCell} align="right">
-                        <Hidden xsDown>
+                        {showTableChart && (
                           <ExplorerTimeline
                             timelines={{
                               cred:
@@ -643,7 +642,7 @@ export const ExplorerHome = ({
                             }}
                             responsive={true}
                           />
-                        </Hidden>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
