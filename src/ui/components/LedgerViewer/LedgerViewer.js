@@ -66,7 +66,7 @@ const DATE_SORT = deepFreeze({
 const PAGINATION_OPTIONS = deepFreeze([25, 50, 100]);
 
 export const LedgerViewer = ({
-  currency: {suffix: currencySuffix},
+  currency: {suffix: currencySuffix, decimals: decimalsToDisplay},
 }: {
   currency: CurrencyDetails,
 }): ReactNode => {
@@ -139,6 +139,7 @@ export const LedgerViewer = ({
               allocation={allocation}
               ledger={ledger}
               currencySuffix={currencySuffix}
+              decimalsToDisplay={decimalsToDisplay}
             />
           </DialogContent>
         </Dialog>

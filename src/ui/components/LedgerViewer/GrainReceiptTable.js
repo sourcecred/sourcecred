@@ -17,6 +17,7 @@ type GrainReceiptTableProps = {|
   +allocation: Allocation | null,
   +ledger: Ledger,
   +currencySuffix: string,
+  +decimalsToDisplay: number,
 |};
 
 type GrainTable = (GrainReceiptTableProps) => ReactNode;
@@ -45,7 +46,7 @@ const GrainReceiptTable = (props: GrainReceiptTableProps) => {
                     />
                   </TableCell>
                   <TableCell align="right">
-                    {G.format(r.amount, 4, props.currencySuffix)}
+                    {G.format(r.amount, props.decimalsToDisplay, props.currencySuffix)}
                   </TableCell>
                 </TableRow>
               );
