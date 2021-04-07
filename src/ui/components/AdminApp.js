@@ -104,11 +104,14 @@ const customRoutes = (
     weights: emptyWeights(),
   });
   const routes = [
-    <Route key="explorer-home" exact path="/explorer-home">
+    <Route key="explorer" exact path="/explorer">
       <ExplorerHome initialView={credGrainView} currency={currency} />
     </Route>,
     <Route key="root" exact path="/">
-      <Redirect to={credGrainView ? "/explorer-home" : "/accounts"} />
+      <Redirect to={credGrainView ? "/explorer" : "/accounts"} />
+    </Route>,
+    <Route key="explorer-home" exact path="/explorer-home">
+      <Redirect to={"/explorer"} />
     </Route>,
     <Route key="accounts" exact path="/accounts">
       <AccountOverview currency={currency} />
