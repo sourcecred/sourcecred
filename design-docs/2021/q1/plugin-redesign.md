@@ -120,18 +120,17 @@ not modifiable from within an instance. Within an instance, plugins are
 specified as active via the root [sourcecred.json] file by the instance
 maintainer.
 
-[bundledplugins.js]: https://github.com/sourcecred/sourcecred/blob/3e77f40a2335c597d18f192e36e756f6c452fc7b/src/api/bundledPlugins.js
 [sourcecred.json]: https://github.com/sourcecred/cred/blob/887584b602eee1ad8e68d88b2733070d1d6732fa/sourcecred.json
 
 ### Data Model
 
 [bundledPlugins.js] may serve as the integration point between core code and
-plugin code, but it is also effectively a white-list. By moving this integration
-point into the scope of the instance, users will be able to import conformant
-plugins that export the correct API. This will necessitate bundling plugins as
-distinct npm packages. Additionally, the function of [bundledPlugins.js] and
-[sourcecred.json] can be merged into a `sourcecred.js` instance configuration
-file.
+plugin code, but it is also effectively an allow-list. By moving this
+integration point into the scope of the instance, users will be able to import
+conformant plugins that export the correct API. This will necessitate bundling
+plugins as distinct npm packages. Additionally, the function of
+[bundledPlugins.js] and [sourcecred.json] can be merged into a `sourcecred.js`
+instance configuration file.
 
 This configuration file is where instance maintainers would import plugins from
 `node_modules` and pass the `Plugin` implementations into and exported config
@@ -139,20 +138,13 @@ file. This is similar to how webpack.config.js files are created.
 
 #### sourcecred.js config file specification
 
-sourcecred.js should export an object containing dictionary mappings from a
-string (aliased as a `PluginName`) to a plugin instantiation.
+The `sourcecred.js` file should export an array of plugin instantiations. This
+should be a named export, so as not to preclude any potential future exports
+or configurations in this file.
 
-In code, this file would import like
+[bundledplugins.js]: https://github.com/sourcecred/sourcecred/blob/3e77f40a2335c597d18f192e36e756f6c452fc7b/src/api/bundledPlugins.js
 
-```javascript
-// @flow
-import activePlugins from "./sourcecred.js";
-
-const pluginNames = activePlugins.keys();
-const plugins = activePlugins.values();
-```
-
-#### Example config file
+##### Example config file
 
 The [Plugin] interface contains all functionality and metadata needed, so that
 interface does not need to change. The plugin.js file just needs to be exported
@@ -160,7 +152,7 @@ interface does not need to change. The plugin.js file just needs to be exported
 
 [plugin]: https://github.com/sourcecred/sourcecred/blob/7cee24d8d5fefa80c0d3b885d3741d301ae4fe45/src/api/plugin.js
 
-##### sourcecred.js
+###### sourcecred.js
 
 ```javascript
 // @flow
@@ -170,22 +162,48 @@ const GithubPlugin = require("@sourcecred/plugin-github");
 const DiscoursePlugin = require("@sourcecred/plugin-discourse");
 const PropsPlugin = require("@sourcecred/plugin-props");
 
-type PluginName = string;
-
 const discourse = new DiscoursePlugin();
 const github = new GithubPlugin();
 const props = new PropsPlugin();
 const discord = new DiscordPlugin();
 
-const enabledPlugins: {[PluginName]: Plugin} = {
+const enabledPlugins: $ReadOnlyArray<Plugin> = [
   discourse,
   github,
   props,
   discord,
-};
+];
 
-export default enabledPlugins;
+export enabledPlugins;
 ```
+
+#### Coexistence With Existing Plugins
+
+Currently there is no need to deprecate the builtin plugins. These plugins are
+easier to get started with, but as a community grows, this new plugin
+model will serve as an option for larger, more active communities with the
+capability and need to maintain this type of model. The increase in maintenance
+demands need not be significant if Github is utilized as the
+`DataArchive` and continues to serve as the execution context for `Fetcher`
+code.
+
+As the builtin plugins are ported to the new architecture, deprecation may be
+revisted, but it will be possible to utilize builtin and external plugins
+together in the same intance.
+
+#### Integration with SourceCred Core
+
+As with the existing `sourcecred.json` file, The `sourcecred.js` file will
+canonically be in the root of each intance. Similarly to how the CLI loads
+the existing json file, the file will be loaded by CLI commands, and can be
+imported like any other Javascript file, though it'd probably behoove us
+to make this file optional at first, and add more helpful error dialogs,
+since this will be a user-facing interface.
+
+Once the plugins are successfully imported from `sourcecred.js`, they are
+extrinsically identitical to the builtin plugins, and can therefore can
+be added to the existing plugin queue constructed from the contents of
+`sourcecred.json`.
 
 ## Internal Plugin Architecture
 
