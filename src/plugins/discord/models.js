@@ -20,7 +20,8 @@ export type ChannelType =
   | "GROUP_DM"
   | "GUILD_CATEGORY"
   | "GUILD_NEWS"
-  | "GUILD_STORE";
+  | "GUILD_STORE"
+  | "UNKNOWN";
 
 export function channelTypeFromId(id: number): ChannelType {
   switch (id) {
@@ -39,7 +40,7 @@ export function channelTypeFromId(id: number): ChannelType {
     case 6:
       return "GUILD_STORE";
     default: {
-      throw new Error(`Unknown channel type ID: ${id}`);
+      return "UNKNOWN";
     }
   }
 }
