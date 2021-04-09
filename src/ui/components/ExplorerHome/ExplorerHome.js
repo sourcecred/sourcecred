@@ -22,6 +22,7 @@ import {
 import {makeStyles} from "@material-ui/core/styles";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import grey from "@material-ui/core/colors/grey";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 import deepFreeze from "deep-freeze";
 import bigInt from "big-integer";
 import {CredGrainView} from "../../../core/credGrainView";
@@ -45,9 +46,6 @@ import {formatTimestamp} from "../../utils/dateHelpers";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
-    minWidth: "1100px",
-    margin: "0 auto",
-    padding: "0 5em 5em",
   },
   arrowBody: {
     color: theme.palette.text.primary,
@@ -95,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
     height: "150px",
   },
   barChartWrapper: {flexGrow: 1, flexBasis: 0, margin: "20px"},
-  tableWrapper: {flexGrow: 0, flexBasis: 0, margin: "20px auto"},
+  tableWrapper: {flexGrow: 1, flexBasis: 0, margin: "20px 0 0"},
   checklabel: {
     margin: "5px",
   },
@@ -128,11 +126,19 @@ const useStyles = makeStyles((theme) => ({
   [`label-${IdentityTypes.ORGANIZATION}`]: {
     color: theme.palette.orange,
   },
+  tab: {
+    minWidth: "100px",
+  },
   labelCred: {
     color: theme.palette.blueish,
   },
   labelGrain: {
     color: theme.palette.darkOrange,
+  },
+  timelineCell: {
+    [theme.breakpoints.up("md")]: {
+      minWidth: "300px",
+    },
   },
   rowAverage: {
     fontStyle: "italic",
@@ -248,6 +254,7 @@ export const ExplorerHome = ({
     );
 
   const classes = useStyles();
+  const showTableChart = useMediaQuery("(min-width:740px)");
   // default view is Last Week's Activity (array index 1)
   const [tab, setTab] = useState<number>(1);
   const [selectedInterval, setSelectedInterval] = useState<Interval>(
@@ -519,7 +526,7 @@ export const ExplorerHome = ({
           onChange={(_, val) => updateTimeframe(val)}
         >
           {TIMEFRAME_OPTIONS.map(({tabLabel}) => (
-            <Tab key={tabLabel} label={tabLabel} />
+            <Tab key={tabLabel} label={tabLabel} className={classes.tab} />
           ))}
         </Tabs>
       </div>
@@ -535,15 +542,14 @@ export const ExplorerHome = ({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: "20px",
             }}
           >
-            <span style={{fontSize: "1.5rem"}}>
+            <h2 style={{fontSize: "24px"}}>
               {TIMEFRAME_OPTIONS[tab].tableLabel}
-            </span>
-            <span style={{fontSize: "1rem"}}>
-              {formatInterval(selectedInterval)}
-            </span>
+              <span style={{fontSize: "16px", paddingLeft: "20px"}}>
+                {formatInterval(selectedInterval)}
+              </span>
+            </h2>
             <TextField
               label="Filter Names"
               variant="outlined"
@@ -604,7 +610,7 @@ export const ExplorerHome = ({
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <b>Contributions Chart (ALL TIME)</b>
+                    {showTableChart && <b>Contributions Chart (ALL TIME)</b>}
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -625,15 +631,18 @@ export const ExplorerHome = ({
                       <TableCell className={classes.labelGrain}>
                         {format(row.grainEarned, 2, currencySuffix)}
                       </TableCell>
-                      <TableCell align="right">
-                        <ExplorerTimeline
-                          timelines={{
-                            cred:
-                              allTimeContributionCharts[
-                                String(row.identity.id)
-                              ],
-                          }}
-                        />
+                      <TableCell className={classes.timelineCell} align="right">
+                        {showTableChart && (
+                          <ExplorerTimeline
+                            timelines={{
+                              cred:
+                                allTimeContributionCharts[
+                                  String(row.identity.id)
+                                ],
+                            }}
+                            responsive={true}
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
@@ -690,7 +699,7 @@ export const ExplorerHome = ({
                       )}
                     </b>
                   </TableCell>
-                  <TableCell align="right" />
+                  <TableCell />
                 </TableRow>
               </TableBody>
               <TableFooter>
