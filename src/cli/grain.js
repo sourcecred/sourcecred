@@ -14,24 +14,34 @@ function die(std, message) {
   return 1;
 }
 
-/**
- * The grain command is soon to be deprecated, as part of a transition
- * to @blueridger's `CredGrainView`.  This original grain command uses
- * `CredView`, which will be deprecated.
- *
- * grain2 forks this command and eliminates the dependence on `CredView`
- */
 const grainCommand: Command = async (args, std) => {
   let simulation = false;
-  if (args.length === 1 && (args[0] === "--simulation" || args[0] === "-s")) {
-    simulation = true;
-  } else if (args.length !== 0) {
-    return die(std, "usage: sourcecred grain [--simulation]");
+  let allowLastDistributionOverwrite = false;
+  const processedArgs = args.filter((arg) => {
+    switch (arg) {
+      case "-f":
+      case "--force":
+        allowLastDistributionOverwrite = true;
+        return false;
+      case "-s":
+      case "--simulation":
+        simulation = true;
+        return false;
+      default:
+        return true;
+    }
+  });
+  if (processedArgs.length) {
+    return die(
+      std,
+      "usage: sourcecred grain [--simulation | -s] [--force | -f]"
+    );
   }
 
   const baseDir = process.cwd();
   const instance: Instance = new LocalInstance(baseDir);
   const grainInput = await instance.readGrainInput();
+  grainInput.allowLastDistributionOverwrite = allowLastDistributionOverwrite;
 
   const {distributions, ledger} = await grain(grainInput);
 
@@ -71,13 +81,16 @@ const grainCommand: Command = async (args, std) => {
 export const grainHelp: Command = async (args, std) => {
   std.out(
     dedent`\
-      usage: sourcecred grain [--simulation || -s]
+      usage: sourcecred grain [--simulation | -s] [--force | -f]
 
       Distribute Grain (or whatever currency this Cred instance is tracking)
       for Cred intervals in which Grain was not already distributed.
 
       When the '--simulation' (-s) flag is provided, no grain will actually be distributed,
       allowing for testing the output of various configurations.
+
+      When the '--force' (-f) flas is provided, it will overwrite the last distribution
+      if a distribution already exists for the past interval.
 
       When run, this will identify all the completed Cred intervals (currently, weeks)
       and find the latest Cred interval for which there was no Grain distribution.
