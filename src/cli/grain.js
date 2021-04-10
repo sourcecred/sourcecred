@@ -16,12 +16,12 @@ function die(std, message) {
 
 const grainCommand: Command = async (args, std) => {
   let simulation = false;
-  let allowLastDistributionOverwrite = false;
+  let allowMultipleDistributionsPerInterval = false;
   const processedArgs = args.filter((arg) => {
     switch (arg) {
       case "-f":
       case "--force":
-        allowLastDistributionOverwrite = true;
+        allowMultipleDistributionsPerInterval = true;
         return false;
       case "-s":
       case "--simulation":
@@ -41,7 +41,7 @@ const grainCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const instance: Instance = new LocalInstance(baseDir);
   const grainInput = await instance.readGrainInput();
-  grainInput.allowLastDistributionOverwrite = allowLastDistributionOverwrite;
+  grainInput.allowMultipleDistributionsPerInterval = allowMultipleDistributionsPerInterval;
 
   const {distributions, ledger} = await grain(grainInput);
 

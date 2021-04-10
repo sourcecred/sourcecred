@@ -42,14 +42,16 @@ export function applyDistributions(
   policy: DistributionPolicy,
   credGraph: CredGraph,
   ledger: Ledger,
-  currentTimestamp: TimestampMs
+  currentTimestamp: TimestampMs,
+  allowMultipleDistributionsPerInterval: boolean
 ): $ReadOnlyArray<Distribution> {
   const credIntervals = credGraph.intervals();
   const distributionIntervals = _chooseDistributionIntervals(
     credIntervals,
     ledger.lastDistributionTimestamp(),
     currentTimestamp,
-    policy.maxSimultaneousDistributions
+    policy.maxSimultaneousDistributions,
+    allowMultipleDistributionsPerInterval
   );
   return distributionIntervals.map((interval) => {
     // Recompute for every endpoint because the Ledger will be in a different state
@@ -69,7 +71,8 @@ export function _chooseDistributionIntervals(
   credIntervals: IntervalSequence,
   lastDistributionTimestamp: TimestampMs,
   currentTimestamp: TimestampMs,
-  maxSimultaneousDistributions: number
+  maxSimultaneousDistributions: number,
+  allowMultipleDistributionsPerInterval: boolean
 ): IntervalSequence {
   // Slice off the final interval--we may assume that it is not yet finished.
   const completeIntervals = credIntervals.filter(
@@ -82,5 +85,9 @@ export function _chooseDistributionIntervals(
     undistributedIntervals.length - maxSimultaneousDistributions,
     undistributedIntervals.length
   );
+  if (allowMultipleDistributionsPerInterval && !sequence.length)
+    return intervalSequence(
+      completeIntervals.slice(completeIntervals.length - 1)
+    );
   return intervalSequence(sequence);
 }
