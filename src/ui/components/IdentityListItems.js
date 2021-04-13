@@ -1,24 +1,34 @@
 // @flow
 import React, {type Node as ReactNode} from "react";
-import {Divider, ListItem} from "@material-ui/core";
-import {type Identity} from "../../core/identity";
+import {Divider, ListItem, ListItemText, Checkbox} from "@material-ui/core";
+import {type Identity, type IdentityId} from "../../core/identity";
+import {type Account} from "../../core/ledger/ledger";
 
 type IdentityListItemsProps = {
-  +identities: $ReadOnlyArray<Identity>,
-  +onClick: Function,
+  +accounts: $ReadOnlyArray<Account>,
+  +onClick: (Identity) => void,
+  +onCheckbox: (IdentityId) => void,
 };
 
 export const IdentityListItems = ({
-  identities,
+  accounts,
   onClick,
+  onCheckbox,
 }: IdentityListItemsProps): ReactNode => {
-  const lastIndex = identities.length - 1;
+  const lastIndex = accounts.length - 1;
 
   if (lastIndex > -1) {
-    return identities.map((identity, index) => (
-      <React.Fragment key={identity.id}>
-        <ListItem button onClick={() => onClick(identity)}>
-          {identity.name}
+    return accounts.map((account, index) => (
+      <React.Fragment key={account.identity.id}>
+        <ListItem button onClick={() => onClick(account.identity)}>
+          <ListItemText primary={account.identity.name} />
+          <Checkbox
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => onCheckbox(account.identity.id)}
+            checked={account.active}
+            name="active"
+            color="primary"
+          />
         </ListItem>
         {index < lastIndex && <Divider />}
       </React.Fragment>
