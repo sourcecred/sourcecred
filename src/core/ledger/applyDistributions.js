@@ -47,7 +47,9 @@ export function applyDistributions(
   const credIntervals = credGraph.intervals();
   const distributionIntervals = _chooseDistributionIntervals(
     credIntervals,
-    ledger.lastDistributionTimestamp(),
+    // Distributions after -Infinity are all the current
+    // distributions
+    ledger.lastDistributionTimestamp() || -Infinity,
     currentTimestamp,
     policy.maxSimultaneousDistributions
   );
