@@ -46,7 +46,11 @@ const GrainReceiptTable = (props: GrainReceiptTableProps) => {
                     />
                   </TableCell>
                   <TableCell align="right">
-                    {G.format(r.amount, props.decimalsToDisplay, props.currencySuffix)}
+                    {G.format(
+                      r.amount,
+                      props.decimalsToDisplay,
+                      props.currencySuffix
+                    )}
                   </TableCell>
                 </TableRow>
               );
