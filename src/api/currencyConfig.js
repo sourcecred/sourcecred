@@ -32,6 +32,12 @@ export const DEFAULT_DECIMALS = 2;
  * detail values after parsing the serialized file.
  */
 function upgrade(c: SerializedCurrencyDetails): CurrencyDetails {
+  if (
+    typeof c.decimalsToDisplay === "number" &&
+    (c.decimalsToDisplay > 18 || c.decimalsToDisplay < 0)
+  )
+    throw new Error("currencyConfig: decimalsToDisplay must be between 0-18");
+
   return {
     name: NullUtil.orElse(c.currencyName, DEFAULT_NAME),
     suffix: NullUtil.orElse(c.currencySuffix, DEFAULT_SUFFIX),
