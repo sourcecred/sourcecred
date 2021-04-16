@@ -1,6 +1,7 @@
 // @flow
 
 import {type TimestampMs} from "../../util/timestamp";
+import * as NullUtil from "../../util/null";
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {Ledger} from "./ledger";
 import {type AllocationPolicy} from "./policies";
@@ -49,7 +50,7 @@ export function applyDistributions(
     credIntervals,
     // Distributions after -Infinity are all the current
     // distributions
-    ledger.lastDistributionTimestamp() || -Infinity,
+    NullUtil.orElse(ledger.lastDistributionTimestamp(), -Infinity),
     currentTimestamp,
     policy.maxSimultaneousDistributions
   );
