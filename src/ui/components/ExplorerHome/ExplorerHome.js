@@ -36,6 +36,8 @@ import {
   add,
   divideFloat,
   fromInteger,
+  toFloatRatio,
+  ONE,
 } from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
@@ -341,6 +343,18 @@ export const ExplorerHome = ({
     [grainTotalsTimeline]
   );
 
+  const formatLongNumbers = (number, p) => {
+    return number <= Math.pow(10, p)
+      ? parseFloat(number.toPrecision(p)).toLocaleString(undefined, {
+          maximumSignificantDigits: p,
+        })
+      : number.toLocaleString(undefined, {
+          notation: "compact",
+        });
+  };
+
+  const grainThisPeriodAsNumber = toFloatRatio(totalGrainThisPeriod, ONE);
+
   const statCircleInfo = [
     {
       title: `Cred ${TIMEFRAME_OPTIONS[tab].tabLabel}`,
@@ -349,7 +363,7 @@ export const ExplorerHome = ({
     },
     {
       title: `${currencyName}`,
-      value: format(totalGrainThisPeriod, 0, currencySuffix),
+      value: formatLongNumbers(grainThisPeriodAsNumber, 5) + currencySuffix,
       className: classes.grainCircle,
     },
   ];
