@@ -958,6 +958,7 @@ function virtualizedMarkovEdge(
         personalAttributionAddress.fromParticipantId,
         personalAttributionAddress.toParticipantId
       ) || 0;
+    if (proportionValue === 0) return null;
     return personalAttributionGadget.markovEdge(
       personalAttributionGadget.fromRaw(address),
       parameters.beta * proportionValue

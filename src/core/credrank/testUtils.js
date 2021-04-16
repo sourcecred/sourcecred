@@ -26,7 +26,7 @@ import * as uuid from "../../util/uuid"; // for spy purposes
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {markovProcessGraphPagerank} from "./compute";
 import {CredGraph, type Participant} from "./credGraph";
-
+import {type PersonalAttributions} from "./personalAttribution";
 /**
  * This module contains test helpers for working with CredRank data,
  * specifically MarkovProcessGraphs and CredGraphs
@@ -158,15 +158,43 @@ export const weightedGraph: () => WeightedGraph = () => ({
   weights: weights(),
   graph: graph(),
 });
-export const args: () => MarkovProcessGraphArguments = () => ({
+export const args = (
+  personalAttributions?: PersonalAttributions = []
+): MarkovProcessGraphArguments => ({
   weightedGraph: weightedGraph(),
   parameters,
   intervals,
   participants: [participant1, participant2],
-  personalAttributions: [],
+  personalAttributions,
 });
-export const markovProcessGraph: () => MarkovProcessGraph = () =>
-  MarkovProcessGraph.new(args());
+const attribution1 = {
+  fromParticipantId: participant1.id,
+  recipients: [
+    {
+      toParticipantId: participant2.id,
+      proportions: [
+        {timestampMs: -2, proportionValue: 0.2},
+        {timestampMs: -1, proportionValue: 0.1},
+        {timestampMs: 0, proportionValue: 0.5},
+      ],
+    },
+  ],
+};
+
+const attribution2 = {
+  fromParticipantId: participant2.id,
+  recipients: [
+    {
+      toParticipantId: participant1.id,
+      proportions: [{timestampMs: 2, proportionValue: 0.3}],
+    },
+  ],
+};
+export const attributions: PersonalAttributions = [attribution1, attribution2];
+
+export const markovProcessGraph = (
+  attributions?: PersonalAttributions = []
+): MarkovProcessGraph => MarkovProcessGraph.new(args(attributions));
 
 export const credGraph: () => Promise<CredGraph> = async () =>
   markovProcessGraphPagerank(markovProcessGraph());
