@@ -2,7 +2,6 @@
 
 import {type IdentityProposal} from "../../core/ledger/identityProposal";
 import {coerce, nameFromString} from "../../core/identity/name";
-import {JsonLog} from "../../util/jsonLog";
 import {type EthAddress} from "./ethAddress";
 import {nodeAddressForEthAddress} from "./ethAddressNode";
 
@@ -21,7 +20,7 @@ export function createIdentity(address: EthAddress): IdentityProposal {
 }
 
 export function createIdentities(
-  ethAddresses: JsonLog<EthAddress>
+  ethAddresses: $ReadOnlyArray<EthAddress>
 ): $ReadOnlyArray<IdentityProposal> {
-  return Array.from(ethAddresses.values()).map(createIdentity);
+  return ethAddresses.map(createIdentity);
 }

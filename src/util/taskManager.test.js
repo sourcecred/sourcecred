@@ -15,7 +15,7 @@ describe("util/taskManager", () => {
     start(task: string): TaskManager {
       return this.taskManager.start(task);
     }
-    finish(task: string) {
+    finish(task: string): TestCase {
       this.taskManager.finish(task);
       return this;
     }

@@ -3377,7 +3377,9 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
 
-        const objects = {
+        type RawType = {|+typename: Schema.Typename, +id: Schema.ObjectId|};
+
+        const objects: {+[string]: () => RawType} = {
           repo: () => ({typename: "Repository", id: "repo:foo/bar"}),
           issue1: () => ({typename: "Issue", id: "issue:#1"}),
           issue2: () => ({typename: "Issue", id: "issue:#2"}),

@@ -26,7 +26,8 @@ export function fromObject<K, V, InK: K & string, InV: V>(object: {
   const result = new Map();
   const keys = (((Object.keys(object): string[]): any): InK[]);
   for (const key of keys) {
-    result.set(key, object[key]);
+    const val: InV = object[(key: any)];
+    result.set(key, val);
   }
   return result;
 }

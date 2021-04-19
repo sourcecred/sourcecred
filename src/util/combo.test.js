@@ -321,9 +321,9 @@ describe("src/util/combo", () => {
     it("is type-safe", () => {
       // $FlowExpectedError[incompatible-cast]
       (C.array(C.string): C.Parser<string>);
-      // $FlowExpectedError[incompatible-call]
+      // $FlowExpectedError[incompatible-cast]
       (C.array(C.string): C.Parser<number[]>);
-      // $FlowExpectedError[incompatible-call]
+      // $FlowExpectedError[incompatible-cast]
       (C.array(C.string): C.Parser<string[][]>);
     });
   });

@@ -29,7 +29,7 @@ declare class bettersqlite3$Database {
     name: string,
     options: bettersqlite3$Database$AggregateOptions<T>
   ): this;
-  loadExtension(path: strin, entryPoint?: string): this;
+  loadExtension(path: string, entryPoint?: string): this;
   exec(source: string): this;
   close(): this;
   defaultSafeIntegers(toggleState?: boolean): this;
@@ -127,7 +127,6 @@ declare class bettersqlite3$SqliteError extends Error {
 declare module "better-sqlite3" {
   declare export type Database = bettersqlite3$Database;
   declare export type Database$ConstructorOptions = bettersqlite3$Database$ConstructorOptions;
-  declare export type Database$RegisterOptions = bettersqlite3$Database$RegisterOptions;
   declare export type BoundValue = bettersqlite3$BoundValue;
   declare export type BindingDictionary = bettersqlite3$BindingDictionary;
   declare export type BoundParameter = bettersqlite3$BoundParameter;

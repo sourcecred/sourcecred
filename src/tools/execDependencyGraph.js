@@ -12,8 +12,8 @@ const {execFile} = require("child_process");
 export type TaskId = string;
 export type Task = {|
   +id: TaskId,
-  +cmd: $ReadOnlyArray<string>,
-  +deps: $ReadOnlyArray<TaskId>,
+  +cmd: Array<string>,
+  +deps: Array<TaskId>,
 |};
 
 export type TaskResult = {|

@@ -28,7 +28,8 @@ export async function fetchGithubOrg(
   const numRepos = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
   const b = Queries.build;
   const makePayload = (afterCursor: ?string) => {
-    const afterArg = afterCursor == null ? {} : {after: b.literal(afterCursor)};
+    const afterArg: $Shape<{|after: Queries.LiteralValue|}> =
+      afterCursor == null ? {} : {after: b.literal(afterCursor)};
     const args = {
       query: b.variable("searchQuery"),
       type: b.enumLiteral("REPOSITORY"),

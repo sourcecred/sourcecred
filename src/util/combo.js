@@ -367,7 +367,7 @@ export const object: PObject = (function object(
 
 // Create a parser for an object type all of whose fields are optional.
 // Shorthand for `object` with an empty first argument.
-export const shape: PObjectShape = function shape(fields) {
+export const shape: PObjectShape = function shape(fields: Fields) {
   return object({}, fields);
 };
 
