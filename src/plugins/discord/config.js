@@ -64,6 +64,8 @@ export type DiscordConfigJson = {|
   // We can set a higher weight on these props edges, which allows us to flow Cred in a props
   // mostly to the people receiving props, rather than to the author of the props message.
   +propsChannels?: $ReadOnlyArray<Model.Snowflake>,
+  // Whether to include NSFW channels in cred distribution or not
+  +includeNsfwChannels?: boolean,
 |};
 
 const parserJson: C.Parser<DiscordConfigJson> = C.object(
@@ -81,6 +83,7 @@ const parserJson: C.Parser<DiscordConfigJson> = C.object(
       weights: C.dict(C.number),
     }),
     propsChannels: C.array(C.string),
+    includeNsfwChannels: C.boolean,
   }
 );
 
@@ -88,6 +91,7 @@ export type DiscordConfig = {|
   +guildId: Model.Snowflake,
   +weights: WeightConfig,
   +propsChannels: $ReadOnlyArray<Model.Snowflake>,
+  +includeNsfwChannels: boolean,
 |};
 
 /**
@@ -115,6 +119,7 @@ export function _upgrade(json: DiscordConfigJson): DiscordConfig {
       },
     },
     propsChannels: json.propsChannels || [],
+    includeNsfwChannels: json.includeNsfwChannels || false,
   };
 }
 
