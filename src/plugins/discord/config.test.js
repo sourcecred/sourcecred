@@ -42,5 +42,6 @@ describe("plugins/discord/config", () => {
       weights: {},
       defaultWeight: 1,
     });
+    expect(parsed.includeNsfwChannels).toEqual(false);
   });
 });
