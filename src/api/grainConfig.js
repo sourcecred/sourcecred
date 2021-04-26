@@ -9,6 +9,7 @@ import {
 } from "../core/ledger/policies";
 import {fromInteger as toNonnegativeGrain} from "../core/ledger/nonnegativeGrain";
 import {toDiscount} from "../core/ledger/policies/recent";
+import {type Name, parser as nameParser} from "../core/identity/name";
 
 export type GrainConfig = {|
   +immediatePerWeek?: number, // (deprecated)
@@ -17,6 +18,7 @@ export type GrainConfig = {|
   +recentWeeklyDecayRate?: number, // (deprecated)
   +allocationPolicies?: $ReadOnlyArray<AllocationPolicy>,
   +maxSimultaneousDistributions?: number,
+  +sinkIdentity?: Name,
 |};
 
 export const parser: C.Parser<GrainConfig> = C.object(
@@ -28,6 +30,7 @@ export const parser: C.Parser<GrainConfig> = C.object(
     balancedPerWeek: C.number,
     recentPerWeek: C.number,
     recentWeeklyDecayRate: C.number,
+    sinkIdentity: nameParser,
   }
 );
 
