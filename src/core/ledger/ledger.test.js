@@ -1593,8 +1593,6 @@ describe("core/ledger/ledger", () => {
       }
     });
     it("lastDistributionTimestamp returns null if there have not been any distributions", () => {
-      // consider changing this behavior; see
-      // https://github.com/sourcecred/sourcecred/issues/2744
       const ledger = new Ledger();
       expect(ledger.lastDistributionTimestamp()).toEqual(null);
     });
