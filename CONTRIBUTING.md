@@ -334,3 +334,20 @@ it's too aggressive / extreme for most proposed changes.
 We formally request changes when there actually _is_ a reason to hard-block the
 PR until issues are addressed. Examples include PRs that introduce security
 vulnerabilites, or that break fundamental assumptions in the codebase.
+
+### SC Cultural Etiquette for PRs
+
+A few notes from our core contributors about our cultural etiquette for PRs.
+
+1. Assign one person - it can be random! - or choose someone you know will be a good
+   reviewer for the code you wrote. When too many people are assigned to a PR it can slow
+   down the review process.
+2. When reviewing PRs, feel free to say "reviewed" and additionally "needs more eyes" or
+   "approved but also needs another review before it's merged".
+3. Always feel free to communicate if you don't have capacity to be a reviewer so it can get
+   passed to someone who does have capacity.
+4. We at SourceCred have agreed to err on the side of being "annoying" to get PRs reviewed -
+   feel free to ping someone daily . We have agreed to be annoying rather than miss things.
+5. There is an auto-assigner - if someone is opting in to this then that is also permission
+   to _ping them daily_ until they do the thing or communicate that they are not available
+   for the thing.
