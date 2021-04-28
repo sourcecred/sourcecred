@@ -1,8 +1,5 @@
 // @flow
 
-import deepFreeze from "deep-freeze";
-import {type Uuid, parser as uuidParser} from "../../util/uuid";
-
 /**
  * Data structure representing a particular kind of Markov process, as
  * kind of a middle ground between the semantic SourceCred graph (in the
@@ -55,6 +52,8 @@ import {type Uuid, parser as uuidParser} from "../../util/uuid";
  * spectral analysis via the `toMarkovChain` method.
  */
 
+import deepFreeze from "deep-freeze";
+import {type Uuid, parser as uuidParser} from "../../util/uuid";
 import * as C from "../../util/combo";
 import sortedIndex from "lodash.sortedindex";
 import {
@@ -73,6 +72,11 @@ import * as MapUtil from "../../util/map";
 import type {TimestampMs} from "../../util/timestamp";
 import {type SparseMarkovChain} from "../algorithm/markovChain";
 import {type IntervalSequence, intervalSequence} from "../interval";
+import {
+  personalAttributionsParser,
+  type PersonalAttributions,
+  IndexedPersonalAttributions,
+} from "./personalAttribution";
 
 import {type MarkovNode, parser as markovNodeParser} from "./markovNode";
 
@@ -97,6 +101,7 @@ import {
   payoutGadget,
   forwardWebbingGadget,
   backwardWebbingGadget,
+  personalAttributionGadget,
 } from "./edgeGadgets";
 
 export type Participant = {|
@@ -121,6 +126,7 @@ export type Arguments = {|
   +participants: $ReadOnlyArray<Participant>,
   +intervals: IntervalSequence,
   +parameters: Parameters,
+  +personalAttributions: PersonalAttributions,
 |};
 
 export type Parameters = {|
@@ -171,6 +177,7 @@ export type MarkovProcessGraphJSON = {|
   // Array of [nodeIndex, transitionProbability] tuples representing all of the
   // connections from the seed node to nodes minting Cred.
   +indexedMints: $ReadOnlyArray<[number, number]>,
+  +personalAttributions: PersonalAttributions,
 |};
 
 export class MarkovProcessGraph {
@@ -184,6 +191,7 @@ export class MarkovProcessGraph {
   _radiationTransitionProbabilties: $ReadOnlyArray<number>;
   _nodeIndex: $ReadOnlyMap<NodeAddressT, number>;
   _edgeIndex: $ReadOnlyMap<MarkovEdgeAddressT, number>;
+  _indexedPersonalAttributions: IndexedPersonalAttributions;
 
   constructor(
     nodes: Map<NodeAddressT, MarkovNode>,
@@ -196,7 +204,8 @@ export class MarkovProcessGraph {
     // transition probability from the seed node). Must sum to about 1.
     mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
     // Transition probabilities for radiation edges, in node order
-    radiationTransitionProbabilities: $ReadOnlyArray<number>
+    radiationTransitionProbabilities: $ReadOnlyArray<number>,
+    indexedPersonalAttributions: IndexedPersonalAttributions
   ) {
     this._nodes = nodes;
     this._edges = edges;
@@ -219,14 +228,22 @@ export class MarkovProcessGraph {
           epochStarts,
           participants,
           mintTransitionProbabilities,
-          _nodeOrder(nodes, epochStarts, participants)
+          _nodeOrder(nodes, epochStarts, participants),
+          indexedPersonalAttributions
         ),
       ].map((a, i) => [a, i])
     );
+    this._indexedPersonalAttributions = indexedPersonalAttributions;
   }
 
   static new(args: Arguments): MarkovProcessGraph {
-    const {weightedGraph, participants, parameters, intervals} = args;
+    const {
+      weightedGraph,
+      participants,
+      parameters,
+      intervals,
+      personalAttributions,
+    } = args;
     const {alpha, beta, gammaForward, gammaBackward} = parameters;
     const _nodes = new Map();
     const _edges = new Map();
@@ -290,6 +307,11 @@ export class MarkovProcessGraph {
       }
       _nodeOutMasses.set(edge.src, (_nodeOutMasses.get(edge.src) || 0) + pr);
     };
+
+    const indexedPersonalAttributions = new IndexedPersonalAttributions(
+      personalAttributions,
+      epochStarts
+    );
 
     // Add graph nodes
     const nwe = nodeWeightEvaluator(weightedGraph.weights);
@@ -508,7 +530,8 @@ export class MarkovProcessGraph {
       lastEpochEndMs,
       parameters,
       mintTransitionProbabilities,
-      radiationTransitionProbabilities
+      radiationTransitionProbabilities,
+      indexedPersonalAttributions
     );
   }
 
@@ -601,7 +624,8 @@ export class MarkovProcessGraph {
       this._epochStarts,
       this._participants,
       this._mintTransitionProbabilties,
-      this.nodeOrder()
+      this.nodeOrder(),
+      this._indexedPersonalAttributions
     );
   }
 
@@ -614,7 +638,8 @@ export class MarkovProcessGraph {
         this._parameters,
         this._nodeIndex,
         this._mintTransitionProbabilties,
-        this._radiationTransitionProbabilties
+        this._radiationTransitionProbabilties,
+        this._indexedPersonalAttributions
       )
     );
   }
@@ -630,7 +655,8 @@ export class MarkovProcessGraph {
       this._epochStarts,
       this._participants,
       this._mintTransitionProbabilties,
-      this.nodeOrder()
+      this.nodeOrder(),
+      this._indexedPersonalAttributions
     )) {
       yield NullUtil.get(
         virtualizedMarkovEdge(
@@ -638,7 +664,8 @@ export class MarkovProcessGraph {
           this._parameters,
           this._nodeIndex,
           this._mintTransitionProbabilties,
-          this._radiationTransitionProbabilties
+          this._radiationTransitionProbabilties,
+          this._indexedPersonalAttributions
         )
       );
     }
@@ -727,6 +754,7 @@ export class MarkovProcessGraph {
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
       indexedMints,
+      personalAttributions: this._indexedPersonalAttributions.toPersonalAttributions(),
     };
   }
 
@@ -740,6 +768,7 @@ export class MarkovProcessGraph {
       parameters,
       radiationTransitionProbabilities,
       indexedMints,
+      personalAttributions,
     } = j;
     const nodeOrder = [
       ...nodes.map((n) => n.address),
@@ -755,6 +784,10 @@ export class MarkovProcessGraph {
     const mintTransitionProbabilities = new Map(
       indexedMints.map(([i, pr]) => [nodeOrder[i], pr])
     );
+    const indexedPersonalAttributions = new IndexedPersonalAttributions(
+      personalAttributions,
+      epochStarts
+    );
 
     return new MarkovProcessGraph(
       new Map(nodes.map((n) => [n.address, n])),
@@ -764,7 +797,8 @@ export class MarkovProcessGraph {
       lastEpochEndMs,
       parameters,
       mintTransitionProbabilities,
-      radiationTransitionProbabilities
+      radiationTransitionProbabilities,
+      indexedPersonalAttributions
     );
   }
 }
@@ -818,12 +852,23 @@ function* virtualizedMarkovEdgeAddresses(
   epochStarts: $ReadOnlyArray<TimestampMs>,
   participants: $ReadOnlyArray<Participant>,
   mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
-  nodeOrder: Iterable<NodeAddressT>
+  nodeOrder: Iterable<NodeAddressT>,
+  indexedPersonalAttributions: IndexedPersonalAttributions
 ): Iterable<MarkovEdgeAddressT> {
   let lastStart = null;
   for (const epochStart of epochStarts) {
     for (const {id} of participants) {
       yield payoutGadget.toRaw({owner: id, epochStart});
+      for (const toParticipantId of indexedPersonalAttributions.recipientsForEpochAndParticipant(
+        epochStart,
+        id
+      )) {
+        yield personalAttributionGadget.toRaw({
+          epochStart,
+          fromParticipantId: id,
+          toParticipantId,
+        });
+      }
       if (lastStart != null) {
         const webbingAddress = {thisStart: epochStart, lastStart, owner: id};
         yield forwardWebbingGadget.toRaw(webbingAddress);
@@ -863,7 +908,8 @@ function virtualizedMarkovEdge(
   parameters: Parameters,
   nodeIndex: $ReadOnlyMap<NodeAddressT, number>,
   mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
-  radiationTransitionProbabilities: $ReadOnlyArray<number>
+  radiationTransitionProbabilities: $ReadOnlyArray<number>,
+  indexedPersonalAttributions: IndexedPersonalAttributions
 ): MarkovEdge | null {
   if (MarkovEdgeAddress.hasPrefix(address, radiationGadget.prefix)) {
     const nodeAddress = radiationGadget.fromRaw(address);
@@ -879,9 +925,15 @@ function virtualizedMarkovEdge(
     return seedMintGadget.markovEdge(nodeAddress, probability);
   }
   if (MarkovEdgeAddress.hasPrefix(address, payoutGadget.prefix)) {
+    const payoutAddress = payoutGadget.fromRaw(address);
+    const sumOfPersonalAttributions =
+      indexedPersonalAttributions.getSumProportionValue(
+        payoutAddress.epochStart,
+        payoutAddress.owner
+      ) || 0;
     return payoutGadget.markovEdge(
       payoutGadget.fromRaw(address),
-      parameters.beta
+      parameters.beta - sumOfPersonalAttributions * parameters.beta
     );
   }
   if (MarkovEdgeAddress.hasPrefix(address, forwardWebbingGadget.prefix)) {
@@ -896,6 +948,22 @@ function virtualizedMarkovEdge(
       parameters.gammaBackward
     );
   }
+  if (MarkovEdgeAddress.hasPrefix(address, personalAttributionGadget.prefix)) {
+    const personalAttributionAddress = personalAttributionGadget.fromRaw(
+      address
+    );
+    const proportionValue =
+      indexedPersonalAttributions.getProportionValue(
+        personalAttributionAddress.epochStart,
+        personalAttributionAddress.fromParticipantId,
+        personalAttributionAddress.toParticipantId
+      ) || 0;
+    if (proportionValue === 0) return null;
+    return personalAttributionGadget.markovEdge(
+      personalAttributionGadget.fromRaw(address),
+      parameters.beta * proportionValue
+    );
+  }
   return null;
 }
 
@@ -908,6 +976,7 @@ export const jsonParser: C.Parser<MarkovProcessGraphJSON> = C.object({
   parameters: parametersParser,
   radiationTransitionProbabilities: C.array(C.number),
   indexedMints: C.array(C.tuple([C.number, C.number])),
+  personalAttributions: personalAttributionsParser,
 });
 
 export const parser: C.Parser<MarkovProcessGraph> = C.fmap(

@@ -19,6 +19,7 @@ import {
   payoutGadget,
   forwardWebbingGadget,
   backwardWebbingGadget,
+  personalAttributionGadget,
 } from "./edgeGadgets";
 import {intervalSequence} from "../interval";
 
@@ -35,6 +36,8 @@ import {
   participant1,
   parameters,
   participants,
+  attributions,
+  intervals,
 } from "./testUtils";
 
 describe("core/credrank/markovProcessGraph", () => {
@@ -152,6 +155,73 @@ describe("core/credrank/markovProcessGraph", () => {
           const edge = radiationGadget.markovEdge(address, parameters.alpha);
           checkMarkovEdge(mpg, edge);
         }
+      });
+    });
+    describe("personalAttribution", () => {
+      it("only returns the latest attribution for a recipient in an epoch", () => {
+        const attr = attributions[0];
+        const mpg = markovProcessGraph(attributions);
+        const interval = intervals[0];
+        const recipient = attr.recipients[0];
+        const proportion = 0.5;
+        const details = {
+          epochStart: interval.startTimeMs,
+          fromParticipantId: attr.fromParticipantId,
+          toParticipantId: recipient.toParticipantId,
+        };
+        const edge = personalAttributionGadget.markovEdge(
+          details,
+          parameters.beta * proportion
+        );
+        checkMarkovEdge(mpg, edge);
+      });
+      it("propagates the latest proportion into subsequent epochs", () => {
+        const attr = attributions[0];
+        const mpg = markovProcessGraph(attributions);
+        const interval = intervals[1];
+        const recipient = attr.recipients[0];
+        const proportion = 0.5;
+        const details = {
+          epochStart: interval.startTimeMs,
+          fromParticipantId: attr.fromParticipantId,
+          toParticipantId: recipient.toParticipantId,
+        };
+        const edge = personalAttributionGadget.markovEdge(
+          details,
+          parameters.beta * proportion
+        );
+        checkMarkovEdge(mpg, edge);
+      });
+      it("filters out 0-weighted edge addresses", () => {
+        const mpg = markovProcessGraph(attributions);
+        const interval = intervals[1];
+        const attr = attributions[1];
+        const recipient = attr.recipients[0];
+        const details = {
+          epochStart: interval.startTimeMs,
+          fromParticipantId: attr.fromParticipantId,
+          toParticipantId: recipient.toParticipantId,
+        };
+        const containsEdge = Array.from(mpg.edges()).includes(
+          personalAttributionGadget.markovEdge(details, 0)
+        );
+        expect(containsEdge).toBe(false);
+      });
+      it("filters out 0-weighted edges", () => {
+        const mpg = markovProcessGraph(attributions);
+        const interval = intervals[1];
+        const attr = attributions[1];
+        const recipient = attr.recipients[0];
+        // $FlowIgnore[cannot-write]
+        recipient.proportions[0].proportionValue = 0;
+        const details = {
+          epochStart: interval.startTimeMs,
+          fromParticipantId: attr.fromParticipantId,
+          toParticipantId: recipient.toParticipantId,
+        };
+        const edgeAddress = personalAttributionGadget.toRaw(details);
+        const result = mpg.edge(edgeAddress);
+        expect(result).toBe(null);
       });
     });
 

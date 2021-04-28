@@ -16,6 +16,7 @@ import {
   MarkovProcessGraph,
   type Parameters as MarkovProcessGraphParameters,
 } from "./markovProcessGraph";
+import {type PersonalAttributions} from "./personalAttribution";
 import {CredGraph} from "./credGraph";
 import {type WeightedGraph} from "../weightedGraph";
 import {Ledger} from "../ledger/ledger";
@@ -38,6 +39,7 @@ const DEFAULT_GAMMA_BACKWARD = 0.1;
 export function credrank(
   weightedGraph: WeightedGraph,
   ledger: Ledger,
+  personalAttributions?: PersonalAttributions = [],
   markovProcessGraphParameters?: $Shape<MarkovProcessGraphParameters> = {},
   pagerankOptions?: $Shape<PagerankOptions>
 ): Promise<CredGraph> {
@@ -63,6 +65,7 @@ export function credrank(
     participants,
     parameters,
     intervals,
+    personalAttributions,
   });
   return markovProcessGraphPagerank(mpg, pagerankOptions);
 }
