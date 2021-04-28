@@ -89,7 +89,7 @@ export const grainHelp: Command = async (args, std) => {
       When the '--simulation' (-s) flag is provided, no grain will actually be distributed,
       allowing for testing the output of various configurations.
 
-      When the '--force' (-f) flas is provided, it will overwrite the last distribution
+      When the '--force' (-f) flag is provided, it will overwrite the last distribution
       if a distribution already exists for the past interval.
 
       When run, this will identify all the completed Cred intervals (currently, weeks)
