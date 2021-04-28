@@ -142,7 +142,7 @@ export class Ledger {
   _distributions: Map<DistributionId, $ReadOnly<Distribution>>;
   _allocationsToDistributions: Map<AllocationId, DistributionId>;
   _latestTimestamp: TimestampMs = -Infinity;
-  _lastDistributionTimestamp: TimestampMs = -Infinity;
+  _lastDistributionTimestamp: TimestampMs | null = null;
 
   constructor() {
     this._ledgerEventLog = new JsonLog();
@@ -607,7 +607,10 @@ export class Ledger {
         });
       }
     }
-    if (distribution.credTimestamp > this._lastDistributionTimestamp) {
+    if (
+      this._lastDistributionTimestamp === null ||
+      distribution.credTimestamp > this._lastDistributionTimestamp
+    ) {
       this._lastDistributionTimestamp = distribution.credTimestamp;
     }
   }
@@ -808,14 +811,9 @@ export class Ledger {
    * We provide this because we may want to have a policy that issues one
    * distribution for each interval in the history of the project.
    *
-   * If there were never any distributions, then -Infinity will be returned.
+   * If there were never any distributions, then null will be returned.
    */
-  lastDistributionTimestamp(): TimestampMs {
-    // TODO(#2744): Amend interface to return null instead of -Infinity
-    // This will be a better interface primarily because in flow checking, it's
-    // easy for the client to not realize that -Infinity could get returned, and
-    // making an explicit return `TimestampMs | null` type will encourage callers
-    // to handle the edge case explicitly.
+  lastDistributionTimestamp(): TimestampMs | null {
     return this._lastDistributionTimestamp;
   }
 

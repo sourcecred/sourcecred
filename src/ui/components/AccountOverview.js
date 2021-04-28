@@ -33,7 +33,7 @@ export const AccountOverview = ({
 
   const lastDistributionTimestamp = ledger.lastDistributionTimestamp();
   const lastPayoutMessage =
-    lastDistributionTimestamp === -Infinity
+    lastDistributionTimestamp === null
       ? ""
       : `Last distribution: ${formatTimestamp(lastDistributionTimestamp)}`;
 

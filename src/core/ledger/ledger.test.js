@@ -1333,7 +1333,7 @@ describe("core/ledger/ledger", () => {
       });
       it("updates the last distribution timestamp", () => {
         const l = new Ledger();
-        expect(l.lastDistributionTimestamp()).toEqual(-Infinity);
+        expect(l.lastDistributionTimestamp()).toEqual(null);
         l.distributeGrain({
           id: uuid.random(),
           allocations: [],
@@ -1592,11 +1592,9 @@ describe("core/ledger/ledger", () => {
         failsWithoutMutation(ledger, thunk, "invalid timestamp");
       }
     });
-    it("lastDistributionTimestamp returns -Infinity if there have not been any distributions", () => {
-      // consider changing this behavior; see
-      // https://github.com/sourcecred/sourcecred/issues/2744
+    it("lastDistributionTimestamp returns null if there have not been any distributions", () => {
       const ledger = new Ledger();
-      expect(ledger.lastDistributionTimestamp()).toEqual(-Infinity);
+      expect(ledger.lastDistributionTimestamp()).toEqual(null);
     });
   });
 
