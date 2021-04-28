@@ -12,6 +12,7 @@ export type GrainInput = {|
   +ledger: Ledger,
   +grainConfig: GrainConfig,
   +currencyDetails: CurrencyDetails,
+  allowMultipleDistributionsPerInterval?: boolean,
 |};
 
 export type GrainOutput = {|
@@ -23,7 +24,7 @@ export type GrainOutput = {|
   A primary SourceCred API that combines the given inputs into a list of
   grain distributions.
 
-  Mutates the ledger that is passed in.
+  May mutate the ledger that is passed in.
  */
 export async function grain(input: GrainInput): Promise<GrainOutput> {
   const distributionPolicy = toDistributionPolicy(input.grainConfig);
@@ -31,7 +32,8 @@ export async function grain(input: GrainInput): Promise<GrainOutput> {
     distributionPolicy,
     input.credGraph,
     input.ledger,
-    +Date.now()
+    +Date.now(),
+    input.allowMultipleDistributionsPerInterval || false
   );
   return {distributions, ledger: input.ledger};
 }

@@ -31,7 +31,7 @@ const credrankCommand: Command = async (args, std) => {
         shouldRunStealth = true;
         return false;
       case "-s":
-      case "--simulate":
+      case "--simulation":
         isSimulation = true;
         return false;
       default:
@@ -42,7 +42,7 @@ const credrankCommand: Command = async (args, std) => {
   if (processedArgs.length !== 0) {
     return die(
       std,
-      "usage: sourcecred credrank [-d] [-s | --simulate] [--stealth]"
+      "usage: sourcecred credrank [-d] [-s | --simulation] [--stealth]"
     );
   }
   const taskReporter = new LoggingTaskReporter();

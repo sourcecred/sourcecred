@@ -22,7 +22,8 @@ describe("core/ledger/applyDistributions", () => {
           credIntervals,
           lastDistributionTimestamp,
           299,
-          maxSimultaneousDistributions
+          maxSimultaneousDistributions,
+          false
         )
       ).toEqual(expected);
     });
@@ -40,7 +41,8 @@ describe("core/ledger/applyDistributions", () => {
           credIntervals,
           lastDistributionTimestamp,
           299,
-          maxSimultaneousDistributions
+          maxSimultaneousDistributions,
+          false
         )
       ).toEqual(expected);
     });
@@ -58,7 +60,27 @@ describe("core/ledger/applyDistributions", () => {
           credIntervals,
           lastDistributionTimestamp,
           299,
-          maxSimultaneousDistributions
+          maxSimultaneousDistributions,
+          false
+        )
+      ).toEqual(expected);
+    });
+    it("handles the case where we allow multiple distributions in an interval", () => {
+      const credIntervals = intervalSequence([
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+        {startTimeMs: 200, endTimeMs: 300},
+      ]);
+      const lastDistributionTimestamp = 2;
+      const maxSimultaneousDistributions = 0;
+      const expected = [{startTimeMs: 100, endTimeMs: 200}];
+      expect(
+        _chooseDistributionIntervals(
+          credIntervals,
+          lastDistributionTimestamp,
+          299,
+          maxSimultaneousDistributions,
+          true
         )
       ).toEqual(expected);
     });
@@ -76,7 +98,8 @@ describe("core/ledger/applyDistributions", () => {
           credIntervals,
           lastDistributionTimestamp,
           299,
-          maxSimultaneousDistributions
+          maxSimultaneousDistributions,
+          false
         )
       ).toEqual(expected);
     });
@@ -94,7 +117,8 @@ describe("core/ledger/applyDistributions", () => {
           credIntervals,
           lastDistributionTimestamp,
           300,
-          maxSimultaneousDistributions
+          maxSimultaneousDistributions,
+          false
         )
       ).toEqual(expected);
     });
