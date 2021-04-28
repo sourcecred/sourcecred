@@ -10,6 +10,7 @@ import go from "./go";
 import serve from "./serve";
 import grain from "./grain";
 import credrank from "./credrank";
+import analysis from "./analysis";
 import help from "./help";
 
 const sourcecred: Command = async (args, std) => {
@@ -38,6 +39,8 @@ const sourcecred: Command = async (args, std) => {
       return grain(args.slice(1), std);
     case "credrank":
       return credrank(args.slice(1), std);
+    case "analysis":
+      return analysis(args.slice(1), std);
     default:
       std.err("fatal: unknown command: " + JSON.stringify(args[0]));
       std.err("fatal: run 'sourcecred help' for commands and usage");

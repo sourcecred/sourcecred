@@ -5,12 +5,14 @@ import {type CredrankInput} from "../main/credrank";
 import {type WeightedGraph} from "../../core/weightedGraph";
 import {type GraphInput} from "../main/graph";
 import {type GrainInput} from "../main/grain";
+import {type AnalysisInput} from "../main/analysis";
 import {join as pathJoin} from "path";
 import {loadJson} from "../../util/storage";
 import {
   CredGraph,
   parser as credGraphParser,
 } from "../../core/credrank/credGraph";
+import {Ledger} from "../../core/ledger/ledger";
 import {NetworkStorage} from "../../core/storage/networkStorage";
 import {OriginStorage} from "../../core/storage/originStorage";
 import {ZipStorage} from "../../core/storage/zip";
@@ -51,6 +53,10 @@ export class ReadInstance implements ReadOnlyInstance {
     throw "not yet implemented";
   }
 
+  async readAnalysisInput(): Promise<AnalysisInput> {
+    throw "not yet implemented";
+  }
+
   async readWeightedGraphForPlugin(): Promise<WeightedGraph> {
     throw "not yet implemented";
   }
@@ -58,5 +64,9 @@ export class ReadInstance implements ReadOnlyInstance {
   async readCredGraph(): Promise<CredGraph> {
     const credGraphPath = pathJoin(...CREDGRAPH_PATH);
     return await loadJson(this._zipStorage, credGraphPath, credGraphParser);
+  }
+
+  async readLedger(): Promise<Ledger> {
+    throw "not yet implemented";
   }
 }
