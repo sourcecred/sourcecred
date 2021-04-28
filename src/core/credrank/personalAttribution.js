@@ -5,18 +5,45 @@ import {type IdentityId, identityIdParser} from "../identity/id";
 import type {TimestampMs} from "../../util/timestamp";
 import * as C from "../../util/combo";
 
+/**
+  This module allows participants to attribute their cred to other participants.
+  This feature should not be used to make cred sellable/transferable, but
+  instead is intended to allow participants to acknowledge that a portion of
+  their creditted outputs are directly generated/supported by the labor of
+  others. (e.g. when a contributor has a personal assistant working behind the 
+  scenes)
+*/
+
+/** 
+  A timestamped configuration representing a decimal proportion of cred flow,
+  which can be applied to a participant pair.
+*/
 export type PersonalAttributionProportion = {|
+  // The start time from which epochs should begin using the proportion
   +timestampMs: TimestampMs,
+  // decimal proportion (0-1) of cred that should flow between 2 participants
   +proportionValue: number,
 |};
+/**
+  A recipient of cred attribution and a chronological log of proportion
+  configurations.
+ */
 export type AttributionRecipient = {|
   +toParticipantId: IdentityId,
   +proportions: $ReadOnlyArray<PersonalAttributionProportion>,
 |};
+/**
+  A participant that is attributing their cred, and a log of how they are
+  attributing it.
+ */
 export type PersonalAttribution = {|
   +fromParticipantId: IdentityId,
   +recipients: $ReadOnlyArray<AttributionRecipient>,
 |};
+/**
+  A list of participants who are attributing their cred, with logs of how
+  they are attributing it.
+ */
 export type PersonalAttributions = $ReadOnlyArray<PersonalAttribution>;
 export const personalAttributionsParser: C.Parser<PersonalAttributions> = C.array(
   C.object({
