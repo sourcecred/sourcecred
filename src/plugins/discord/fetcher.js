@@ -125,6 +125,7 @@ export class Fetcher implements DiscordApi {
       id: x.id,
       name: x.name,
       type: Model.channelTypeFromId(x.type),
+      nsfw: x.nsfw,
     }));
   }
 

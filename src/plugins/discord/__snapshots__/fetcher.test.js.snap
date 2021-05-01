@@ -5,31 +5,37 @@ Array [
   Object {
     "id": "678348980756938813",
     "name": "Text Channels",
+    "nsfw": false,
     "type": "GUILD_CATEGORY",
   },
   Object {
     "id": "678348980798881844",
     "name": "Voice Channels",
+    "nsfw": false,
     "type": "GUILD_CATEGORY",
   },
   Object {
     "id": "678348980849213472",
     "name": "general",
+    "nsfw": false,
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "678348980878573661",
     "name": "General",
+    "nsfw": false,
     "type": "GUILD_VOICE",
   },
   Object {
     "id": "678394406507905129",
     "name": "pagination",
+    "nsfw": false,
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "678696874869522446",
     "name": "notmymessage",
+    "nsfw": false,
     "type": "GUILD_TEXT",
   },
 ]

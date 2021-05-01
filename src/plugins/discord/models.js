@@ -49,6 +49,7 @@ export type Channel = {|
   +id: Snowflake,
   +type: ChannelType,
   +name: string,
+  +nsfw?: boolean,
 |};
 
 export type Role = {|
