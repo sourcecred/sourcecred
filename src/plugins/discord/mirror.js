@@ -12,15 +12,18 @@ export class Mirror {
   +_repo: SqliteMirrorRepository;
   +_api: DiscordApi;
   +guild: Model.Snowflake;
+  +includeNsfwChannels: boolean;
 
   constructor(
     repo: SqliteMirrorRepository,
     api: DiscordApi,
-    guild: Model.Snowflake
+    guild: Model.Snowflake,
+    includeNsfwChannels: boolean
   ) {
     this._repo = repo;
     this._api = api;
     this.guild = guild;
+    this.includeNsfwChannels = includeNsfwChannels;
   }
 
   async update(reporter: TaskReporter) {
@@ -68,6 +71,7 @@ export class Mirror {
     const channels = await this._api.channels(this.guild);
     for (const channel of channels) {
       if (channel.type !== "GUILD_TEXT") continue;
+      if (!this.includeNsfwChannels && channel.nsfw) continue;
       this._repo.addChannel(channel);
     }
     return this._repo.channels();
