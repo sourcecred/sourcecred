@@ -24,9 +24,11 @@ describe("plugins/discord/config", () => {
           "759191073943191613": 0.25,
         },
       },
+      includeNsfwChannels: true,
     };
     const parsed: DiscordConfig = parser.parseOrThrow(raw);
     expect(parsed).toEqual(_upgrade(raw));
+    expect(parsed.includeNsfwChannels).toEqual(true);
   });
   it("fills in optional properties", () => {
     const raw = {
