@@ -37,6 +37,8 @@ import {
   add,
   divideFloat,
   fromInteger,
+  toFloatRatio,
+  ONE,
 } from "../../../core/ledger/grain";
 import ExplorerTimeline from "./ExplorerTimeline";
 import {IdentityTypes} from "../../../core/identity/identityType";
@@ -241,7 +243,11 @@ type ExplorerHomeProps = {|
 
 export const ExplorerHome = ({
   initialView,
-  currency: {suffix: currencySuffix, name: currencyName},
+  currency: {
+    name: currencyName,
+    suffix: currencySuffix,
+    decimals: decimalsToDisplay,
+  },
 }: ExplorerHomeProps): ReactNode => {
   if (!initialView)
     return (
@@ -344,6 +350,18 @@ export const ExplorerHome = ({
     [grainTotalsTimeline]
   );
 
+  const formatLongNumbers = (number, p) => {
+    return number <= Math.pow(10, p)
+      ? parseFloat(number.toPrecision(p)).toLocaleString(undefined, {
+          maximumSignificantDigits: p,
+        })
+      : number.toLocaleString(undefined, {
+          notation: "compact",
+        });
+  };
+
+  const grainThisPeriodAsNumber = toFloatRatio(totalGrainThisPeriod, ONE);
+
   const statCircleInfo = [
     {
       title: `Cred ${TIMEFRAME_OPTIONS[tab].tabLabel}`,
@@ -352,7 +370,7 @@ export const ExplorerHome = ({
     },
     {
       title: `${currencyName}`,
-      value: format(totalGrainThisPeriod, 0, currencySuffix),
+      value: formatLongNumbers(grainThisPeriodAsNumber, 5) + currencySuffix,
       className: classes.grainCircle,
     },
   ];
@@ -629,7 +647,11 @@ export const ExplorerHome = ({
                         {Math.round(row.cred).toLocaleString()}
                       </TableCell>
                       <TableCell className={classes.labelGrain}>
-                        {format(row.grainEarned, 2, currencySuffix)}
+                        {format(
+                          row.grainEarned,
+                          decimalsToDisplay,
+                          currencySuffix
+                        )}
                       </TableCell>
                       <TableCell className={classes.timelineCell} align="right">
                         {showTableChart && (

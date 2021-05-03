@@ -4,11 +4,12 @@ import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
 
 /**
- * Shape of concurrencyDetails.json on disk
+ * Shape of currencyDetails.json on disk
  */
 type SerializedCurrencyDetails = {|
   +currencyName?: string,
   +currencySuffix?: string,
+  +decimalsToDisplay?: number,
 |};
 
 /**
@@ -17,10 +18,12 @@ type SerializedCurrencyDetails = {|
 export type CurrencyDetails = {|
   +name: string,
   +suffix: string,
+  +decimals: number,
 |};
 
 export const DEFAULT_NAME = "Grain";
 export const DEFAULT_SUFFIX = "g";
+export const DEFAULT_DECIMALS = 2;
 
 /**
  * Utilized by combo.fmap to enforce default currency values
@@ -29,9 +32,16 @@ export const DEFAULT_SUFFIX = "g";
  * detail values after parsing the serialized file.
  */
 function upgrade(c: SerializedCurrencyDetails): CurrencyDetails {
+  if (
+    typeof c.decimalsToDisplay === "number" &&
+    (c.decimalsToDisplay > 18 || c.decimalsToDisplay < 0)
+  )
+    throw new Error("currencyConfig: decimalsToDisplay must be between 0-18");
+
   return {
     name: NullUtil.orElse(c.currencyName, DEFAULT_NAME),
     suffix: NullUtil.orElse(c.currencySuffix, DEFAULT_SUFFIX),
+    decimals: NullUtil.orElse(c.decimalsToDisplay, DEFAULT_DECIMALS),
   };
 }
 
@@ -39,10 +49,18 @@ export function defaultCurrencyConfig(): CurrencyDetails {
   return {
     name: DEFAULT_NAME,
     suffix: DEFAULT_SUFFIX,
+    decimals: DEFAULT_DECIMALS,
   };
 }
 
 export const parser: C.Parser<CurrencyDetails> = C.fmap(
-  C.object({}, {currencyName: C.string, currencySuffix: C.string}),
+  C.object(
+    {},
+    {
+      currencyName: C.string,
+      currencySuffix: C.string,
+      decimalsToDisplay: C.number,
+    }
+  ),
   upgrade
 );
