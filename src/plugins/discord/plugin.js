@@ -55,11 +55,11 @@ export class DiscordPlugin implements Plugin {
     ctx: PluginDirectoryContext,
     reporter: TaskReporter
   ): Promise<void> {
-    const {guildId} = await loadConfig(ctx);
+    const {guildId, includeNsfwChannels} = await loadConfig(ctx);
     const token = getTokenFromEnv();
     const fetcher = new Fetcher({token});
     const repo = await repository(ctx, guildId);
-    const mirror = new Mirror(repo, fetcher, guildId);
+    const mirror = new Mirror(repo, fetcher, guildId, includeNsfwChannels);
     await mirror.update(reporter);
   }
 

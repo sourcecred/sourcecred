@@ -4,8 +4,11 @@
     "name": "SourceCred Test Server",
     "icon": null,
     "owner": false,
-    "permissions": 2147483647,
-    "features": [],
-    "permissions_new": "2147483647"
+    "permissions": 33620992,
+    "features": [
+      "NEWS",
+      "COMMUNITY"
+    ],
+    "permissions_new": "6476071936"
   }
 ]

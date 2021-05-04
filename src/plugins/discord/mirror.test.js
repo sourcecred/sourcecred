@@ -11,6 +11,7 @@ describe("plugins/discord/mirror", () => {
     // const channelId = "678394406507905129";
 
     it("should print", async () => {
+      const includeNsfwChannels = true;
       // Given
       const repo = new SqliteMirrorRepository(
         new Database(":memory:"),
@@ -19,9 +20,31 @@ describe("plugins/discord/mirror", () => {
       const api = snapshotFetcher();
 
       // When
-      const mirror = new Mirror(repo, api, guildId);
+      const mirror = new Mirror(repo, api, guildId, includeNsfwChannels);
       await mirror.addMembers();
       await mirror.addTextChannels();
+      expect(
+        repo.channels().some((channel) => channel.name.includes("nsfw"))
+      ).toBe(true);
+      // await mirror.addMessages(channelId, 10);
+    });
+
+    it("should print", async () => {
+      const includeNsfwChannels = false;
+      // Given
+      const repo = new SqliteMirrorRepository(
+        new Database(":memory:"),
+        guildId
+      );
+      const api = snapshotFetcher();
+
+      // When
+      const mirror = new Mirror(repo, api, guildId, includeNsfwChannels);
+      await mirror.addMembers();
+      await mirror.addTextChannels();
+      expect(
+        repo.channels().every((channel) => !channel.name.includes("nsfw"))
+      ).toBe(true);
       // await mirror.addMessages(channelId, 10);
     });
   });

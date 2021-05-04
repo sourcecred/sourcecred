@@ -6,13 +6,6 @@
     "require_colons": true,
     "managed": false,
     "animated": false,
-    "available": true,
-    "user": {
-      "id": "143776454050709505",
-      "username": "Beanow",
-      "avatar": "6496446fe1455f31f9536b132dcc4ac8",
-      "discriminator": "5887",
-      "public_flags": 0
-    }
+    "available": true
   }
 ]

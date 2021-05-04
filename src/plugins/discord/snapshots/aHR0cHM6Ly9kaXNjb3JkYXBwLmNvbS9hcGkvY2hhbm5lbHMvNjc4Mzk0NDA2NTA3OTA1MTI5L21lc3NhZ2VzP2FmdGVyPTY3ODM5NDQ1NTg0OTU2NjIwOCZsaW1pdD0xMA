@@ -20,7 +20,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:32.307000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394493124476939",
@@ -43,7 +44,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:31.121000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394489391415348",
@@ -66,7 +68,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:30.231000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394486644146187",
@@ -89,7 +92,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:29.576000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394484291141700",
@@ -112,7 +116,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:29.015000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394480184918016",
@@ -136,6 +141,7 @@
     "timestamp": "2020-02-16T00:17:28.036000+00:00",
     "edited_timestamp": null,
     "flags": 0,
+    "components": [],
     "reactions": [
       {
         "emoji": {
@@ -168,7 +174,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:27.302000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394473428025354",
@@ -191,7 +198,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:26.425000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394469048909841",
@@ -214,7 +222,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:25.381000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394468373626890",
@@ -237,6 +246,7 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:25.220000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   }
 ]

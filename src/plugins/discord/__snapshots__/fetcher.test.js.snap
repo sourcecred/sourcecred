@@ -5,31 +5,61 @@ Array [
   Object {
     "id": "678348980756938813",
     "name": "Text Channels",
+    "nsfw": false,
     "type": "GUILD_CATEGORY",
   },
   Object {
     "id": "678348980798881844",
     "name": "Voice Channels",
+    "nsfw": false,
     "type": "GUILD_CATEGORY",
   },
   Object {
     "id": "678348980849213472",
     "name": "general",
+    "nsfw": false,
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "678348980878573661",
     "name": "General",
+    "nsfw": false,
     "type": "GUILD_VOICE",
   },
   Object {
     "id": "678394406507905129",
     "name": "pagination",
+    "nsfw": false,
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "678696874869522446",
     "name": "notmymessage",
+    "nsfw": false,
+    "type": "GUILD_TEXT",
+  },
+  Object {
+    "id": "830088231538130964",
+    "name": "rules",
+    "nsfw": false,
+    "type": "GUILD_TEXT",
+  },
+  Object {
+    "id": "830088231538130965",
+    "name": "moderator-only",
+    "nsfw": false,
+    "type": "GUILD_TEXT",
+  },
+  Object {
+    "id": "830089044695187586",
+    "name": "test stage",
+    "nsfw": false,
+    "type": "UNKNOWN",
+  },
+  Object {
+    "id": "837851969795129344",
+    "name": "test-nsfw",
+    "nsfw": true,
     "type": "GUILD_TEXT",
   },
 ]
@@ -49,7 +79,7 @@ Array [
   Object {
     "id": "678348980639498428",
     "name": "SourceCred Test Server",
-    "permissions": 2147483647,
+    "permissions": 33620992,
   },
 ]
 `;
@@ -73,13 +103,37 @@ Array [
     "nick": null,
     "roles": Array [
       "678349848684003359",
+    ],
+    "user": Object {
+      "bot": false,
+      "discriminator": "2630",
+      "id": "258786206387666944",
+      "username": "Thena",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
+      "678349848684003359",
+    ],
+    "user": Object {
+      "bot": false,
+      "discriminator": "8826",
+      "id": "318552163649454081",
+      "username": "hz",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
+      "678349848684003359",
       "678350026946117694",
     ],
     "user": Object {
       "bot": false,
-      "discriminator": "1337",
+      "discriminator": "3370",
       "id": "420341518948237331",
-      "username": "decentralion",
+      "username": "DandeLion",
     },
   },
   Object {
@@ -111,6 +165,7 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
+      "678349848684003359",
       "678350026946117694",
     ],
     "user": Object {
@@ -159,6 +214,18 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
+      "767909888226492448",
+    ],
+    "user": Object {
+      "bot": true,
+      "discriminator": "9034",
+      "id": "758370311774404618",
+      "username": "topocount's server bot",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
       "761706197606334535",
     ],
     "user": Object {
@@ -166,6 +233,18 @@ Array [
       "discriminator": "6627",
       "id": "761705425870782516",
       "username": "SourceCred Test",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
+      "772890579632652339",
+    ],
+    "user": Object {
+      "bot": true,
+      "discriminator": "3070",
+      "id": "772886503830323210",
+      "username": "sourcecred-test-thena",
     },
   },
 ]
@@ -444,6 +523,14 @@ Array [
   Object {
     "id": "761706197606334535",
     "name": "SourceCred Test",
+  },
+  Object {
+    "id": "767909888226492448",
+    "name": "SC server bot",
+  },
+  Object {
+    "id": "772890579632652339",
+    "name": "sourcecred-test",
   },
 ]
 `;
