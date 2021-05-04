@@ -21,6 +21,7 @@ export function botSet(): Set<string> {
     "tensorflowbutler",
     "github-actions",
     "vercel",
+    "codecov-commenter",
     "transifex-integration",
     "dependabot",
   ]);
