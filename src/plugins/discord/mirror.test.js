@@ -23,7 +23,9 @@ describe("plugins/discord/mirror", () => {
       const mirror = new Mirror(repo, api, guildId, includeNsfwChannels);
       await mirror.addMembers();
       await mirror.addTextChannels();
-      expect(repo.channels().some((channel) => channel.name.includes('nsfw'))).toBe(true);
+      expect(
+        repo.channels().some((channel) => channel.name.includes("nsfw"))
+      ).toBe(true);
       // await mirror.addMessages(channelId, 10);
     });
 
@@ -40,7 +42,9 @@ describe("plugins/discord/mirror", () => {
       const mirror = new Mirror(repo, api, guildId, includeNsfwChannels);
       await mirror.addMembers();
       await mirror.addTextChannels();
-      expect(repo.channels().every((channel) => !channel.name.includes('nsfw'))).toBe(true);
+      expect(
+        repo.channels().every((channel) => !channel.name.includes("nsfw"))
+      ).toBe(true);
       // await mirror.addMessages(channelId, 10);
     });
   });
