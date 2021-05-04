@@ -20,7 +20,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:22.234000+00:00",
     "edited_timestamp": "2020-02-16T00:17:38.520000+00:00",
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394451462193154",
@@ -43,7 +44,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:21.188000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394448497082388",
@@ -66,7 +68,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:20.481000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394445351092275",
@@ -89,7 +92,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:19.731000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394442301833247",
@@ -112,7 +116,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:19.004000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394436757094410",
@@ -136,6 +141,7 @@
     "timestamp": "2020-02-16T00:17:17.682000+00:00",
     "edited_timestamp": null,
     "flags": 0,
+    "components": [],
     "reactions": [
       {
         "emoji": {
@@ -168,7 +174,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:16.842000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394431149178940",
@@ -191,7 +198,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:16.345000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394428569813013",
@@ -214,7 +222,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:15.730000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394426153893948",
@@ -238,6 +247,7 @@
     "timestamp": "2020-02-16T00:17:15.154000+00:00",
     "edited_timestamp": null,
     "flags": 0,
+    "components": [],
     "reactions": [
       {
         "emoji": {

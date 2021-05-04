@@ -5,7 +5,10 @@
   "description": null,
   "splash": null,
   "discovery_splash": null,
-  "features": [],
+  "features": [
+    "COMMUNITY",
+    "NEWS"
+  ],
   "emojis": [
     {
       "name": "sourcecred",
@@ -26,7 +29,7 @@
   "system_channel_id": "678348980849213472",
   "widget_enabled": false,
   "widget_channel_id": null,
-  "verification_level": 0,
+  "verification_level": 1,
   "roles": [
     {
       "id": "678348980639498428",
@@ -37,7 +40,7 @@
       "hoist": false,
       "managed": false,
       "mentionable": false,
-      "permissions_new": "33620992"
+      "permissions_new": "6476071936"
     },
     {
       "id": "678349848684003359",
@@ -48,7 +51,7 @@
       "hoist": false,
       "managed": false,
       "mentionable": false,
-      "permissions_new": "104324673"
+      "permissions_new": "6546775617"
     },
     {
       "id": "678350026946117694",
@@ -59,7 +62,7 @@
       "hoist": false,
       "managed": false,
       "mentionable": false,
-      "permissions_new": "104324681"
+      "permissions_new": "6546775625"
     },
     {
       "id": "678359229433905152",
@@ -73,7 +76,7 @@
       "tags": {
         "bot_id": "678351352770068560"
       },
-      "permissions_new": "66560"
+      "permissions_new": "6442517504"
     },
     {
       "id": "728740243926286386",
@@ -87,7 +90,7 @@
       "tags": {
         "bot_id": "728738433199112280"
       },
-      "permissions_new": "66560"
+      "permissions_new": "6442517504"
     },
     {
       "id": "761706197606334535",
@@ -101,12 +104,40 @@
       "tags": {
         "bot_id": "761705425870782516"
       },
-      "permissions_new": "8"
+      "permissions_new": "6442450952"
+    },
+    {
+      "id": "767909888226492448",
+      "name": "SC server bot",
+      "permissions": 66560,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false,
+      "tags": {
+        "bot_id": "758370311774404618"
+      },
+      "permissions_new": "6442517504"
+    },
+    {
+      "id": "772890579632652339",
+      "name": "sourcecred-test",
+      "permissions": 66560,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false,
+      "tags": {
+        "bot_id": "772886503830323210"
+      },
+      "permissions_new": "6442517504"
     }
   ],
   "default_message_notifications": 1,
   "mfa_level": 0,
-  "explicit_content_filter": 0,
+  "explicit_content_filter": 2,
   "max_presences": null,
   "max_members": 100000,
   "max_video_channel_users": 25,
@@ -115,8 +146,9 @@
   "premium_subscription_count": 0,
   "system_channel_flags": 0,
   "preferred_locale": "en-US",
-  "rules_channel_id": null,
-  "public_updates_channel_id": null,
+  "rules_channel_id": "830088231538130964",
+  "public_updates_channel_id": "830088231538130965",
+  "nsfw": false,
   "embed_enabled": false,
   "embed_channel_id": null
 }
