@@ -48,6 +48,10 @@ import {
 } from "../currencyConfig";
 import {defaultCurrencyConfig} from "../currencyConfig";
 import {type CredAccountData} from "../../core/ledger/credAccounts";
+import {
+  type PersonalAttributionsConfig,
+  personalAttributionsConfigParser,
+} from "../config/personalAttributionsConfig";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -62,6 +66,10 @@ const GRAIN_PATH: $ReadOnlyArray<string> = ["config", "grain.json"];
 const CURRENCY_PATH: $ReadOnlyArray<string> = [
   "config",
   "currencyDetails.json",
+];
+const PERSONAL_ATTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
+  "config",
+  "personalAttributions.json",
 ];
 const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
 const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
@@ -117,12 +125,14 @@ export class LocalInstance implements Instance {
       weightOverrides,
       dependencies,
       pluginsBudget,
+      personalAttributions,
     ] = await Promise.all([
       this.readPluginGraphs(),
       this.readLedger(),
       this.readWeightOverrides(),
       this.readDependencies(),
       this.readPluginsBudget(),
+      this.readPersonalAttributions(),
     ]);
     return {
       pluginGraphs,
@@ -130,6 +140,7 @@ export class LocalInstance implements Instance {
       weightOverrides,
       dependencies,
       pluginsBudget,
+      personalAttributions,
     };
   }
 
@@ -203,6 +214,7 @@ export class LocalInstance implements Instance {
       this.writeLedger(credrankOutput.ledger),
       this.writeCredGraph(credrankOutput.credGraph),
       this.writeDependenciesConfig(credrankOutput.dependencies),
+      this.writePersonalAttributionsConfig(credrankOutput.personalAttributions),
     ]);
   }
 
@@ -286,6 +298,16 @@ export class LocalInstance implements Instance {
     );
   }
 
+  async readPersonalAttributions(): Promise<PersonalAttributionsConfig> {
+    const path = pathJoin(...PERSONAL_ATTRIBUTIONS_PATH);
+    return loadJsonWithDefault(
+      this._storage,
+      path,
+      personalAttributionsConfigParser,
+      () => []
+    );
+  }
+
   createPluginDirectory(
     components: $ReadOnlyArray<string>,
     pluginId: string
@@ -350,6 +372,13 @@ export class LocalInstance implements Instance {
       dependenciesPath,
       stringify(dependenciesConfig, {space: 4})
     );
+  }
+
+  async writePersonalAttributionsConfig(
+    config: PersonalAttributionsConfig
+  ): Promise<void> {
+    const path = pathJoin(...PERSONAL_ATTRIBUTIONS_PATH);
+    return this._storage.set(path, stringify(config, {space: 4}));
   }
 
   async writeCredAccounts(credAccounts: CredAccountData): Promise<void> {
