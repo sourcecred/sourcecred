@@ -13,12 +13,24 @@ type menuProps = {|onMenuClick: Function|};
 
 const createMenu = (
   hasBackend: boolean,
-  {name: currencyName}: CurrencyDetails
+  {name: currencyName}: CurrencyDetails,
+  isDev: boolean
 ): ((menuProps) => ReactNode) => {
   const Menu = ({onMenuClick}: menuProps) => {
     const open = useSelector((state) => state.admin.ui.sidebarOpen);
     return (
       <>
+        {isDev && (
+          <>
+            <MenuItemLink
+              to="/profile"
+              primaryText="Profile"
+              leftIcon={<PeopleIcon />}
+              onClick={onMenuClick}
+              sidebarIsOpen={open}
+            />
+          </>
+        )}
         <MenuItemLink
           to="/explorer-home"
           primaryText="Explorer"

@@ -27,6 +27,7 @@ export type LoadSuccess = {|
   +hasBackend: boolean,
   +currency: CurrencyDetails,
   +credGraph: CredGraph | null,
+  +isDev: boolean,
 |};
 export type LoadFailure = {|+type: "FAILURE", +error: any|};
 
@@ -81,6 +82,7 @@ export async function load(): Promise<LoadResult> {
       };
     }
     const bundledPlugins = upgradeRawInstanceConfig(rawInstanceConfig);
+    const isDev = new URLSearchParams(location.search).get("dev") === "true";
     return {
       type: "SUCCESS",
       bundledPlugins,
@@ -88,6 +90,7 @@ export async function load(): Promise<LoadResult> {
       hasBackend,
       currency,
       credGraph,
+      isDev,
     };
   } catch (e) {
     console.error(e);
