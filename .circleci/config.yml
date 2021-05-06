@@ -45,7 +45,7 @@ jobs:
     steps:
       - checkout
       - set_up_node_modules
-      - run: yarn test --full --ci
+      - run: cd packages/sourcecred && yarn test --full --ci
 
 workflows:
   version: 2.0
