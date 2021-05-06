@@ -13,6 +13,7 @@ import pink from "@material-ui/core/colors/pink";
 import {makeStyles} from "@material-ui/core/styles";
 import fakeDataProvider from "ra-data-fakerest";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
+import {ProfilePage} from "./Profile/ProfilePage";
 import WeightsConfigSection from "./Explorer/WeightsConfigSection";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredGrainView} from "../../core/credGrainView";
@@ -79,7 +80,7 @@ const useLayoutStyles = makeStyles(
   }),
   {name: "RaLayout"}
 );
-const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
+const createAppLayout = ({hasBackend, currency, isDev}: LoadSuccess) => {
   const AppLayout = (props) => {
     const classes = useLayoutStyles(props);
     return (
@@ -87,7 +88,7 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
         className={classes.layout}
         {...props}
         appBar={AppBar}
-        menu={withRouter(createMenu(hasBackend, currency))}
+        menu={withRouter(createMenu(hasBackend, currency, isDev))}
       />
     );
   };
@@ -98,7 +99,8 @@ const customRoutes = (
   hasBackend: boolean,
   currency: CurrencyDetails,
   credGrainView: CredGrainView | null,
-  pluginDeclarations: PluginDeclarations
+  pluginDeclarations: PluginDeclarations,
+  isDev: boolean
 ) => {
   const [weightsState, setWeightsState] = useState<{weights: WeightsT}>({
     weights: emptyWeights(),
@@ -120,26 +122,35 @@ const customRoutes = (
       <LedgerViewer currency={currency} />
     </Route>,
   ];
-  const backendRoutes = [
-    <Route key="admin" exact path="/admin">
-      <LedgerAdmin />
-    </Route>,
-    <Route key="transfer" exact path="/transfer">
-      <Transfer currency={currency} />
-    </Route>,
-    <Route key="special-distribution" exact path="/special-distribution">
-      <SpecialDistribution currency={currency} />
-    </Route>,
-    <Route key="weight-config" exact path="/weight-config">
-      <WeightsConfigSection
-        show={true}
-        pluginDeclarations={pluginDeclarations}
-        weights={weightsState.weights}
-        setWeightsState={setWeightsState}
-      />
-    </Route>,
-  ];
-  return routes.concat(hasBackend ? backendRoutes : []);
+  const backendRoutes = hasBackend
+    ? [
+        <Route key="admin" exact path="/admin">
+          <LedgerAdmin />
+        </Route>,
+        <Route key="transfer" exact path="/transfer">
+          <Transfer currency={currency} />
+        </Route>,
+        <Route key="special-distribution" exact path="/special-distribution">
+          <SpecialDistribution currency={currency} />
+        </Route>,
+        <Route key="weight-config" exact path="/weight-config">
+          <WeightsConfigSection
+            show={true}
+            pluginDeclarations={pluginDeclarations}
+            weights={weightsState.weights}
+            setWeightsState={setWeightsState}
+          />
+        </Route>,
+      ]
+    : [];
+  const devRoutes = isDev
+    ? [
+        <Route key="profile" exact path="/profile">
+          <ProfilePage />
+        </Route>,
+      ]
+    : [];
+  return routes.concat(backendRoutes, devRoutes);
 };
 
 const AdminApp = (): ReactNode => {
@@ -204,7 +215,8 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
           loadSuccess.hasBackend,
           loadSuccess.currency,
           credGrainView,
-          Array.from(loadSuccess.bundledPlugins.values())
+          Array.from(loadSuccess.bundledPlugins.values()),
+          loadSuccess.isDev
         )}
       >
         {/*
