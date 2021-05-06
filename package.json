@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "lerna run test --",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "install": "lerna bootstrap"
   }
 }
