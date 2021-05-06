@@ -17,6 +17,11 @@ import {applyBudget, type Budget} from "../../core/mintBudget";
 import {type WeightsT} from "../../core/weights";
 import {contractions as identityContractions} from "../../core/identity";
 import {credrank as computeCredrank} from "../../core/credrank/compute";
+import {
+  type PersonalAttributionsConfig,
+  updatePersonalAttributionsConfig,
+  toPersonalAttributions,
+} from "../config/personalAttributionsConfig";
 
 export type CredrankInput = {|
   +pluginGraphs: $ReadOnlyArray<WeightedGraph>,
@@ -24,12 +29,14 @@ export type CredrankInput = {|
   +dependencies: DependenciesConfig,
   +weightOverrides: WeightsT,
   +pluginsBudget: Budget | null,
+  +personalAttributions: PersonalAttributionsConfig,
 |};
 
 export type CredrankOutput = {|
   +credGraph: CredGraph,
   +ledger: Ledger,
   +dependencies: DependenciesConfig,
+  +personalAttributions: PersonalAttributionsConfig,
 |};
 
 /**
@@ -44,13 +51,6 @@ export async function credrank(input: CredrankInput): Promise<CredrankOutput> {
     merge(input.pluginGraphs),
     input.weightOverrides
   );
-  const dependenciesWithIds = input.dependencies.map((d) =>
-    // This mutates the ledger, adding new identities when needed.
-    ensureIdentityExists(d, input.ledger)
-  );
-  const dependencyBonuses = dependenciesWithIds.map((d) =>
-    toBonusPolicy(d, input.ledger)
-  );
 
   const identities = input.ledger.accounts().map((a) => a.identity);
   const contractedGraph = weightedGraph.graph.contractNodes(
@@ -63,14 +63,33 @@ export async function credrank(input: CredrankInput): Promise<CredrankOutput> {
   if (input.pluginsBudget) {
     weightedGraph = applyBudget(weightedGraph, input.pluginsBudget);
   }
+
+  const dependenciesWithIds = input.dependencies.map((d) =>
+    // This mutates the ledger, adding new identities when needed.
+    ensureIdentityExists(d, input.ledger)
+  );
+  const dependencyBonuses = dependenciesWithIds.map((d) =>
+    toBonusPolicy(d, input.ledger)
+  );
   const bonusGraph = createBonusGraph(
     computeBonusMinting(weightedGraph, dependencyBonuses)
   );
   weightedGraph = merge([weightedGraph, bonusGraph]);
-  const credGraph = await computeCredrank(weightedGraph, input.ledger);
+
+  const updatedPersonalAttributionsConfig = updatePersonalAttributionsConfig(
+    input.personalAttributions,
+    input.ledger
+  );
+
+  const credGraph = await computeCredrank(
+    weightedGraph,
+    input.ledger,
+    toPersonalAttributions(updatedPersonalAttributionsConfig)
+  );
   return {
     credGraph,
     ledger: input.ledger,
     dependencies: dependenciesWithIds,
+    personalAttributions: updatedPersonalAttributionsConfig,
   };
 }
