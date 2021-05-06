@@ -20,7 +20,7 @@ import {type PersonalAttributions} from "../../core/credrank/personalAttribution
   which allows participants to attribute their cred to other participants.
   This feature should not be used to make cred sellable/transferable, but
   instead is intended to allow participants to acknowledge that a portion of
-  their creditted outputs are directly generated/supported by the labor of
+  their credited outputs are directly generated/supported by the labor of
   others. (e.g. when a contributor has a personal assistant working behind the 
   scenes)
  */
