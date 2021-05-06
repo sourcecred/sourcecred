@@ -39,13 +39,13 @@ jobs:
     steps:
       - checkout
       - set_up_node_modules
-      - run: cd packages/sourcecred && yarn test --ci
+      - run: yarn test --ci
   test_full:
     executor: node12
     steps:
       - checkout
       - set_up_node_modules
-      - run: cd packages/sourcecred && yarn test --full --ci
+      - run: yarn test --full --ci
 
 workflows:
   version: 2.0
