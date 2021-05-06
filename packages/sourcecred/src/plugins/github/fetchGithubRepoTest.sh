@@ -49,7 +49,7 @@ main() {
   if [ -n "${SOURCECRED_BIN:-}" ]; then
     SOURCECRED_BIN="$(readlink -f "${SOURCECRED_BIN}")"
   fi
-  cd "$(git rev-parse --show-toplevel)"
+  cd "$(git rev-parse --show-toplevel)/packages/sourcecred"
   UPDATE=
   BUILD=1
   while [ $# -gt 0 ]; do

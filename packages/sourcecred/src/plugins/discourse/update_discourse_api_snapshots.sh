@@ -10,7 +10,7 @@ if [ ! "$(jq --version)" ]; then
   exit 1
 fi
 
-toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)/packages/sourcecred"
 cd "${toplevel}"
 
 fetch() {
