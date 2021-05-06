@@ -50,7 +50,7 @@ export type PersonalAttributionsConfig = Array<{|
 |}>;
 
 /**
-  Adds the IdentityIds where only IdentityNames are provide, and updates names
+  Adds the IdentityIds where only IdentityNames are provided, and updates names
   and ids to reflect the account's current identity after merging/renaming.
  */
 export function updatePersonalAttributionsConfig(
