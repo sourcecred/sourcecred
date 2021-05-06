@@ -14,7 +14,7 @@ export GIT_ATTR_NOSYSTEM=1
 main() {
     parse_args "$@"
 
-    toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+    toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)/packages/sourcecred"
     cd "${toplevel}"
 
     sourcecred_repo=

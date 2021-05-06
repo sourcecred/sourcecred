@@ -20,7 +20,7 @@ export GIT_ATTR_NOSYSTEM=1
 . ./sharness.sh
 
 test_expect_success "environment and Node linking setup" '
-    toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" &&
+    toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)/packages/sourcecred" &&
     snapshot_directory="${toplevel}/sharness/__snapshots__/test-instance/" &&
     if [ -z "${SOURCECRED_BIN}" ]; then
         printf >&2 "warn: missing environment variable SOURCECRED_BIN\n" &&

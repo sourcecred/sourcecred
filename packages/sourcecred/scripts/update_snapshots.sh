@@ -7,7 +7,7 @@
 
 set -eu
 
-toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)/packages/sourcecred"
 cd "${toplevel}"
 
 tmpdir="$(mktemp -d)"
