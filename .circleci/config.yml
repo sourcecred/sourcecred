@@ -26,9 +26,11 @@ commands:
             # fall back to using the latest cache if no exact match is found
             - v1-node<< parameters.node_version >>-dependencies-
       - run: yarn install
+      - run: yarn lerna bootstrap
       - save_cache:
           paths:
             - node_modules
+            - packages/sourcecred/node_modules
           key: v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}
 
 jobs:
@@ -37,7 +39,7 @@ jobs:
     steps:
       - checkout
       - set_up_node_modules
-      - run: yarn test --ci
+      - run: cd packages/sourcecred && yarn test --ci
   test_full:
     executor: node12
     steps:
