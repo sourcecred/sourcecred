@@ -10,5 +10,8 @@
     "test": "lerna run test --",
     "build": "lerna run build",
     "install": "lerna bootstrap"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
