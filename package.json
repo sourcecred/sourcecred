@@ -4,12 +4,14 @@
   "repository": "github:sourcecred/sourcecred",
   "private": true,
   "devDependencies": {
+    "flow-mono-cli": "^1.5.3",
     "lerna": "^4.0.0"
   },
   "scripts": {
     "test": "lerna run test --",
     "build": "lerna run build",
-    "install": "lerna bootstrap"
+    "install": "lerna bootstrap ; ./scripts/flow-mono.sh",
+    "start": "lerna run start"
   },
   "workspaces": [
     "packages/*"

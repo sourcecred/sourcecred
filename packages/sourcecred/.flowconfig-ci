@@ -3,7 +3,6 @@
 <PROJECT_ROOT>/node_modules/webpack-cli/lib/utils/__tests__/.*
 
 [include]
-../../node_modules
 
 [libs]
 flow-typed

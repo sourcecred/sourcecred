@@ -6,6 +6,8 @@
   "version": "0.8.5",
   "private": false,
   "dependencies": {
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "aphrodite": "^2.4.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
@@ -15,6 +17,7 @@
     "big-integer": "^1.6.48",
     "bottleneck": "^2.19.5",
     "chalk": "^4.0.0",
+    "classnames": "~2.2.5",
     "commonmark": "0.29.1",
     "cross-fetch": "^3.0.6",
     "d3-array": "^2.4.0",
@@ -25,6 +28,7 @@
     "d3-time": "^2.0.0",
     "d3-time-format": "^3.0.0",
     "deep-freeze": "^0.0.1",
+    "entities": "^2.0.0",
     "express": "^4.17.1",
     "fs-extra": "^10.0.0",
     "globby": "^11.0.0",
@@ -42,7 +46,9 @@
     "object-assign": "^4.1.1",
     "pako": "^2.0.3",
     "promise": "^8.1.0",
+    "ra-core": "^3.13.4",
     "ra-data-fakerest": "^3.6.2",
+    "ra-ui-materialui": "^3.13.4",
     "react": "^16.13.0",
     "react-admin": "^3.6.2",
     "react-dom": "^16.13.0",
@@ -124,7 +130,8 @@
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0",
     "prepublishOnly": "yarn build",
-    "docs": "node ./scripts/build-docs.js"
+    "docs": "node ./scripts/build-docs.js",
+    "postinstall": "../../scripts/flow-mono.sh"
   },
   "engines": {
     "node": ">=12"
