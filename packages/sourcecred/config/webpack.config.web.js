@@ -181,9 +181,11 @@ function makeConfig(mode /*: "production" | "development" */) /*: Object */ {
     module: {
       strictExportPresence: true,
       rules: [
-        // TODO: Disable require.ensure as it's not a standard language feature.
-        // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
-        // { parser: { requireEnsure: false } },
+        {
+          parser: {
+            requireEnsure: false,
+          },
+        },
         {
           // "oneOf" will traverse all following loaders until one will
           // match the requirements. When no loader matches it will fall

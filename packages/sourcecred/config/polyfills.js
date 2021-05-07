@@ -16,3 +16,17 @@ Object.assign = require("object-assign");
 if (process.env.NODE_ENV === "test") {
   require("raf").polyfill(global);
 }
+
+function getGlobalObject() {
+  if (typeof self !== "undefined") {
+    return;
+  }
+  if (typeof global !== "undefined") {
+    return (global.self = global);
+  }
+  if (typeof window !== "undefined") {
+    return (window.self = window);
+  }
+}
+
+getGlobalObject();
