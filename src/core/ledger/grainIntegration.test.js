@@ -1,6 +1,6 @@
 // @flow
 import {
-  type grainIntegration,
+  type GrainIntegration,
   executeGrainIntegration,
 } from "./grainIntegration";
 import {
@@ -73,7 +73,7 @@ describe("src/core/ledger/grainIntegration", () => {
         currency.chainId
       );
     });
-    const getmockIntegration: (?boolean) => grainIntegration = (
+    const getmockIntegration: (?boolean) => GrainIntegration = (
       returnDistribution = false
     ) => (distributions, currency) => {
       const _ = currency;
@@ -84,7 +84,7 @@ describe("src/core/ledger/grainIntegration", () => {
       if (returnDistribution) return {transferredGrain: result};
     };
     const currency = buildCurrency("BTC");
-    it("can execute grainIntegration that doesn't update the ledger", () => {
+    it("can execute GrainIntegration that doesn't update the ledger", () => {
       const ledgerSnapshot = ledger.serialize();
       const newLedger = executeGrainIntegration(
         ledger,
@@ -100,7 +100,7 @@ describe("src/core/ledger/grainIntegration", () => {
         {
           "action": {
             "id": "000000000000000000000A",
-            "type": "RUN_INTEGRATION",
+            "type": "MARK_DISTRIBUTION_EXECUTED",
           },
           "ledgerTimestamp": 10,
           "uuid": "000000000000000000011A",
@@ -138,7 +138,7 @@ describe("src/core/ledger/grainIntegration", () => {
         {
           "action": {
             "id": "000000000000000000000A",
-            "type": "RUN_INTEGRATION",
+            "type": "MARK_DISTRIBUTION_EXECUTED",
           },
           "ledgerTimestamp": 10,
           "uuid": "000000000000000000011A",
@@ -161,7 +161,7 @@ describe("src/core/ledger/grainIntegration", () => {
         {
           "action": {
             "id": "000000000000000000000A",
-            "type": "RUN_INTEGRATION",
+            "type": "MARK_DISTRIBUTION_EXECUTED",
           },
           "ledgerTimestamp": 10,
           "uuid": "000000000000000000011A",
@@ -199,7 +199,7 @@ describe("src/core/ledger/grainIntegration", () => {
         {
           "action": {
             "id": "000000000000000000000A",
-            "type": "RUN_INTEGRATION",
+            "type": "MARK_DISTRIBUTION_EXECUTED",
           },
           "ledgerTimestamp": 10,
           "uuid": "000000000000000000011A",
