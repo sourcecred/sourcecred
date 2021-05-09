@@ -1604,21 +1604,22 @@ describe("core/ledger/ledger", () => {
       allocations: [],
       id: uuid.random(),
     });
-    describe("Toggle Integrations", () => {
+    describe("Grain Integrations", () => {
       it("can enable integrations", () => {
         const ledger = new Ledger();
+        dateMock.resetFakeDate();
         ledger.enableIntegrationTracking();
         expect(ledger.eventLog()).toEqual([
           {
             "action": {
-              type: "TOGGLE_INTEGRATION",
+              type: "ENABLE_GRAIN_INTEGRATION",
             },
-            ledgerTimestamp: 4,
+            ledgerTimestamp: 0,
             uuid: "000000000000000000017A",
             version: "1",
           },
         ]);
-        expect(ledger._trackIntegration).toBe(true);
+        expect(ledger._trackGrainIntegration).toBe(true);
       });
       it("can disable integrations", () => {
         const ledger = new Ledger();
@@ -1627,50 +1628,50 @@ describe("core/ledger/ledger", () => {
         expect(ledger.eventLog()).toEqual([
           {
             "action": {
-              type: "TOGGLE_INTEGRATION",
+              type: "ENABLE_GRAIN_INTEGRATION",
             },
-            ledgerTimestamp: 5,
+            ledgerTimestamp: 1,
             uuid: "000000000000000000018A",
             version: "1",
           },
           {
             "action": {
-              type: "TOGGLE_INTEGRATION",
+              type: "DISABLE_GRAIN_INTEGRATION",
             },
-            ledgerTimestamp: 6,
+            ledgerTimestamp: 2,
             uuid: "000000000000000000019A",
             version: "1",
           },
         ]);
-        expect(ledger._trackIntegration).toBe(false);
+        expect(ledger._trackGrainIntegration).toBe(false);
       });
-      it("is a no-op when repeatedly disabling integrations", () => {
+      it("is a no-op when repeatedly enabling integrations", () => {
         const ledger = new Ledger();
         ledger.enableIntegrationTracking();
         ledger.enableIntegrationTracking();
         expect(ledger.eventLog()).toEqual([
           {
             "action": {
-              type: "TOGGLE_INTEGRATION",
+              type: "ENABLE_GRAIN_INTEGRATION",
             },
-            ledgerTimestamp: 7,
+            ledgerTimestamp: 3,
             uuid: "000000000000000000020A",
             version: "1",
           },
         ]);
-        expect(ledger._trackIntegration).toBe(true);
+        expect(ledger._trackGrainIntegration).toBe(true);
       });
-      it("is a no-op when attempting to repeatedly enable integrations", () => {
+      it("is a no-op when attempting to repeatedly disable integrations", () => {
         const ledger = new Ledger();
         ledger.disableIntegrationTracking();
         expect(ledger.eventLog()).toEqual([]);
       });
-      describe("runIntegration", () => {
+      describe("markDistributionExecuted", () => {
         it("does not run if a integration tracking is disabled", () => {
           const distribution = getEmptyDistribution();
           const ledger = new Ledger();
           ledger.distributeGrain(distribution);
-          const thunk = () => ledger.runIntegration(distribution.id);
+          const thunk = () => ledger.markDistributionExecuted(distribution.id);
           expect(thunk).toThrow("integration tracking not enabled");
           expect(Array.from(ledger.trackedDistributions())).toEqual([]);
         });
@@ -1679,20 +1680,20 @@ describe("core/ledger/ledger", () => {
           const ledger = new Ledger();
           ledger.enableIntegrationTracking();
           ledger.distributeGrain(distribution);
-          ledger.runIntegration(distribution.id);
+          ledger.markDistributionExecuted(distribution.id);
           expect(ledger.eventLog()).toEqual([
             {
               "action": {
-                type: "TOGGLE_INTEGRATION",
+                type: "ENABLE_GRAIN_INTEGRATION",
               },
-              ledgerTimestamp: 9,
+              ledgerTimestamp: 5,
               uuid: "000000000000000000024A",
               version: "1",
             },
             {
               uuid: "000000000000000000025A",
               version: "1",
-              ledgerTimestamp: 10,
+              ledgerTimestamp: 6,
               action: {
                 "distribution": {
                   "allocations": [],
@@ -1705,9 +1706,9 @@ describe("core/ledger/ledger", () => {
             {
               "action": {
                 "id": "000000000000000000023A",
-                "type": "RUN_INTEGRATION",
+                "type": "MARK_DISTRIBUTION_EXECUTED",
               },
-              "ledgerTimestamp": 11,
+              "ledgerTimestamp": 7,
               "uuid": "000000000000000000026A",
               "version": "1",
             },
@@ -1715,10 +1716,10 @@ describe("core/ledger/ledger", () => {
           expect(Array.from(ledger.trackedDistributions())).toEqual([
             distribution.id,
           ]);
-          expect(ledger.integrationExecuted(distribution.id)).toBe(true);
+          expect(ledger.isGrainIntegrationExecuted(distribution.id)).toBe(true);
         });
       });
-      describe("trackDistributions", () => {
+      describe("tracked Distributions", () => {
         const distribution = getEmptyDistribution();
         const ledger = new Ledger();
         ledger.distributeGrain(distribution);
@@ -1730,16 +1731,22 @@ describe("core/ledger/ledger", () => {
             distribution2.id,
           ]);
         });
-        describe("integrationExecuted", () => {
+        describe("isGrainIntegrationExecuted", () => {
           it("returns undefined for untracked distributions", () => {
-            expect(ledger.integrationExecuted(distribution.id)).toBe(undefined);
+            expect(ledger.isGrainIntegrationExecuted(distribution.id)).toBe(
+              undefined
+            );
           });
           it("returns false for tracked integrations not yet executed", () => {
-            expect(ledger.integrationExecuted(distribution2.id)).toBe(false);
+            expect(ledger.isGrainIntegrationExecuted(distribution2.id)).toBe(
+              false
+            );
           });
           it("returns true for executed integrations", () => {
-            ledger.runIntegration(distribution2.id);
-            expect(ledger.integrationExecuted(distribution2.id)).toBe(true);
+            ledger.markDistributionExecuted(distribution2.id);
+            expect(ledger.isGrainIntegrationExecuted(distribution2.id)).toBe(
+              true
+            );
           });
         });
       });
