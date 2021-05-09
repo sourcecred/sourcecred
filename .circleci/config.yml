@@ -22,8 +22,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            # TODO: make this dynamic using lerna or something
-            - v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}-{{ checksum "packages/sourcecred/package.json" }}
+            - v1-node<< parameters.node_version >>-dependencies-{{ checksum "yarn.lock" }}
             # fall back to using the latest cache if no exact match is found
             - v1-node<< parameters.node_version >>-dependencies-
       - run: yarn install
@@ -31,8 +30,7 @@ commands:
           paths:
             - node_modules
             - packages/sourcecred/node_modules
-          # TODO: make this dynamic using lerna or something
-          key: v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}-{{ checksum "packages/sourcecred/package.json" }}
+          key: v1-node<< parameters.node_version >>-dependencies-{{ checksum "yarn.lock" }}
 
 jobs:
   test:
