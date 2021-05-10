@@ -1619,7 +1619,6 @@ describe("core/ledger/ledger", () => {
             version: "1",
           },
         ]);
-        expect(ledger._trackGrainIntegration).toBe(true);
       });
       it("can disable integrations", () => {
         const ledger = new Ledger();
@@ -1643,7 +1642,6 @@ describe("core/ledger/ledger", () => {
             version: "1",
           },
         ]);
-        expect(ledger._trackGrainIntegration).toBe(false);
       });
       it("is a no-op when repeatedly enabling integrations", () => {
         const ledger = new Ledger();
@@ -1659,7 +1657,6 @@ describe("core/ledger/ledger", () => {
             version: "1",
           },
         ]);
-        expect(ledger._trackGrainIntegration).toBe(true);
       });
       it("is a no-op when attempting to repeatedly disable integrations", () => {
         const ledger = new Ledger();
