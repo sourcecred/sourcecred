@@ -13,9 +13,9 @@ type Transfer = {|
   memo: string,
 |};
 
-export type PayoutDistributions = Map<PayoutAddress, G.Grain>;
+export type PayoutDistributions = Array<[PayoutAddress, G.Grain]>;
 export type PayoutAddressToId = Map<PayoutAddress, IdentityId>;
-export type TransferredGrain = Map<PayoutAddress, Transfer>;
+export type TransferredGrain = Array<[PayoutAddress, Transfer]>;
 
 export type PayoutResult = {|
   // Amounts that are actually distributed by the integration.
@@ -83,7 +83,7 @@ export function executeGrainIntegration(
   }
   if (result && sink && accountingEnabled && processDistributions) {
     const {transferredGrain} = result;
-    for (const [address, {amount, memo}] of transferredGrain.entries()) {
+    for (const [address, {amount, memo}] of transferredGrain) {
       const recipientId = payoutAddressToId.get(address);
       if (!recipientId)
         throw new Error(`Invalid recipient address: ${address}`);
@@ -106,7 +106,7 @@ export function buildDistributionIndexes(
   payoutDistributions: PayoutDistributions,
   payoutAddressToId: PayoutAddressToId,
 } {
-  const payoutDistributions = new Map();
+  const payoutDistributionMap = new Map();
   const payoutAddressToId = new Map();
   const balances = getDistributionBalances(distribution);
   for (const [id, amount] of balances.entries()) {
@@ -116,10 +116,12 @@ export function buildDistributionIndexes(
     // need to allow for identities that have since been merged to still claim
     // funds if accounts are merged between a grain distribution and a
     // grainIntegration call.
-    const total = NullUtil.orElse(payoutDistributions.get(address), G.ZERO);
-    payoutDistributions.set(address, G.add(amount, total));
+    const total = NullUtil.orElse(payoutDistributionMap.get(address), G.ZERO);
+    payoutDistributionMap.set(address, G.add(amount, total));
     payoutAddressToId.set(address, identity.id);
   }
+
+  const payoutDistributions = Array.from(payoutDistributionMap.entries());
 
   return {payoutDistributions, payoutAddressToId};
 }

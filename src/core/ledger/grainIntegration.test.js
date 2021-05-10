@@ -1,4 +1,5 @@
 // @flow
+
 import {
   type GrainIntegration,
   executeGrainIntegration,
@@ -77,10 +78,10 @@ describe("src/core/ledger/grainIntegration", () => {
       returnDistribution = false
     ) => (distributions, currency) => {
       const _ = currency;
-      const result = new Map();
-      for (const [address, amount] of distributions.entries()) {
-        result.set(address, {amount, memo: "hello transfer"});
-      }
+      const result = distributions.map(([address, amount]) => [
+        address,
+        {amount, memo: "hello transfer"},
+      ]);
       if (returnDistribution) return {transferredGrain: result};
     };
     const currency = buildCurrency("BTC");
