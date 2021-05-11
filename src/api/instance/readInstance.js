@@ -7,7 +7,11 @@ import {type GraphInput} from "../main/graph";
 import {type GrainInput} from "../main/grain";
 import {type AnalysisInput} from "../main/analysis";
 import {join as pathJoin} from "path";
-import {loadJson} from "../../util/storage";
+import {
+  loadJson,
+  loadFileWithDefault,
+  loadJsonWithDefault,
+} from "../../util/storage";
 import {
   CredGraph,
   parser as credGraphParser,
@@ -17,12 +21,24 @@ import {NetworkStorage} from "../../core/storage/networkStorage";
 import {OriginStorage} from "../../core/storage/originStorage";
 import {ZipStorage} from "../../core/storage/zip";
 import {DataStorage} from "../../core/storage";
+import {type GrainConfig, parser as grainConfigParser} from "../grainConfig";
+import {
+  parser as currencyConfigParser,
+  type CurrencyDetails,
+} from "../currencyConfig";
+import {defaultCurrencyConfig} from "../currencyConfig";
 
 export const getNetworkReadInstance = (base: string): ReadInstance =>
   new ReadInstance(new NetworkStorage(base));
 export const getOriginReadInstance = (base: string): ReadInstance =>
   new ReadInstance(new OriginStorage(base));
 
+const GRAIN_PATH: $ReadOnlyArray<string> = ["config", "grain.json"];
+const CURRENCY_PATH: $ReadOnlyArray<string> = [
+  "config",
+  "currencyDetails.json",
+];
+const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
 const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
   "output",
   "credGraph.json.gzip",
@@ -50,7 +66,23 @@ export class ReadInstance implements ReadOnlyInstance {
   }
 
   async readGrainInput(): Promise<GrainInput> {
-    throw "not yet implemented";
+    const [
+      credGraph,
+      ledger,
+      grainConfig,
+      currencyDetails,
+    ] = await Promise.all([
+      this.readCredGraph(),
+      this.readLedger(),
+      this.readGrainConfig(),
+      this.readCurrencyDetails(),
+    ]);
+    return {
+      credGraph,
+      ledger,
+      grainConfig,
+      currencyDetails,
+    };
   }
 
   async readAnalysisInput(): Promise<AnalysisInput> {
@@ -67,6 +99,24 @@ export class ReadInstance implements ReadOnlyInstance {
   }
 
   async readLedger(): Promise<Ledger> {
-    throw "not yet implemented";
+    const ledgerPath = pathJoin(...LEDGER_PATH);
+    return loadFileWithDefault(this._storage, ledgerPath, () =>
+      new Ledger().serialize()
+    ).then((result) => Ledger.parse(result));
+  }
+
+  async readGrainConfig(): Promise<GrainConfig> {
+    const grainConfigPath = pathJoin(...GRAIN_PATH);
+    return loadJson(this._storage, grainConfigPath, grainConfigParser);
+  }
+
+  async readCurrencyDetails(): Promise<CurrencyDetails> {
+    const currencyDetailsPath = pathJoin(...CURRENCY_PATH);
+    return loadJsonWithDefault(
+      this._storage,
+      currencyDetailsPath,
+      currencyConfigParser,
+      defaultCurrencyConfig
+    );
   }
 }
