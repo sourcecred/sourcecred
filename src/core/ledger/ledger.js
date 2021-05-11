@@ -143,6 +143,8 @@ export class Ledger {
   _allocationsToDistributions: Map<AllocationId, DistributionId>;
   _latestTimestamp: TimestampMs = -Infinity;
   _lastDistributionTimestamp: TimestampMs | null = null;
+  _shouldTrackGrainIntegration: boolean = false;
+  _grainIntegrationStatuses: Map<DistributionId, boolean>;
 
   constructor() {
     this._ledgerEventLog = new JsonLog();
@@ -153,6 +155,7 @@ export class Ledger {
     this._allocations = new Map();
     this._distributions = new Map();
     this._allocationsToDistributions = new Map();
+    this._grainIntegrationStatuses = new Map();
   }
 
   /**
@@ -613,6 +616,9 @@ export class Ledger {
     ) {
       this._lastDistributionTimestamp = distribution.credTimestamp;
     }
+    if (this._shouldTrackGrainIntegration) {
+      this._grainIntegrationStatuses.set(distribution.id, false);
+    }
   }
 
   /**
@@ -769,6 +775,84 @@ export class Ledger {
   }
 
   /**
+   * no-ops if integration tracking is already enabled
+   */
+  enableIntegrationTracking(): Ledger {
+    if (!this._shouldTrackGrainIntegration) {
+      this._createAndProcessEvent({
+        type: "ENABLE_GRAIN_INTEGRATION",
+      });
+    }
+    return this;
+  }
+
+  /**
+   * no-ops if integration tracking is already disabled
+   */
+  disableIntegrationTracking(): Ledger {
+    if (this._shouldTrackGrainIntegration) {
+      this._createAndProcessEvent({
+        type: "DISABLE_GRAIN_INTEGRATION",
+      });
+    }
+    return this;
+  }
+
+  _enableGrainIntegrationTracking(_: EnableGrainIntegration) {
+    this._shouldTrackGrainIntegration = true;
+  }
+
+  _disableGrainIntegrationTracking(_: DisableGrainIntegration) {
+    this._shouldTrackGrainIntegration = false;
+    this._grainIntegrationStatuses.clear();
+  }
+
+  /**
+   * Mark integrations as executed.
+   * Validates that:
+   * a) executions are tracked
+   * b) executions are not yet marked as executed
+   * c) distribution tracking is enabled
+   */
+  markDistributionExecuted(id: DistributionId): Ledger {
+    if (!this._shouldTrackGrainIntegration) {
+      throw new Error("integration tracking not enabled");
+    }
+    if (this._grainIntegrationStatuses.get(id) === undefined) {
+      throw new Error("Distribution not eligible to executed");
+    }
+    if (this._grainIntegrationStatuses.get(id) === true) {
+      throw new Error("Integration has already executed this distribution");
+    }
+    this._createAndProcessEvent({
+      type: "MARK_DISTRIBUTION_EXECUTED",
+      id,
+    });
+    return this;
+  }
+  _markDistributionExecuted({id}: MarkDistributionExecuted) {
+    this._grainIntegrationStatuses.set(id, true);
+  }
+
+  /**
+   * Is cleared each time `disableIntegrationTracking` is called
+   */
+  trackedDistributions(): Iterator<DistributionId> {
+    return this._grainIntegrationStatuses.keys();
+  }
+
+  /**
+   * Returns the status of a tracked distribution
+   * If the distribution has not been executed by the integration, `false` is
+   * returned.
+   * If the distribution has been executed, `true` is returned.
+   * If the distribution is untracked, `undefined` is returned.
+   */
+  isGrainIntegrationExecuted(id: DistributionId): ?boolean {
+    return this._grainIntegrationStatuses.get(id);
+  }
+
+  /**
    * Retrieve the log of all actions in the Ledger's history.
    *
    * May be used to reconstruct the Ledger after serialization.
@@ -846,6 +930,15 @@ export class Ledger {
       case "SET_PAYOUT_ADDRESS":
         this._setPayoutAddress(action);
         break;
+      case "ENABLE_GRAIN_INTEGRATION":
+        this._enableGrainIntegrationTracking(action);
+        break;
+      case "DISABLE_GRAIN_INTEGRATION":
+        this._disableGrainIntegrationTracking(action);
+        break;
+      case "MARK_DISTRIBUTION_EXECUTED":
+        this._markDistributionExecuted(action);
+        break;
       // istanbul ignore next: unreachable per Flow
       default:
         throw new Error(`Unknown type: ${(action.type: empty)}`);
@@ -913,7 +1006,10 @@ type Action =
   | DistributeGrain
   | TransferGrain
   | ChangeIdentityType
-  | SetPayoutAddress;
+  | SetPayoutAddress
+  | EnableGrainIntegration
+  | DisableGrainIntegration
+  | MarkDistributionExecuted;
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
@@ -1016,6 +1112,36 @@ const transferGrainParser: C.Parser<TransferGrain> = C.object({
   memo: C.orElse([C.string, C.null_]),
 });
 
+type EnableGrainIntegration = {|
+  +type: "ENABLE_GRAIN_INTEGRATION",
+|};
+
+const enableGrainIntegrationParser: C.Parser<EnableGrainIntegration> = C.object(
+  {
+    type: C.exactly(["ENABLE_GRAIN_INTEGRATION"]),
+  }
+);
+
+type DisableGrainIntegration = {|
+  +type: "DISABLE_GRAIN_INTEGRATION",
+|};
+
+const disableGrainIntegrationParser: C.Parser<DisableGrainIntegration> = C.object(
+  {
+    type: C.exactly(["DISABLE_GRAIN_INTEGRATION"]),
+  }
+);
+
+type MarkDistributionExecuted = {|
+  +type: "MARK_DISTRIBUTION_EXECUTED",
+  +id: DistributionId,
+|};
+
+const executeDistributionParser: C.Parser<MarkDistributionExecuted> = C.object({
+  type: C.exactly(["MARK_DISTRIBUTION_EXECUTED"]),
+  id: uuid.parser,
+});
+
 const actionParser: C.Parser<Action> = C.orElse([
   createIdentityParser,
   renameIdentityParser,
@@ -1026,6 +1152,9 @@ const actionParser: C.Parser<Action> = C.orElse([
   distributeGrainParser,
   transferGrainParser,
   setPayoutAddressParser,
+  enableGrainIntegrationParser,
+  disableGrainIntegrationParser,
+  executeDistributionParser,
 ]);
 
 const ledgerEventParser: C.Parser<LedgerEvent> = C.object({

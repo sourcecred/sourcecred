@@ -1598,6 +1598,158 @@ describe("core/ledger/ledger", () => {
     });
   });
 
+  describe("Grain Integrations", () => {
+    const getEmptyDistribution = (time: number = 1) => ({
+      credTimestamp: time,
+      allocations: [],
+      id: uuid.random(),
+    });
+    describe("Grain Integrations", () => {
+      it("can enable integrations", () => {
+        const ledger = new Ledger();
+        dateMock.resetFakeDate();
+        ledger.enableIntegrationTracking();
+        expect(ledger.eventLog()).toEqual([
+          {
+            "action": {
+              type: "ENABLE_GRAIN_INTEGRATION",
+            },
+            ledgerTimestamp: 0,
+            uuid: "000000000000000000017A",
+            version: "1",
+          },
+        ]);
+      });
+      it("can disable integrations", () => {
+        const ledger = new Ledger();
+        ledger.enableIntegrationTracking();
+        ledger.disableIntegrationTracking();
+        expect(ledger.eventLog()).toEqual([
+          {
+            "action": {
+              type: "ENABLE_GRAIN_INTEGRATION",
+            },
+            ledgerTimestamp: 1,
+            uuid: "000000000000000000018A",
+            version: "1",
+          },
+          {
+            "action": {
+              type: "DISABLE_GRAIN_INTEGRATION",
+            },
+            ledgerTimestamp: 2,
+            uuid: "000000000000000000019A",
+            version: "1",
+          },
+        ]);
+      });
+      it("is a no-op when repeatedly enabling integrations", () => {
+        const ledger = new Ledger();
+        ledger.enableIntegrationTracking();
+        ledger.enableIntegrationTracking();
+        expect(ledger.eventLog()).toEqual([
+          {
+            "action": {
+              type: "ENABLE_GRAIN_INTEGRATION",
+            },
+            ledgerTimestamp: 3,
+            uuid: "000000000000000000020A",
+            version: "1",
+          },
+        ]);
+      });
+      it("is a no-op when attempting to repeatedly disable integrations", () => {
+        const ledger = new Ledger();
+        ledger.disableIntegrationTracking();
+        expect(ledger.eventLog()).toEqual([]);
+      });
+      describe("markDistributionExecuted", () => {
+        it("does not run if a integration tracking is disabled", () => {
+          const distribution = getEmptyDistribution();
+          const ledger = new Ledger();
+          ledger.distributeGrain(distribution);
+          const thunk = () => ledger.markDistributionExecuted(distribution.id);
+          expect(thunk).toThrow("integration tracking not enabled");
+          expect(Array.from(ledger.trackedDistributions())).toEqual([]);
+        });
+        it("runs when integration tracking is enabled", () => {
+          const distribution = getEmptyDistribution();
+          const ledger = new Ledger();
+          ledger.enableIntegrationTracking();
+          ledger.distributeGrain(distribution);
+          ledger.markDistributionExecuted(distribution.id);
+          expect(ledger.eventLog()).toEqual([
+            {
+              "action": {
+                type: "ENABLE_GRAIN_INTEGRATION",
+              },
+              ledgerTimestamp: 5,
+              uuid: "000000000000000000024A",
+              version: "1",
+            },
+            {
+              uuid: "000000000000000000025A",
+              version: "1",
+              ledgerTimestamp: 6,
+              action: {
+                "distribution": {
+                  "allocations": [],
+                  "credTimestamp": 1,
+                  "id": "000000000000000000023A",
+                },
+                type: "DISTRIBUTE_GRAIN",
+              },
+            },
+            {
+              "action": {
+                "id": "000000000000000000023A",
+                "type": "MARK_DISTRIBUTION_EXECUTED",
+              },
+              "ledgerTimestamp": 7,
+              "uuid": "000000000000000000026A",
+              "version": "1",
+            },
+          ]);
+          expect(Array.from(ledger.trackedDistributions())).toEqual([
+            distribution.id,
+          ]);
+          expect(ledger.isGrainIntegrationExecuted(distribution.id)).toBe(true);
+        });
+      });
+      describe("tracked Distributions", () => {
+        const distribution = getEmptyDistribution();
+        const ledger = new Ledger();
+        ledger.distributeGrain(distribution);
+        ledger.enableIntegrationTracking();
+        const distribution2 = getEmptyDistribution(7);
+        ledger.distributeGrain(distribution2);
+        it("doesn't return untracked distributions", () => {
+          expect(Array.from(ledger.trackedDistributions())).toEqual([
+            distribution2.id,
+          ]);
+        });
+        describe("isGrainIntegrationExecuted", () => {
+          it("returns undefined for untracked distributions", () => {
+            expect(ledger.isGrainIntegrationExecuted(distribution.id)).toBe(
+              undefined
+            );
+          });
+          it("returns false for tracked integrations not yet executed", () => {
+            expect(ledger.isGrainIntegrationExecuted(distribution2.id)).toBe(
+              false
+            );
+          });
+          it("returns true for executed integrations", () => {
+            ledger.markDistributionExecuted(distribution2.id);
+            expect(ledger.isGrainIntegrationExecuted(distribution2.id)).toBe(
+              true
+            );
+          });
+        });
+      });
+    });
+  });
+
   describe("uuids", () => {
     it("ledger events have uuids", () => {
       const ledger = new Ledger();
