@@ -78,10 +78,11 @@ describe("src/core/ledger/grainIntegration", () => {
       returnDistribution = false
     ) => (distributions, currency) => {
       const _ = currency;
-      const result = distributions.map(([address, amount]) => [
-        address,
-        {amount, memo: "hello transfer"},
-      ]);
+      const result = distributions.map(([payoutAddress, amount]) => ({
+        payoutAddress,
+        amount,
+        memo: "hello transfer",
+      }));
       if (returnDistribution) return {transferredGrain: result};
     };
     const currency = buildCurrency("BTC");

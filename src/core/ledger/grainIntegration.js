@@ -9,13 +9,14 @@ import * as NullUtil from "../../util/null";
 import * as G from "./grain";
 
 type Transfer = {|
+  payoutAddress: PayoutAddress,
   amount: G.Grain,
   memo: string,
 |};
 
 export type PayoutDistributions = Array<[PayoutAddress, G.Grain]>;
 export type PayoutAddressToId = Map<PayoutAddress, IdentityId>;
-export type TransferredGrain = Array<[PayoutAddress, Transfer]>;
+export type TransferredGrain = Array<Transfer>;
 
 export type PayoutResult = {|
   // Amounts that are actually distributed by the integration.
@@ -83,10 +84,10 @@ export function executeGrainIntegration(
   }
   if (result && sink && accountingEnabled && processDistributions) {
     const {transferredGrain} = result;
-    for (const [address, {amount, memo}] of transferredGrain) {
-      const recipientId = payoutAddressToId.get(address);
+    for (const {payoutAddress, amount, memo} of transferredGrain) {
+      const recipientId = payoutAddressToId.get(payoutAddress);
       if (!recipientId)
-        throw new Error(`Invalid recipient address: ${address}`);
+        throw new Error(`Invalid recipient address: ${payoutAddress}`);
       ledger.transferGrain({
         from: recipientId,
         to: sink,
