@@ -36,11 +36,11 @@ const WeightsConfigSection = ({
         <Grid container item xs={12} direction="column">
           <Grid>
             <Grid>
-              This page is not yet integrated with the rest of the site. If you
-              have an existing weights.json file, upload it here. Once you are
-              done configuring weights, download the file and put it in your
-              /config directory in your instance as weights.json. To see new
-              scores, re-calculate scores using the CLI.
+              This page loads your current config/weights.json file, if one
+              exists. Once you are done configuring weights, download the file
+              and put it in your /config directory in your instance as
+              weights.json. To see new scores, re-calculate scores using the
+              CLI.
             </Grid>
             <Grid>
               <WeightsFileManager

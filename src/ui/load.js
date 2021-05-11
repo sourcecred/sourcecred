@@ -18,6 +18,7 @@ import {ZipStorage} from "../core/storage/zip";
 import {loadJson, loadJsonWithDefault} from "../util/storage";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {upgradeRawInstanceConfig} from "../api/bundledDeclarations";
+import * as Weights from "../core/weights";
 
 export type LoadResult = LoadSuccess | LoadFailure;
 export type LoadSuccess = {|
@@ -28,6 +29,7 @@ export type LoadSuccess = {|
   +currency: CurrencyDetails,
   +credGraph: CredGraph | null,
   +isDev: boolean,
+  +weights: Weights.WeightsT,
 |};
 export type LoadFailure = {|+type: "FAILURE", +error: any|};
 
@@ -65,6 +67,12 @@ export async function load(): Promise<LoadResult> {
       ),
       () => null
     ),
+    loadJsonWithDefault(
+      originStorage,
+      "config/weights.json",
+      Weights.parser,
+      Weights.empty
+    ),
   ];
   try {
     const [
@@ -72,6 +80,7 @@ export async function load(): Promise<LoadResult> {
       {hasBackend},
       currency,
       credGraph,
+      weights,
     ] = await Promise.all(queries);
 
     const ledgerResult = await ledgerManager.reloadLedger();
@@ -91,6 +100,7 @@ export async function load(): Promise<LoadResult> {
       currency,
       credGraph,
       isDev,
+      weights,
     };
   } catch (e) {
     console.error(e);

@@ -28,7 +28,7 @@ import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
 import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
 import {type PluginDeclarations} from "../../analysis/pluginDeclaration";
-import {type WeightsT, empty as emptyWeights} from "../../core/weights";
+import {type WeightsT} from "../../core/weights";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -100,10 +100,11 @@ const customRoutes = (
   currency: CurrencyDetails,
   credGrainView: CredGrainView | null,
   pluginDeclarations: PluginDeclarations,
-  isDev: boolean
+  isDev: boolean,
+  weights: WeightsT
 ) => {
   const [weightsState, setWeightsState] = useState<{weights: WeightsT}>({
-    weights: emptyWeights(),
+    weights,
   });
   const routes = [
     <Route key="explorer" exact path="/explorer">
@@ -216,7 +217,8 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
           loadSuccess.currency,
           credGrainView,
           Array.from(loadSuccess.bundledPlugins.values()),
-          loadSuccess.isDev
+          loadSuccess.isDev,
+          loadSuccess.weights
         )}
       >
         {/*
