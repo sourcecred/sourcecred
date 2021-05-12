@@ -27,9 +27,9 @@ export type GraphOutput = {|
 |};
 
 /**
-  
-
-  Might mutate the ledger that is passed in.
+ 
+ 
+ Might mutate the ledger that is passed in.
  */
 export async function graph(
   input: GraphInput,
@@ -84,7 +84,9 @@ export function _hackyIdentityNameReferenceDetector(
   ledger: Ledger
 ): ReferenceDetector {
   const usernameToAddress = new Map(
-    ledger.accounts().map((a) => [a.identity.name, a.identity.address])
+    ledger
+      .accounts()
+      .map((a) => [a.identity.name.toLowerCase(), a.identity.address])
   );
   function addressFromUrl(potentialUsername: string) {
     const prepped = potentialUsername.replace("@", "").toLowerCase();
