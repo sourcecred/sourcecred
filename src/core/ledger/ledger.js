@@ -90,10 +90,10 @@ export type Account = $ReadOnly<MutableAccount>;
  * Keying on the raw Currency object means keying on the object reference,
  * rather than the contents of the object.
  */
-type CurrencyId = string;
+export type CurrencyId = string;
 
 // Only Eth Addresses are supported at the moment
-type PayoutAddress = EthAddress;
+export type PayoutAddress = EthAddress;
 
 /**
  * PayableAddressStore maps currencies to a participant's
