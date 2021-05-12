@@ -8,10 +8,10 @@
     "lerna": "^4.0.0"
   },
   "scripts": {
-    "test": "lerna run test --",
-    "build": "lerna run build",
+    "test": "lerna run test --stream --",
+    "build": "lerna run build --stream",
     "install": "lerna bootstrap ; ./scripts/flow-mono.sh",
-    "start": "lerna run start"
+    "start": "lerna run start --stream"
   },
   "workspaces": [
     "packages/*"
