@@ -6,9 +6,10 @@
 # snapshots, run ./src/plugins/discourse/update_discourse_api_snapshots.sh
 
 set -eu
+toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 
-toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)/packages/sourcecred"
-cd "${toplevel}"
+. $toplevel/scripts/monorepo_vars.sh
+cd "${CORE_SUBPATH}"
 
 tmpdir="$(mktemp -d)"
 cleanup() {
@@ -19,7 +20,7 @@ trap cleanup EXIT
 SOURCECRED_BIN="${tmpdir}/bin"
 yarn run --silent build:backend --output-path "${SOURCECRED_BIN}"
 export SOURCECRED_BIN  # for Sharness and shell tests
-export NODE_PATH="${toplevel}/node_modules${NODE_PATH:+:${NODE_PATH}}"
+export NODE_PATH="${CORE_SUBPATH}/node_modules${NODE_PATH:+:${NODE_PATH}}"
 
 echo "Updating GitHub GraphQL Flow types"
 cp .prettierrc.json "${SOURCECRED_BIN}/"

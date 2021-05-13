@@ -7,6 +7,9 @@ set -eu
 : "${DEPLOY_REMOTE:=git@github.com:sourcecred/sourcecred.github.io.git}"
 : "${DEPLOY_BRANCH:=master}"
 : "${DEPLOY_CNAME_URL:=sourcecred.io}"
+toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+
+. $toplevel/scripts/monorepo_vars.sh
 
 export GIT_CONFIG_NOSYSTEM=1
 export GIT_ATTR_NOSYSTEM=1
@@ -14,8 +17,7 @@ export GIT_ATTR_NOSYSTEM=1
 main() {
     parse_args "$@"
 
-    toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)/packages/sourcecred"
-    cd "${toplevel}"
+    cd "$CORE_SUBPATH"
 
     sourcecred_repo=
     static_site=

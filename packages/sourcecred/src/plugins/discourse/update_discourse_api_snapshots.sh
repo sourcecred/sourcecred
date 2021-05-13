@@ -5,13 +5,16 @@ set -eu
 snapshots_dir=src/plugins/discourse/snapshots
 test_instance_url="https://sourcecred-test.discourse.group"
 
+toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+
+. $toplevel/scripts/monorepo_vars.sh
+
 if [ ! "$(jq --version)" ]; then
   printf >&2 'This script depends on jq. Please install it.\n'
   exit 1
 fi
 
-toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)/packages/sourcecred"
-cd "${toplevel}"
+cd "${CORE_SUBPATH}"
 
 fetch() {
   url="${test_instance_url}$1"
