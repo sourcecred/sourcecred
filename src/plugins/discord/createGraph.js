@@ -332,7 +332,8 @@ export function _createGraphFromMessages(
           message,
           reaction,
           reactingMember,
-          propsChannels
+          propsChannels,
+          reactions
         )
       );
       wg.graph.addNode(node);

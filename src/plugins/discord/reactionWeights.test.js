@@ -8,6 +8,7 @@ import {
   _emojiWeight,
   reactionWeight,
 } from "./reactionWeights";
+import {type GraphReaction} from "./createGraph";
 
 describe("plugins/discord/reactionWeights", () => {
   const channelId = "1";
@@ -67,6 +68,17 @@ describe("plugins/discord/reactionWeights", () => {
     emoji: sourcecredEmoji,
   });
 
+  const reactions: $ReadOnlyArray<GraphReaction> = deepFreeze([
+    {
+      reaction: reacterReaction,
+      reactingMember: reacterMember,
+    },
+    {
+      reaction: authorSelfReaction,
+      reactingMember: authorMember,
+    },
+  ]);
+
   describe("_roleWeight", () => {
     const roleWeights = deepFreeze({
       defaultWeight: 0,
@@ -97,15 +109,19 @@ describe("plugins/discord/reactionWeights", () => {
 
   describe("_emojiWeight", () => {
     it("defaults to the defaultWeight if custom emoji weight not specified", () => {
-      const ew = {defaultWeight: 7, weights: {}};
+      const ew = {defaultWeight: 7, weights: {}, applyAveraging: false};
       expect(_emojiWeight(ew, authorSelfReaction)).toEqual(7);
     });
     it("can match an emoji weight for a builtin emoji", () => {
-      const ew = {defaultWeight: 0, weights: {"💜": 9}};
+      const ew = {defaultWeight: 0, weights: {"💜": 9}, applyAveraging: false};
       expect(_emojiWeight(ew, authorSelfReaction)).toEqual(9);
     });
     it("can match an emoji weight for a custom emoji", () => {
-      const ew = {defaultWeight: 0, weights: {"sourcecred:8": 12}};
+      const ew = {
+        defaultWeight: 0,
+        weights: {"sourcecred:8": 12},
+        applyAveraging: false,
+      };
       expect(_emojiWeight(ew, reacterReaction)).toEqual(12);
     });
   });
@@ -115,6 +131,7 @@ describe("plugins/discord/reactionWeights", () => {
       const emojiWeights = {
         defaultWeight: 1,
         weights: {"💜": 3, "sourcecred:8": 4},
+        applyAveraging: false,
       };
       const roleWeights = {
         defaultWeight: 1,
@@ -128,12 +145,65 @@ describe("plugins/discord/reactionWeights", () => {
           message,
           reacterReaction,
           reacterMember,
-          new Set()
+          new Set(),
+          reactions
         )
       ).toEqual(4 * 5 * 6);
     });
+    it("averages across role-weighted users when averaging is enabled", () => {
+      const emojiWeights = {
+        defaultWeight: 1,
+        weights: {"💜": 3, "sourcecred:8": 4},
+        applyAveraging: true,
+      };
+      const roleWeights = {
+        defaultWeight: 1,
+        weights: {[badassRoleId]: 5, [plebeRoleId]: 3},
+      };
+      const channelWeights = {defaultWeight: 1, weights: {[channelId]: 6}};
+      const weights = {emojiWeights, roleWeights, channelWeights};
+      // This is the role weight of the reactor and excludes the author
+      const expectedAveragingModifier = 5;
+      expect(
+        reactionWeight(
+          weights,
+          message,
+          reacterReaction,
+          reacterMember,
+          new Set(),
+          reactions
+        )
+      ).toEqual((4 * 5 * 6) / expectedAveragingModifier);
+    });
+    it("averaging is safe against divide-by-zero when all roles are zero", () => {
+      const emojiWeights = {
+        defaultWeight: 1,
+        weights: {"💜": 3, "sourcecred:8": 4},
+        applyAveraging: true,
+      };
+      const roleWeights = {
+        defaultWeight: 0,
+        weights: {[badassRoleId]: 0, [plebeRoleId]: 0},
+      };
+      const channelWeights = {defaultWeight: 1, weights: {[channelId]: 6}};
+      const weights = {emojiWeights, roleWeights, channelWeights};
+      expect(
+        reactionWeight(
+          weights,
+          message,
+          reacterReaction,
+          reacterMember,
+          new Set(),
+          reactions
+        )
+      ).toEqual(0);
+    });
     it("sets the weight to 0 for a self-reaction", () => {
-      const emojiWeights = {defaultWeight: 1, weights: {}};
+      const emojiWeights = {
+        defaultWeight: 1,
+        weights: {},
+        applyAveraging: false,
+      };
       const roleWeights = {defaultWeight: 1, weights: {}};
       const channelWeights = {defaultWeight: 1, weights: {}};
       const weights = {emojiWeights, roleWeights, channelWeights};
@@ -143,12 +213,17 @@ describe("plugins/discord/reactionWeights", () => {
           message,
           authorSelfReaction,
           authorMember,
-          new Set()
+          new Set(),
+          reactions
         )
       ).toEqual(0);
     });
     it("sets a  nonzero-weight for a self-reaction in a props channel", () => {
-      const emojiWeights = {defaultWeight: 5, weights: {}};
+      const emojiWeights = {
+        defaultWeight: 5,
+        weights: {},
+        applyAveraging: false,
+      };
       const roleWeights = {defaultWeight: 2, weights: {}};
       const channelWeights = {defaultWeight: 3, weights: {}};
       const weights = {emojiWeights, roleWeights, channelWeights};
@@ -159,7 +234,8 @@ describe("plugins/discord/reactionWeights", () => {
           message,
           authorSelfReaction,
           authorMember,
-          propsChannelSet
+          propsChannelSet,
+          reactions
         )
       ).toEqual(5 * 2 * 3);
     });

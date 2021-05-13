@@ -3,6 +3,7 @@
 import * as Model from "./models";
 import * as NullUtil from "../../util/null";
 import {type NodeWeight} from "../../core/weights";
+import {type GraphReaction} from "./createGraph";
 
 export type RoleWeightConfig = {|
   +defaultWeight: NodeWeight,
@@ -18,6 +19,7 @@ export type EmojiWeightMap = {[Model.Snowflake]: NodeWeight};
 export type EmojiWeightConfig = {|
   +defaultWeight: NodeWeight,
   +weights: EmojiWeightMap,
+  +applyAveraging: boolean,
 |};
 
 export type WeightConfig = {|
@@ -31,7 +33,8 @@ export function reactionWeight(
   message: Model.Message,
   reaction: Model.Reaction,
   reactingMember: Model.GuildMember,
-  propsChannels: Set<Model.Snowflake>
+  propsChannels: Set<Model.Snowflake>,
+  reactions: $ReadOnlyArray<GraphReaction>
 ): NodeWeight {
   if (
     message.authorId === reaction.authorId &&
@@ -42,10 +45,27 @@ export function reactionWeight(
     return 0;
   }
 
+  const roleMultipliedReactingMembers = weights.emojiWeights.applyAveraging
+    ? [
+        ...new Set(
+          reactions
+            .filter(({reaction}) => reaction.authorId !== message.authorId)
+            .map(({reactingMember}) => reactingMember)
+        ),
+      ].reduce(
+        (total, member) => total + _roleWeight(weights.roleWeights, member),
+        0
+      )
+    : null;
+  const averagingMultiplier = roleMultipliedReactingMembers
+    ? 1 / roleMultipliedReactingMembers
+    : 1;
+
   return (
     _roleWeight(weights.roleWeights, reactingMember) *
     _channelWeight(weights.channelWeights, reaction) *
-    _emojiWeight(weights.emojiWeights, reaction)
+    _emojiWeight(weights.emojiWeights, reaction) *
+    averagingMultiplier
   );
 }
 
