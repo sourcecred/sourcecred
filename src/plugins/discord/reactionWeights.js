@@ -46,13 +46,13 @@ export function reactionWeight(
   }
 
   const roleMultipliedReactingMembers = weights.emojiWeights.applyAveraging
-    ? [
-        ...new Set(
+    ? Array.from(
+        new Set(
           reactions
             .filter(({reaction}) => reaction.authorId !== message.authorId)
             .map(({reactingMember}) => reactingMember)
-        ),
-      ].reduce(
+        )
+      ).reduce(
         (total, member) => total + _roleWeight(weights.roleWeights, member),
         0
       )
