@@ -1,2 +1,3 @@
 #!/bin/sh
-export CORE_SUBPATH="$(git rev-parse --show-toplevel)/packages/sourcecred"
+CORE_PACKAGE_SUBPATH=$(lerna ll --loglevel=silent | grep ^sourcecred' ' | cut --delimiter=' ' --fields=3)
+export CORE_PATH="$(git rev-parse --show-toplevel)/$CORE_PACKAGE_SUBPATH"
