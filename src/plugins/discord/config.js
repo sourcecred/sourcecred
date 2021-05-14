@@ -66,6 +66,11 @@ export type DiscordConfigJson = {|
   +propsChannels?: $ReadOnlyArray<Model.Snowflake>,
   // Whether to include NSFW channels in cred distribution or not
   +includeNsfwChannels?: boolean,
+  // What the weight should be for reactions not specified in reactionWeights
+  +defaultReactionWeight?: number,
+  // Whether reaction weights on a given message should be divided by the number
+  // of unique members that reacted to the message.
+  +applyAveragingToReactions?: boolean,
 |};
 
 const parserJson: C.Parser<DiscordConfigJson> = C.object(
@@ -84,6 +89,8 @@ const parserJson: C.Parser<DiscordConfigJson> = C.object(
     }),
     propsChannels: C.array(C.string),
     includeNsfwChannels: C.boolean,
+    defaultReactionWeight: C.number,
+    applyAveragingToReactions: C.boolean,
   }
 );
 
@@ -114,8 +121,8 @@ export function _upgrade(json: DiscordConfigJson): DiscordConfig {
       ),
       emojiWeights: {
         weights: json.reactionWeights,
-        // TODO: Make the default emoji weight customizable
-        defaultWeight: 1,
+        defaultWeight: NullUtil.orElse(json.defaultReactionWeight, 1),
+        applyAveraging: NullUtil.orElse(json.applyAveragingToReactions, false),
       },
     },
     propsChannels: json.propsChannels || [],
