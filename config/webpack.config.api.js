@@ -95,4 +95,13 @@ const server = {
   },
 };
 
-module.exports = ([client, server] /*: Array<any>*/);
+const devModule = {
+  ...server,
+  devtool: "source-map",
+  output: {
+    ...server.output,
+    path: `${paths.apiBuild}/module`,
+  },
+};
+
+module.exports = ([client, server, devModule] /*: Array<any>*/);
