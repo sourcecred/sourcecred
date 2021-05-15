@@ -14,7 +14,7 @@ if [ ! "$(jq --version)" ]; then
   exit 1
 fi
 
-cd "${CORE_SUBPATH}"
+cd "${CORE_PATH}"
 
 fetch() {
   url="${test_instance_url}$1"

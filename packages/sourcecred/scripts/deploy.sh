@@ -17,7 +17,7 @@ export GIT_ATTR_NOSYSTEM=1
 main() {
     parse_args "$@"
 
-    cd "$CORE_SUBPATH"
+    cd "$CORE_PATH"
 
     sourcecred_repo=
     static_site=

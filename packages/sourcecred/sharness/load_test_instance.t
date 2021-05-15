@@ -24,13 +24,13 @@ toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 . $toplevel/scripts/monorepo_vars.sh
 
 test_expect_success "environment and Node linking setup" '
-    snapshot_directory="${CORE_SUBPATH}/sharness/__snapshots__/test-instance/" &&
+    snapshot_directory="${CORE_PATH}/sharness/__snapshots__/test-instance/" &&
     if [ -z "${SOURCECRED_BIN}" ]; then
         printf >&2 "warn: missing environment variable SOURCECRED_BIN\n" &&
         printf >&2 "warn: using repository bin directory as fallback\n" &&
-        export SOURCECRED_BIN="${CORE_SUBPATH}/bin"
+        export SOURCECRED_BIN="${CORE_PATH}/bin"
     fi &&
-    export NODE_PATH="${CORE_SUBPATH}/node_modules${NODE_PATH:+:${NODE_PATH}}" &&
+    export NODE_PATH="${CORE_PATH}/node_modules${NODE_PATH:+:${NODE_PATH}}" &&
     test_set_prereq SETUP
 '
 

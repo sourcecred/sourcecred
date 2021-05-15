@@ -22,7 +22,7 @@ fi
 
 
 
-cd "${CORE_SUBPATH}"
+cd "${CORE_PATH}"
 
 fetch() {
   url="${test_instance_url}$1"
