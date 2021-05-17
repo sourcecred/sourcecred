@@ -21,6 +21,7 @@ export GIT_ATTR_NOSYSTEM=1
 
 toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 
+# shellcheck disable=SC1091
 . "${toplevel}/scripts/monorepo_vars.sh"
 
 test_expect_success "environment and Node linking setup" '
