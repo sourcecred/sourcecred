@@ -54,15 +54,15 @@ describe("util/taskReporter", () => {
         const timeMock = () => this._time;
         this.taskReporter = new LoggingTaskReporter(logMock, timeMock);
       }
-      start(task: string) {
+      start(task: string): TestCase {
         this.taskReporter.start(task);
         return this;
       }
-      finish(task: string) {
+      finish(task: string): TestCase {
         this.taskReporter.finish(task);
         return this;
       }
-      time(t: number) {
+      time(t: number): TestCase {
         this._time = t;
         return this;
       }

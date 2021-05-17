@@ -66,14 +66,14 @@ export class Mirror {
     repo: MirrorRepository,
     fetcher: Discourse,
     serverUrl: string,
-    options?: $Shape<MirrorOptions>
+    options?: $Shape<MirrorOptions> = {}
   ) {
     this._repo = repo;
     this._fetcher = fetcher;
     this._serverUrl = serverUrl;
     this._options = {
       ...defaultOptions,
-      ...(options || {}),
+      ...options,
     };
   }
 

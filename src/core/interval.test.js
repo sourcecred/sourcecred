@@ -79,6 +79,7 @@ describe("src/core/interval", () => {
       const i0 = {startTimeMs: 0, endTimeMs: 100};
       const i1 = {startTimeMs: 100, endTimeMs: 200};
       const is = intervalSequence([i0, i1]);
+      // $FlowExpectedError[cannot-write]
       i1.startTimeMs = 300;
       intervalSequence(is);
       expect(is[0].startTimeMs).toEqual(0);

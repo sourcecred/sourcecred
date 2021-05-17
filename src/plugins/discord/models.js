@@ -62,6 +62,7 @@ export type User = {|
   +username: string,
   +discriminator: string,
   +bot: boolean,
+  +system?: boolean,
 |};
 
 export type GuildMember = {|

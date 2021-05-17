@@ -2,7 +2,7 @@
 
 export type PluckFn<T> = (T) => any;
 
-const identity = (x) => x;
+const identity = (x: any) => x;
 
 /**
  * Sorting utility. Accepts an array and optionally any number of "pluck"
