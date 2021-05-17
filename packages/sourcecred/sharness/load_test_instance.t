@@ -20,9 +20,8 @@ export GIT_ATTR_NOSYSTEM=1
 . ./sharness.sh
 
 toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
-cd "${toplevel}" || exit 1
-. $toplevel/scripts/monorepo_vars.sh
-cd "${CORE_PATH}" || exit 1
+
+. "${toplevel}/scripts/monorepo_vars.sh"
 
 test_expect_success "environment and Node linking setup" '
     snapshot_directory="${CORE_PATH}/sharness/__snapshots__/test-instance/" &&
