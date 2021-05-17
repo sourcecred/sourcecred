@@ -6,7 +6,7 @@ main() {
     if [ "${1:-}" = "-n" ] || [ "${1:-}" = "--dry-run" ]; then
         DRY_RUN=1
     fi
-    cd "$(git rev-parse --show-toplevel)"
+    cd "$(git rev-parse --show-toplevel)/packages/sourcecred"
     yarn build:backend
     printf '\n'
     printf 'Synchronizing: example-git\n'

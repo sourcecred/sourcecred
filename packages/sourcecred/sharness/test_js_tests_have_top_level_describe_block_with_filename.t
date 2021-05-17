@@ -11,7 +11,7 @@ test_description='check that each JavaScript test has a "describe" block with it
 . ./sharness.sh
 
 test_expect_success "setup" '
-    root="$(git rev-parse --show-toplevel)" &&
+    root="$(git rev-parse --show-toplevel)/packages/sourcecred" &&
     (cd "${root}/src" && git ls-files -z "*.test.js") >test_files_z &&
     tr "\0" "\n" <test_files_z >test_files &&
     test_set_prereq SETUP

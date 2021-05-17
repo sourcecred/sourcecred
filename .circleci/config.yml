@@ -22,14 +22,15 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}
+            - v1-node<< parameters.node_version >>-dependencies-{{ checksum "yarn.lock" }}
             # fall back to using the latest cache if no exact match is found
             - v1-node<< parameters.node_version >>-dependencies-
       - run: yarn install
       - save_cache:
           paths:
             - node_modules
-          key: v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}
+            - packages/sourcecred/node_modules
+          key: v1-node<< parameters.node_version >>-dependencies-{{ checksum "yarn.lock" }}
 
 jobs:
   test:
