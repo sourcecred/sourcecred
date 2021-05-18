@@ -103,7 +103,7 @@ const loadCommand: Command = async (args, std) => {
         throw e;
       })
       .catch((e) => {
-        fail(std, name, e);
+        fail(std, name, JSON.stringify(e));
         failedPlugins.push(name);
       });
     loadPromises.push(loadWithPossibleRetry);
