@@ -25,6 +25,10 @@ export function fromString(s: string): NonnegativeGrain {
   return fromGrain(G.fromString(s));
 }
 
+export function fromFloatString(s: string): NonnegativeGrain {
+  return fromGrain(G.fromFloatString(s));
+}
+
 export const grainParser: P.Parser<NonnegativeGrain> = P.fmap(
   G.parser,
   fromGrain
@@ -33,6 +37,10 @@ export const numberParser: P.Parser<NonnegativeGrain> = P.fmap(
   P.number,
   fromInteger
 );
+export const numberOrFloatStringParser: P.Parser<NonnegativeGrain> = P.orElse([
+  P.fmap(P.integer, fromInteger),
+  P.fmap(P.string, fromFloatString),
+]);
 export const stringParser: P.Parser<NonnegativeGrain> = P.fmap(
   P.string,
   fromString

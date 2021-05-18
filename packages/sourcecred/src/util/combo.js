@@ -79,6 +79,13 @@ export const number: Parser<number> = new Parser((x) => {
   return success(x);
 });
 
+export const integer: Parser<number> = new Parser((x) => {
+  if (typeof x !== "number" || Math.floor(x) !== x) {
+    return failure("expected integer, got " + typename(x));
+  }
+  return success(x);
+});
+
 export const boolean: Parser<boolean> = new Parser((x) => {
   if (typeof x !== "boolean") {
     return failure("expected boolean, got " + typename(x));

@@ -4,28 +4,39 @@ import {parser, toDistributionPolicy, type GrainConfig} from "./grainConfig";
 import {type DistributionPolicy} from "../core/ledger/applyDistributions";
 import {toDiscount} from "../core/ledger/policies/recent";
 import {type Uuid, random as randomUuid} from "../util/uuid";
-import {fromInteger as toNonnegativeGrain} from "../core/ledger/nonnegativeGrain";
+import {
+  fromFloatString,
+  fromInteger,
+  type NonnegativeGrain,
+} from "../core/ledger/nonnegativeGrain";
 import {type BalancedPolicy} from "../core/ledger/policies/balanced";
 import {type ImmediatePolicy} from "../core/ledger/policies/immediate";
 import {type RecentPolicy} from "../core/ledger/policies/recent";
 import {type SpecialPolicy} from "../core/ledger/policies/special";
 
-const balanced = (budget: number): BalancedPolicy => ({
+const toNonnegativeGrain = (budget: number | string): NonnegativeGrain => {
+  if (typeof budget === "string") {
+    return fromFloatString(budget);
+  }
+  return fromInteger(budget);
+};
+
+const balanced = (budget: number | string): BalancedPolicy => ({
   policyType: "BALANCED",
   budget: toNonnegativeGrain(budget),
 });
-const immediate = (budget: number): ImmediatePolicy => ({
+const immediate = (budget: number | string): ImmediatePolicy => ({
   policyType: "IMMEDIATE",
   budget: toNonnegativeGrain(budget),
   numIntervalsLookback: 1,
 });
-const recent = (budget: number, discount: number): RecentPolicy => ({
+const recent = (budget: number | string, discount: number): RecentPolicy => ({
   policyType: "RECENT",
   budget: toNonnegativeGrain(budget),
   discount: toDiscount(discount),
 });
 const special = (
-  budget: number,
+  budget: number | string,
   memo: string,
   recipient: Uuid
 ): SpecialPolicy => ({
@@ -143,6 +154,47 @@ describe("api/grainConfig", () => {
       expect(parser.parseOrThrow(grainConfig)).toEqual(expected);
     });
 
+    it("can accept float strings for budgets", () => {
+      const uuid = randomUuid();
+      const grainConfig = {
+        allocationPolicies: [
+          {
+            policyType: "BALANCED",
+            budget: "50.5",
+          },
+          {
+            policyType: "IMMEDIATE",
+            budget: "10.1",
+            numIntervalsLookback: 1,
+          },
+          {
+            policyType: "RECENT",
+            budget: "20.2",
+            discount: 0.5,
+          },
+          {
+            policyType: "SPECIAL",
+            budget: "100.11",
+            memo: "howdy",
+            recipient: uuid,
+          },
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+
+      const expected: GrainConfig = {
+        allocationPolicies: [
+          balanced("50.5"),
+          immediate("10.1"),
+          recent("20.2", 0.5),
+          special("100.11", "howdy", uuid),
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+
+      expect(parser.parseOrThrow(grainConfig)).toEqual(expected);
+    });
+
     it("can take multiple of the same policy", () => {
       const config = {
         allocationPolicies: [
@@ -169,7 +221,7 @@ describe("api/grainConfig", () => {
     });
 
     it("parses deprecated policy config", () => {
-      const config = {
+      const inputConfig = {
         allocationPolicies: [],
         balancedPerWeek: 10,
         immediatePerWeek: 20,
@@ -177,8 +229,16 @@ describe("api/grainConfig", () => {
         recentWeeklyDecayRate: 0.5,
         maxSimultaneousDistributions: 100,
       };
+      const outputConfig = {
+        allocationPolicies: [],
+        balancedPerWeek: toNonnegativeGrain(10),
+        immediatePerWeek: toNonnegativeGrain(20),
+        recentPerWeek: toNonnegativeGrain(30),
+        recentWeeklyDecayRate: 0.5,
+        maxSimultaneousDistributions: 100,
+      };
 
-      expect(parser.parseOrThrow(config)).toEqual(config);
+      expect(parser.parseOrThrow(inputConfig)).toEqual(outputConfig);
     });
   });
 
@@ -186,8 +246,8 @@ describe("api/grainConfig", () => {
     it("deprecated policy config works alongside new config", () => {
       const x: GrainConfig = {
         allocationPolicies: [recent(50, 0.1)],
-        immediatePerWeek: 10,
-        recentPerWeek: 30,
+        immediatePerWeek: toNonnegativeGrain(10),
+        recentPerWeek: toNonnegativeGrain(30),
         recentWeeklyDecayRate: 0.5,
         maxSimultaneousDistributions: 10,
       };
@@ -198,20 +258,9 @@ describe("api/grainConfig", () => {
       expect(toDistributionPolicy(x)).toEqual(expected);
     });
 
-    it("errors on deprecated allocation policy with negative budget", () => {
+    it("errors on deprecated recent policy with no discount", () => {
       const x: GrainConfig = {
-        balancedPerWeek: -1,
-        allocationPolicies: [],
-      };
-
-      expect(() => toDistributionPolicy(x)).toThrowError(
-        `budget must be nonnegative integer`
-      );
-    });
-
-    it("deprecated recent policy with no discount errors", () => {
-      const x: GrainConfig = {
-        recentPerWeek: 10,
+        recentPerWeek: toNonnegativeGrain(10),
         allocationPolicies: [],
       };
 
@@ -236,9 +285,9 @@ describe("api/grainConfig", () => {
 
     it("default immediate's numIntervalsLookback to 1", () => {
       const x: GrainConfig = {
-        balancedPerWeek: 0,
-        immediatePerWeek: 100,
-        recentPerWeek: 0,
+        balancedPerWeek: toNonnegativeGrain(0),
+        immediatePerWeek: toNonnegativeGrain(100),
+        recentPerWeek: toNonnegativeGrain(0),
         recentWeeklyDecayRate: 0.1,
         maxSimultaneousDistributions: 2,
       };
