@@ -7,7 +7,7 @@ import {type ProcessedIdentities} from "../processedIdentities";
 import {
   type NonnegativeGrain,
   grainParser,
-  numberParser,
+  numberOrFloatStringParser,
 } from "../nonnegativeGrain";
 
 /**
@@ -55,7 +55,7 @@ export function recentReceipts(
 
 export const recentConfigParser: P.Parser<RecentPolicy> = P.object({
   policyType: P.exactly(["RECENT"]),
-  budget: numberParser,
+  budget: numberOrFloatStringParser,
   discount: P.fmap(P.number, toDiscount),
 });
 
