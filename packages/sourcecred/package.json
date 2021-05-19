@@ -130,8 +130,7 @@
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0",
     "prepublishOnly": "yarn build",
-    "docs": "node ./scripts/build-docs.js",
-    "postinstall": "../../scripts/flow-mono.sh"
+    "docs": "node ./scripts/build-docs.js"
   },
   "engines": {
     "node": ">=12"
