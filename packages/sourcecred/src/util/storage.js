@@ -51,6 +51,7 @@ export async function loadJsonWithDefault<T>(
     return parser.parseOrThrow(JSON.parse(decode(contents)));
   } catch (e) {
     if (notFound(e)) {
+      console.log(`File not found at path: ${path}. Defaulting.`);
       return def();
     } else {
       throw e;
