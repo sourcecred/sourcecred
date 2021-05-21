@@ -301,12 +301,12 @@ export function _createGraphFromMessages(
   config: DiscordConfig,
   messages: Iterable<GraphMessage>
 ): WeightedGraphT {
-  const {guildId, weights} = config;
-  const propsChannels = new Set(config.propsChannels);
   const wg = {
     graph: new Graph(),
     weights: emptyWeights(),
   };
+  const {guildId, weights} = config;
+  const propsChannels = new Set(config.propsChannels);
 
   for (const graphMessage of messages) {
     const {

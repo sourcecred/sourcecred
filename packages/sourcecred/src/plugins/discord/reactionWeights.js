@@ -16,16 +16,16 @@ export type ChannelWeightConfig = {|
 |};
 
 export type EmojiWeightMap = {[Model.Snowflake]: NodeWeight};
-export type EmojiWeightConfig = {|
-  +defaultWeight: NodeWeight,
+export type ReactionWeightConfig = {|
   +weights: EmojiWeightMap,
+  +defaultWeight: NodeWeight,
   +applyAveraging: boolean,
 |};
 
 export type WeightConfig = {|
   +roleWeights: RoleWeightConfig,
   +channelWeights: ChannelWeightConfig,
-  +emojiWeights: EmojiWeightConfig,
+  +emojiWeights: ReactionWeightConfig,
 |};
 
 export function reactionWeight(
@@ -93,7 +93,7 @@ export function _channelWeight(
 }
 
 export function _emojiWeight(
-  config: EmojiWeightConfig,
+  config: ReactionWeightConfig,
   reaction: Model.Reaction
 ): NodeWeight {
   const {defaultWeight, weights} = config;

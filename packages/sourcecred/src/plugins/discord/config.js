@@ -4,7 +4,7 @@ import * as NullUtil from "../../util/null";
 import * as C from "../../util/combo";
 import * as Model from "./models";
 import {
-  type EmojiWeightMap,
+  type ReactionWeightConfig,
   type RoleWeightConfig,
   type ChannelWeightConfig,
   type WeightConfig,
@@ -20,7 +20,7 @@ export type {BotToken as DiscordToken} from "./models";
  * weight configuration in single optional sub-object, I think. Consider
  * cleaning up before 0.8.0.
  */
-export type DiscordConfigJson = {|
+export type DiscordConfigJson = $ReadOnlyArray<{|
   // Id of the Discord server.
   // To get the ID, go into your Discord settings and under "Appearance",
   // go to the "Advanced" section and enable "Developer Mode".
@@ -35,7 +35,7 @@ export type DiscordConfigJson = {|
   //
   // You can get a custom emoji ID by right clicking the custom emoji and
   // copying it's URL, with the ID being the image file name.
-  +reactionWeights: EmojiWeightMap,
+  +reactionWeightConfig?: ReactionWeightConfig,
   // An object mapping a role to a weight, as in:
   // {
   //   "defaultWeight": 0,
@@ -66,32 +66,31 @@ export type DiscordConfigJson = {|
   +propsChannels?: $ReadOnlyArray<Model.Snowflake>,
   // Whether to include NSFW channels in cred distribution or not
   +includeNsfwChannels?: boolean,
-  // What the weight should be for reactions not specified in reactionWeights
-  +defaultReactionWeight?: number,
-  // Whether reaction weights on a given message should be divided by the number
-  // of unique members that reacted to the message.
-  +applyAveragingToReactions?: boolean,
-|};
+|}>;
 
-const parserJson: C.Parser<DiscordConfigJson> = C.object(
-  {
-    guildId: C.string,
-    reactionWeights: C.dict(C.number),
-  },
-  {
-    roleWeightConfig: C.object({
-      defaultWeight: C.number,
-      weights: C.dict(C.number),
-    }),
-    channelWeightConfig: C.object({
-      defaultWeight: C.number,
-      weights: C.dict(C.number),
-    }),
-    propsChannels: C.array(C.string),
-    includeNsfwChannels: C.boolean,
-    defaultReactionWeight: C.number,
-    applyAveragingToReactions: C.boolean,
-  }
+const parserJson: C.Parser<DiscordConfigJson> = C.array(
+  C.object(
+    {
+      guildId: C.string,
+      reactionWeightConfig: C.object({
+        weights: C.dict(C.number),
+        defaultWeight: C.number,
+        applyAveraging: C.boolean,
+      }),
+    },
+    {
+      roleWeightConfig: C.object({
+        defaultWeight: C.number,
+        weights: C.dict(C.number),
+      }),
+      channelWeightConfig: C.object({
+        defaultWeight: C.number,
+        weights: C.dict(C.number),
+      }),
+      propsChannels: C.array(C.string),
+      includeNsfwChannels: C.boolean,
+    }
+  )
 );
 
 export type DiscordConfig = {|
@@ -100,6 +99,7 @@ export type DiscordConfig = {|
   +propsChannels: $ReadOnlyArray<Model.Snowflake>,
   +includeNsfwChannels: boolean,
 |};
+export type DiscordConfigs = $ReadOnlyArray<DiscordConfig>;
 
 /**
  * Upgrade from the version on disk to the DiscordConfig.
@@ -108,26 +108,30 @@ export type DiscordConfig = {|
  * We may need this indefinitely if e.g. we decide to de-serialize the raw JSON into maps (since maps
  * can't be written directly to JSON).
  */
-export function _upgrade(json: DiscordConfigJson): DiscordConfig {
+export function _upgrade(json: DiscordConfigJson): DiscordConfigs {
+  const defaultReactionWeights = {
+    defaultWeight: 1,
+    weights: {},
+    applyAveraging: false,
+  };
   const defaultRoleWeights = {defaultWeight: 1, weights: {}};
   const defaultChannelWeights = {defaultWeight: 1, weights: {}};
-  return {
-    guildId: json.guildId,
+  return json.map((config) => ({
+    guildId: config.guildId,
     weights: {
-      roleWeights: NullUtil.orElse(json.roleWeightConfig, defaultRoleWeights),
+      roleWeights: NullUtil.orElse(config.roleWeightConfig, defaultRoleWeights),
+      emojiWeights: NullUtil.orElse(
+        config.reactionWeightConfig,
+        defaultReactionWeights
+      ),
       channelWeights: NullUtil.orElse(
-        json.channelWeightConfig,
+        config.channelWeightConfig,
         defaultChannelWeights
       ),
-      emojiWeights: {
-        weights: json.reactionWeights,
-        defaultWeight: NullUtil.orElse(json.defaultReactionWeight, 1),
-        applyAveraging: NullUtil.orElse(json.applyAveragingToReactions, false),
-      },
     },
-    propsChannels: json.propsChannels || [],
-    includeNsfwChannels: json.includeNsfwChannels || false,
-  };
+    propsChannels: config.propsChannels || [],
+    includeNsfwChannels: config.includeNsfwChannels || false,
+  }));
 }
 
-export const parser: C.Parser<DiscordConfig> = C.fmap(parserJson, _upgrade);
+export const parser: C.Parser<DiscordConfigs> = C.fmap(parserJson, _upgrade);
