@@ -52,6 +52,11 @@ export async function credrank(input: CredrankInput): Promise<CredrankOutput> {
     input.weightOverrides
   );
 
+  // important that this happens before identity contractions
+  const dependenciesWithIds = input.dependencies.map((d) =>
+    // This mutates the ledger, adding new identities when needed.
+    ensureIdentityExists(d, input.ledger)
+  );
   const identities = input.ledger.accounts().map((a) => a.identity);
   const contractedGraph = weightedGraph.graph.contractNodes(
     identityContractions(identities)
@@ -64,10 +69,6 @@ export async function credrank(input: CredrankInput): Promise<CredrankOutput> {
     weightedGraph = applyBudget(weightedGraph, input.pluginsBudget);
   }
 
-  const dependenciesWithIds = input.dependencies.map((d) =>
-    // This mutates the ledger, adding new identities when needed.
-    ensureIdentityExists(d, input.ledger)
-  );
   const dependencyBonuses = dependenciesWithIds.map((d) =>
     toBonusPolicy(d, input.ledger)
   );
