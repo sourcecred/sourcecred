@@ -8,7 +8,7 @@ import {type ProcessedIdentities} from "../processedIdentities";
 import {
   type NonnegativeGrain,
   grainParser,
-  numberParser,
+  numberOrFloatStringParser,
 } from "../nonnegativeGrain";
 
 /**
@@ -83,7 +83,7 @@ export function balancedReceipts(
 
 export const balancedConfigParser: P.Parser<BalancedPolicy> = P.object({
   policyType: P.exactly(["BALANCED"]),
-  budget: numberParser,
+  budget: numberOrFloatStringParser,
 });
 
 export const balancedPolicyParser: P.Parser<BalancedPolicy> = P.object({

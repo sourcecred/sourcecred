@@ -9,7 +9,7 @@ import {type ProcessedIdentities} from "../processedIdentities";
 import {
   type NonnegativeGrain,
   grainParser,
-  numberParser,
+  numberOrFloatStringParser,
 } from "../nonnegativeGrain";
 
 /**
@@ -44,7 +44,7 @@ export function specialReceipts(
 
 export const specialConfigParser: P.Parser<SpecialPolicy> = P.object({
   policyType: P.exactly(["SPECIAL"]),
-  budget: numberParser,
+  budget: numberOrFloatStringParser,
   memo: P.string,
   recipient: uuidParser,
 });

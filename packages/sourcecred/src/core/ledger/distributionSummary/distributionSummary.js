@@ -56,7 +56,7 @@ function timeStamp(credTimeStamp: TimestampMs): string {
 }
 
 function total(total: G.Grain, currencySuffix: string): string {
-  return `#### Total Distributed: ${G.format(total, 0, currencySuffix)}`;
+  return `#### Total Distributed: ${G.formatAndTrim(total, currencySuffix)}`;
 }
 
 function policyAmounts(
@@ -66,7 +66,7 @@ function policyAmounts(
   return distribution.allocations
     .map(({policy}) => {
       const {policyType, budget} = policy;
-      return `#### ${policyType}: ${G.format(budget, 0, currencySuffix)}`;
+      return `#### ${policyType}: ${G.formatAndTrim(budget, currencySuffix)}`;
     })
     .join(`\n`);
 }

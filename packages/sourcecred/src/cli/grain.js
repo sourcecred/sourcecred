@@ -58,7 +58,7 @@ const grainCommand: Command = async (args, std) => {
 
   std.out(
     (simulation ? `——SIMULATED DISTRIBUTION——\n` : ``) +
-      `Distributed ${G.format(totalDistributed)} to ${
+      `Distributed ${G.formatAndTrim(totalDistributed)} to ${
         recipientIdentities.size
       } identities in ${distributions.length} distributions` +
       `\n`

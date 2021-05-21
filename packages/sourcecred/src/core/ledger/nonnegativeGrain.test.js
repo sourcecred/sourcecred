@@ -1,6 +1,11 @@
 // @flow
 
-import {fromGrain, fromInteger, fromString} from "./nonnegativeGrain";
+import {
+  fromGrain,
+  fromInteger,
+  fromString,
+  numberOrFloatStringParser,
+} from "./nonnegativeGrain";
 import {ONE, type Grain} from "./grain";
 import {g} from "./testUtils";
 
@@ -51,6 +56,40 @@ describe("core/ledger/nonnegativeGrain", () => {
         const thunk = () => fromInteger(bad);
         expect(thunk).toThrowError(`not an integer: ${bad}`);
       }
+    });
+  });
+
+  describe("numberOrFloatStringParser", () => {
+    it("works on 0", () => {
+      expect(numberOrFloatStringParser.parse(0)).toEqual({
+        ok: true,
+        value: "0",
+      });
+    });
+    it("works on 1", () => {
+      expect(numberOrFloatStringParser.parse(1)).toEqual({
+        ok: true,
+        value: ONE,
+      });
+    });
+    it("works on 3", () => {
+      expect(numberOrFloatStringParser.parse(3)).toEqual({
+        ok: true,
+        value: "3000000000000000000",
+      });
+    });
+    it("works on '3.5' (string)", () => {
+      expect(numberOrFloatStringParser.parse("3.5")).toEqual({
+        ok: true,
+        value: "3500000000000000000",
+      });
+    });
+    it("fails on 3.5 (number)", () => {
+      expect(numberOrFloatStringParser.parse(3.5)).toEqual({
+        ok: false,
+        err:
+          'no parse matched: ["expected integer, got number","expected string, got number"]',
+      });
     });
   });
 });

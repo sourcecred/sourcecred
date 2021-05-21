@@ -7,7 +7,7 @@ import {type ProcessedIdentities} from "../processedIdentities";
 import {
   type NonnegativeGrain,
   grainParser,
-  numberParser,
+  numberOrFloatStringParser,
 } from "../nonnegativeGrain";
 
 /**
@@ -63,7 +63,7 @@ export function immediateReceipts(
 
 export const immediateConfigParser: P.Parser<ImmediatePolicy> = P.object({
   policyType: P.exactly(["IMMEDIATE"]),
-  budget: numberParser,
+  budget: numberOrFloatStringParser,
   numIntervalsLookback: P.number,
 });
 
