@@ -36,7 +36,10 @@ export class Mirror {
       try {
         await this.addMessages(channel.id);
       } catch (e) {
-        console.warn(e);
+        const warn = e?.message?.includes("403")
+          ? "Skipping private channel."
+          : e;
+        console.warn(warn);
       }
       reporter.finish(`discord/${guild.name}/#${channel.name}`);
     }
