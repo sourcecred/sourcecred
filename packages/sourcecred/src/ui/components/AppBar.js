@@ -19,6 +19,7 @@ import {toggleSidebar, useTranslate} from "ra-core";
 import {HideOnScroll} from "ra-ui-materialui";
 
 import LoadingIndicator from "./LoadingIndicator";
+import {LoginButton} from "./LoginButton";
 
 const useStyles = makeStyles(
   (theme) => ({
@@ -137,6 +138,7 @@ const AppBar = (props: Props): React.Node => {
             children
           )}
           <LoadingIndicator />
+          <LoginButton />
         </Toolbar>
       </MuiAppBar>
     </HideOnScroll>
