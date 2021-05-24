@@ -24,6 +24,7 @@ import {LedgerProvider} from "../utils/LedgerContext";
 import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
 import {type PluginDeclarations} from "../../analysis/pluginDeclaration";
 import {type WeightsT} from "../../core/weights";
+import {Web3ContextProvider} from "../utils/Web3Context";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -191,27 +192,29 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   return (
     // TODO (@topocount) create context for read-only instance state
     <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
-      <Admin
-        disableTelemetry
-        layout={createAppLayout(loadSuccess)}
-        theme={theme}
-        dataProvider={dataProvider}
-        history={history}
-        customRoutes={customRoutes(
-          loadSuccess.hasBackend,
-          loadSuccess.currency,
-          loadSuccess.credGrainView,
-          Array.from(loadSuccess.bundledPlugins.values()),
-          loadSuccess.isDev,
-          loadSuccess.weights
-        )}
-      >
-        {/*
+      <Web3ContextProvider>
+        <Admin
+          disableTelemetry
+          layout={createAppLayout(loadSuccess)}
+          theme={theme}
+          dataProvider={dataProvider}
+          history={history}
+          customRoutes={customRoutes(
+            loadSuccess.hasBackend,
+            loadSuccess.currency,
+            loadSuccess.credGrainView,
+            Array.from(loadSuccess.bundledPlugins.values()),
+            loadSuccess.isDev,
+            loadSuccess.weights
+          )}
+        >
+          {/*
             This dummy resource is required to get react
             admin working beyond the hello world screen
           */}
-        <Resource name="dummyResource" />
-      </Admin>
+          <Resource name="dummyResource" />
+        </Admin>
+      </Web3ContextProvider>
     </LedgerProvider>
   );
 };
