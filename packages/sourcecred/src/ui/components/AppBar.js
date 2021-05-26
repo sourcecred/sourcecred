@@ -54,6 +54,15 @@ const useStyles = makeStyles(
   {name: "RaAppBar"}
 );
 
+type Props = {
+  children: React.Node,
+  classes: Object,
+  className: string,
+  color: "default" | "inherit" | "primary" | "secondary" | "transparent",
+  open: boolean,
+  isDev: boolean,
+};
+
 /**
  * The AppBar component renders a custom MuiAppBar.
  *
@@ -87,6 +96,7 @@ const AppBar = (props: Props): React.Node => {
     classes: _ /*classesOverride*/,
     className,
     color = "secondary",
+    isDev,
     /*logo*/
     open,
     /*title*/
@@ -138,19 +148,11 @@ const AppBar = (props: Props): React.Node => {
             children
           )}
           <LoadingIndicator />
-          <LoginButton />
+          {isDev ? <LoginButton /> : null}
         </Toolbar>
       </MuiAppBar>
     </HideOnScroll>
   );
-};
-
-type Props = {
-  children: React.Node,
-  classes: Object,
-  className: string,
-  color: "default" | "inherit" | "primary" | "secondary" | "transparent",
-  open: boolean,
 };
 
 export default AppBar;

@@ -77,13 +77,14 @@ const useLayoutStyles = makeStyles(
   {name: "RaLayout"}
 );
 const createAppLayout = ({hasBackend, currency, isDev}: LoadSuccess) => {
+  const AdminAppBar = (props) => <AppBar isDev={isDev} {...props} />;
   const AppLayout = (props) => {
     const classes = useLayoutStyles(props);
     return (
       <Layout
         className={classes.layout}
         {...props}
-        appBar={AppBar}
+        appBar={AdminAppBar}
         menu={withRouter(createMenu(hasBackend, currency, isDev))}
       />
     );
