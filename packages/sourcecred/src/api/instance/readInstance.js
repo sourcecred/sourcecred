@@ -35,7 +35,7 @@ import {parser as pluginBudgetParser} from "../pluginBudgetConfig";
 import {
   rawParser as rawConfigParser,
   type RawInstanceConfig,
-} from "../RawinstanceConfig";
+} from "../rawinstanceConfig";
 import {NetworkStorage} from "../../core/storage/networkStorage";
 import {OriginStorage} from "../../core/storage/originStorage";
 import {ZipStorage} from "../../core/storage/zip";
