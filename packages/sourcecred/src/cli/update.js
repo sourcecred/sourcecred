@@ -3,12 +3,11 @@
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import findLastIndex from "lodash.findlastindex";
-import * as C from "../util/combo";
 import {DiskStorage} from "../core/storage/disk";
-import {loadJsonWithDefault, loadFileWithDefault} from "../util/storage";
+import {loadFileWithDefault} from "../util/storage";
 import {join as pathJoin} from "path";
-import stringify from "json-stable-stringify";
 import {encode} from "../core/storage/textEncoding";
+import {v0_9_0} from "./update/v0_9_0";
 
 /**
   The `update` CLI can be used by instance maintainers to magically update
@@ -19,74 +18,6 @@ import {encode} from "../core/storage/textEncoding";
   To add an updater, create a new function for it below this string and then
   register your updater by appending it to the `updates` const defined below.
  */
-
-const v0_9_0 = async () => {
-  const storage = new DiskStorage(process.cwd());
-  const oldDiscordParser = C.object(
-    {
-      guildId: C.string,
-      reactionWeights: C.dict(C.number),
-    },
-    {
-      roleWeightConfig: C.object({
-        defaultWeight: C.number,
-        weights: C.dict(C.number),
-      }),
-      channelWeightConfig: C.object({
-        defaultWeight: C.number,
-        weights: C.dict(C.number),
-      }),
-      propsChannels: C.array(C.string),
-      includeNsfwChannels: C.boolean,
-      defaultReactionWeight: C.number,
-      applyAveragingToReactions: C.boolean,
-    }
-  );
-  const discordConfigPath = pathJoin(
-    "config",
-    "plugins",
-    "sourcecred",
-    "discord",
-    "config.json"
-  );
-  const discordConfig = await loadJsonWithDefault(
-    storage,
-    discordConfigPath,
-    oldDiscordParser,
-    () => null
-  );
-  if (discordConfig) {
-    storage.set(
-      discordConfigPath,
-      encode(
-        stringify(
-          [
-            {
-              guildId: discordConfig.guildId,
-              reactionWeightConfig: {
-                weights: discordConfig.reactionWeights,
-                applyAveraging:
-                  discordConfig.applyAveragingToReactions || false,
-                defaultWeight: discordConfig.defaultReactionWeight || 1,
-              },
-              roleWeightConfig: discordConfig.roleWeightConfig || {
-                defaultWeight: 1,
-                weights: {},
-              },
-              channelWeightConfig: discordConfig.channelWeightConfig || {
-                defaultWeight: 1,
-                weights: {},
-              },
-              propsChannels: discordConfig.propsChannels || [],
-              includeNsfwChannels: discordConfig.includeNsfwChannels || false,
-            },
-          ],
-          {space: 2}
-        )
-      )
-    );
-  }
-};
 
 /**
   Ascending order registry of updaters of type:
