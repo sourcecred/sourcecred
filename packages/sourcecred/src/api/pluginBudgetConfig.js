@@ -17,7 +17,7 @@ import {
   timestampISOParser,
 } from "../util/timestamp";
 import * as C from "../util/combo";
-import {bundledPlugins} from "./bundledPlugins";
+import {bundledDeclarations} from "./bundledDeclarations";
 
 /**
  * This module contains logic for setting Cred minting budgets over time on a per-plugin basis.
@@ -67,11 +67,11 @@ function upgradeRawPeriod(p: RawBudgetPeriod): BudgetPeriod {
 function upgrade(config: RawPluginBudgetConfig): Budget {
   const entries = Object.keys(config.plugins).map((key) => {
     const id = pluginIdFromString(key);
-    const plugin = bundledPlugins()[id];
+    const declaration = bundledDeclarations()[id];
     if (id == null) {
       throw new Error(`No available plugin with id ${id}`);
     }
-    const prefix = plugin.declaration().nodePrefix;
+    const prefix = declaration.nodePrefix;
     const periods = config.plugins[id].map(upgradeRawPeriod);
     return {prefix, periods};
   });
