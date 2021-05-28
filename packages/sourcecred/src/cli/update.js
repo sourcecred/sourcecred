@@ -23,110 +23,87 @@ import {v0_9_0} from "./update/v0_9_0";
   Ascending order registry of updaters of type:
   [[majorVersion, minorVersion, pathVersion], updaterFunction]
  */
-const updatesRegistry: $ReadOnlyArray<
-  [[number, number, number], () => Promise<void>]
-> = [[[0, 9, 0], v0_9_0]];
+const updatesRegistry: $ReadOnlyArray<[string, () => Promise<void>]> = [
+  ["0.9.0", v0_9_0],
+];
 
 ///
 ///
 ///
 ///
 ///
+
+const validNames = () => {
+  return updatesRegistry.map(([name]) => name);
+};
 
 function die(std, message) {
   std.err("fatal: " + message);
   return 1;
 }
 
-const VERSION_REGEX = /^[0-9]*\.[0-9]*\.[0-9]*$/;
 const UPDATER_FILE_FIRST_LINE =
   "Auto-generated. Commit changes, do not edit, do not delete.";
 const UPGRADER_FILE_PATH = ["data", "upgrader.txt"];
+
+const run = async (
+  std,
+  storage: DiskStorage,
+  updaters: $ReadOnlyArray<[string, () => Promise<void>]>
+) => {
+  for (const [name, f] of updaters) {
+    await f();
+    await storage.set(
+      pathJoin(...UPGRADER_FILE_PATH),
+      encode(UPDATER_FILE_FIRST_LINE + "\n" + name)
+    );
+    std.out(`Found and successfully ran upgrader for ${name}`);
+  }
+  std.out(`\nRemember to commit and push changes to data/updater.txt`);
+};
 
 const updateCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const storage = new DiskStorage(baseDir);
 
-  if (
-    (args[0] && !args[0].match(VERSION_REGEX)) ||
-    (args[1] && !args[1].match(VERSION_REGEX))
-  ) {
+  if (args.length < 0 || args.length > 1) {
     return die(
       std,
-      "usage: sourcecred update [newVersion] [oldVersion]\nwhere the oldVersion and newVersion are of the form: X.X.X\nRecommended usage: sourcecred update"
+      "usage: sourcecred update [updaterName]\nRecommended usage: sourcecred update"
     );
   }
-
-  let oldVersion = args[1];
-  if (!oldVersion) {
-    const upgraderFile = await loadFileWithDefault(
-      storage,
-      pathJoin(...UPGRADER_FILE_PATH),
-      () => ""
-    );
-    oldVersion = upgraderFile.split("\n")[1];
+  if (args.length) {
+    const updater = updatesRegistry.find(([name]) => args[0] === name);
+    if (!updater)
+      return die(
+        std,
+        `${args[0]} is not a valid updater name. Valid names: ${validNames().join(
+          ", "
+        )}`
+      );
+    run(std, storage, [updater]);
+    return 0;
   }
 
-  const selectedUpdates = selectUpdates(updatesRegistry, oldVersion, args[0]);
-
-  for (const [v, f] of selectedUpdates) {
-    await f();
-    await storage.set(
-      pathJoin(...UPGRADER_FILE_PATH),
-      encode(UPDATER_FILE_FIRST_LINE + "\n" + v.join("."))
-    );
-    std.out(`Found and successfully ran upgrader for ${v.join(".")}`);
-  }
-
-  if (selectedUpdates.length)
-    std.out(`\nRemember to commit and push changes to data/updater.txt`);
-  else
-    std.out(
-      `No updaters found for ${oldVersion || "<first updater>"} to ${
-        args[0] || "<last updater>"
-      }`
-    );
-
-  return 0;
-};
-
-export const selectUpdates = (
-  updatesRegistry: $ReadOnlyArray<
-    [[number, number, number], () => Promise<void>]
-  >,
-  oldVersion: ?string,
-  newVersion: ?string
-): $ReadOnlyArray<[[number, number, number], () => Promise<void>]> => {
-  const oldV = oldVersion
-    ? oldVersion.split(".").map((x) => parseInt(x))
-    : [-Infinity, -Infinity, -Infinity];
-  const newV = newVersion
-    ? newVersion.split(".").map((x) => parseInt(x))
-    : [Infinity, Infinity, Infinity];
-  if (
-    oldV[0] > newV[0] ||
-    (oldV[0] === newV[0] && oldV[1] > newV[1]) ||
-    (oldV[0] === newV[0] && oldV[1] === newV[1] && oldV[2] >= newV[2])
-  )
-    throw "usage: sourcecred update [newVersion] [oldVersion] where the oldVersion and newVersion are of the form: X.X.X  Recommended usage: sourcecred update";
-  const startingIndexInclusive =
-    findLastIndex(
-      updatesRegistry,
-      ([v]) =>
-        oldV[0] > v[0] ||
-        (oldV[0] === v[0] && oldV[1] > v[1]) ||
-        (oldV[0] === v[0] && oldV[1] === v[1] && oldV[2] >= v[2])
-    ) + 1;
-  let endingIndexExclusive = updatesRegistry.findIndex(
-    ([v]) =>
-      newV[0] < v[0] ||
-      (newV[0] === v[0] && newV[1] < v[1]) ||
-      (newV[0] === v[0] && newV[1] === v[1] && newV[2] < v[2])
+  const upgraderFile = await loadFileWithDefault(
+    storage,
+    pathJoin(...UPGRADER_FILE_PATH),
+    () => ""
   );
-  if (endingIndexExclusive === -1)
-    endingIndexExclusive = updatesRegistry.length;
+  const startingName = upgraderFile.split("\n")[1];
 
-  return updatesRegistry.slice(startingIndexInclusive, endingIndexExclusive);
+  const selectedUpdates = updatesRegistry.slice(
+    updatesRegistry.findIndex(([name]) => name === startingName) + 1
+  );
+  if (selectedUpdates.length) {
+    run(std, storage, selectedUpdates);
+  } else
+    std.out(
+      startingName
+        ? `No updaters found since ${startingName}.`
+        : `No updaters found.`
+    );
+  return 0;
 };
 
 export const updateHelp: Command = async (args, std) => {
@@ -134,16 +111,13 @@ export const updateHelp: Command = async (args, std) => {
     dedent`\
       Recommended usage: sourcecred update
 
-      usage: sourcecred update [newVersion] [oldVersion]
-      where the newVersion and oldVersion are of the form: X.X.X
+      usage: sourcecred update [updaterName]
+      valid names:
+      ${validNames().join("\n")}
 
-      If both args are omitted, it will try to load the last updater ran from
+      If [updaterName] omitted, it will try to load the last updater ran from
         data/updater.txt and either run all updaters after the last, or
         run all updaters if the file is not found.
-      If oldVersion is omitted, it will try to load the last updater ran from
-        data/updater.txt and either run all updaters after the last until the
-        newVersion, or if the file is not found, run all updaters from the
-        first until the newVersion.
 
       Generates data structures useful for data analysis and writes them to
       disk.
