@@ -151,7 +151,14 @@ export class ReadInstance implements ReadOnlyInstance {
   }
 
   async readAnalysisInput(): Promise<AnalysisInput> {
-    throw "not yet implemented";
+    const [credGraph, ledger] = await Promise.all([
+      this.readCredGraph(),
+      this.readLedger(),
+    ]);
+    return {
+      credGraph,
+      ledger,
+    };
   }
 
   async readWeightedGraphForPlugin(): Promise<WeightedGraph> {
