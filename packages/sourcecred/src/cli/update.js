@@ -2,7 +2,6 @@
 
 import dedent from "../util/dedent";
 import type {Command} from "./command";
-import findLastIndex from "lodash.findlastindex";
 import {DiskStorage} from "../core/storage/disk";
 import {loadFileWithDefault} from "../util/storage";
 import {join as pathJoin} from "path";
@@ -15,13 +14,15 @@ import {v0_9_0} from "./update/v0_9_0";
   to be more liberal in making breaking changes, as long as we provide updaters
   in this module to making the transition super easy for instance maintainers.
 
-  To add an updater, create a new function for it below this string and then
-  register your updater by appending it to the `updates` const defined below.
+  To add an updater, create a new function for it in the cli/update folder and
+  then register your updater by appending it to the `updatesRegistry` const 
+  defined below.
  */
 
 /**
   Ascending order registry of updaters of type:
-  [[majorVersion, minorVersion, pathVersion], updaterFunction]
+  [updaterName, updaterFunction]
+  New updaters should be added append-only.
  */
 const updatesRegistry: $ReadOnlyArray<[string, () => Promise<void>]> = [
   ["0.9.0", v0_9_0],
@@ -44,7 +45,7 @@ function die(std, message) {
 
 const UPDATER_FILE_FIRST_LINE =
   "Auto-generated. Commit changes, do not edit, do not delete.";
-const UPGRADER_FILE_PATH = ["data", "upgrader.txt"];
+const UPDATER_FILE_PATH = ["data", "updater.txt"];
 
 const run = async (
   std,
@@ -54,10 +55,10 @@ const run = async (
   for (const [name, f] of updaters) {
     await f();
     await storage.set(
-      pathJoin(...UPGRADER_FILE_PATH),
+      pathJoin(...UPDATER_FILE_PATH),
       encode(UPDATER_FILE_FIRST_LINE + "\n" + name)
     );
-    std.out(`Found and successfully ran upgrader for ${name}`);
+    std.out(`Found and successfully ran updater for ${name}`);
   }
   std.out(`\nRemember to commit and push changes to data/updater.txt`);
 };
@@ -77,20 +78,20 @@ const updateCommand: Command = async (args, std) => {
     if (!updater)
       return die(
         std,
-        `${args[0]} is not a valid updater name. Valid names: ${validNames().join(
-          ", "
-        )}`
+        `${
+          args[0]
+        } is not a valid updater name. Valid names: ${validNames().join(", ")}`
       );
     run(std, storage, [updater]);
     return 0;
   }
 
-  const upgraderFile = await loadFileWithDefault(
+  const updaterFile = await loadFileWithDefault(
     storage,
-    pathJoin(...UPGRADER_FILE_PATH),
+    pathJoin(...UPDATER_FILE_PATH),
     () => ""
   );
-  const startingName = upgraderFile.split("\n")[1];
+  const startingName = updaterFile.split("\n")[1];
 
   const selectedUpdates = updatesRegistry.slice(
     updatesRegistry.findIndex(([name]) => name === startingName) + 1
