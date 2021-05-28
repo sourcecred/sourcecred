@@ -161,8 +161,17 @@ export class ReadInstance implements ReadOnlyInstance {
     };
   }
 
-  async readWeightedGraphForPlugin(): Promise<WeightedGraph> {
-    throw "not yet implemented";
+  async readWeightedGraphForPlugin(pluginId: string): Promise<WeightedGraph> {
+    const outputPath = pathJoin(
+      this.createPluginGraphDirectory(pluginId),
+      ...GRAPHS_PATH
+    );
+    const graphJSON = await loadJson(
+      this._zipStorage,
+      outputPath,
+      ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
+    );
+    return weightedGraphFromJSON(graphJSON);
   }
 
   async readCredGraph(): Promise<CredGraph> {
@@ -267,5 +276,9 @@ export class ReadInstance implements ReadOnlyInstance {
     const [pluginOwner, pluginName] = idParts;
     const pathComponents = [...components, pluginOwner, pluginName];
     return pathJoin(...pathComponents);
+  }
+
+  createPluginGraphDirectory(pluginId: string): string {
+    return this.createPluginDirectory(GRAPHS_DIRECTORY, pluginId);
   }
 }
