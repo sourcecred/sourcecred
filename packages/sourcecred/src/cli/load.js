@@ -103,7 +103,8 @@ const loadCommand: Command = async (args, std) => {
         throw e;
       })
       .catch((e) => {
-        fail(std, name, JSON.stringify(e));
+        const output = e instanceof Error ? e : JSON.stringify(e);
+        fail(std, name, output);
         failedPlugins.push(name);
       });
     loadPromises.push(loadWithPossibleRetry);

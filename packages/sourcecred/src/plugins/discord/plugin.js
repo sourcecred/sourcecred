@@ -4,14 +4,17 @@ import Database from "better-sqlite3";
 
 import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
-import {parser, type DiscordConfig, type DiscordToken} from "./config";
+import {parser, type DiscordConfigs, type DiscordToken} from "./config";
 import {declaration} from "./declaration";
 import {join as pathJoin} from "path";
 import {type TaskReporter} from "../../util/taskReporter";
 import {Fetcher} from "./fetcher";
 import {Mirror} from "./mirror";
 import type {ReferenceDetector} from "../../core/references";
-import type {WeightedGraph} from "../../core/weightedGraph";
+import {
+  type WeightedGraph,
+  merge as mergeGraphs,
+} from "../../core/weightedGraph";
 import {merge as mergeWeights} from "../../core/weights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph} from "./createGraph";
@@ -28,7 +31,7 @@ import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
-): Promise<DiscordConfig> {
+): Promise<DiscordConfigs> {
   const dirname = dirContext.configDirectory();
   const storage = new DiskStorage(dirname);
   return loadJson(storage, "config.json", parser);
@@ -55,12 +58,14 @@ export class DiscordPlugin implements Plugin {
     ctx: PluginDirectoryContext,
     reporter: TaskReporter
   ): Promise<void> {
-    const {guildId, includeNsfwChannels} = await loadConfig(ctx);
+    const configs = await loadConfig(ctx);
     const token = getTokenFromEnv();
     const fetcher = new Fetcher({token});
-    const repo = await repository(ctx, guildId);
-    const mirror = new Mirror(repo, fetcher, guildId, includeNsfwChannels);
-    await mirror.update(reporter);
+    for (const {guildId, includeNsfwChannels} of configs) {
+      const repo = await repository(ctx, guildId);
+      const mirror = new Mirror(repo, fetcher, guildId, includeNsfwChannels);
+      await mirror.update(reporter);
+    }
   }
 
   async graph(
@@ -68,10 +73,15 @@ export class DiscordPlugin implements Plugin {
     rd: ReferenceDetector
   ): Promise<WeightedGraph> {
     const _ = rd; // TODO(#1808): not yet used
-    const config = await loadConfig(ctx);
-    const repo = await repository(ctx, config.guildId);
-
-    const weightedGraph = await createGraph(config, repo);
+    const configs = await loadConfig(ctx);
+    const weightedGraph = mergeGraphs(
+      await Promise.all(
+        configs.map(async (config) => {
+          const repo = await repository(ctx, config.guildId);
+          return createGraph(config, repo);
+        })
+      )
+    );
 
     const declarationWeights = weightsForDeclaration(declaration);
     // Add in the type-level weights from the plugin spec
@@ -93,9 +103,15 @@ export class DiscordPlugin implements Plugin {
   async identities(
     ctx: PluginDirectoryContext
   ): Promise<$ReadOnlyArray<IdentityProposal>> {
-    const {guildId} = await loadConfig(ctx);
-    const repo = await repository(ctx, guildId);
-    return createIdentities(repo);
+    const configs = await loadConfig(ctx);
+    return (
+      await Promise.all(
+        configs.map(async ({guildId}) => {
+          const repo = await repository(ctx, guildId);
+          return createIdentities(repo);
+        })
+      )
+    ).flat(1);
   }
 }
 
@@ -103,7 +119,7 @@ async function repository(
   ctx: PluginDirectoryContext,
   guild: Model.Snowflake
 ): Promise<SqliteMirrorRepository> {
-  const path = pathJoin(ctx.cacheDirectory(), "discordMirror.db");
+  const path = pathJoin(ctx.cacheDirectory(), `discordMirror-${guild}.db`);
   const db = await new Database(path);
   return new SqliteMirrorRepository(db, guild);
 }
