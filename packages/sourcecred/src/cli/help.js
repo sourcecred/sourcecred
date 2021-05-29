@@ -10,6 +10,7 @@ import {serveHelp} from "./serve";
 import {siteHelp} from "./site";
 import {credRankHelp} from "./credrank";
 import {analysisHelp} from "./analysis";
+import {updateHelp} from "./update";
 import dedent from "../util/dedent";
 
 const help: Command = async (args, std) => {
@@ -28,6 +29,7 @@ const help: Command = async (args, std) => {
     credrank: credRankHelp,
     serve: serveHelp,
     analysis: analysisHelp,
+    update: updateHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
