@@ -133,7 +133,7 @@ const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
 type GithubResponseError =
   | {|+type: "FETCH_ERROR", error: Error|}
-  | {|+type: "GRAPHQL_ERROR", error: mixed|}
+  | {|+type: "GRAPHQL_ERROR", error: {errors: [{|message: string|}]}|}
   | {|+type: "RATE_LIMIT_EXCEEDED", error: mixed|}
   | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", error: mixed|}
   | {|+type: "BAD_CREDENTIALS", error: mixed|}
@@ -329,9 +329,9 @@ export async function postQuery(
           break;
         case "GRAPHQL_ERROR":
           console.error(
-            "Unexpected GraphQL error; this may be a bug in SourceCred: ",
-            JSON.stringify({postBody: postBody, error: error.error})
-          );
+            "Unexpected GraphQL error: " + 
+            error.error.errors[0].message
+            /* JSON.stringify({postBody: postBody, error: error.error} */);
           break;
         case "RATE_LIMIT_EXCEEDED":
           console.error(
