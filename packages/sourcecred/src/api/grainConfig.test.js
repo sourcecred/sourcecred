@@ -13,6 +13,7 @@ import {type BalancedPolicy} from "../core/ledger/policies/balanced";
 import {type ImmediatePolicy} from "../core/ledger/policies/immediate";
 import {type RecentPolicy} from "../core/ledger/policies/recent";
 import {type SpecialPolicy} from "../core/ledger/policies/special";
+import {nameFromString} from "../core/identity/name";
 
 const toNonnegativeGrain = (budget: number | string): NonnegativeGrain => {
   if (typeof budget === "string") {
@@ -141,6 +142,8 @@ describe("api/grainConfig", () => {
           },
         ],
         maxSimultaneousDistributions: 2,
+        sinkIdentity: "testName",
+        processDistributions: true,
       };
 
       const expected: GrainConfig = {
@@ -151,6 +154,8 @@ describe("api/grainConfig", () => {
           special(100, "howdy", uuid),
         ],
         maxSimultaneousDistributions: 2,
+        sinkIdentity: nameFromString("testName"),
+        processDistributions: true,
       };
 
       expect(parser.parseOrThrow(grainConfig)).toEqual(expected);
