@@ -328,9 +328,9 @@ export async function postQuery(
           break;
         case "GRAPHQL_ERROR":
           console.error(
-            "Unexpected GraphQL error: " + 
-            error.error.errors[0].message
-            /* JSON.stringify({postBody: postBody, error: error.error} */);
+            "Unexpected GraphQL error: " + error.error.errors[0].message
+            /* JSON.stringify({postBody: postBody, error: error.error} */
+          );
           break;
         case "RATE_LIMIT_EXCEEDED":
           console.error(
@@ -348,7 +348,8 @@ export async function postQuery(
           break;
         default:
           console.error(
-            "Unexpected GitHub Error: " + JSON.stringify({postBody: postBody, error: error})
+            "Unexpected GitHub Error: " +
+              JSON.stringify({postBody: postBody, error: error})
           );
       }
       return Promise.reject(error);
