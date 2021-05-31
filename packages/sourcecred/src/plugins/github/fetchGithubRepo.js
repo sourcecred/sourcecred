@@ -314,7 +314,7 @@ export async function postQuery(
   return retryGithubFetch(postBody, token).catch(
     (error: GithubResponseError) => {
       const type = error.type;
-      switch (type) {
+      switch (error.type) {
         case "GITHUB_INTERNAL_EXECUTION_ERROR":
         case "NO_DATA":
           console.error(
@@ -348,7 +348,9 @@ export async function postQuery(
           );
           break;
         default:
-          throw new Error((type: empty));
+          console.error(
+            "Unexpected GitHub Error: " + JSON.stringify({postBody: postBody, error: error})
+          );
       }
       return Promise.reject(error);
     }
