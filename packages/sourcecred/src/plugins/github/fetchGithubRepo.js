@@ -313,7 +313,6 @@ export async function postQuery(
   });
   return retryGithubFetch(postBody, token).catch(
     (error: GithubResponseError) => {
-      const type = error.type;
       switch (error.type) {
         case "GITHUB_INTERNAL_EXECUTION_ERROR":
         case "NO_DATA":
