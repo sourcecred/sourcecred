@@ -1,6 +1,6 @@
 // @flow
 
-import React, {type Node as ReactNode} from "react";
+import React, {type Node as ReactNode, useMemo} from "react";
 import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
@@ -63,14 +63,21 @@ type LedgerEventRowProps = {|
 type EventRow = (LedgerEventRowProps) => ReactNode;
 
 function _friendlyFormatActionType(type: string): string {
-  //Split words by _, capitalize them, and join them with " "
-  var words = type.split("_");
-  words.forEach((word, idx) => {
-    word = word.toLowerCase();
-    word = word.charAt(0).toUpperCase() + word.slice(1);
-    words[idx] = word;
-  });
-  return words.join(" ");
+  //Memoize computed label values. Small set of expected labels,
+  //potentially large number of times displayed. Best to save the values.
+
+  const label = useMemo(() => {
+    //Split words by _, capitalize them, and join them with " "
+    var words = type.split("_");
+    words.forEach((word, idx) => {
+      word = word.toLowerCase();
+      word = word.charAt(0).toUpperCase() + word.slice(1);
+      words[idx] = word;
+    });
+    return words.join(" ");
+  }, [type]);
+
+  return label;
 }
 
 const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
