@@ -133,7 +133,7 @@ const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
 type GithubResponseError =
   | {|+type: "FETCH_ERROR", error: Error|}
-  | {|+type: "GRAPHQL_ERROR", error: mixed|}
+  | {|+type: "GRAPHQL_ERROR", error: {errors: [{|type: string|}]}|}
   | {|+type: "RATE_LIMIT_EXCEEDED", error: mixed|}
   | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", error: mixed|}
   | {|+type: "BAD_CREDENTIALS", error: mixed|}
@@ -313,8 +313,7 @@ export async function postQuery(
   });
   return retryGithubFetch(postBody, token).catch(
     (error: GithubResponseError) => {
-      const type = error.type;
-      switch (type) {
+      switch (error.type) {
         case "GITHUB_INTERNAL_EXECUTION_ERROR":
         case "NO_DATA":
           console.error(
@@ -328,10 +327,20 @@ export async function postQuery(
           console.error(error.error);
           break;
         case "GRAPHQL_ERROR":
-          console.error(
-            "Unexpected GraphQL error; this may be a bug in SourceCred: ",
-            JSON.stringify({postBody: postBody, error: error.error})
-          );
+          error.error.errors.forEach((error) => {
+            if (error.type === "NOT_FOUND") {
+              console.error(
+                "Unable to find the specified repository. Please check for typos " +
+                  "in the repository owner and name and confirm that you are using the correct token in " +
+                  "$SOURCECRED_GITHUB_TOKEN"
+              );
+            } else {
+              console.error(
+                "Unexpected GraphQL error: " +
+                  JSON.stringify({postBody: postBody, error: error})
+              );
+            }
+          });
           break;
         case "RATE_LIMIT_EXCEEDED":
           console.error(
@@ -348,7 +357,10 @@ export async function postQuery(
           );
           break;
         default:
-          throw new Error((type: empty));
+          console.error(
+            "Unexpected GitHub Error: " +
+              JSON.stringify({postBody: postBody, error: error})
+          );
       }
       return Promise.reject(error);
     }
