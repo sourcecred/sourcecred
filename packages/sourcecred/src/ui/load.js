@@ -1,9 +1,6 @@
 // @flow
 import * as pluginId from "../api/pluginId";
-import {
-  CredGraph,
-  jsonParser as credGraphJsonParser,
-} from "../core/credrank/credGraph";
+import {CredGrainView, credGrainViewParser} from "../core/credGrainView";
 import {
   type CurrencyDetails,
   parser as currencyParser,
@@ -27,7 +24,7 @@ export type LoadSuccess = {|
   +bundledPlugins: $ReadOnlyMap<pluginId.PluginId, PluginDeclaration>,
   +hasBackend: boolean,
   +currency: CurrencyDetails,
-  +credGraph: CredGraph | null,
+  +credGrainView: CredGrainView | null,
   +isDev: boolean,
   +weights: Weights.WeightsT,
 |};
@@ -61,10 +58,8 @@ export async function load(): Promise<LoadResult> {
     ),
     loadJsonWithDefault(
       new ZipStorage(originStorage),
-      "output/credGraph.json.gzip",
-      Combo.fmap(credGraphJsonParser, (graphJson) =>
-        CredGraph.fromJSON(graphJson)
-      ),
+      "output/credGrainView",
+      credGrainViewParser,
       () => null
     ),
     loadJsonWithDefault(
@@ -79,7 +74,7 @@ export async function load(): Promise<LoadResult> {
       rawInstanceConfig,
       {hasBackend},
       currency,
-      credGraph,
+      credGrainView,
       weights,
     ] = await Promise.all(queries);
 
@@ -98,7 +93,7 @@ export async function load(): Promise<LoadResult> {
       ledgerManager,
       hasBackend,
       currency,
-      credGraph,
+      credGrainView,
       isDev,
       weights,
     };

@@ -1,11 +1,6 @@
 // @flow
 
-import React, {
-  type Node as ReactNode,
-  useEffect,
-  useState,
-  useMemo,
-} from "react";
+import React, {type Node as ReactNode, useEffect, useState} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
@@ -192,16 +187,6 @@ const AdminApp = (): ReactNode => {
  */
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
-  const credGrainView = useMemo(
-    () =>
-      loadSuccess.credGraph
-        ? new CredGrainView(
-            loadSuccess.credGraph,
-            loadSuccess.ledgerManager.ledger
-          )
-        : null,
-    [loadSuccess.credGraph, loadSuccess.ledgerManager.ledger]
-  );
 
   return (
     // TODO (@topocount) create context for read-only instance state
@@ -215,7 +200,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
         customRoutes={customRoutes(
           loadSuccess.hasBackend,
           loadSuccess.currency,
-          credGrainView,
+          loadSuccess.credGrainView,
           Array.from(loadSuccess.bundledPlugins.values()),
           loadSuccess.isDev,
           loadSuccess.weights

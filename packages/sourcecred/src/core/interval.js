@@ -6,6 +6,7 @@ import {utcWeek} from "d3-time";
 import * as NullUtil from "../util/null";
 import type {TimestampMs} from "../util/timestamp";
 import type {Node, Edge, Graph} from "./graph";
+import * as C from "../util/combo";
 
 /**
  * Represents a time interval
@@ -54,6 +55,16 @@ export function intervalSequence(
     endTimeMs,
   }));
 }
+
+export const intervalSequenceParser: C.Parser<IntervalSequence> = C.fmap(
+  C.array(
+    C.object({
+      startTimeMs: C.number,
+      endTimeMs: C.number,
+    })
+  ),
+  (arr) => intervalSequence(arr)
+);
 
 /**
  * Represents a slice of a time-partitioned graph
