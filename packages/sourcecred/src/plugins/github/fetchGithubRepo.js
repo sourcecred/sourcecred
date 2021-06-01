@@ -327,7 +327,6 @@ export async function postQuery(
           console.error(error.error);
           break;
         case "GRAPHQL_ERROR":
-
           error.error.errors.forEach((error) => {
             if (error.type === "NOT_FOUND") {
               console.error(
