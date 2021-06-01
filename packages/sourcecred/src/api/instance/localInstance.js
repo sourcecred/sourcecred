@@ -23,8 +23,10 @@ import {WritableZipStorage} from "../../core/storage/zip";
 import {encode} from "../../core/storage/textEncoding";
 import type {PluginDirectoryContext} from "../plugin";
 import {type CredAccountData} from "../../core/ledger/credAccounts";
-import {type PersonalAttributionsConfig} from "../config/personalAttributionsConfig";
 import {WritableDataStorage} from "../../core/storage";
+import {type PersonalAttributionsConfig} from "../config/personalAttributionsConfig";
+import type {GrainIntegrationOutput} from "../../core/ledger/grainIntegration";
+import type {Distribution} from "../../core/ledger/distribution";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -44,6 +46,10 @@ const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph.json.gzip"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
 const ACCOUNTS_PATH: $ReadOnlyArray<string> = ["output", "accounts.json"];
+const GRAIN_INTEGRATION_DIRECTORY: $ReadOnlyArray<string> = [
+  "output",
+  "grainIntegration",
+];
 
 /**
 This is an Instance implementation that reads and writes using relative paths
@@ -112,6 +118,23 @@ export class LocalInstance extends ReadInstance implements Instance {
   async writeLedger(ledger: Ledger): Promise<void> {
     const ledgerPath = pathJoin(...LEDGER_PATH);
     return this._writableStorage.set(ledgerPath, encode(ledger.serialize()));
+  }
+
+  async writeGrainIntegrationOutput(
+    output: GrainIntegrationOutput,
+    distribution: Distribution
+  ): Promise<void> {
+    mkdirx(pathJoin(...GRAIN_INTEGRATION_DIRECTORY));
+    const credDateString = new Date(
+      distribution.credTimestamp
+      // utilise the `SE` datestring format since it appears like `YYYY-MM-DD`
+      // with numbers and is therefore easy to sort on and human-readable.
+    ).toLocaleDateString("en-SE");
+    const grainIntegrationPath = pathJoin(
+      ...GRAIN_INTEGRATION_DIRECTORY,
+      credDateString + "_" + output.fileName
+    );
+    this._writableStorage.set(grainIntegrationPath, encode(output.content));
   }
 
   //////////////////////////////
