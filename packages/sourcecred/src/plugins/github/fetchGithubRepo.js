@@ -329,7 +329,7 @@ export async function postQuery(
         case "GRAPHQL_ERROR":
 
           error.error.errors.forEach((error) => {
-            if (error.type == "NOT_FOUND") {
+            if (error.type === "NOT_FOUND") {
               console.error(
                 "Unable to find the specified repository. Please check for typos " +
                   "in the repository owner and name and confirm that you are using the correct token in " +
