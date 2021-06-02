@@ -1,6 +1,7 @@
 // @flow
 
-import React, {type Node as ReactNode} from "react";
+import React, {type Node as ReactNode, useMemo} from "react";
+import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import VisibilityIcon from "@material-ui/icons/Visibility";
@@ -41,6 +42,17 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
+const actionTheme = createMuiTheme({
+  palette: {
+    primary: {
+      // light: will be calculated from palette.primary.main,
+      main: "#CBDFFF",
+      // dark: will be calculated from palette.primary.main,
+      // contrastText: will be calculated to contrast with palette.primary.main
+    },
+  },
+});
+
 type LedgerEventRowProps = {|
   +event: LedgerEvent,
   +ledger: Ledger,
@@ -49,6 +61,17 @@ type LedgerEventRowProps = {|
 |};
 
 type EventRow = (LedgerEventRowProps) => ReactNode;
+
+function _friendlyFormatActionType(type: string): string {
+  //Split words by _, capitalize them, and join them with " "
+  var words = type.split("_");
+  words.forEach((word, idx) => {
+    word = word.toLowerCase();
+    word = word.charAt(0).toUpperCase() + word.slice(1);
+    words[idx] = word;
+  });
+  return words.join(" ");
+}
 
 const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
   const classes = useStyles();
@@ -119,12 +142,14 @@ const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
     }
   };
 
+  const type = props.event.action.type;
+  const label = useMemo(() => _friendlyFormatActionType(type), [type]);
   return (
     <TableRow>
       <TableCell component="th" scope="row">
-        <Typography variant="button">
-          {props.event.action.type.replace("_", " ")}
-        </Typography>
+        <ThemeProvider theme={actionTheme}>
+          <Typography color="primary">{label}</Typography>
+        </ThemeProvider>
       </TableCell>
       <TableCell>
         <Box
