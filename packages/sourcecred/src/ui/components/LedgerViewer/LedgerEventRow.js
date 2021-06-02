@@ -63,21 +63,14 @@ type LedgerEventRowProps = {|
 type EventRow = (LedgerEventRowProps) => ReactNode;
 
 function _friendlyFormatActionType(type: string): string {
-  //Memoize computed label values. Small set of expected labels,
-  //potentially large number of times displayed. Best to save the values.
-
-  const label = useMemo(() => {
-    //Split words by _, capitalize them, and join them with " "
-    var words = type.split("_");
-    words.forEach((word, idx) => {
-      word = word.toLowerCase();
-      word = word.charAt(0).toUpperCase() + word.slice(1);
-      words[idx] = word;
-    });
-    return words.join(" ");
-  }, [type]);
-
-  return label;
+  //Split words by _, capitalize them, and join them with " "
+  var words = type.split("_");
+  words.forEach((word, idx) => {
+    word = word.toLowerCase();
+    word = word.charAt(0).toUpperCase() + word.slice(1);
+    words[idx] = word;
+  });
+  return words.join(" ");
 }
 
 const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
@@ -149,13 +142,13 @@ const LedgerEventRow = (props: LedgerEventRowProps): ReactNode => {
     }
   };
 
+  const type = props.event.action.type;
+  const label = useMemo(() => _friendlyFormatActionType(type), [type]);
   return (
     <TableRow>
       <TableCell component="th" scope="row">
         <ThemeProvider theme={actionTheme}>
-          <Typography color="primary">
-            {_friendlyFormatActionType(props.event.action.type)}
-          </Typography>
+          <Typography color="primary">{label}</Typography>
         </ThemeProvider>
       </TableCell>
       <TableCell>
