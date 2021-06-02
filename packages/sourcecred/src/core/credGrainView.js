@@ -12,13 +12,18 @@ import {
   CredGraph,
   type Participant as GraphParticipant,
 } from "./credrank/credGraph";
-import {type Identity, type IdentityId} from "./identity";
+import {type Identity, type IdentityId, identityParser} from "./identity";
 import * as G from "./ledger/grain";
 import {type Grain, add, ZERO} from "./ledger/grain";
 import {Ledger, type Account} from "./ledger/ledger";
 import {type TimestampMs} from "../util/timestamp";
 import findLastIndex from "lodash.findlastindex";
-import {type IntervalSequence, intervalSequence} from "./interval";
+import {
+  type IntervalSequence,
+  intervalSequence,
+  intervalSequenceParser,
+} from "./interval";
+import * as C from "../util/combo";
 
 /**
  * Cred and Grain data for a given participant.
@@ -43,6 +48,26 @@ export type ParticipantCredGrain = {|
   +grainEarnedPerInterval: $ReadOnlyArray<Grain>,
 |};
 
+export type CredGrainViewJSON = {|
+  +participants: $ReadOnlyArray<ParticipantCredGrain>,
+  +intervals: IntervalSequence,
+|};
+export const credGrainViewParser: C.Parser<CredGrainView> = C.fmap(
+  C.object({
+    participants: C.array(
+      C.object({
+        identity: identityParser,
+        cred: C.number,
+        credPerInterval: C.array(C.number),
+        grainEarned: G.parser,
+        grainEarnedPerInterval: C.array(G.parser),
+      })
+    ),
+    intervals: intervalSequenceParser,
+  }),
+  (json) => CredGrainView.fromJSON(json)
+);
+
 /**
  * Aggregates data across a CredGraph and Ledger.
  *
@@ -52,60 +77,37 @@ export type ParticipantCredGrain = {|
  * across time.
  */
 export class CredGrainView {
-  _credGraph: CredGraph;
-  _ledger: Ledger;
   _participants: $ReadOnlyArray<ParticipantCredGrain>;
   _intervals: IntervalSequence;
   _credTotals: Array<number>;
   _grainTotals: Array<Grain>;
 
-  constructor(credGraph: CredGraph, ledger: Ledger) {
-    this._credGraph = credGraph;
-    this._ledger = ledger;
-    this._intervals = deepFreeze(credGraph.intervals());
+  constructor(
+    participants: $ReadOnlyArray<ParticipantCredGrain>,
+    intervals: IntervalSequence
+  ) {
+    this._participants = participants;
+    this._intervals = intervals;
     this._credTotals = [];
     this._grainTotals = [];
-
-    const graphParticipants = new Map<IdentityId, GraphParticipant>();
-    for (const participant of credGraph.participants()) {
-      graphParticipants.set(participant.id, participant);
-    }
-
-    this._participants = deepFreeze(
-      ledger.accounts().map((account) => {
-        const graphParticipant = graphParticipants.get(account.identity.id);
-        if (!graphParticipant)
-          throw new Error(
-            `The graph is missing account [${account.identity.name}: ${account.identity.id}] that exists in the ledger.`
-          );
-
-        const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
-          account
+    participants.forEach((participant) => {
+      for (let i = 0; i < this._intervals.length; i++) {
+        this._credTotals[i] =
+          participant.credPerInterval[i] + this._credTotals[i] || 0;
+        this._grainTotals[i] = add(
+          participant.grainEarnedPerInterval[i],
+          this._grainTotals[i] || ZERO
         );
-        for (let i = 0; i < this._intervals.length; i++) {
-          this._credTotals[i] =
-            graphParticipant.credPerInterval[i] + this._credTotals[i] || 0;
-
-          this._grainTotals[i] = add(
-            grainEarnedPerInterval[i],
-            this._grainTotals[i] || ZERO
-          );
-        }
-
-        return {
-          identity: account.identity,
-          cred: graphParticipant.cred,
-          credPerInterval: graphParticipant.credPerInterval,
-          grainEarned: account.paid,
-          grainEarnedPerInterval,
-        };
-      })
-    );
+      }
+    });
   }
 
-  _calculateGrainEarnedPerInterval(account: Account): $ReadOnlyArray<Grain> {
+  static _calculateGrainEarnedPerInterval(
+    account: Account,
+    intervals: IntervalSequence
+  ): $ReadOnlyArray<Grain> {
     let allocationIndex = 0;
-    return this._intervals.map((interval) => {
+    return intervals.map((interval) => {
       let grain = G.ZERO;
       while (
         account.allocationHistory.length - 1 >= allocationIndex &&
@@ -146,6 +148,52 @@ export class CredGrainView {
 
   totalGrainPerInterval(): $ReadOnlyArray<Grain> {
     return this._grainTotals;
+  }
+
+  toJSON(): CredGrainViewJSON {
+    return {
+      participants: this._participants,
+      intervals: this._intervals,
+    };
+  }
+
+  static fromJSON(json: CredGrainViewJSON): CredGrainView {
+    return new CredGrainView(json.participants, json.intervals);
+  }
+
+  static fromCredGraphAndLedger(
+    credGraph: CredGraph,
+    ledger: Ledger
+  ): CredGrainView {
+    const intervals = deepFreeze(credGraph.intervals());
+
+    const graphParticipants = new Map<IdentityId, GraphParticipant>();
+    for (const participant of credGraph.participants()) {
+      graphParticipants.set(participant.id, participant);
+    }
+
+    const participants = deepFreeze(
+      ledger.accounts().map((account) => {
+        const graphParticipant = graphParticipants.get(account.identity.id);
+        if (!graphParticipant)
+          throw new Error(
+            `The graph is missing account [${account.identity.name}: ${account.identity.id}] that exists in the ledger.`
+          );
+
+        const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
+          account,
+          intervals
+        );
+        return {
+          identity: account.identity,
+          cred: graphParticipant.cred,
+          credPerInterval: graphParticipant.credPerInterval,
+          grainEarned: account.paid,
+          grainEarnedPerInterval,
+        };
+      })
+    );
+    return new CredGrainView(participants, intervals);
   }
 }
 

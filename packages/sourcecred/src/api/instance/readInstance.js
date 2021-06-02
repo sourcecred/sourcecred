@@ -25,6 +25,7 @@ import {
   CredGraph,
   parser as credGraphParser,
 } from "../../core/credrank/credGraph";
+import {CredGrainView, credGrainViewParser} from "../../core/credGrainView";
 import {Ledger} from "../../core/ledger/ledger";
 import {
   parser as dependenciesParser,
@@ -61,14 +62,11 @@ const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
   "dependencies.json",
 ];
-
 const WEIGHT_OVERRIDES_PATH: $ReadOnlyArray<string> = [
   "config",
   "weights.json",
 ];
-
 const BUDGET_PATH: $ReadOnlyArray<string> = ["config", "pluginBudgets.json"];
-
 const GRAIN_PATH: $ReadOnlyArray<string> = ["config", "grain.json"];
 const CURRENCY_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -84,6 +82,7 @@ const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
   "output",
   "credGraph.json.gzip",
 ];
+const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_DIRECTORY: $ReadOnlyArray<string> = ["output", "graphs"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph.json.gzip"];
 
@@ -177,6 +176,11 @@ export class ReadInstance implements ReadOnlyInstance {
   async readCredGraph(): Promise<CredGraph> {
     const credGraphPath = pathJoin(...CREDGRAPH_PATH);
     return await loadJson(this._zipStorage, credGraphPath, credGraphParser);
+  }
+
+  async readCredGrainView(): Promise<CredGrainView> {
+    const path = pathJoin(...CREDGRAINVIEW_PATH);
+    return loadJson(this._zipStorage, path, credGrainViewParser);
   }
 
   async readLedger(): Promise<Ledger> {

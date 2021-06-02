@@ -58,8 +58,14 @@ describe("core/credGrainView", () => {
       ledger = ledgerWithActiveIdentities(id1, id2);
       ledger.distributeGrain(distribution1);
       ledger.distributeGrain(distribution2);
-      credGrainView = new CredGrainView(credGraph, ledger);
+      credGrainView = CredGrainView.fromCredGraphAndLedger(credGraph, ledger);
       done();
+    });
+
+    it("does a JSON round trip", () => {
+      expect(CredGrainView.fromJSON(credGrainView.toJSON())).toEqual(
+        credGrainView
+      );
     });
 
     it("should have participant data for all intervals", () => {
@@ -326,7 +332,7 @@ describe("core/credGrainView", () => {
       credGraph = await GraphUtil.credGraph();
       ledger = ledgerWithActiveIdentities(id1, id2);
       ledger.distributeGrain(distribution1);
-      credGrainView = new CredGrainView(credGraph, ledger);
+      credGrainView = CredGrainView.fromCredGraphAndLedger(credGraph, ledger);
       done();
     });
 
@@ -401,7 +407,7 @@ describe("core/credGrainView", () => {
     beforeEach(async (done) => {
       credGraph = await GraphUtil.credGraph();
       ledger = ledgerWithActiveIdentities(id1, id2);
-      credGrainView = new CredGrainView(credGraph, ledger);
+      credGrainView = CredGrainView.fromCredGraphAndLedger(credGraph, ledger);
       done();
     });
 
@@ -437,7 +443,7 @@ describe("core/credGrainView", () => {
     beforeEach(async (done) => {
       credGraph = await GraphUtil.credGraph();
       ledger = new Ledger();
-      credGrainView = new CredGrainView(credGraph, ledger);
+      credGrainView = CredGrainView.fromCredGraphAndLedger(credGraph, ledger);
       done();
     });
 
@@ -464,9 +470,9 @@ describe("core/credGrainView", () => {
     });
 
     it("should throw", () => {
-      expect(() => new CredGrainView(credGraph, ledger)).toThrow(
-        "The graph is missing account"
-      );
+      expect(() =>
+        CredGrainView.fromCredGraphAndLedger(credGraph, ledger)
+      ).toThrow("The graph is missing account");
     });
   });
 });

@@ -1,6 +1,7 @@
 // @flow
 
 import {CredGraph} from "../../core/credrank/credGraph";
+import {CredGrainView} from "../../core/credGrainView";
 import {
   type WeightedGraph,
   merge,
@@ -34,6 +35,7 @@ export type CredrankInput = {|
 
 export type CredrankOutput = {|
   +credGraph: CredGraph,
+  +credGrainView: CredGrainView,
   +ledger: Ledger,
   +dependencies: DependenciesConfig,
   +personalAttributions: PersonalAttributionsConfig,
@@ -89,6 +91,10 @@ export async function credrank(input: CredrankInput): Promise<CredrankOutput> {
   );
   return {
     credGraph,
+    credGrainView: CredGrainView.fromCredGraphAndLedger(
+      credGraph,
+      input.ledger
+    ),
     ledger: input.ledger,
     dependencies: dependenciesWithIds,
     personalAttributions: updatedPersonalAttributionsConfig,

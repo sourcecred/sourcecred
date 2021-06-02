@@ -36,6 +36,7 @@ import {
   CredGraph,
   parser as credGraphParser,
 } from "../../core/credrank/credGraph";
+import {CredGrainView, credGrainViewParser} from "../../core/credGrainView";
 import {DiskStorage} from "../../core/storage/disk";
 import {WritableZipStorage} from "../../core/storage/zip";
 import {encode} from "../../core/storage/textEncoding";
@@ -76,6 +77,7 @@ const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
   "output",
   "credGraph.json.gzip",
 ];
+const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_DIRECTORY: $ReadOnlyArray<string> = ["output", "graphs"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph.json.gzip"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
@@ -189,13 +191,18 @@ export class LocalInstance implements Instance {
   }
 
   async readCredGraph(): Promise<CredGraph> {
-    const credGraphPath = pathJoin(...CREDGRAPH_PATH);
-    return loadJson(this._zipStorage, credGraphPath, credGraphParser);
+    const path = pathJoin(...CREDGRAPH_PATH);
+    return loadJson(this._zipStorage, path, credGraphParser);
+  }
+
+  async readCredGrainView(): Promise<CredGrainView> {
+    const path = pathJoin(...CREDGRAPH_PATH);
+    return loadJson(this._zipStorage, path, credGrainViewParser);
   }
 
   async readLedger(): Promise<Ledger> {
-    const ledgerPath = pathJoin(...LEDGER_PATH);
-    return loadFileWithDefault(this._storage, ledgerPath, () =>
+    const path = pathJoin(...LEDGER_PATH);
+    return loadFileWithDefault(this._storage, path, () =>
       new Ledger().serialize()
     ).then((result) => Ledger.parse(result));
   }
@@ -213,6 +220,7 @@ export class LocalInstance implements Instance {
     await Promise.all([
       this.writeLedger(credrankOutput.ledger),
       this.writeCredGraph(credrankOutput.credGraph),
+      this.writeCredGrainView(credrankOutput.credGrainView),
       this.writeDependenciesConfig(credrankOutput.dependencies),
       this.writePersonalAttributionsConfig(credrankOutput.personalAttributions),
     ]);
@@ -350,6 +358,12 @@ export class LocalInstance implements Instance {
     const cgJson = stringify(credGraph.toJSON());
     const outputPath = pathJoin(...CREDGRAPH_PATH);
     return this._zipStorage.set(outputPath, encode(cgJson));
+  }
+
+  async writeCredGrainView(credGrainView: CredGrainView): Promise<void> {
+    const json = stringify(credGrainView.toJSON());
+    const outputPath = pathJoin(...CREDGRAINVIEW_PATH);
+    return this._zipStorage.set(outputPath, encode(json));
   }
 
   async writePluginGraph(
