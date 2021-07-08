@@ -319,9 +319,9 @@ export function _createGraphFromMessages(
     } = graphMessage;
     if (author) {
       wg.graph.addNode(memberNode(author));
-      wg.graph.addNode(messageNode(message, guildId, channelName));
       wg.graph.addEdge(authorsMessageEdge(message, author));
     }
+    wg.graph.addNode(messageNode(message, guildId, channelName));
 
     for (const {reaction, reactingMember} of reactions) {
       const node = reactionNode(reaction, message.timestampMs, guildId);
