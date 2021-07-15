@@ -67,7 +67,7 @@ describe("core/ledger/computeDistribution", () => {
 
       /* The GraphUtil will create 2 participants, but we're only going to activate
         1 in the ledger. If things are working properly, we should not see data
-        for the second participant in the CredGrainView. */
+        for the second participant in the allocationIdentities. */
 
       const allocationId1 = uuid.random();
       const allocation1 = {
@@ -112,7 +112,7 @@ describe("core/ledger/computeDistribution", () => {
 
       /* The GraphUtil will create 2 participants, but we're only going to activate
         1 in the ledger. If things are working properly, we should not see data
-        for the second participant in the CredGrainView. */
+        for the second participant in the allocationIdentities. */
 
       const allocationId1 = uuid.random();
       const allocation1 = {
