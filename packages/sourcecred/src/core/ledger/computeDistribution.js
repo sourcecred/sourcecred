@@ -4,7 +4,7 @@ import * as uuid from "../../util/uuid";
 import {type TimestampMs} from "../../util/timestamp";
 import {type AllocationIdentity, computeAllocation} from "./grainAllocation";
 import {type AllocationPolicy} from "./policies";
-import {type CredGrainView} from "../credGrainView"
+import {type CredGrainView} from "../credGrainView";
 import {type Distribution} from "./distribution";
 
 /**
@@ -43,15 +43,18 @@ export function _allocationIdentities(
   credGrainData: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<AllocationIdentity> {
+  const activeParticipants = credGrainData
+    .participants()
+    .filter((participant) => participant.active);
 
-  const allocationIdentities = credGrainData.participants().map((x) => ({
+  const allocationIdentities = activeParticipants.map((x) => ({
     id: x.identity.id,
     paid: x.grainEarned,
-    cred: x.credPerInterval
+    cred: x.credPerInterval,
   }));
-  const numIntervals = credGrainData.intervals.filter(
-    (x) => x.endTimeMs <= effectiveTimestamp
-  ).length;
+  const numIntervals = credGrainData
+    .intervals()
+    .filter((x) => x.endTimeMs <= effectiveTimestamp).length;
   const timeSlicedAllocationIdentities = allocationIdentities.map((x) => ({
     id: x.id,
     paid: x.paid,

@@ -59,7 +59,10 @@ export function applyDistributions(
     // (wrt paid balances)
 
     //const accountsData = computeCredAccounts(ledger, credGraph);
-    const credGrainData = CredGrainView.fromCredGraphAndLedger(credGraph,ledger);
+    const credGrainData = CredGrainView.fromCredGraphAndLedger(
+      credGraph,
+      ledger
+    );
     const distribution = computeDistribution(
       policy.allocationPolicies,
       credGrainData,
