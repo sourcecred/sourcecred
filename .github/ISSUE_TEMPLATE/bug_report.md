@@ -2,7 +2,7 @@
 name: Bug report
 about: Something broken in SourceCred? Let us know!
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
