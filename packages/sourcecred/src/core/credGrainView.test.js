@@ -36,7 +36,11 @@ describe("core/credGrainView", () => {
     };
     const allocation2 = {
       id: allocationId2,
-      policy: {policyType: "BALANCED", budget: nng("20")},
+      policy: {
+        policyType: "BALANCED",
+        budget: nng("20"),
+        numIntervalsLookback: 0,
+      },
       receipts: [
         {amount: g("10"), id: id1},
         {amount: g("10"), id: id2},

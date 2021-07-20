@@ -29,7 +29,7 @@ export function computeDistribution(
     effectiveTimestamp
   );
   const allocations = policies.map((p) =>
-    computeAllocation(p, allocationIdentities)
+    computeAllocation(p, allocationIdentities, credGrainData)
   );
   const distribution = {
     id: uuid.random(),
@@ -52,9 +52,11 @@ export function _allocationIdentities(
     paid: x.grainEarned,
     cred: x.credPerInterval,
   }));
+
   const numIntervals = credGrainData
     .intervals()
     .filter((x) => x.endTimeMs <= effectiveTimestamp).length;
+
   const timeSlicedAllocationIdentities = allocationIdentities.map((x) => ({
     id: x.id,
     paid: x.paid,

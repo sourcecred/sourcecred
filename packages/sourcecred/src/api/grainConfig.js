@@ -74,6 +74,7 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
     allocationPoliciesDeprecated.push({
       budget: balancedPerWeek,
       policyType: "BALANCED",
+      numIntervalsLookback: 0, // Zero means use the whole history
     });
   }
   const maxSimultaneousDistributions = NullUtil.orElse(

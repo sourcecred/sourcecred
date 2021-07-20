@@ -7,6 +7,8 @@
  */
 import * as G from "./grain";
 import * as P from "../../util/combo";
+import {type CredGrainView} from "../credGrainView";
+
 import {
   type Uuid,
   random as randomUuid,
@@ -47,15 +49,36 @@ export type AllocationIdentity = {|
 
 export function computeAllocation(
   policy: AllocationPolicy,
-  identities: $ReadOnlyArray<AllocationIdentity>
+  identities: $ReadOnlyArray<AllocationIdentity>,
+  credGrainData: CredGrainView
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
   const processedIdentities = processIdentities(identities);
   return _validateAllocationBudget({
     policy,
-    receipts: receipts(validatedPolicy, processedIdentities),
+    receipts: receipts(validatedPolicy, processedIdentities, credGrainData),
     id: randomUuid(),
   });
+}
+
+/* This is a simplified case that should not require a credGrainView */
+export function computeAllocationSpecial(
+  policy: AllocationPolicy,
+  identities: $ReadOnlyArray<AllocationIdentity>
+): Allocation {
+  const validatedPolicy = _validatePolicy(policy);
+  const processedIdentities = processIdentities(identities);
+  if (validatedPolicy.policyType === "SPECIAL") {
+    return _validateAllocationBudget({
+      policy,
+      receipts: specialReceipts(validatedPolicy, processedIdentities),
+      id: randomUuid(),
+    });
+  } else {
+    throw new Error(
+      `SpecialPolicyRequired. Got: ${validatedPolicy.policyType}`
+    );
+  }
 }
 
 function _validatePolicy(p: AllocationPolicy) {
@@ -79,7 +102,8 @@ export function _validateAllocationBudget(a: Allocation): Allocation {
 
 function receipts(
   policy: AllocationPolicy,
-  identities: ProcessedIdentities
+  identities: ProcessedIdentities,
+  credGrainData: CredGrainView
 ): $ReadOnlyArray<GrainReceipt> {
   switch (policy.policyType) {
     case "IMMEDIATE":
@@ -87,7 +111,8 @@ function receipts(
     case "RECENT":
       return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":
-      return balancedReceipts(policy.budget, identities);
+      //console.log("id1 - 1:"+identities[1].id)
+      return balancedReceipts(policy, identities, credGrainData);
     case "SPECIAL":
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow

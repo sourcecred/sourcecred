@@ -45,6 +45,18 @@ export const participantNode2: GraphNode = {
   address: na("participant2"),
   timestampMs: null,
 };
+
+export const participantNode3: GraphNode = {
+  description: "participant3",
+  address: na("participant3"),
+  timestampMs: null,
+};
+export const participantNode4: GraphNode = {
+  description: "participant4",
+  address: na("participant4"),
+  timestampMs: null,
+};
+
 deepFreeze([participantNode1, participantNode2]);
 
 export const participant1: MarkovProcessParticipant = {
@@ -72,6 +84,34 @@ export const expectedParticipant2: Participant = {
   cred: 1.286615549244117e-19,
   credPerInterval: [5.146462196976468e-20, 7.719693295464702e-20],
 };
+
+export const participant3: MarkovProcessParticipant = {
+  description: participantNode3.description,
+  address: participantNode3.address,
+  id: uuid.fromString("eHZoNDhmbDN2Z3N3bjg0aA"),
+};
+export const participant4: MarkovProcessParticipant = {
+  description: participantNode4.description,
+  address: participantNode4.address,
+  id: uuid.fromString("bmdvMzd2bmZqNG5nOTRuaA"),
+};
+
+export const expectedParticipant3: Participant = {
+  description: participantNode3.description,
+  address: participantNode3.address,
+  id: uuid.fromString("eHZoNDhmbDN2Z3N3bjg0aA"),
+  cred: 0.87108213188,
+  credPerInterval: [0.740419825600136, 0.13066230628165218],
+};
+export const expectedParticipant4: Participant = {
+  description: participantNode4.description,
+  address: participantNode4.address,
+  id: uuid.fromString("bmdvMzd2bmZqNG5nOTRuaA"),
+  cred: 2.12891729299,
+  credPerInterval: [0.2128917958122319, 1.9160254971783794],
+};
+
+//Create a very uneven graph
 
 export const participants: $ReadOnlyArray<MarkovProcessParticipant> = deepFreeze(
   [participant1, participant2]
@@ -198,3 +238,117 @@ export const markovProcessGraph = (
 
 export const credGraph: () => Promise<CredGraph> = async () =>
   markovProcessGraphPagerank(markovProcessGraph());
+
+//Create a more balanced cred allocation:
+
+const c3 = {description: "c3", address: na("c3"), timestampMs: 0};
+const c4 = {description: "c4", address: na("c4"), timestampMs: 2};
+export const contributions2: $ReadOnlyArray<GraphNode> = deepFreeze([c3, c4]);
+
+// Connects contribution 3 to participant 3
+export const e4: GraphEdge = {
+  address: ea("e4"),
+  src: c3.address,
+  dst: participantNode3.address,
+  timestampMs: 1,
+};
+
+// Connects contribution 4 to participant 4
+export const e5: GraphEdge = {
+  address: ea("e5"),
+  src: c4.address,
+  dst: participantNode4.address,
+  timestampMs: 3,
+};
+
+// Connects c3 to c4.
+export const e6: GraphEdge = {
+  address: ea("e6"),
+  src: c3.address,
+  dst: c4.address,
+  timestampMs: 4,
+};
+
+export const e7: GraphEdge = {
+  address: ea("e3"),
+  src: c3.address,
+  dst: c4.address,
+  timestampMs: 4,
+};
+
+export const edges2: $ReadOnlyArray<GraphEdge> = deepFreeze([e4, e5, e6, e7]);
+
+export const parameters2: MarkovProcessGraphParameters = deepFreeze({
+  beta: 0.2,
+  gammaForward: 0.15,
+  gammaBackward: 0.1,
+  alpha: 0.2,
+});
+
+export function graph2(): Graph {
+  const g = new Graph();
+  g.addNode(participantNode3);
+  g.addNode(participantNode4);
+  for (const c of contributions2) {
+    g.addNode(c);
+  }
+  for (const e of edges2) {
+    g.addEdge(e);
+  }
+  return g;
+}
+export function weights2(): WeightsT {
+  const nodeWeights = new Map().set(c3.address, 1).set(c4.address, 2);
+  const edgeWeights = new Map()
+    .set(e4.address, {forwards: 1, backwards: 0})
+    .set(e5.address, {forwards: 2, backwards: 1})
+    .set(e6.address, {forwards: 0, backwards: 0});
+  return {nodeWeights, edgeWeights};
+}
+
+export const nodeWeight2: NodeWeightEvaluator = nodeWeightEvaluator(weights2());
+export const edgeWeight2: EdgeWeightEvaluator = edgeWeightEvaluator(weights2());
+export const weightedGraph2: () => WeightedGraph = () => ({
+  weights: weights2(),
+  graph: graph2(),
+});
+export const args2 = (
+  personalAttributions?: PersonalAttributions = []
+): MarkovProcessGraphArguments => ({
+  weightedGraph: weightedGraph2(),
+  parameters,
+  intervals,
+  participants: [participant3, participant4],
+  personalAttributions,
+});
+const attribution3 = {
+  fromParticipantId: participant3.id,
+  recipients: [
+    {
+      toParticipantId: participant4.id,
+      proportions: [
+        {timestampMs: -2, proportionValue: 0.2},
+        {timestampMs: -1, proportionValue: 0.1},
+        {timestampMs: 0, proportionValue: 0.5},
+      ],
+    },
+  ],
+};
+
+const attribution4 = {
+  fromParticipantId: participant4.id,
+  recipients: [
+    {
+      toParticipantId: participant3.id,
+      proportions: [{timestampMs: 2, proportionValue: 0.3}],
+    },
+  ],
+};
+export const attributions2: PersonalAttributions = [attribution3, attribution4];
+
+export const markovProcessGraph2 = (
+  attributions2?: PersonalAttributions = []
+): MarkovProcessGraph => MarkovProcessGraph.new(args2(attributions2));
+
+export const credGraph2: () => Promise<CredGraph> = async () =>
+  markovProcessGraphPagerank(markovProcessGraph2());
