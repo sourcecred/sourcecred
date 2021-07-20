@@ -96,7 +96,7 @@ export class CredGrainView {
     participants.forEach((participant) => {
       for (let i = 0; i < this._intervals.length; i++) {
         this._credTotals[i] =
-          participant.credPerInterval[i] + this._credTotals[i] || 0;
+          participant.credPerInterval[i] + (this._credTotals[i] || 0);
         this._grainTotals[i] = add(
           participant.grainEarnedPerInterval[i],
           this._grainTotals[i] || ZERO
