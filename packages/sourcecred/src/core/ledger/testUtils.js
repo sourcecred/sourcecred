@@ -110,7 +110,7 @@ export const createTestLedgerFixture = (
     firstId: IdentityId = id1,
     secondId: IdentityId = id2
   ): Ledger => {
-    const ledger = ledgerWithIdentities();
+    const ledger = ledgerWithIdentities(firstId, secondId);
     ledger.activate(firstId);
     ledger.activate(secondId);
     return ledger;
