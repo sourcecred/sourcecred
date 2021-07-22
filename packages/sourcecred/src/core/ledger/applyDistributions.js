@@ -58,7 +58,6 @@ export function applyDistributions(
     // Recompute for every endpoint because the Ledger will be in a different state
     // (wrt paid balances)
 
-    //const accountsData = computeCredAccounts(ledger, credGraph);
     const credGrainData = CredGrainView.fromCredGraphAndLedger(
       credGraph,
       ledger

@@ -54,8 +54,8 @@ export function _allocationIdentities(
   }));
 
   const numIntervals = credGrainData
-    .intervals()
-    .filter((x) => x.endTimeMs <= effectiveTimestamp).length;
+    .withTimeScope(0, effectiveTimestamp)
+    .intervals().length;
 
   const timeSlicedAllocationIdentities = allocationIdentities.map((x) => ({
     id: x.id,
