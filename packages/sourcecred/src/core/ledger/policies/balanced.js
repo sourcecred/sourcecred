@@ -131,11 +131,22 @@ export const balancedConfigParser: P.Parser<BalancedPolicy> = P.object({
   numIntervalsLookback: P.number,
 });
 
-export const balancedPolicyParser: P.Parser<BalancedPolicy> = P.object({
-  policyType: P.exactly(["BALANCED"]),
-  budget: grainParser,
-  numIntervalsLookback: P.number,
-});
+export const balancedPolicyParser: P.Parser<BalancedPolicy> = P.fmap(
+  P.object(
+    {
+      policyType: P.exactly(["BALANCED"]),
+      budget: grainParser,
+    },
+    {
+      numIntervalsLookback: P.number,
+    }
+  ),
+  (policy) => ({
+    ...policy,
+    numIntervalsLookback:
+      policy.numIntervalsLookback != null ? policy.numIntervalsLookback : 0,
+  })
+);
 
 export function toString(policy: BalancedPolicy): string {
   return [
