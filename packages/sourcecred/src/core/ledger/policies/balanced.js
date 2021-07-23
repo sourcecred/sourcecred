@@ -11,6 +11,7 @@ import {
   numberOrFloatStringParser,
 } from "../nonnegativeGrain";
 import {type CredGrainView} from "../../credGrainView";
+import {type IntervalSequence} from "../../interval";
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their
  * lifetime Grain payouts are consistent with their lifetime Cred scores.
@@ -26,7 +27,7 @@ export type Balanced = "BALANCED";
 export type BalancedPolicy = {|
   +policyType: Balanced,
   +budget: NonnegativeGrain,
-  numIntervalsLookback: number,
+  +numIntervalsLookback: number,
 |};
 
 /**
@@ -57,7 +58,7 @@ export type BalancedPolicy = {|
 export function balancedReceipts(
   policy: BalancedPolicy,
   identities: ProcessedIdentities,
-  credGrainData: CredGrainView
+  credGrainView: CredGrainView
 ): $ReadOnlyArray<GrainReceipt> {
   if (policy.numIntervalsLookback < 0) {
     throw new Error(
@@ -70,22 +71,29 @@ export function balancedReceipts(
     );
   }
 
-  const intervals = credGrainData.intervals();
-  if (
-    !policy.numIntervalsLookback ||
-    policy.numIntervalsLookback > intervals.length
-  ) {
-    policy.numIntervalsLookback = intervals.length;
-  }
+  const intervals = credGrainView.intervals();
+  const numIntervalsLookback = ((
+    policy: BalancedPolicy,
+    intervals: IntervalSequence
+  ) => {
+    if (
+      !policy.numIntervalsLookback ||
+      policy.numIntervalsLookback > intervals.length
+    ) {
+      return intervals.length;
+    } else {
+      return policy.numIntervalsLookback;
+    }
+  })(policy, intervals);
 
-  const timeLimitedCredGrainData = credGrainData.withTimeScope(
-    intervals[intervals.length - policy.numIntervalsLookback].startTimeMs,
+  const timeLimitedcredGrainView = credGrainView.withTimeScope(
+    intervals[intervals.length - numIntervalsLookback].startTimeMs,
     intervals[intervals.length - 1].endTimeMs
   );
 
-  const timeLimitedParticipants = timeLimitedCredGrainData.participants();
-  const totalCred = sum(timeLimitedCredGrainData.totalCredPerInterval());
-  const totalEverPaid = G.sum(timeLimitedCredGrainData.totalGrainPerInterval());
+  const timeLimitedParticipants = timeLimitedcredGrainView.participants();
+  const totalCred = sum(timeLimitedcredGrainView.totalCredPerInterval());
+  const totalEverPaid = G.sum(timeLimitedcredGrainView.totalGrainPerInterval());
   const targetTotalDistributed = G.add(totalEverPaid, policy.budget);
 
   const targetGrainPerCred = G.multiplyFloat(

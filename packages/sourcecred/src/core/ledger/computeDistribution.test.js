@@ -43,7 +43,7 @@ describe("core/ledger/computeDistribution", () => {
       ledger.activate(idActive);
       ledger.distributeGrain(distribution1);
 
-      const credGrainData = CredGrainView.fromCredGraphAndLedger(
+      const credGrainView = CredGrainView.fromCredGraphAndLedger(
         credGraph,
         ledger
       );
@@ -56,7 +56,7 @@ describe("core/ledger/computeDistribution", () => {
         },
       ];
 
-      expect(_allocationIdentities(credGrainData, 999)).toEqual(
+      expect(_allocationIdentities(credGrainView, 999)).toEqual(
         expectedAllocationIdentites
       );
     });
@@ -89,7 +89,7 @@ describe("core/ledger/computeDistribution", () => {
       ledger.activate(idActive);
       ledger.distributeGrain(distribution1);
 
-      const credGrainData = CredGrainView.fromCredGraphAndLedger(
+      const credGrainView = CredGrainView.fromCredGraphAndLedger(
         credGraph,
         ledger
       );
@@ -101,7 +101,7 @@ describe("core/ledger/computeDistribution", () => {
           paid: "2",
         },
       ];
-      expect(_allocationIdentities(credGrainData, 999)).toEqual(
+      expect(_allocationIdentities(credGrainView, 999)).toEqual(
         expectedAllocationIdentites
       );
     });
@@ -134,7 +134,7 @@ describe("core/ledger/computeDistribution", () => {
       ledger.activate(idActive);
       ledger.distributeGrain(distribution1);
 
-      const credGrainData = CredGrainView.fromCredGraphAndLedger(
+      const credGrainView = CredGrainView.fromCredGraphAndLedger(
         credGraph,
         ledger
       );
@@ -148,7 +148,7 @@ describe("core/ledger/computeDistribution", () => {
         },
       ];
       expect(
-        _allocationIdentities(credGrainData, GraphUtil.intervals[0].endTimeMs)
+        _allocationIdentities(credGrainView, GraphUtil.intervals[0].endTimeMs)
       ).toEqual(expectedAllocationIdentites);
     });
   });

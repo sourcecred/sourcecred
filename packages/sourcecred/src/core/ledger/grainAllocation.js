@@ -50,13 +50,13 @@ export type AllocationIdentity = {|
 export function computeAllocation(
   policy: AllocationPolicy,
   identities: $ReadOnlyArray<AllocationIdentity>,
-  credGrainData: CredGrainView
+  credGrainView: CredGrainView
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
   const processedIdentities = processIdentities(identities);
   return _validateAllocationBudget({
     policy,
-    receipts: receipts(validatedPolicy, processedIdentities, credGrainData),
+    receipts: receipts(validatedPolicy, processedIdentities, credGrainView),
     id: randomUuid(),
   });
 }
@@ -103,7 +103,7 @@ export function _validateAllocationBudget(a: Allocation): Allocation {
 function receipts(
   policy: AllocationPolicy,
   identities: ProcessedIdentities,
-  credGrainData: CredGrainView
+  credGrainView: CredGrainView
 ): $ReadOnlyArray<GrainReceipt> {
   switch (policy.policyType) {
     case "IMMEDIATE":
@@ -111,8 +111,7 @@ function receipts(
     case "RECENT":
       return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":
-      //console.log("id1 - 1:"+identities[1].id)
-      return balancedReceipts(policy, identities, credGrainData);
+      return balancedReceipts(policy, identities, credGrainView);
     case "SPECIAL":
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow

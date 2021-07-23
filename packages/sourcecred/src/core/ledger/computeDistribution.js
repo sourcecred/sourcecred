@@ -21,15 +21,15 @@ import {type Distribution} from "./distribution";
  */
 export function computeDistribution(
   policies: $ReadOnlyArray<AllocationPolicy>,
-  credGrainData: CredGrainView,
+  credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): Distribution {
   const allocationIdentities = _allocationIdentities(
-    credGrainData,
+    credGrainView,
     effectiveTimestamp
   );
   const allocations = policies.map((p) =>
-    computeAllocation(p, allocationIdentities, credGrainData)
+    computeAllocation(p, allocationIdentities, credGrainView)
   );
   const distribution = {
     id: uuid.random(),
@@ -40,27 +40,17 @@ export function computeDistribution(
 }
 
 export function _allocationIdentities(
-  credGrainData: CredGrainView,
+  credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<AllocationIdentity> {
-  const activeParticipants = credGrainData
+  const timeSlicedActiveParticipants = credGrainView
+    .withTimeScope(0, effectiveTimestamp)
     .participants()
     .filter((participant) => participant.active);
 
-  const allocationIdentities = activeParticipants.map((x) => ({
+  return timeSlicedActiveParticipants.map((x) => ({
     id: x.identity.id,
     paid: x.grainEarned,
     cred: x.credPerInterval,
   }));
-
-  const numIntervals = credGrainData
-    .withTimeScope(0, effectiveTimestamp)
-    .intervals().length;
-
-  const timeSlicedAllocationIdentities = allocationIdentities.map((x) => ({
-    id: x.id,
-    paid: x.paid,
-    cred: x.cred.slice(0, numIntervals),
-  }));
-  return timeSlicedAllocationIdentities;
 }

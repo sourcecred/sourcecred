@@ -15,7 +15,6 @@ import {createTestLedgerFixture} from "../ledger/testUtils";
 import {g} from "../ledger/testUtils";
 import * as uuid from "../../util/uuid";
 import * as GraphUtil from "../credrank/testUtils";
-/*import {sum} from "d3-array"; */
 
 describe("core/ledger/grainAllocation", () => {
   // concise helper for grain from a number
