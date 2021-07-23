@@ -104,4 +104,4 @@ export const allocationParser: P.Parser<Allocation> = P.object({
   policy: allocationPolicyParser,
   id: uuidParser,
   receipts: P.array(grainReceiptParser),
-}); 
+});
