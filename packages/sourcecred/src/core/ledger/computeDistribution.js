@@ -24,12 +24,19 @@ export function computeDistribution(
   credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): Distribution {
+
   const allocationIdentities = _allocationIdentities(
     credGrainView,
     effectiveTimestamp
   );
+
+  // As of now the balanced policy uses credGrainView and effective Timestamp
+  // but other policies are still using allocationIdentities.
+  // when all policies are converted to credGrainView, we won't need
+  // allocationIdentities, but for the time being, we need both.
+
   const allocations = policies.map((p) =>
-    computeAllocation(p, allocationIdentities, credGrainView)
+    computeAllocation(p, allocationIdentities, credGrainView, effectiveTimestamp)
   );
   const distribution = {
     id: uuid.random(),

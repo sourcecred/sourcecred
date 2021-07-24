@@ -8,6 +8,7 @@
 import * as G from "./grain";
 import * as P from "../../util/combo";
 import {type CredGrainView} from "../credGrainView";
+import {type TimestampMs} from "../../util/timestamp";
 
 import {
   type Uuid,
@@ -50,13 +51,14 @@ export type AllocationIdentity = {|
 export function computeAllocation(
   policy: AllocationPolicy,
   identities: $ReadOnlyArray<AllocationIdentity>,
-  credGrainView: CredGrainView
+  credGrainView: CredGrainView,
+  effectiveTimestamp: TimestampMs
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
   const processedIdentities = processIdentities(identities);
   return _validateAllocationBudget({
     policy,
-    receipts: receipts(validatedPolicy, processedIdentities, credGrainView),
+    receipts: receipts(validatedPolicy, processedIdentities, credGrainView, effectiveTimestamp),
     id: randomUuid(),
   });
 }
@@ -103,7 +105,8 @@ export function _validateAllocationBudget(a: Allocation): Allocation {
 function receipts(
   policy: AllocationPolicy,
   identities: ProcessedIdentities,
-  credGrainView: CredGrainView
+  credGrainView: CredGrainView,
+  effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<GrainReceipt> {
   switch (policy.policyType) {
     case "IMMEDIATE":
@@ -111,7 +114,7 @@ function receipts(
     case "RECENT":
       return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":
-      return balancedReceipts(policy, identities, credGrainView);
+      return balancedReceipts(policy, credGrainView, effectiveTimestamp);
     case "SPECIAL":
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow

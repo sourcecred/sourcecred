@@ -4,7 +4,6 @@ import {sum} from "d3-array";
 import * as G from "../grain";
 import * as P from "../../../util/combo";
 import {type GrainReceipt} from "../grainAllocation";
-import {type ProcessedIdentities} from "../processedIdentities";
 import {
   type NonnegativeGrain,
   grainParser,
@@ -12,6 +11,7 @@ import {
 } from "../nonnegativeGrain";
 import {type CredGrainView} from "../../credGrainView";
 import {type IntervalSequence} from "../../interval";
+import {type TimestampMs} from "../../../util/timestamp";
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their
  * lifetime Grain payouts are consistent with their lifetime Cred scores.
@@ -57,8 +57,8 @@ export type BalancedPolicy = {|
  */
 export function balancedReceipts(
   policy: BalancedPolicy,
-  identities: ProcessedIdentities,
-  credGrainView: CredGrainView
+  credGrainView: CredGrainView,
+  effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<GrainReceipt> {
   if (policy.numIntervalsLookback < 0) {
     throw new Error(
@@ -71,29 +71,31 @@ export function balancedReceipts(
     );
   }
 
-  const intervals = credGrainView.intervals();
+  const intervalsBeforeEffective = 
+    credGrainView.intervals().filter(interval => interval.endTimeMs <= effectiveTimestamp);
+
   const numIntervalsLookback = ((
     policy: BalancedPolicy,
-    intervals: IntervalSequence
+    intervalsLength: number,
   ) => {
     if (
       !policy.numIntervalsLookback ||
-      policy.numIntervalsLookback > intervals.length
+      policy.numIntervalsLookback > intervalsLength
     ) {
-      return intervals.length;
+      return intervalsLength;
     } else {
       return policy.numIntervalsLookback;
     }
-  })(policy, intervals);
+  })(policy, intervalsBeforeEffective.length);
 
   const timeLimitedcredGrainView = credGrainView.withTimeScope(
-    intervals[intervals.length - numIntervalsLookback].startTimeMs,
-    intervals[intervals.length - 1].endTimeMs
+    intervalsBeforeEffective[intervalsBeforeEffective.length - numIntervalsLookback].startTimeMs,
+    effectiveTimestamp
   );
 
-  const timeLimitedParticipants = timeLimitedcredGrainView.participants();
-  const totalCred = sum(timeLimitedcredGrainView.totalCredPerInterval());
-  const totalEverPaid = G.sum(timeLimitedcredGrainView.totalGrainPerInterval());
+  const timeLimitedParticipants = timeLimitedcredGrainView.participants().filter((participant) => participant.active);
+  const totalCred = sum(timeLimitedParticipants.map(participant => participant.cred));
+  const totalEverPaid = G.sum(timeLimitedParticipants.map(participant => participant.grainEarned));
   const targetTotalDistributed = G.add(totalEverPaid, policy.budget);
 
   const targetGrainPerCred = G.multiplyFloat(
@@ -101,28 +103,21 @@ export function balancedReceipts(
     1 / totalCred
   );
 
-  const userUnderpayment = identities.map(({id, paid}) => {
-    const participant = timeLimitedParticipants.find(
-      ({identity}) => identity.id === id
-    );
-
-    if (participant) {
+  const userUnderpayment = timeLimitedParticipants.map(
+    (participant) => {
       const lookbackCred = sum(participant.credPerInterval);
       const target = G.multiplyFloat(targetGrainPerCred, lookbackCred);
-      if (G.gt(target, paid)) {
-        return G.sub(target, paid);
+      if (G.gt(target, participant.grainEarned)) {
+        return G.sub(target, participant.grainEarned);
       } else {
         return G.ZERO;
       }
-    } else {
-      throw new Error(`Identity missing in participants ${id}`);
-    }
   });
 
   const floatUnderpayment = userUnderpayment.map((x) => Number(x));
 
   const grainAmounts = G.splitBudget(policy.budget, floatUnderpayment);
-  return identities.map(({id}, i) => ({id, amount: grainAmounts[i]}));
+  return timeLimitedParticipants.map(({identity}, i) => ({id: identity.id, amount: grainAmounts[i]}));
 }
 
 export const balancedConfigParser: P.Parser<BalancedPolicy> = P.object({
