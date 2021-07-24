@@ -88,10 +88,12 @@ export function balancedReceipts(
     }
   })(policy, intervalsBeforeEffective.length);
 
-  console.log("asdfj ---");
-  console.log("asdfj Budget: "+policy.budget);
-  console.log("asdfj NumIntervalsLookback: "+ numIntervalsLookback);
-  console.log("asdfj IntervalsBeforeEffective: "+ intervalsBeforeEffective.length);
+  console.log("##### ---");
+  console.log("##### Budget: " + policy.budget);
+  console.log("##### NumIntervalsLookback: " + numIntervalsLookback);
+  console.log(
+    "##### IntervalsBeforeEffective: " + intervalsBeforeEffective.length
+  );
 
   const timeLimitedcredGrainView = credGrainView.withTimeScope(
     intervalsBeforeEffective[
@@ -107,27 +109,26 @@ export function balancedReceipts(
     timeLimitedParticipants.map((participant) => participant.cred)
   );
 
-  console.log("asdfj TotalCred:"+ totalCred);
+  console.log("##### TotalCred:" + totalCred);
 
   const totalEverPaid = G.sum(
     timeLimitedParticipants.map((participant) => participant.grainEarned)
   );
 
-  console.log("asdfj totalEverPaid: "+totalEverPaid);
+  console.log("##### totalEverPaid: " + totalEverPaid);
   const targetTotalDistributed = G.add(totalEverPaid, policy.budget);
-  console.log("asdfj TargetTotalDistributed: "+targetTotalDistributed);
+  console.log("##### TargetTotalDistributed: " + targetTotalDistributed);
   const targetGrainPerCred = G.multiplyFloat(
     targetTotalDistributed,
     1 / totalCred
   );
 
-  console.log("asdfj TargetGrainPerCred: "+targetGrainPerCred);
-
+  console.log("##### TargetGrainPerCred: " + targetGrainPerCred);
 
   const userUnderpayment = timeLimitedParticipants.map((participant) => {
-    console.log("asdfj ParticipantID: "+participant.identity.id);
-    console.log("asdfj ParticipantTotalEverPaid: "+participant.grainEarned);
-    console.log("asdfj ParticipantTotaCred: "+participant.cred);
+    console.log("##### ParticipantID: " + participant.identity.id);
+    console.log("##### ParticipantTotalEverPaid: " + participant.grainEarned);
+    console.log("##### ParticipantTotaCred: " + participant.cred);
     const lookbackCred = sum(participant.credPerInterval);
     const target = G.multiplyFloat(targetGrainPerCred, lookbackCred);
     if (G.gt(target, participant.grainEarned)) {
@@ -136,12 +137,12 @@ export function balancedReceipts(
       return G.ZERO;
     }
   });
-  
+
   const floatUnderpayment = userUnderpayment.map((x) => Number(x));
   const grainAmounts = G.splitBudget(policy.budget, floatUnderpayment);
-  console.log("asdfj grain amount 0: "+grainAmounts[0]);
-  console.log("asdfj grain amount 1: "+grainAmounts[1]);
-  console.log("asdfj ---");
+  console.log("##### grain amount 0: " + grainAmounts[0]);
+  console.log("##### grain amount 1: " + grainAmounts[1]);
+  console.log("##### ---");
   return timeLimitedParticipants.map(({identity}, i) => ({
     id: identity.id,
     amount: grainAmounts[i],

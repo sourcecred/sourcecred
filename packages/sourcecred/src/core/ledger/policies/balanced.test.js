@@ -89,9 +89,9 @@ describe("core/ledger/policies/balanced", () => {
         budget: nng(100),
         numIntervalsLookback: -1,
       };
-      expect(() =>
-        balancedReceipts(policy, credGrainView, 0)
-      ).toThrowError(`numIntervalsLookback must be at least 0`);
+      expect(() => balancedReceipts(policy, credGrainView, 0)).toThrowError(
+        `numIntervalsLookback must be at least 0`
+      );
     });
 
     it("errors on float instead of int", () => {
@@ -100,9 +100,9 @@ describe("core/ledger/policies/balanced", () => {
         budget: nng(100),
         numIntervalsLookback: 1.5,
       };
-      expect(() =>
-        balancedReceipts(policy, credGrainView, 0)
-      ).toThrowError(`numIntervalsLookback must be an integer`);
+      expect(() => balancedReceipts(policy, credGrainView, 0)).toThrowError(
+        `numIntervalsLookback must be an integer`
+      );
     });
 
     it("defaults lookback period > history to max history", () => {
@@ -116,16 +116,8 @@ describe("core/ledger/policies/balanced", () => {
         budget: nng(100),
         numIntervalsLookback: 50, // 50 > number of intervals (2)
       };
-      const expected = balancedReceipts(
-        policy1,
-        credGrainViewUnbalanced,
-        4
-      );
-      const actual = balancedReceipts(
-        policy2,
-        credGrainViewUnbalanced,
-        4
-      );
+      const expected = balancedReceipts(policy1, credGrainViewUnbalanced, 4);
+      const actual = balancedReceipts(policy2, credGrainViewUnbalanced, 4);
       expect(actual).toEqual(expected);
     });
 
@@ -140,16 +132,8 @@ describe("core/ledger/policies/balanced", () => {
         budget: nng(100),
         numIntervalsLookback: 2,
       };
-      const expected = balancedReceipts(
-        policy1,
-        credGrainViewUnbalanced,
-        4
-      );
-      const actual = balancedReceipts(
-        policy2,
-        credGrainViewUnbalanced,
-        4
-      );
+      const expected = balancedReceipts(policy1, credGrainViewUnbalanced, 4);
+      const actual = balancedReceipts(policy2, credGrainViewUnbalanced, 4);
       expect(actual).toEqual(expected);
     });
 

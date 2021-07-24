@@ -18,7 +18,6 @@ import * as GraphUtil from "../credrank/testUtils";
 import {type TimestampMs} from "../../util/timestamp";
 
 describe("core/ledger/grainAllocation", () => {
-
   // concise helper for grain from a number
   const nng = (x: number) => nngFromString(x.toString());
   // concise helper for an allocation identity
@@ -67,7 +66,8 @@ describe("core/ledger/grainAllocation", () => {
       });
 
       it("errors if there are no identities", () => {
-        const thunk = () => computeAllocation(immediate(5), [], credGrainView, 0);
+        const thunk = () =>
+          computeAllocation(immediate(5), [], credGrainView, 0);
         expect(thunk).toThrowError("must have at least one identity");
       });
       it("errors if the total cred is zero", () => {
@@ -112,7 +112,12 @@ describe("core/ledger/grainAllocation", () => {
         const policy = immediate(10);
         const i1 = aid(100, [10, 2]);
         const i2 = aid(0, [0, 3]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
+        const allocation = computeAllocation(
+          policy,
+          [i1, i2],
+          credGrainView,
+          0
+        );
         const expectedReceipts = [
           {id: i1.id, amount: nng(4)},
           {id: i2.id, amount: nng(6)},
@@ -128,7 +133,12 @@ describe("core/ledger/grainAllocation", () => {
         const policy = immediate(0);
         const i1 = aid(3, [1, 1]);
         const i2 = aid(0, [3, 0]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
+        const allocation = computeAllocation(
+          policy,
+          [i1, i2],
+          credGrainView,
+          0
+        );
         const expectedReceipts = [
           {id: i1.id, amount: nng(0)},
           {id: i2.id, amount: nng(0)},
@@ -180,7 +190,12 @@ describe("core/ledger/grainAllocation", () => {
         const policy = recent(100, 0.1);
         const i1 = aid(0, [100, 100, 100]);
         const i2 = aid(100, [100, 100, 100]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
+        const allocation = computeAllocation(
+          policy,
+          [i1, i2],
+          credGrainView,
+          0
+        );
         const expectedReceipts = [
           {id: i1.id, amount: nng(50)},
           {id: i2.id, amount: nng(50)},
@@ -197,7 +212,12 @@ describe("core/ledger/grainAllocation", () => {
         const policy = recent(100, 1);
         const i1 = aid(50, [0, 50, 0]);
         const i2 = aid(0, [0, 10, 100]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView,0);
+        const allocation = computeAllocation(
+          policy,
+          [i1, i2],
+          credGrainView,
+          0
+        );
         const expectedReceipts = [
           {id: i1.id, amount: nng(0)},
           {id: i2.id, amount: nng(100)},
@@ -214,7 +234,12 @@ describe("core/ledger/grainAllocation", () => {
         const policy = recent(0, 0.1);
         const i1 = aid(50, [100, 50, 10]);
         const i2 = aid(0, [0, 10, 100]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
+        const allocation = computeAllocation(
+          policy,
+          [i1, i2],
+          credGrainView,
+          0
+        );
         const expectedReceipts = [
           {id: i1.id, amount: nng(0)},
           {id: i2.id, amount: nng(0)},
@@ -412,7 +437,7 @@ describe("core/ledger/grainAllocation", () => {
           memo: "something",
           recipient: i1.id,
         };
-        const allocation = computeAllocation(policy, [i1], credGrainView,0);
+        const allocation = computeAllocation(policy, [i1], credGrainView, 0);
         const expectedReceipts = [{id: i1.id, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -430,7 +455,8 @@ describe("core/ledger/grainAllocation", () => {
           memo: "something",
           recipient: id,
         };
-        const thunk = () => computeAllocation(policy, [other], credGrainView,0);
+        const thunk = () =>
+          computeAllocation(policy, [other], credGrainView, 0);
         expect(thunk).toThrowError("no active grain account for identity");
       });
 
