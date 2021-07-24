@@ -15,8 +15,10 @@ import {createTestLedgerFixture} from "../ledger/testUtils";
 import {g} from "../ledger/testUtils";
 import * as uuid from "../../util/uuid";
 import * as GraphUtil from "../credrank/testUtils";
+import {type TimestampMs} from "../../util/timestamp";
 
 describe("core/ledger/grainAllocation", () => {
+
   // concise helper for grain from a number
   const nng = (x: number) => nngFromString(x.toString());
   // concise helper for an allocation identity
@@ -65,24 +67,24 @@ describe("core/ledger/grainAllocation", () => {
       });
 
       it("errors if there are no identities", () => {
-        const thunk = () => computeAllocation(immediate(5), [], credGrainView);
+        const thunk = () => computeAllocation(immediate(5), [], credGrainView, 0);
         expect(thunk).toThrowError("must have at least one identity");
       });
       it("errors if the total cred is zero", () => {
         const thunk = () =>
-          computeAllocation(immediate(5), [aid(0, [0])], credGrainView);
+          computeAllocation(immediate(5), [aid(0, [0])], credGrainView, 0);
         expect(thunk).toThrowError("cred is zero");
       });
       it("errors if there's NaN or Infinity in Cred", () => {
         const thunk = () =>
-          computeAllocation(immediate(5), [aid(0, [NaN])], credGrainView);
+          computeAllocation(immediate(5), [aid(0, [NaN])], credGrainView, 0);
         expect(thunk).toThrowError("invalid cred");
       });
       it("errors if there's inconsistent Cred lengths", () => {
         const i1 = aid(0, [1]);
         const i2 = aid(0, [1, 2]);
         const thunk = () =>
-          computeAllocation(immediate(5), [i1, i2], credGrainView);
+          computeAllocation(immediate(5), [i1, i2], credGrainView, 0);
         expect(thunk).toThrowError("inconsistent cred length");
       });
       it("errors if the receipts don't match the budget", () => {
@@ -110,7 +112,7 @@ describe("core/ledger/grainAllocation", () => {
         const policy = immediate(10);
         const i1 = aid(100, [10, 2]);
         const i2 = aid(0, [0, 3]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView);
+        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
         const expectedReceipts = [
           {id: i1.id, amount: nng(4)},
           {id: i2.id, amount: nng(6)},
@@ -126,7 +128,7 @@ describe("core/ledger/grainAllocation", () => {
         const policy = immediate(0);
         const i1 = aid(3, [1, 1]);
         const i2 = aid(0, [3, 0]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView);
+        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
         const expectedReceipts = [
           {id: i1.id, amount: nng(0)},
           {id: i2.id, amount: nng(0)},
@@ -158,7 +160,8 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [i1, i2, i3],
-          credGrainView
+          credGrainView,
+          0
         );
         const expectedReceipts = [
           {id: i1.id, amount: nng(38)},
@@ -177,7 +180,7 @@ describe("core/ledger/grainAllocation", () => {
         const policy = recent(100, 0.1);
         const i1 = aid(0, [100, 100, 100]);
         const i2 = aid(100, [100, 100, 100]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView);
+        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
         const expectedReceipts = [
           {id: i1.id, amount: nng(50)},
           {id: i2.id, amount: nng(50)},
@@ -194,7 +197,7 @@ describe("core/ledger/grainAllocation", () => {
         const policy = recent(100, 1);
         const i1 = aid(50, [0, 50, 0]);
         const i2 = aid(0, [0, 10, 100]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView);
+        const allocation = computeAllocation(policy, [i1, i2], credGrainView,0);
         const expectedReceipts = [
           {id: i1.id, amount: nng(0)},
           {id: i2.id, amount: nng(100)},
@@ -211,7 +214,7 @@ describe("core/ledger/grainAllocation", () => {
         const policy = recent(0, 0.1);
         const i1 = aid(50, [100, 50, 10]);
         const i2 = aid(0, [0, 10, 100]);
-        const allocation = computeAllocation(policy, [i1, i2], credGrainView);
+        const allocation = computeAllocation(policy, [i1, i2], credGrainView, 0);
         const expectedReceipts = [
           {id: i1.id, amount: nng(0)},
           {id: i2.id, amount: nng(0)},
@@ -235,13 +238,13 @@ describe("core/ledger/grainAllocation", () => {
       const allocation1 = {
         policy: {
           policyType: "IMMEDIATE",
-          budget: nngFromString("100"),
+          budget: nngFromString("110"),
           numIntervalsLookback: 1,
         },
         id: allocationId1,
         receipts: [
           {amount: g("100"), id: id3},
-          {amount: g("10"), id: id3},
+          {amount: g("10"), id: id4},
         ],
       };
 
@@ -285,7 +288,8 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [aid1, aid2],
-          credGrainViewEmpty
+          credGrainViewEmpty,
+          4
         );
         const expectedReceipts = [
           {id: aid1.id, amount: nng(28)},
@@ -300,7 +304,7 @@ describe("core/ledger/grainAllocation", () => {
       });
 
       it("takes past payment into account", () => {
-        const policy = balanced(20);
+        const policy = balanced(3000);
         const aid1 = aid(
           0,
           GraphUtil.expectedParticipant3.credPerInterval,
@@ -314,11 +318,12 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [aid1, aid2],
-          credGrainViewUnbalanced
+          credGrainViewUnbalanced,
+          4
         );
         const expectedReceipts = [
-          {id: aid1.id, amount: nng(5)},
-          {id: aid2.id, amount: nng(15)},
+          {id: aid1.id, amount: nng(802)},
+          {id: aid2.id, amount: nng(2198)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -343,11 +348,12 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [aid1, aid2],
-          credGrainViewUnbalanced
+          credGrainViewUnbalanced,
+          4
         );
         const expectedReceipts = [
-          {id: aid1.id, amount: nng(127)},
-          {id: aid2.id, amount: nng(1873)},
+          {id: aid1.id, amount: nng(34)},
+          {id: aid2.id, amount: nng(1966)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -372,7 +378,8 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [aid1, aid2],
-          credGrainViewUnbalanced
+          credGrainViewUnbalanced,
+          4
         );
         const expectedReceipts = [
           {id: aid1.id, amount: nng(0)},
@@ -405,7 +412,7 @@ describe("core/ledger/grainAllocation", () => {
           memo: "something",
           recipient: i1.id,
         };
-        const allocation = computeAllocation(policy, [i1], credGrainView);
+        const allocation = computeAllocation(policy, [i1], credGrainView,0);
         const expectedReceipts = [{id: i1.id, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -423,7 +430,7 @@ describe("core/ledger/grainAllocation", () => {
           memo: "something",
           recipient: id,
         };
-        const thunk = () => computeAllocation(policy, [other], credGrainView);
+        const thunk = () => computeAllocation(policy, [other], credGrainView,0);
         expect(thunk).toThrowError("no active grain account for identity");
       });
 

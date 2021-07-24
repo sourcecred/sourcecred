@@ -10,7 +10,6 @@ import {
   numberOrFloatStringParser,
 } from "../nonnegativeGrain";
 import {type CredGrainView} from "../../credGrainView";
-import {type IntervalSequence} from "../../interval";
 import {type TimestampMs} from "../../../util/timestamp";
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their
@@ -71,12 +70,13 @@ export function balancedReceipts(
     );
   }
 
-  const intervalsBeforeEffective = 
-    credGrainView.intervals().filter(interval => interval.endTimeMs <= effectiveTimestamp);
+  const intervalsBeforeEffective = credGrainView
+    .intervals()
+    .filter((interval) => interval.endTimeMs <= effectiveTimestamp);
 
   const numIntervalsLookback = ((
     policy: BalancedPolicy,
-    intervalsLength: number,
+    intervalsLength: number
   ) => {
     if (
       !policy.numIntervalsLookback ||
@@ -88,36 +88,64 @@ export function balancedReceipts(
     }
   })(policy, intervalsBeforeEffective.length);
 
+  console.log("asdfj ---");
+  console.log("asdfj Budget: "+policy.budget);
+  console.log("asdfj NumIntervalsLookback: "+ numIntervalsLookback);
+  console.log("asdfj IntervalsBeforeEffective: "+ intervalsBeforeEffective.length);
+
   const timeLimitedcredGrainView = credGrainView.withTimeScope(
-    intervalsBeforeEffective[intervalsBeforeEffective.length - numIntervalsLookback].startTimeMs,
+    intervalsBeforeEffective[
+      intervalsBeforeEffective.length - numIntervalsLookback
+    ].startTimeMs,
     effectiveTimestamp
   );
 
-  const timeLimitedParticipants = timeLimitedcredGrainView.participants().filter((participant) => participant.active);
-  const totalCred = sum(timeLimitedParticipants.map(participant => participant.cred));
-  const totalEverPaid = G.sum(timeLimitedParticipants.map(participant => participant.grainEarned));
-  const targetTotalDistributed = G.add(totalEverPaid, policy.budget);
+  const timeLimitedParticipants = timeLimitedcredGrainView
+    .participants()
+    .filter((participant) => participant.active);
+  const totalCred = sum(
+    timeLimitedParticipants.map((participant) => participant.cred)
+  );
 
+  console.log("asdfj TotalCred:"+ totalCred);
+
+  const totalEverPaid = G.sum(
+    timeLimitedParticipants.map((participant) => participant.grainEarned)
+  );
+
+  console.log("asdfj totalEverPaid: "+totalEverPaid);
+  const targetTotalDistributed = G.add(totalEverPaid, policy.budget);
+  console.log("asdfj TargetTotalDistributed: "+targetTotalDistributed);
   const targetGrainPerCred = G.multiplyFloat(
     targetTotalDistributed,
     1 / totalCred
   );
 
-  const userUnderpayment = timeLimitedParticipants.map(
-    (participant) => {
-      const lookbackCred = sum(participant.credPerInterval);
-      const target = G.multiplyFloat(targetGrainPerCred, lookbackCred);
-      if (G.gt(target, participant.grainEarned)) {
-        return G.sub(target, participant.grainEarned);
-      } else {
-        return G.ZERO;
-      }
+  console.log("asdfj TargetGrainPerCred: "+targetGrainPerCred);
+
+
+  const userUnderpayment = timeLimitedParticipants.map((participant) => {
+    console.log("asdfj ParticipantID: "+participant.identity.id);
+    console.log("asdfj ParticipantTotalEverPaid: "+participant.grainEarned);
+    console.log("asdfj ParticipantTotaCred: "+participant.cred);
+    const lookbackCred = sum(participant.credPerInterval);
+    const target = G.multiplyFloat(targetGrainPerCred, lookbackCred);
+    if (G.gt(target, participant.grainEarned)) {
+      return G.sub(target, participant.grainEarned);
+    } else {
+      return G.ZERO;
+    }
   });
-
+  
   const floatUnderpayment = userUnderpayment.map((x) => Number(x));
-
   const grainAmounts = G.splitBudget(policy.budget, floatUnderpayment);
-  return timeLimitedParticipants.map(({identity}, i) => ({id: identity.id, amount: grainAmounts[i]}));
+  console.log("asdfj grain amount 0: "+grainAmounts[0]);
+  console.log("asdfj grain amount 1: "+grainAmounts[1]);
+  console.log("asdfj ---");
+  return timeLimitedParticipants.map(({identity}, i) => ({
+    id: identity.id,
+    amount: grainAmounts[i],
+  }));
 }
 
 export const balancedConfigParser: P.Parser<BalancedPolicy> = P.object({

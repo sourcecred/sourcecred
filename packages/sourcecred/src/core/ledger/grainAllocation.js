@@ -58,7 +58,12 @@ export function computeAllocation(
   const processedIdentities = processIdentities(identities);
   return _validateAllocationBudget({
     policy,
-    receipts: receipts(validatedPolicy, processedIdentities, credGrainView, effectiveTimestamp),
+    receipts: receipts(
+      validatedPolicy,
+      processedIdentities,
+      credGrainView,
+      effectiveTimestamp
+    ),
     id: randomUuid(),
   });
 }

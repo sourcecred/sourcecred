@@ -24,7 +24,6 @@ export function computeDistribution(
   credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): Distribution {
-
   const allocationIdentities = _allocationIdentities(
     credGrainView,
     effectiveTimestamp
@@ -36,7 +35,12 @@ export function computeDistribution(
   // allocationIdentities, but for the time being, we need both.
 
   const allocations = policies.map((p) =>
-    computeAllocation(p, allocationIdentities, credGrainView, effectiveTimestamp)
+    computeAllocation(
+      p,
+      allocationIdentities,
+      credGrainView,
+      effectiveTimestamp
+    )
   );
   const distribution = {
     id: uuid.random(),

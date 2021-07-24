@@ -40,7 +40,7 @@ describe("core/ledger/policies/balanced", () => {
     id: allocationId1,
     receipts: [
       {amount: g("100"), id: id3},
-      {amount: g("10"), id: id3},
+      {amount: g("10"), id: id4},
     ],
   };
 
@@ -90,7 +90,7 @@ describe("core/ledger/policies/balanced", () => {
         numIntervalsLookback: -1,
       };
       expect(() =>
-        balancedReceipts(policy, processedIdentities, credGrainView)
+        balancedReceipts(policy, credGrainView, 0)
       ).toThrowError(`numIntervalsLookback must be at least 0`);
     });
 
@@ -101,7 +101,7 @@ describe("core/ledger/policies/balanced", () => {
         numIntervalsLookback: 1.5,
       };
       expect(() =>
-        balancedReceipts(policy, processedIdentities, credGrainView)
+        balancedReceipts(policy, credGrainView, 0)
       ).toThrowError(`numIntervalsLookback must be an integer`);
     });
 
@@ -118,13 +118,13 @@ describe("core/ledger/policies/balanced", () => {
       };
       const expected = balancedReceipts(
         policy1,
-        processedIdentities2,
-        credGrainViewUnbalanced
+        credGrainViewUnbalanced,
+        4
       );
       const actual = balancedReceipts(
         policy2,
-        processedIdentities2,
-        credGrainViewUnbalanced
+        credGrainViewUnbalanced,
+        4
       );
       expect(actual).toEqual(expected);
     });
@@ -142,13 +142,13 @@ describe("core/ledger/policies/balanced", () => {
       };
       const expected = balancedReceipts(
         policy1,
-        processedIdentities2,
-        credGrainViewUnbalanced
+        credGrainViewUnbalanced,
+        4
       );
       const actual = balancedReceipts(
         policy2,
-        processedIdentities2,
-        credGrainViewUnbalanced
+        credGrainViewUnbalanced,
+        4
       );
       expect(actual).toEqual(expected);
     });
@@ -160,13 +160,13 @@ describe("core/ledger/policies/balanced", () => {
         numIntervalsLookback: 1, // 0 means forever, but there are only 2 intervals in the test data
       };
       const expectedReceipts = [
-        {id: aid3.id, amount: nng(127)},
-        {id: aid4.id, amount: nng(1873)},
+        {id: aid3.id, amount: nng(34)},
+        {id: aid4.id, amount: nng(1966)},
       ];
       const actualReceipts = balancedReceipts(
         policy1,
-        processedIdentities2,
-        credGrainViewUnbalanced
+        credGrainViewUnbalanced,
+        4
       );
       expect(actualReceipts).toEqual(expectedReceipts);
     });
