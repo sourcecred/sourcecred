@@ -1,6 +1,5 @@
 // @flow
 
-import {processIdentities} from "../processedIdentities";
 import {random as randomUuid} from "../../../util/uuid";
 import {balancedReceipts} from "./balanced";
 import * as GraphUtil from "../../credrank/testUtils";
@@ -74,14 +73,8 @@ describe("core/ledger/policies/balanced", () => {
   });
 
   describe("balancedReceipts", () => {
-    const aid1 = aid(0, GraphUtil.expectedParticipant3.credPerInterval, id1);
-    const aid2 = aid(0, GraphUtil.expectedParticipant4.credPerInterval, id2);
-
     const aid3 = aid(0, GraphUtil.expectedParticipant3.credPerInterval, id3);
     const aid4 = aid(0, GraphUtil.expectedParticipant4.credPerInterval, id4);
-
-    const processedIdentities = processIdentities([aid1, aid2]);
-    const processedIdentities2 = processIdentities([aid3, aid4]);
 
     it("errors on invalid range", () => {
       const policy = {
