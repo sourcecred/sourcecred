@@ -11,7 +11,6 @@ import {
 } from "../nonnegativeGrain";
 import {type CredGrainView} from "../../credGrainView";
 import {type TimestampMs} from "../../../util/timestamp";
-import bigInt from "big-integer";
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their
  * lifetime Grain payouts are consistent with their lifetime Cred scores.
@@ -89,13 +88,6 @@ export function balancedReceipts(
     }
   })(policy, intervalsBeforeEffective.length);
 
-  console.log("##### ---");
-  console.log("##### Budget: " + bigInt(policy.budget) / 1000000000000000000);
-  console.log("##### NumIntervalsLookback: " + numIntervalsLookback);
-  console.log(
-    "##### IntervalsBeforeEffective: " + intervalsBeforeEffective.length
-  );
-
   const timeLimitedcredGrainView = credGrainView.withTimeScope(
     intervalsBeforeEffective[
       intervalsBeforeEffective.length - numIntervalsLookback
@@ -110,41 +102,21 @@ export function balancedReceipts(
     timeLimitedParticipants.map((participant) => participant.cred)
   );
 
-  console.log("##### TotalCred:" + totalCred);
-
   const totalEverPaid = G.sum(
     timeLimitedParticipants.map((participant) => participant.grainEarned)
   );
 
-  console.log("##### totalEverPaid: " + totalEverPaid);
   const targetTotalDistributed = G.add(totalEverPaid, policy.budget);
-  console.log("##### TargetTotalDistributed: " + targetTotalDistributed);
   const targetGrainPerCred = G.multiplyFloat(
     targetTotalDistributed,
     1 / totalCred
   );
 
-  console.log("##### TargetGrainPerCred: " + targetGrainPerCred);
-
   const userUnderpayment = timeLimitedParticipants.map((participant) => {
-    console.log("*****");
-    console.log("##### ParticipantID: " + participant.identity.id);
-    console.log(
-      "##### ParticipantTotalEverPaid: " +
-        bigInt(participant.grainEarned) / 1000000000000000000
-    );
-    console.log("##### ParticipantTotalCred: " + participant.cred);
     const lookbackCred = sum(participant.credPerInterval);
     const target = G.multiplyFloat(targetGrainPerCred, lookbackCred);
-    console.log(
-      "##### ParticipantTarget: " + bigInt(target) / 1000000000000000000
-    );
+
     if (G.gt(target, participant.grainEarned)) {
-      console.log(
-        "##### Underpayment Amount: " +
-          bigInt(G.sub(target, bigInt(participant.grainEarned))) /
-            1000000000000000000
-      );
       return G.sub(target, participant.grainEarned);
     } else {
       return G.ZERO;
@@ -153,7 +125,6 @@ export function balancedReceipts(
 
   const floatUnderpayment = userUnderpayment.map((x) => Number(x));
   const grainAmounts = G.splitBudget(policy.budget, floatUnderpayment);
-  console.log("##### ---");
   return timeLimitedParticipants.map(({identity}, i) => ({
     id: identity.id,
     amount: grainAmounts[i],
