@@ -198,6 +198,32 @@ describe("plugins/discord/reactionWeights", () => {
         )
       ).toEqual(0);
     });
+    it("dampens emoji average when dampener >0", () => {
+      const emojiWeights = {
+        defaultWeight: 1,
+        weights: {"💜": 3, "sourcecred:8": 4},
+        applyAveraging: true,
+        confidenceDampener: 2,
+      };
+      const roleWeights = {
+        defaultWeight: 1,
+        weights: {[badassRoleId]: 5, [plebeRoleId]: 3},
+      };
+      const channelWeights = {defaultWeight: 1, weights: {[channelId]: 6}};
+      const weights = {emojiWeights, roleWeights, channelWeights};
+      // This is the role weight of the reactor and excludes the author
+      const expectedAveragingModifier = 7;
+      expect(
+        reactionWeight(
+          weights,
+          message,
+          reacterReaction,
+          reacterMember,
+          new Set(),
+          reactions
+        )
+      ).toEqual((4 * 5 * 6) / expectedAveragingModifier);
+    });
     it("sets the weight to 0 for a self-reaction", () => {
       const emojiWeights = {
         defaultWeight: 1,
