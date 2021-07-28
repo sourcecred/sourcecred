@@ -37,8 +37,8 @@ import * as C from "../util/combo";
  * TimeScopedCredGrainView that generated this.
  */
 export type ParticipantCredGrain = {|
-  +active: boolean,
   // Is the user active
+  +active: boolean,
   +identity: Identity,
   // Total Cred earned during the time scope.
   +cred: number,
