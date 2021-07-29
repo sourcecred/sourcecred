@@ -11,7 +11,8 @@
     "test": "lerna run test --stream --",
     "build": "lerna run build --stream",
     "install": "lerna bootstrap && ./scripts/flow-mono.sh",
-    "start": "lerna run start --stream"
+    "start": "lerna run start --stream",
+    "clean": "lerna clean"
   },
   "workspaces": [
     "packages/*"

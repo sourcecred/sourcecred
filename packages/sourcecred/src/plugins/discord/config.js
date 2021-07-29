@@ -72,11 +72,16 @@ const parserJson: C.Parser<DiscordConfigJson> = C.array(
   C.object(
     {
       guildId: C.string,
-      reactionWeightConfig: C.object({
-        weights: C.dict(C.number),
-        defaultWeight: C.number,
-        applyAveraging: C.boolean,
-      }),
+      reactionWeightConfig: C.object(
+        {
+          weights: C.dict(C.number),
+          defaultWeight: C.number,
+          applyAveraging: C.boolean,
+        },
+        {
+          confidenceDampener: C.number,
+        }
+      ),
     },
     {
       roleWeightConfig: C.object({

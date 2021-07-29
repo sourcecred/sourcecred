@@ -20,6 +20,7 @@ export type ReactionWeightConfig = {|
   +weights: EmojiWeightMap,
   +defaultWeight: NodeWeight,
   +applyAveraging: boolean,
+  +confidenceDampener?: number,
 |};
 
 export type WeightConfig = {|
@@ -55,7 +56,7 @@ export function reactionWeight(
       ).reduce(
         (total, member) => total + _roleWeight(weights.roleWeights, member),
         0
-      )
+      ) + (weights.emojiWeights.confidenceDampener || 0)
     : null;
   const averagingMultiplier = roleMultipliedReactingMembers
     ? 1 / roleMultipliedReactingMembers
