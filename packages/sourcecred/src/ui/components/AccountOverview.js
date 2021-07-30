@@ -14,6 +14,7 @@ import * as G from "../../core/ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
 import {formatTimestamp} from "../utils/dateHelpers";
 import {makeStyles} from "@material-ui/core/styles";
+import IdentityDetails from "./LedgerViewer/IdentityDetails";
 
 type OverviewProps = {|+currency: CurrencyDetails|};
 
@@ -77,7 +78,7 @@ export const AccountOverview = ({
 const AccountRow = (account: Account, suffix: string, decimals: number) => (
   <TableRow key={account.identity.id}>
     <TableCell component="th" scope="row">
-      {account.identity.name}
+      <IdentityDetails id={account.identity.id} name={account.identity.name} />
     </TableCell>
     <TableCell align="right">{account.active ? "✅" : "🛑"}</TableCell>
     <TableCell align="right">
