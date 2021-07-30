@@ -7,7 +7,7 @@ import {div, fromFloatString, lt, ZERO} from "../../core/ledger/grain";
 import {type Account} from "../../core/ledger/ledger";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import AccountDropdown from "./AccountSelector";
-import {computeAllocation} from "../../core/ledger/grainAllocation";
+import {computeAllocationSpecial} from "../../core/ledger/grainAllocation";
 import * as uuid from "../../util/uuid";
 import type {TimestampMs} from "../../util/timestamp";
 import {useLedger} from "../utils/LedgerContext";
@@ -72,7 +72,7 @@ export const SpecialDistribution = ({
         memo,
         recipient: recipient.identity.id,
       };
-      const allocation = computeAllocation(policy, [
+      const allocation = computeAllocationSpecial(policy, [
         {cred: [1], paid: ZERO, id: recipient.identity.id},
       ]);
       const distribution = {

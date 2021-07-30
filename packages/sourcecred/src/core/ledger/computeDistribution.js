@@ -4,7 +4,7 @@ import * as uuid from "../../util/uuid";
 import {type TimestampMs} from "../../util/timestamp";
 import {type AllocationIdentity, computeAllocation} from "./grainAllocation";
 import {type AllocationPolicy} from "./policies";
-import {type CredAccountData} from "./credAccounts";
+import {type CredGrainView} from "../credGrainView";
 import {type Distribution} from "./distribution";
 
 /**
@@ -21,15 +21,26 @@ import {type Distribution} from "./distribution";
  */
 export function computeDistribution(
   policies: $ReadOnlyArray<AllocationPolicy>,
-  accountsData: CredAccountData,
+  credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): Distribution {
   const allocationIdentities = _allocationIdentities(
-    accountsData,
+    credGrainView,
     effectiveTimestamp
   );
+
+  // As of now the balanced policy uses credGrainView and effective Timestamp
+  // but other policies are still using allocationIdentities.
+  // when all policies are converted to credGrainView, we won't need
+  // allocationIdentities, but for the time being, we need both.
+
   const allocations = policies.map((p) =>
-    computeAllocation(p, allocationIdentities)
+    computeAllocation(
+      p,
+      allocationIdentities,
+      credGrainView,
+      effectiveTimestamp
+    )
   );
   const distribution = {
     id: uuid.random(),
@@ -40,24 +51,17 @@ export function computeDistribution(
 }
 
 export function _allocationIdentities(
-  accountsData: CredAccountData,
+  credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<AllocationIdentity> {
-  const activeAccounts = accountsData.accounts.filter(
-    ({account}) => account.active
-  );
-  const allocationIdentities = activeAccounts.map((x) => ({
-    id: x.account.identity.id,
-    paid: x.account.paid,
-    cred: x.cred,
+  const timeSlicedActiveParticipants = credGrainView
+    .withTimeScope(0, effectiveTimestamp)
+    .participants()
+    .filter((participant) => participant.active);
+
+  return timeSlicedActiveParticipants.map((x) => ({
+    id: x.identity.id,
+    paid: x.grainEarned,
+    cred: x.credPerInterval,
   }));
-  const numIntervals = accountsData.intervals.filter(
-    (x) => x.endTimeMs <= effectiveTimestamp
-  ).length;
-  const timeSlicedAllocationIdentities = allocationIdentities.map((x) => ({
-    id: x.id,
-    paid: x.paid,
-    cred: x.cred.slice(0, numIntervals),
-  }));
-  return timeSlicedAllocationIdentities;
 }

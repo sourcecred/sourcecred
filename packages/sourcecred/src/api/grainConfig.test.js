@@ -24,6 +24,7 @@ const toNonnegativeGrain = (budget: number | string): NonnegativeGrain => {
 const balanced = (budget: number | string): BalancedPolicy => ({
   policyType: "BALANCED",
   budget: toNonnegativeGrain(budget),
+  numIntervalsLookback: 0,
 });
 const immediate = (budget: number | string): ImmediatePolicy => ({
   policyType: "IMMEDIATE",
@@ -120,6 +121,7 @@ describe("api/grainConfig", () => {
           {
             policyType: "BALANCED",
             budget: 50,
+            numIntervalsLookback: 0,
           },
           {
             policyType: "IMMEDIATE",
@@ -161,6 +163,7 @@ describe("api/grainConfig", () => {
           {
             policyType: "BALANCED",
             budget: "50.5",
+            numIntervalsLookback: 0,
           },
           {
             policyType: "IMMEDIATE",
