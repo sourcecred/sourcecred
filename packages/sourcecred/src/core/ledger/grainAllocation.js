@@ -115,7 +115,7 @@ function receipts(
 ): $ReadOnlyArray<GrainReceipt> {
   switch (policy.policyType) {
     case "IMMEDIATE":
-      return immediateReceipts(policy, identities);
+      return immediateReceipts(policy, credGrainView, effectiveTimestamp);
     case "RECENT":
       return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":

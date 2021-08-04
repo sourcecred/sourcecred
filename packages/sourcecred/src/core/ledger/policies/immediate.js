@@ -3,12 +3,13 @@
 import * as G from "../grain";
 import * as P from "../../../util/combo";
 import {type GrainReceipt} from "../grainAllocation";
-import {type ProcessedIdentities} from "../processedIdentities";
+import {type CredGrainView} from "../../credGrainView";
 import {
   type NonnegativeGrain,
   grainParser,
   numberOrFloatStringParser,
 } from "../nonnegativeGrain";
+import {type TimestampMs} from "../../../util/timestamp";
 
 /**
  * The Immediate policy evenly distributes its Grain budget across users
@@ -33,7 +34,8 @@ export type ImmediatePolicy = {|
  */
 export function immediateReceipts(
   policy: ImmediatePolicy,
-  identities: ProcessedIdentities
+  credGrainView: CredGrainView,
+  effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<GrainReceipt> {
   // Default to 1 interval to preserve back-compat with old ledger events
 
@@ -48,17 +50,43 @@ export function immediateReceipts(
     );
   }
 
-  const totalIntervals = identities[0].cred.length;
-  const shortTermCredPerIdentity = identities.map(({cred}) =>
-    cred
-      .slice(
-        cred.length - Math.min(policy.numIntervalsLookback, totalIntervals)
-      )
-      .reduce((sum, cred) => sum + cred, 0)
+  const intervalsBeforeEffective = credGrainView
+    .intervals()
+    .filter((interval) => interval.endTimeMs <= effectiveTimestamp);
+
+  const numIntervalsLookback = ((
+    policy: ImmediatePolicy,
+    intervalsLength: number
+  ) => {
+    if (
+      !policy.numIntervalsLookback ||
+      policy.numIntervalsLookback > intervalsLength
+    ) {
+      return intervalsLength;
+    } else {
+      return policy.numIntervalsLookback;
+    }
+  })(policy, intervalsBeforeEffective.length);
+
+  const timeLimitedcredGrainView = credGrainView.withTimeScope(
+    intervalsBeforeEffective[
+      intervalsBeforeEffective.length - numIntervalsLookback
+    ].startTimeMs,
+    effectiveTimestamp
   );
 
+  const timeLimitedParticipants = timeLimitedcredGrainView
+    .participants()
+    .filter((participant) => participant.active);
+
+  const shortTermCredPerIdentity = timeLimitedParticipants.map((p) => p.cred);
+
   const amounts = G.splitBudget(policy.budget, shortTermCredPerIdentity);
-  return identities.map(({id}, i) => ({id, amount: amounts[i]}));
+
+  return timeLimitedParticipants.map(({identity}, i) => ({
+    id: identity.id,
+    amount: amounts[i],
+  }));
 }
 
 export const immediateConfigParser: P.Parser<ImmediatePolicy> = P.object({
