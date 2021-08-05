@@ -136,17 +136,25 @@ export class CredGrainView {
     return new TimeScopedCredGrainView(this, startTimeMs, endTimeMs);
   }
 
-  withTimeScopeFromLookback(effectiveTimestamp: TimestampMs, numIntervalsLookback: number): 
-  TimeScopedCredGrainView {
-    const intervalsBeforeEffective = this._intervals
-    .filter((interval) => interval.endTimeMs <= effectiveTimestamp);
+  withTimeScopeFromLookback(
+    effectiveTimestamp: TimestampMs,
+    numIntervalsLookback: number
+  ): TimeScopedCredGrainView {
+    const intervalsBeforeEffective = this._intervals.filter(
+      (interval) => interval.endTimeMs <= effectiveTimestamp
+    );
 
-    if (!numIntervalsLookback) return new TimeScopedCredGrainView(this, 0 ,effectiveTimestamp);
+    if (!numIntervalsLookback)
+      return new TimeScopedCredGrainView(this, 0, effectiveTimestamp);
 
-    if (intervalsBeforeEffective.length <= numIntervalsLookback) 
-      return new TimeScopedCredGrainView(this, 0, effectiveTimestamp)
+    if (intervalsBeforeEffective.length <= numIntervalsLookback)
+      return new TimeScopedCredGrainView(this, 0, effectiveTimestamp);
 
-    return new TimeScopedCredGrainView(this, intervalsBeforeEffective[0].startTimeMs, effectiveTimestamp)
+    return new TimeScopedCredGrainView(
+      this,
+      intervalsBeforeEffective[0].startTimeMs,
+      effectiveTimestamp
+    );
   }
 
   intervals(): IntervalSequence {
