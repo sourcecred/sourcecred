@@ -145,14 +145,19 @@ export class CredGrainView {
     );
 
     if (!numIntervalsLookback)
-      return new TimeScopedCredGrainView(this, 0, effectiveTimestamp);
+      return new TimeScopedCredGrainView(this, -Infinity, effectiveTimestamp);
 
-    if (intervalsBeforeEffective.length <= numIntervalsLookback)
-      return new TimeScopedCredGrainView(this, 0, effectiveTimestamp);
+    if (
+      !intervalsBeforeEffective ||
+      intervalsBeforeEffective.length <= numIntervalsLookback
+    )
+      return new TimeScopedCredGrainView(this, -Infinity, effectiveTimestamp);
 
     return new TimeScopedCredGrainView(
       this,
-      intervalsBeforeEffective[0].startTimeMs,
+      intervalsBeforeEffective[
+        intervalsBeforeEffective.length - numIntervalsLookback
+      ].startTimeMs,
       effectiveTimestamp
     );
   }
@@ -163,6 +168,10 @@ export class CredGrainView {
 
   participants(): $ReadOnlyArray<ParticipantCredGrain> {
     return this._participants;
+  }
+
+  activeParticipants(): $ReadOnlyArray<ParticipantCredGrain> {
+    return this._participants.filter((participant) => participant.active);
   }
 
   // This is imprecise, due to floating point rounding.
@@ -294,6 +303,10 @@ export class TimeScopedCredGrainView {
 
   participants(): $ReadOnlyArray<ParticipantCredGrain> {
     return this._participants;
+  }
+
+  activeParticipants(): $ReadOnlyArray<ParticipantCredGrain> {
+    return this._participants.filter((participant) => participant.active);
   }
 
   // This is imprecise, due to floating point rounding.

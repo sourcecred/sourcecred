@@ -50,37 +50,13 @@ export function immediateReceipts(
     );
   }
 
-  const intervalsBeforeEffective = credGrainView
-    .intervals()
-    .filter((interval) => interval.endTimeMs <= effectiveTimestamp);
-
-  const numIntervalsLookback = ((
-    policy: ImmediatePolicy,
-    intervalsLength: number
-  ) => {
-    if (
-      !policy.numIntervalsLookback ||
-      policy.numIntervalsLookback > intervalsLength
-    ) {
-      return intervalsLength;
-    } else {
-      return policy.numIntervalsLookback;
-    }
-  })(policy, intervalsBeforeEffective.length);
-
-  const timeLimitedcredGrainView = credGrainView.withTimeScope(
-    intervalsBeforeEffective[
-      intervalsBeforeEffective.length - numIntervalsLookback
-    ].startTimeMs,
-    effectiveTimestamp
+  const timeLimitedCredGrainView = credGrainView.withTimeScopeFromLookback(
+    effectiveTimestamp,
+    policy.numIntervalsLookback
   );
-
-  const timeLimitedParticipants = timeLimitedcredGrainView
-    .participants()
-    .filter((participant) => participant.active);
+  const timeLimitedParticipants = timeLimitedCredGrainView.activeParticipants();
 
   const shortTermCredPerIdentity = timeLimitedParticipants.map((p) => p.cred);
-
   const amounts = G.splitBudget(policy.budget, shortTermCredPerIdentity);
 
   return timeLimitedParticipants.map(({identity}, i) => ({
