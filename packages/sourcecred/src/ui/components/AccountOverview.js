@@ -1,6 +1,6 @@
 // @flow
 
-import React, {type Node as ReactNode} from "react";
+import React, {type Node as ReactNode, useMemo} from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -26,6 +26,15 @@ const useStyles = makeStyles(() => {
   };
 });
 
+
+function comparator(a: Account, b: Account) {
+  if (a.balance === b.balance) {
+    return 0;
+  }
+  return G.gt(a.paid, b.paid) ? -1 : 1;
+}
+
+
 export const AccountOverview = ({
   currency: {
     name: currencyName,
@@ -38,19 +47,13 @@ export const AccountOverview = ({
 
   const lastDistributionTimestamp = ledger.lastDistributionTimestamp();
   const lastPayoutMessage =
-    lastDistributionTimestamp === null
+    useMemo(() => lastDistributionTimestamp === null
       ? ""
-      : `Last distribution: ${formatTimestamp(lastDistributionTimestamp)}`;
+      : `Last distribution: ${formatTimestamp(lastDistributionTimestamp)}`, [lastDistributionTimestamp]);
 
-  const accounts = ledger.accounts();
-  function comparator(a: Account, b: Account) {
-    if (a.balance === b.balance) {
-      return 0;
-    }
-    return G.gt(a.paid, b.paid) ? -1 : 1;
-  }
+  const accounts = useMemo(() => ledger.accounts(), []);
 
-  const sortedAccounts = accounts.slice().sort(comparator);
+  const sortedAccounts = useMemo(() => accounts.slice().sort(comparator), [accounts]);
   return (
     <>
       <TableContainer component={Paper} className={classes.container}>
