@@ -26,14 +26,12 @@ const useStyles = makeStyles(() => {
   };
 });
 
-
 function comparator(a: Account, b: Account) {
   if (a.balance === b.balance) {
     return 0;
   }
   return G.gt(a.paid, b.paid) ? -1 : 1;
 }
-
 
 export const AccountOverview = ({
   currency: {
@@ -46,14 +44,19 @@ export const AccountOverview = ({
   const classes = useStyles();
 
   const lastDistributionTimestamp = ledger.lastDistributionTimestamp();
-  const lastPayoutMessage =
-    useMemo(() => lastDistributionTimestamp === null
-      ? ""
-      : `Last distribution: ${formatTimestamp(lastDistributionTimestamp)}`, [lastDistributionTimestamp]);
+  const lastPayoutMessage = useMemo(
+    () =>
+      lastDistributionTimestamp === null
+        ? ""
+        : `Last distribution: ${formatTimestamp(lastDistributionTimestamp)}`,
+    [lastDistributionTimestamp]
+  );
 
   const accounts = useMemo(() => ledger.accounts(), []);
 
-  const sortedAccounts = useMemo(() => accounts.slice().sort(comparator), [accounts]);
+  const sortedAccounts = useMemo(() => accounts.slice().sort(comparator), [
+    accounts,
+  ]);
   return (
     <>
       <TableContainer component={Paper} className={classes.container}>

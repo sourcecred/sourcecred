@@ -1,6 +1,11 @@
 // @flow
 
-import React, {useState, useMemo, type Node as ReactNode, useCallback} from "react";
+import React, {
+  useState,
+  useMemo,
+  type Node as ReactNode,
+  useCallback,
+} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import {
@@ -96,15 +101,18 @@ export const LedgerAdmin = (): ReactNode => {
     updateLedger(ledger);
   };
 
-  const toggleIdentityActivation = useCallback((id: IdentityId) => {
-    let nextLedger;
-    if (ledger.account(id).active) {
-      nextLedger = ledger.deactivate(id);
-    } else {
-      nextLedger = ledger.activate(id);
-    }
-    updateLedger(nextLedger);
-  }, [ledger]);
+  const toggleIdentityActivation = useCallback(
+    (id: IdentityId) => {
+      let nextLedger;
+      if (ledger.account(id).active) {
+        nextLedger = ledger.deactivate(id);
+      } else {
+        nextLedger = ledger.activate(id);
+      }
+      updateLedger(nextLedger);
+    },
+    [ledger]
+  );
 
   const resetIdentity = () => {
     setIdentityName("");
@@ -125,18 +133,22 @@ export const LedgerAdmin = (): ReactNode => {
       .toLowerCase()
       .split("")
       .join("+.*");
-    searchAccounts(filterString)
+    searchAccounts(filterString);
   };
 
-  const searchAccounts = useCallback(debounce((filterString) => {
-    const regex = new RegExp(filterString);
-    accountsTableState.createOrUpdateFilterFn("filterIdentities", (account) =>
-      regex.test(account.identity.name.toLowerCase())
-    );
+  const searchAccounts = useCallback(
+    debounce((filterString) => {
+      const regex = new RegExp(filterString);
+      accountsTableState.createOrUpdateFilterFn("filterIdentities", (account) =>
+        regex.test(account.identity.name.toLowerCase())
+      );
+    }, 400),
+    []
+  );
 
-  }, 400), [])
-
-  const nameIsEmpty = useMemo(() => nextIdentityName.trim().length === 0, [nextIdentityName]);
+  const nameIsEmpty = useMemo(() => nextIdentityName.trim().length === 0, [
+    nextIdentityName,
+  ]);
 
   return (
     <Container className={classes.root}>
@@ -171,10 +183,7 @@ export const LedgerAdmin = (): ReactNode => {
         )}
       </div>
       <ButtonGroup color="primary" variant="contained">
-        <Button
-          onClick={createOrUpdateIdentity}
-          disabled={nameIsEmpty}
-        >
+        <Button onClick={createOrUpdateIdentity} disabled={nameIsEmpty}>
           {selectedId ? "update username" : "create identity"}
         </Button>
         <Button onClick={saveToDisk}>save ledger to disk</Button>
