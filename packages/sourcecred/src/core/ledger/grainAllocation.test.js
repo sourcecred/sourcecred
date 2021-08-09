@@ -15,6 +15,7 @@ import {createTestLedgerFixture} from "../ledger/testUtils";
 import {g} from "../ledger/testUtils";
 import * as uuid from "../../util/uuid";
 import * as GraphUtil from "../credrank/testUtils";
+import * as G from "./grain";
 
 describe("core/ledger/grainAllocation", () => {
   // concise helper for grain from a number
@@ -98,28 +99,37 @@ describe("core/ledger/grainAllocation", () => {
     });
 
     describe("immediate policy", () => {
+      let credGrainViewUnbalanced;
+      let credGraph2;
+
       beforeEach(async (done) => {
-        credGraph = await GraphUtil.credGraph();
-        credGrainView = CredGrainView.fromCredGraphAndLedger(
-          credGraph,
-          emptyLedger
+        credGraph2 = await GraphUtil.credGraph2();
+        const unbalancedLedger = ledgerWithActiveIdentities(id3, id4);
+        credGrainViewUnbalanced = CredGrainView.fromCredGraphAndLedger(
+          credGraph2,
+          unbalancedLedger
         );
         done();
       });
 
       it("splits based on just most recent cred", () => {
-        const policy = immediate(10);
+        const policy = immediate(1000);
         const i1 = aid(100, [10, 2]);
         const i2 = aid(0, [0, 3]);
         const allocation = computeAllocation(
           policy,
           [i1, i2],
-          credGrainView,
-          0
+          credGrainViewUnbalanced,
+          4
         );
+        const participants = credGrainViewUnbalanced.participants();
+        const expectedAmounts = G.splitBudget(policy.budget, [
+          participants[0].credPerInterval[1],
+          participants[1].credPerInterval[1],
+        ]);
         const expectedReceipts = [
-          {id: i1.id, amount: nng(4)},
-          {id: i2.id, amount: nng(6)},
+          {id: id3, amount: expectedAmounts[0]},
+          {id: id4, amount: expectedAmounts[1]},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -128,6 +138,7 @@ describe("core/ledger/grainAllocation", () => {
         };
         expect(allocation).toEqual(expectedAllocation);
       });
+
       it("handles 0 budget correctly", () => {
         const policy = immediate(0);
         const i1 = aid(3, [1, 1]);
@@ -135,12 +146,12 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [i1, i2],
-          credGrainView,
-          0
+          credGrainViewUnbalanced,
+          4
         );
         const expectedReceipts = [
-          {id: i1.id, amount: nng(0)},
-          {id: i2.id, amount: nng(0)},
+          {id: id3, amount: nng(0)},
+          {id: id4, amount: nng(0)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -289,10 +300,12 @@ describe("core/ledger/grainAllocation", () => {
           credGraph,
           emptyLedger2
         );
+
         credGrainViewUnbalanced = CredGrainView.fromCredGraphAndLedger(
           credGraph,
           unbalancedLedger
         );
+
         done();
       });
 
