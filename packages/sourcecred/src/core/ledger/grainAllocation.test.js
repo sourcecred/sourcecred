@@ -48,12 +48,15 @@ describe("core/ledger/grainAllocation", () => {
     const {ledgerWithActiveIdentities} = createTestLedgerFixture();
     let credGraph;
     let credGrainView;
+    let credGraph2;
+    let credGrainView2;
     const id1 = GraphUtil.participant1.id;
     const id2 = GraphUtil.participant2.id;
     const id3 = GraphUtil.participant3.id;
     const id4 = GraphUtil.participant4.id;
 
     const emptyLedger = ledgerWithActiveIdentities(id1, id2);
+    const emptyLedger2 = ledgerWithActiveIdentities(id3, id4);
 
     describe("validation", () => {
       beforeEach(async (done) => {
@@ -449,23 +452,37 @@ describe("core/ledger/grainAllocation", () => {
     describe("special policy", () => {
       beforeEach(async (done) => {
         credGraph = await GraphUtil.credGraph();
+        credGraph2 = await GraphUtil.credGraph2();
+
         credGrainView = CredGrainView.fromCredGraphAndLedger(
           credGraph,
           emptyLedger
         );
+
+        credGrainView2 = CredGrainView.fromCredGraphAndLedger(
+          credGraph2,
+          emptyLedger2
+        );
         done();
       });
 
+      const aid1 = aid(0, [1], id3);
+      const aid2 = aid(0, [1], id4);
+
       it("distributes the budget to the stated recipient", () => {
-        const i1 = aid(0, [1]);
         const policy = {
           policyType: "SPECIAL",
           budget: nng(100),
           memo: "something",
-          recipient: i1.id,
+          recipient: id2,
         };
-        const allocation = computeAllocation(policy, [i1], credGrainView, 0);
-        const expectedReceipts = [{id: i1.id, amount: nng(100)}];
+        const allocation = computeAllocation(
+          policy,
+          [aid1, aid2],
+          credGrainView,
+          0
+        );
+        const expectedReceipts = [{id: id2, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
           id: uuidParser.parseOrThrow(allocation.id),
@@ -474,31 +491,32 @@ describe("core/ledger/grainAllocation", () => {
         expect(allocation).toEqual(expectedAllocation);
       });
       it("errors if the recipient is not available", () => {
-        const {id} = aid(0, [1]);
-        const other = aid(0, [1]);
         const policy = {
           policyType: "SPECIAL",
           budget: nng(100),
           memo: "something",
-          recipient: id,
+          recipient: id3,
         };
         const thunk = () =>
-          computeAllocation(policy, [other], credGrainView, 0);
+          computeAllocation(policy, [aid1, aid2], credGrainView, 0);
         expect(thunk).toThrowError("no active grain account for identity");
       });
 
       //Test ComputeAllocationSpecial function
 
       it("distributes the budget to the stated recipient", () => {
-        const i1 = aid(0, [1]);
         const policy = {
           policyType: "SPECIAL",
           budget: nng(100),
           memo: "something",
-          recipient: i1.id,
+          recipient: id1,
         };
-        const allocation = computeAllocationSpecial(policy, [i1]);
-        const expectedReceipts = [{id: i1.id, amount: nng(100)}];
+        const identities = credGrainView
+          .activeParticipants()
+          .map((participant) => participant.identity);
+
+        const allocation = computeAllocationSpecial(policy, identities);
+        const expectedReceipts = [{id: id1, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
           id: uuidParser.parseOrThrow(allocation.id),
@@ -507,15 +525,18 @@ describe("core/ledger/grainAllocation", () => {
         expect(allocation).toEqual(expectedAllocation);
       });
       it("errors if the recipient is not available", () => {
-        const {id} = aid(0, [1]);
-        const other = aid(0, [1]);
         const policy = {
           policyType: "SPECIAL",
           budget: nng(100),
           memo: "something",
-          recipient: id,
+          recipient: id2,
         };
-        const thunk = () => computeAllocationSpecial(policy, [other]);
+
+        const identities = credGrainView2
+          .activeParticipants()
+          .map((participant) => participant.identity);
+
+        const thunk = () => computeAllocationSpecial(policy, identities);
         expect(thunk).toThrowError("no active grain account for identity");
       });
     });

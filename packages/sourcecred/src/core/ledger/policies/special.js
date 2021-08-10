@@ -2,10 +2,9 @@
 
 import {parser as uuidParser} from "../../../util/uuid";
 import * as P from "../../../util/combo";
-import {type IdentityId} from "../../identity";
+import {type IdentityId, type Identity} from "../../identity";
 import * as G from "../grain";
 import {type GrainReceipt} from "../grainAllocation";
-import {type ProcessedIdentities} from "../processedIdentities";
 import {
   type NonnegativeGrain,
   grainParser,
@@ -32,7 +31,7 @@ export type SpecialPolicy = {|
 
 export function specialReceipts(
   policy: SpecialPolicy,
-  identities: ProcessedIdentities
+  identities: $ReadOnlyArray<Identity>
 ): $ReadOnlyArray<GrainReceipt> {
   for (const {id} of identities) {
     if (id === policy.recipient) {

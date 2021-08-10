@@ -15,7 +15,7 @@ import {
   random as randomUuid,
   parser as uuidParser,
 } from "../../util/uuid";
-import {type IdentityId} from "../identity";
+import {type IdentityId, type Identity} from "../identity";
 import {
   type AllocationPolicy,
   allocationPolicyParser,
@@ -71,14 +71,14 @@ export function computeAllocation(
 /* This is a simplified case that should not require a credGrainView */
 export function computeAllocationSpecial(
   policy: AllocationPolicy,
-  identities: $ReadOnlyArray<AllocationIdentity>
+  identities: $ReadOnlyArray<Identity>
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
-  const processedIdentities = processIdentities(identities);
+  //const processedIdentities = processIdentities(identities);
   if (validatedPolicy.policyType === "SPECIAL") {
     return _validateAllocationBudget({
       policy,
-      receipts: specialReceipts(validatedPolicy, processedIdentities),
+      receipts: specialReceipts(validatedPolicy, identities),
       id: randomUuid(),
     });
   } else {
@@ -121,6 +121,9 @@ function receipts(
     case "BALANCED":
       return balancedReceipts(policy, credGrainView, effectiveTimestamp);
     case "SPECIAL":
+      const identities = credGrainView
+        .activeParticipants()
+        .map((participant) => participant.identity);
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow
     default:
