@@ -58,22 +58,22 @@ describe("analysis/pluginDeclaration", () => {
 
   describe("to/fromJSON", () => {
     it("works round-trip on an empty declaration", () => {
-      const json = toJSON([emptyDeclaration]);
+      const json = toJSON(emptyDeclaration);
       const result = fromJSON(json);
-      expect(result).toEqual([emptyDeclaration]);
+      expect(result).toEqual(emptyDeclaration);
     });
     it("snapshots on an empty declaration", () => {
       // stringify to avoid having literal NUL bytes in our source.
-      expect(stringify(toJSON([emptyDeclaration]))).toMatchSnapshot();
+      expect(stringify([toJSON(emptyDeclaration)])).toMatchSnapshot();
     });
     it("works round-trip on an non-empty declaration", () => {
-      const json = toJSON([nonEmptyDeclaration]);
+      const json = toJSON(nonEmptyDeclaration);
       const result = fromJSON(json);
-      expect(result).toEqual([nonEmptyDeclaration]);
+      expect(result).toEqual(nonEmptyDeclaration);
     });
     it("snapshots on an non-empty declaration", () => {
       // stringify to avoid having literal NUL bytes in our source.
-      expect(stringify(toJSON([nonEmptyDeclaration]))).toMatchSnapshot();
+      expect(stringify([toJSON(nonEmptyDeclaration)])).toMatchSnapshot();
     });
   });
 });

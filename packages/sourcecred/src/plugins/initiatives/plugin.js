@@ -32,7 +32,7 @@ function getDirectoryFromContext(ctx: PluginDirectoryContext): string {
 export class InitiativesPlugin implements Plugin {
   id: PluginId = pluginIdFromString("sourcecred/initiatives");
 
-  declaration(): PluginDeclaration {
+  async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }
 

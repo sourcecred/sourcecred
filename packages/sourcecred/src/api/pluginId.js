@@ -29,4 +29,12 @@ export function fromString(s: string): PluginId {
   return s;
 }
 
+export function getPluginOwner(id: PluginId): string {
+  return id.split("/")[0];
+}
+
+export function getPluginName(id: PluginId): string {
+  return id.split("/")[1];
+}
+
 export const parser: P.Parser<PluginId> = P.fmap(P.string, fromString);

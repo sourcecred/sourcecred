@@ -7,27 +7,39 @@ import {declaration as discordDeclaration} from "../plugins/discord/declaration"
 import {declaration as initiativesDeclaration} from "../plugins/initiatives/declaration";
 import {declaration as ethereumDeclaration} from "../plugins/ethereum/declaration";
 import {type RawInstanceConfig} from "./rawInstanceConfig";
-import {type PluginId} from "./pluginId";
+import {type PluginId, getPluginOwner} from "./pluginId";
+import {DataStorage} from "../core/storage";
+import {
+  ExternalPlugin,
+  ExternalPluginIdOwner,
+} from "../plugins/external/plugin";
 
-export function bundledDeclarations(): {[pluginId: string]: PluginDeclaration} {
-  return {
+export async function getPluginDeclaration(
+  pluginId: PluginId,
+  storage: DataStorage
+): Promise<PluginDeclaration> {
+  const mapping = {
     "sourcecred/github": githubDeclaration,
     "sourcecred/discourse": discourseDeclaration,
     "sourcecred/discord": discordDeclaration,
     "sourcecred/initiatives": initiativesDeclaration,
     "sourcecred/ethereum": ethereumDeclaration,
   };
+  if (mapping[pluginId.toString()]) return mapping[pluginId.toString()];
+  if (getPluginOwner(pluginId) === ExternalPluginIdOwner)
+    return await new ExternalPlugin(pluginId, storage).declaration();
+  throw "Bad declaration: " + JSON.stringify(pluginId);
 }
 
-export function upgradeRawInstanceConfig(
-  raw: RawInstanceConfig
-): $ReadOnlyMap<PluginId, PluginDeclaration> {
-  const allBundledPlugins = bundledDeclarations();
+export async function upgradeRawInstanceConfig(
+  raw: RawInstanceConfig,
+  storage: DataStorage
+): Promise<$ReadOnlyMap<PluginId, PluginDeclaration>> {
   const bundledPlugins = new Map();
   for (const id of raw.bundledPlugins) {
-    const plugin = allBundledPlugins[id];
+    const plugin = await getPluginDeclaration(id, storage);
     if (plugin == null) {
-      throw new Error("bad bundled plugin: " + JSON.stringify(id));
+      throw new Error("bad bundled declaration: " + JSON.stringify(id));
     }
     bundledPlugins.set(id, plugin);
   }

@@ -50,6 +50,10 @@ export const parser: C.Parser<IdentityProposal> = C.object({
   type: identityTypeParser,
 });
 
+export const identityProposalsParser: C.Parser<
+  $ReadOnlyArray<IdentityProposal>
+> = C.array(parser);
+
 /**
  * Given a Ledger and an IdentityProposal, ensure that some Ledger account
  * exists for the proposed identity and return the identity ID.

@@ -64,7 +64,7 @@ function getTokenFromEnv(): GithubToken {
 export class GithubPlugin implements Plugin {
   id: PluginId = pluginIdFromString("sourcecred/github");
 
-  declaration(): PluginDeclaration {
+  async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }
 

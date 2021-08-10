@@ -32,7 +32,10 @@ import {
   type DependenciesConfig,
 } from "../dependenciesConfig";
 import {type Budget} from "../../core/mintBudget";
-import {parser as pluginBudgetParser} from "../pluginBudgetConfig";
+import {
+  rawParser as pluginBudgetParser,
+  upgrade as pluginBudgetUpgrader,
+} from "../pluginBudgetConfig";
 import {
   rawParser as rawConfigParser,
   type RawInstanceConfig,
@@ -261,12 +264,13 @@ export class ReadInstance implements ReadOnlyInstance {
 
   async readPluginsBudget(): Promise<Budget | null> {
     const budgetPath = pathJoin(...BUDGET_PATH);
-    return loadJsonWithDefault(
+    const raw = await loadJsonWithDefault(
       this._storage,
       budgetPath,
       pluginBudgetParser,
       () => null
     );
+    return raw ? await pluginBudgetUpgrader(raw, this._storage) : null;
   }
 
   createPluginDirectory(

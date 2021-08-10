@@ -50,7 +50,7 @@ function getTokenFromEnv(): DiscordToken {
 export class DiscordPlugin implements Plugin {
   id: PluginId = pluginIdFromString("sourcecred/discord");
 
-  declaration(): PluginDeclaration {
+  async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }
 

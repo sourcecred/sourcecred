@@ -2,7 +2,7 @@
 
 import * as P from "../util/combo";
 import {Plugin} from "./plugin";
-import {bundledPlugins as getAllBundledPlugins} from "./bundledPlugins";
+import {getPlugin} from "./bundledPlugins";
 import {rawParser, type RawInstanceConfig} from "./rawInstanceConfig";
 import * as pluginId from "./pluginId";
 
@@ -11,10 +11,9 @@ export type InstanceConfig = {|
 |};
 
 function upgrade(raw: RawInstanceConfig): InstanceConfig {
-  const allBundledPlugins = getAllBundledPlugins();
   const bundledPlugins = new Map();
   for (const id of raw.bundledPlugins) {
-    const plugin = allBundledPlugins[id];
+    const plugin = getPlugin(id);
     if (plugin == null) {
       throw new Error("bad bundled plugin: " + JSON.stringify(id));
     }
