@@ -2,8 +2,9 @@
 
 import * as G from "../grain";
 import * as P from "../../../util/combo";
+import {type CredGrainView} from "../../credGrainView";
+import {type TimestampMs} from "../../../util/timestamp";
 import {type GrainReceipt} from "../grainAllocation";
-import {type ProcessedIdentities} from "../processedIdentities";
 import {
   type NonnegativeGrain,
   grainParser,
@@ -41,16 +42,34 @@ export type RecentPolicy = {|
  * cred.
  */
 export function recentReceipts(
-  budget: G.Grain,
-  identities: ProcessedIdentities,
-  discount: Discount
+  policy: RecentPolicy,
+  credGrainView: CredGrainView,
+  effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<GrainReceipt> {
-  const computeDecayedCred = (i) =>
-    i.cred.reduce((acc, cred) => acc * (1 - discount) + cred, 0);
-  const decayedCredPerIdentity = identities.map(computeDecayedCred);
-  const amounts = G.splitBudget(budget, decayedCredPerIdentity);
+  const lookback = 0;
 
-  return identities.map(({id}, i) => ({id, amount: amounts[i]}));
+  const timeLimitedCredGrainView = credGrainView.withTimeScopeFromLookback(
+    effectiveTimestamp,
+    lookback
+  );
+  const timeLimitedParticipants = timeLimitedCredGrainView.activeParticipants();
+
+  const computeDecayedCred = (i) => {
+    return i.credPerInterval.reduce(
+      (acc, cred) => acc * (1 - policy.discount) + cred,
+      0
+    );
+  };
+  const decayedCredPerIdentity = timeLimitedParticipants.map(
+    computeDecayedCred
+  );
+
+  const amounts = G.splitBudget(policy.budget, decayedCredPerIdentity);
+
+  return timeLimitedParticipants.map(({identity}, i) => ({
+    id: identity.id,
+    amount: amounts[i],
+  }));
 }
 
 export const recentConfigParser: P.Parser<RecentPolicy> = P.object({

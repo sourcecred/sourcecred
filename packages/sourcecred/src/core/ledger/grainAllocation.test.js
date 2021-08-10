@@ -172,6 +172,23 @@ describe("core/ledger/grainAllocation", () => {
         done();
       });
 
+      let credGraph2;
+      let credGrainViewUnbalanced;
+      let credGrainViewUnbalancedUnpaid;
+      beforeEach(async (done) => {
+        credGraph2 = await GraphUtil.credGraph2();
+        const unbalancedLedger = ledgerWithActiveIdentities(id3, id4);
+        credGrainViewUnbalanced = CredGrainView.fromCredGraphAndLedger(
+          credGraph2,
+          unbalancedLedger
+        );
+        credGrainViewUnbalancedUnpaid = CredGrainView.fromCredGraphAndLedger(
+          credGraph2,
+          ledgerWithActiveIdentities(id3, id4)
+        );
+        done();
+      });
+
       it("splits based on discounted cred", () => {
         const policy = recent(100, 0.1);
         const i1 = aid(0, [0, 0, 100]);
@@ -180,13 +197,12 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [i1, i2, i3],
-          credGrainView,
-          0
+          credGrainViewUnbalancedUnpaid,
+          4
         );
         const expectedReceipts = [
-          {id: i1.id, amount: nng(38)},
-          {id: i2.id, amount: nng(31)},
-          {id: i3.id, amount: nng(31)},
+          {id: id3, amount: nng(27)},
+          {id: id4, amount: nng(73)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -203,12 +219,12 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [i1, i2],
-          credGrainView,
-          0
+          credGrainViewUnbalanced,
+          4
         );
         const expectedReceipts = [
-          {id: i1.id, amount: nng(50)},
-          {id: i2.id, amount: nng(50)},
+          {id: id3, amount: nng(27)},
+          {id: id4, amount: nng(73)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -225,12 +241,12 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [i1, i2],
-          credGrainView,
-          0
+          credGrainViewUnbalanced,
+          4
         );
         const expectedReceipts = [
-          {id: i1.id, amount: nng(0)},
-          {id: i2.id, amount: nng(100)},
+          {id: id3, amount: nng(6)},
+          {id: id4, amount: nng(94)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -247,12 +263,12 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           [i1, i2],
-          credGrainView,
-          0
+          credGrainViewUnbalanced,
+          4
         );
         const expectedReceipts = [
-          {id: i1.id, amount: nng(0)},
-          {id: i2.id, amount: nng(0)},
+          {id: id3, amount: nng(0)},
+          {id: id4, amount: nng(0)},
         ];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -290,15 +306,14 @@ describe("core/ledger/grainAllocation", () => {
       };
 
       unbalancedLedger.distributeGrain(distribution1);
-      const emptyLedger2 = ledgerWithActiveIdentities(id3, id4);
-
       let credGrainViewEmpty;
       let credGrainViewUnbalanced;
+
       beforeEach(async (done) => {
         credGraph = await GraphUtil.credGraph2();
         credGrainViewEmpty = CredGrainView.fromCredGraphAndLedger(
           credGraph,
-          emptyLedger2
+          ledgerWithActiveIdentities(id3, id4)
         );
 
         credGrainViewUnbalanced = CredGrainView.fromCredGraphAndLedger(

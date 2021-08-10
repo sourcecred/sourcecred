@@ -117,7 +117,7 @@ function receipts(
     case "IMMEDIATE":
       return immediateReceipts(policy, credGrainView, effectiveTimestamp);
     case "RECENT":
-      return recentReceipts(policy.budget, identities, policy.discount);
+      return recentReceipts(policy, credGrainView, effectiveTimestamp);
     case "BALANCED":
       return balancedReceipts(policy, credGrainView, effectiveTimestamp);
     case "SPECIAL":
