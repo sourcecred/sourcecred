@@ -1,23 +1,13 @@
 // @flow
 
-import {random as randomUuid} from "../../../util/uuid";
 import {balancedReceipts} from "./balanced";
 import * as GraphUtil from "../../credrank/testUtils";
 import {createTestLedgerFixture} from "../../ledger/testUtils";
 import {CredGrainView} from "../../credGrainView";
-import {type AllocationIdentity} from "../grainAllocation";
 import {fromString as nngFromString} from "../nonnegativeGrain";
 const nng = (x: number) => nngFromString(x.toString());
 import {g} from "../../ledger/testUtils";
 import * as uuid from "../../../util/uuid";
-
-function aid(
-  paid: number,
-  cred: $ReadOnlyArray<number>,
-  id = randomUuid()
-): AllocationIdentity {
-  return {id: id, paid: nng(paid), cred};
-}
 
 describe("core/ledger/policies/balanced", () => {
   const id1 = GraphUtil.participant1.id;
@@ -73,9 +63,6 @@ describe("core/ledger/policies/balanced", () => {
   });
 
   describe("balancedReceipts", () => {
-    const aid3 = aid(0, GraphUtil.expectedParticipant3.credPerInterval, id3);
-    const aid4 = aid(0, GraphUtil.expectedParticipant4.credPerInterval, id4);
-
     it("errors on invalid range", () => {
       const policy = {
         policyType: "BALANCED",
@@ -137,8 +124,8 @@ describe("core/ledger/policies/balanced", () => {
         numIntervalsLookback: 1, // 0 means forever, but there are only 2 intervals in the test data
       };
       const expectedReceipts = [
-        {id: aid3.id, amount: nng(34)},
-        {id: aid4.id, amount: nng(1966)},
+        {id: id3, amount: nng(34)},
+        {id: id4, amount: nng(1966)},
       ];
       const actualReceipts = balancedReceipts(
         policy1,

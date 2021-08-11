@@ -24,10 +24,6 @@ import {
   recentReceipts,
   specialReceipts,
 } from "./policies";
-import {
-  type ProcessedIdentities,
-  processIdentities,
-} from "./processedIdentities";
 
 export type AllocationId = Uuid;
 
@@ -42,28 +38,17 @@ export type Allocation = {|
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
-export type AllocationIdentity = {|
-  +cred: $ReadOnlyArray<number>,
-  +paid: G.Grain,
-  +id: IdentityId,
-|};
-
 export function computeAllocation(
   policy: AllocationPolicy,
-  identities: $ReadOnlyArray<AllocationIdentity>,
   credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
-  const processedIdentities = processIdentities(identities);
+  console.log("##### Validating CredGrainView");
+  credGrainView.validateForGrainAllocation();
   return _validateAllocationBudget({
     policy,
-    receipts: receipts(
-      validatedPolicy,
-      processedIdentities,
-      credGrainView,
-      effectiveTimestamp
-    ),
+    receipts: receipts(validatedPolicy, credGrainView, effectiveTimestamp),
     id: randomUuid(),
   });
 }
@@ -109,7 +94,6 @@ export function _validateAllocationBudget(a: Allocation): Allocation {
 
 function receipts(
   policy: AllocationPolicy,
-  identities: ProcessedIdentities,
   credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<GrainReceipt> {

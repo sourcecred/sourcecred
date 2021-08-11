@@ -7,6 +7,7 @@
  * It is useful for cases where you want to view a participant's Cred and Grain
  * data simultaneously, for example for creating summary dashboards.
  */
+import {sum} from "d3-array";
 import deepFreeze from "deep-freeze";
 import {
   CredGraph,
@@ -127,6 +128,24 @@ export class CredGrainView {
       }
       return grain;
     });
+  }
+
+  validateForGrainAllocation() {
+    if (this.activeParticipants().length === 0) {
+      throw new Error(`must have at least one identity to allocate grain to`);
+    }
+
+    this.activeParticipants().map((p) => {
+      if (p.grainEarned < G.ZERO) {
+        throw new Error(`negative paid: ${p.grainEarned}`);
+      }
+    });
+
+    console.log("##### Sum of Cred" + sum(this.totalCredPerInterval()));
+    if (sum(this.totalCredPerInterval()) < 1)
+      throw new Error(
+        "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
+      );
   }
 
   withTimeScope(
