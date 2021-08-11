@@ -141,7 +141,6 @@ export class CredGrainView {
       }
     });
 
-    console.log("##### Sum of Cred" + sum(this.totalCredPerInterval()));
     if (sum(this.totalCredPerInterval()) < 1)
       throw new Error(
         "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
