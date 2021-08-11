@@ -58,7 +58,6 @@ export function computeAllocationSpecial(
   identities: $ReadOnlyArray<Identity>
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
-  //const processedIdentities = processIdentities(identities);
   if (validatedPolicy.policyType === "SPECIAL") {
     return _validateAllocationBudget({
       policy,
