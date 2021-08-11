@@ -57,17 +57,6 @@ export const participantNode4: GraphNode = {
   timestampMs: null,
 };
 
-export const participantNode5: GraphNode = {
-  description: "participant5",
-  address: na("participant5"),
-  timestampMs: null,
-};
-export const participantNode6: GraphNode = {
-  description: "participant6",
-  address: na("participant6"),
-  timestampMs: null,
-};
-
 deepFreeze([participantNode1, participantNode2]);
 
 export const participant1: MarkovProcessParticipant = {
