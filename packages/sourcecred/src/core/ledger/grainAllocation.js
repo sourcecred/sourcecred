@@ -44,7 +44,6 @@ export function computeAllocation(
   effectiveTimestamp: TimestampMs
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
-  console.log("##### Validating CredGrainView");
   credGrainView.validateForGrainAllocation();
   return _validateAllocationBudget({
     policy,
