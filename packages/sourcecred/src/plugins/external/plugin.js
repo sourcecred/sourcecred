@@ -42,30 +42,49 @@ const configParser: C.Parser<ExternalPluginConfig> = C.object({
 export class ExternalPlugin implements Plugin {
   id: PluginId;
   storage: DataStorage;
+  defaultConfigDirectory: PluginDirectoryContext;
 
-  async getConfig(): Promise<ExternalPluginConfig | void> {
+  constructor(id: PluginId, storage: DataStorage) {
+    this.id = id;
+    this.storage = storage;
+    this.defaultConfigDirectory = {
+      configDirectory: () => pathJoin("config/plugins/", id),
+      cacheDirectory: () => pathJoin("cache/", id),
+    };
+  }
+
+  async getConfig(
+    ctx: PluginDirectoryContext
+  ): Promise<ExternalPluginConfig | void> {
+    const path = pathJoin(ctx.configDirectory(), "config.json");
     return loadJsonWithDefault(
       this.storage,
-      "config.json",
+      path,
       configParser,
       () => undefined
     );
   }
 
-  constructor(id: PluginId, storage: DataStorage) {
-    this.id = id;
-    this.storage = storage;
-  }
-
-  async getStorage(): Promise<DataStorage> {
-    const config = await this.getConfig();
-    return config ? new NetworkStorage(config.baseUrl) : this.storage;
+  async getStorage(
+    ctx: PluginDirectoryContext
+  ): Promise<{
+    storage: DataStorage,
+    path: string,
+  }> {
+    const config = await this.getConfig(ctx);
+    return config
+      ? {storage: new NetworkStorage(config.baseUrl), path: ""}
+      : {
+          storage: this.storage,
+          path: ctx.configDirectory(),
+        };
   }
 
   async declaration(): Promise<PluginDeclaration> {
+    const {storage, path} = await this.getStorage(this.defaultConfigDirectory);
     const json = await loadJsonWithDefault(
-      await this.getStorage(),
-      "declaration.json",
+      storage,
+      pathJoin(path, "declaration.json"),
       ((Combo.raw: any): Combo.Parser<PluginDeclarationJSON>),
       () => null
     );
@@ -83,15 +102,15 @@ export class ExternalPlugin implements Plugin {
     ctx: PluginDirectoryContext,
     _unused_rd: ReferenceDetector
   ): Promise<WeightedGraph> {
-    const storage = await this.getStorage();
+    const {storage, path} = await this.getStorage(ctx);
     const graphJSON = await loadJson(
       storage,
-      pathJoin(ctx.configDirectory(), "graph.json"),
+      pathJoin(path, "graph.json"),
       ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
     ).catch(() => {
       return loadJson(
         new ZipStorage(storage),
-        pathJoin(ctx.configDirectory(), "graph.json.gzip"),
+        pathJoin(path, "graph.json.gzip"),
         ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
       );
     });
@@ -110,11 +129,12 @@ export class ExternalPlugin implements Plugin {
   }
 
   async identities(
-    _unused_ctx: PluginDirectoryContext
+    ctx: PluginDirectoryContext
   ): Promise<$ReadOnlyArray<IdentityProposal>> {
+    const {storage, path} = await this.getStorage(ctx);
     return await loadJsonWithDefault(
-      await this.getStorage(),
-      "identityProposals.json",
+      storage,
+      pathJoin(path, "identityProposals.json"),
       identityProposalsParser,
       () => []
     );
