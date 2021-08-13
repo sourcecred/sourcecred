@@ -25,7 +25,7 @@ import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type WeightsT} from "../../core/weights";
 import {Web3ContextProvider} from "../utils/Web3Context";
-import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import {MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 
 const dataProvider = fakeDataProvider({}, true);
@@ -196,28 +196,28 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
     // TODO (@topocount) create context for read-only instance state
     <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
       <Web3ContextProvider>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <Admin
-          disableTelemetry
-          layout={createAppLayout(loadSuccess)}
-          theme={theme}
-          dataProvider={dataProvider}
-          history={history}
-          customRoutes={customRoutes(
-            loadSuccess.hasBackend,
-            loadSuccess.currency,
-            loadSuccess.credGrainView,
-            Array.from(loadSuccess.bundledPlugins.values()),
-            loadSuccess.isDev,
-            loadSuccess.weights
-          )}
-        >
-          {/*
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <Admin
+            disableTelemetry
+            layout={createAppLayout(loadSuccess)}
+            theme={theme}
+            dataProvider={dataProvider}
+            history={history}
+            customRoutes={customRoutes(
+              loadSuccess.hasBackend,
+              loadSuccess.currency,
+              loadSuccess.credGrainView,
+              Array.from(loadSuccess.bundledPlugins.values()),
+              loadSuccess.isDev,
+              loadSuccess.weights
+            )}
+          >
+            {/*
             This dummy resource is required to get react
             admin working beyond the hello world screen
           */}
-          <Resource name="dummyResource" />
-        </Admin>
+            <Resource name="dummyResource" />
+          </Admin>
         </MuiPickersUtilsProvider>
       </Web3ContextProvider>
     </LedgerProvider>
