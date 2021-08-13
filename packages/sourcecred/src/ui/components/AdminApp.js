@@ -25,6 +25,8 @@ import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type WeightsT} from "../../core/weights";
 import {Web3ContextProvider} from "../utils/Web3Context";
+import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -194,6 +196,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
     // TODO (@topocount) create context for read-only instance state
     <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
       <Web3ContextProvider>
+      <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <Admin
           disableTelemetry
           layout={createAppLayout(loadSuccess)}
@@ -215,6 +218,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
           */}
           <Resource name="dummyResource" />
         </Admin>
+        </MuiPickersUtilsProvider>
       </Web3ContextProvider>
     </LedgerProvider>
   );
