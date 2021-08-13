@@ -1,6 +1,11 @@
 // @flow
 
-import React, {useState, useMemo, type Node as ReactNode} from "react";
+import React, {
+  useState,
+  useMemo,
+  type Node as ReactNode,
+  useCallback,
+} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import {
@@ -12,7 +17,9 @@ import {
   TextField,
   ListSubheader,
   Divider,
+  debounce,
 } from "@material-ui/core";
+
 import {useLedger} from "../utils/LedgerContext";
 import {useTableState} from "../../webutil/tableState";
 import {IdentityMerger} from "./IdentityMerger";
@@ -94,15 +101,18 @@ export const LedgerAdmin = (): ReactNode => {
     updateLedger(ledger);
   };
 
-  const toggleIdentityActivation = (id: IdentityId) => {
-    let nextLedger;
-    if (ledger.account(id).active) {
-      nextLedger = ledger.deactivate(id);
-    } else {
-      nextLedger = ledger.activate(id);
-    }
-    updateLedger(nextLedger);
-  };
+  const toggleIdentityActivation = useCallback(
+    (id: IdentityId) => {
+      let nextLedger;
+      if (ledger.account(id).active) {
+        nextLedger = ledger.deactivate(id);
+      } else {
+        nextLedger = ledger.activate(id);
+      }
+      updateLedger(nextLedger);
+    },
+    [ledger]
+  );
 
   const resetIdentity = () => {
     setIdentityName("");
@@ -110,11 +120,11 @@ export const LedgerAdmin = (): ReactNode => {
     setPromptString("Add Identity: ");
   };
 
-  const setActiveIdentity = (identity: Identity) => {
+  const setActiveIdentity = useCallback((identity: Identity) => {
     setIdentityName(identity.name);
     setSelectedId(identity.id);
     setPromptString("Update Identity: ");
-  };
+  }, []);
 
   const filterIdentities = (event: SyntheticInputEvent<HTMLInputElement>) => {
     // fuzzy match letters "in order, but not necessarily sequentially", per issue #2490
@@ -123,12 +133,22 @@ export const LedgerAdmin = (): ReactNode => {
       .toLowerCase()
       .split("")
       .join("+.*");
-    const regex = new RegExp(filterString);
-
-    accountsTableState.createOrUpdateFilterFn("filterIdentities", (account) =>
-      regex.test(account.identity.name.toLowerCase())
-    );
+    searchAccounts(filterString);
   };
+
+  const searchAccounts = useCallback(
+    debounce((filterString) => {
+      const regex = new RegExp(filterString);
+      accountsTableState.createOrUpdateFilterFn("filterIdentities", (account) =>
+        regex.test(account.identity.name.toLowerCase())
+      );
+    }, 400),
+    []
+  );
+
+  const nameIsEmpty = useMemo(() => nextIdentityName.trim().length === 0, [
+    nextIdentityName,
+  ]);
 
   return (
     <Container className={classes.root}>
@@ -163,10 +183,7 @@ export const LedgerAdmin = (): ReactNode => {
         )}
       </div>
       <ButtonGroup color="primary" variant="contained">
-        <Button
-          onClick={createOrUpdateIdentity}
-          disabled={nextIdentityName.trim().length === 0}
-        >
+        <Button onClick={createOrUpdateIdentity} disabled={nameIsEmpty}>
           {selectedId ? "update username" : "create identity"}
         </Button>
         <Button onClick={saveToDisk}>save ledger to disk</Button>
