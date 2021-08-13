@@ -20,6 +20,9 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import {
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
 import {type LedgerEvent} from "../../../core/ledger/ledger";
 import {useLedger} from "../../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
@@ -32,6 +35,7 @@ import {
 } from "../../../webutil/tableState";
 import LedgerEventRow from "./LedgerEventRow";
 import GrainReceiptTable from "./GrainReceiptTable";
+import Grid from "@material-ui/core/Grid";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -48,6 +52,8 @@ const useStyles = makeStyles((theme) => {
     toolbar: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(1),
+      flexDirection: 'column',
+      alignItems: 'flex-start',
     },
     chip: {
       fontSize: "0.55rem",
@@ -82,7 +88,18 @@ export const LedgerViewer = ({
     setAllocation(null);
   }, []);
 
+  const handleStartDateChange = (date) => {
+    setStartDateFilter(date);
+  }
+  const handleEndDateChange = (date) => {
+    setEndDateFilter(date);
+  }
+
+
   const eventLog = useMemo(() => [...ledger.eventLog()], [ledger]);
+  const  [startDateFilter, setStartDateFilter] = useState(new Date());
+  const  [endDateFilter, setEndDateFilter] = useState(new Date());
+
   const ts = useTableState(
     {data: eventLog},
     {
@@ -101,6 +118,34 @@ export const LedgerViewer = ({
         <Typography variant="h6" id="tableTitle" component="div">
           Ledger Event History
         </Typography>
+      <Grid 
+        container
+        justifyContent="space-between">
+        <KeyboardDatePicker
+          disableToolbar
+          variant="inline"
+          format="MM/dd/yyyy"
+          margin="normal"
+          id="date-picker-inline"
+          label="Start Date"
+          value={startDateFilter}
+          onChange={handleStartDateChange}
+          KeyboardButtonProps={{
+            'aria-label': 'change start date',
+          }}
+        />
+        <KeyboardDatePicker
+          margin="normal"
+          id="date-picker-dialog"
+          label="End Date"
+          format="MM/dd/yyyy"
+          value={endDateFilter}
+          onChange={handleEndDateChange}
+          KeyboardButtonProps={{
+            'aria-label': 'change end date',
+          }}
+        />
+        </Grid>
       </Toolbar>
       <TableContainer className={classes.table}>
         <Table stickyHeader size="small">
