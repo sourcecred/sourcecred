@@ -28,6 +28,9 @@ export function getPlugin(pluginId: PluginId): ?Plugin {
   };
   if (mapping[pluginId.toString()]) return mapping[pluginId.toString()];
   if (getPluginOwner(pluginId) === ExternalPluginIdOwner)
-    return new ExternalPlugin(pluginId, new DiskStorage(process.cwd()));
+    return new ExternalPlugin({
+      pluginId,
+      storage: new DiskStorage(process.cwd()),
+    });
   return null;
 }

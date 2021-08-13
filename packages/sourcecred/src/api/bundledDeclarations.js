@@ -27,7 +27,7 @@ export async function getPluginDeclaration(
   };
   if (mapping[pluginId.toString()]) return mapping[pluginId.toString()];
   if (getPluginOwner(pluginId) === ExternalPluginIdOwner)
-    return await new ExternalPlugin(pluginId, storage).declaration();
+    return await new ExternalPlugin({pluginId, storage}).declaration();
   throw "Bad declaration: " + JSON.stringify(pluginId);
 }
 
