@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
   useState,
+  useEffect,
 } from "react";
 import deepFreeze from "deep-freeze";
 import Table from "@material-ui/core/Table";
@@ -20,7 +21,6 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import {KeyboardDatePicker} from "@material-ui/pickers";
 import {type LedgerEvent} from "../../../core/ledger/ledger";
 import {useLedger} from "../../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
@@ -33,7 +33,7 @@ import {
 } from "../../../webutil/tableState";
 import LedgerEventRow from "./LedgerEventRow";
 import GrainReceiptTable from "./GrainReceiptTable";
-import Grid from "@material-ui/core/Grid";
+import {LedgerDateFilter} from "./LedgerDateFilter";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -77,6 +77,8 @@ export const LedgerViewer = ({
   const {ledger} = useLedger();
   const classes = useStyles();
   const [allocation, setAllocation] = useState<Allocation | null>(null);
+  const [startDateFilter, setStartDateFilter] = useState<Date>(null);
+  const [endDateFilter, setEndDateFilter] = useState<Date>(null);
 
   const handleClickOpen = useCallback((allocation: Allocation) => {
     setAllocation(allocation);
@@ -86,16 +88,7 @@ export const LedgerViewer = ({
     setAllocation(null);
   }, []);
 
-  const handleStartDateChange = (date) => {
-    setStartDateFilter(date);
-  };
-  const handleEndDateChange = (date) => {
-    setEndDateFilter(date);
-  };
-
   const eventLog = useMemo(() => [...ledger.eventLog()], [ledger]);
-  const [startDateFilter, setStartDateFilter] = useState(new Date());
-  const [endDateFilter, setEndDateFilter] = useState(new Date());
 
   const ts = useTableState(
     {data: eventLog},
@@ -109,38 +102,63 @@ export const LedgerViewer = ({
     }
   );
 
+  const handleChangeStartDate = useCallback((date) => {
+    setStartDateFilter(date);
+  }, []);
+
+  const handleChangeEndDate = useCallback((date) => {
+    setEndDateFilter(date);
+  }, []);
+
+  const handleClearStartDate = useCallback(() => {
+    setStartDateFilter(null);
+  }, []);
+
+  const handleClearEndDate = useCallback(() => {
+    setEndDateFilter(null);
+  }, []);
+
+  // This Effect Runs Whenever you enter a start date and/or end date
+  useEffect(() => {
+    if (startDateFilter && !endDateFilter) {
+      ts.createOrUpdateFilterFn(
+        "Date",
+        (ledgerEvent) =>
+          ledgerEvent.ledgerTimestamp >= startDateFilter.getTime()
+      );
+    } else if (!startDateFilter && endDateFilter) {
+      ts.createOrUpdateFilterFn(
+        "Date",
+        (ledgerEvent) =>
+          ledgerEvent.ledgerTimestamp >= 0 &&
+          ledgerEvent.ledgerTimestamp <= endDateFilter.getTime()
+      );
+    } else if (startDateFilter && endDateFilter) {
+      ts.createOrUpdateFilterFn(
+        "Date",
+        (ledgerEvent) =>
+          ledgerEvent.ledgerTimestamp >= startDateFilter.getTime() &&
+          ledgerEvent.ledgerTimestamp <= endDateFilter.getTime()
+      );
+    } else {
+      ts.createOrUpdateFilterFn("Date", () => true);
+    }
+  }, [startDateFilter, endDateFilter]);
+
   return (
     <Paper className={classes.container}>
       <Toolbar className={classes.toolbar}>
         <Typography variant="h6" id="tableTitle" component="div">
           Ledger Event History
         </Typography>
-        <Grid container justifyContent="space-between">
-          <KeyboardDatePicker
-            disableToolbar
-            variant="inline"
-            format="MM/dd/yyyy"
-            margin="normal"
-            id="date-picker-inline"
-            label="Start Date"
-            value={startDateFilter}
-            onChange={handleStartDateChange}
-            KeyboardButtonProps={{
-              "aria-label": "change start date",
-            }}
-          />
-          <KeyboardDatePicker
-            margin="normal"
-            id="date-picker-dialog"
-            label="End Date"
-            format="MM/dd/yyyy"
-            value={endDateFilter}
-            onChange={handleEndDateChange}
-            KeyboardButtonProps={{
-              "aria-label": "change end date",
-            }}
-          />
-        </Grid>
+        <LedgerDateFilter
+          startDateFilter={startDateFilter}
+          endDateFilter={endDateFilter}
+          handleClearEndDate={handleClearEndDate}
+          handleClearStartDate={handleClearStartDate}
+          handleChangeStartDate={handleChangeStartDate}
+          handleChangeEndDate={handleChangeEndDate}
+        />
       </Toolbar>
       <TableContainer className={classes.table}>
         <Table stickyHeader size="small">
