@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import ClearIcon from "@material-ui/icons/Clear";
@@ -30,8 +30,8 @@ const useStyles = makeStyles(() => ({
 type LedgerDateFilterProps = {|
   +startDateFilter: Date | null,
   +endDateFilter: Date | null,
-  handleChangeStartDate: (date) => void,
-  handleChangeEndDate: (date) => void,
+  handleChangeStartDate: (date: Date | null) => void,
+  handleChangeEndDate: (date: Date | null) => void,
   handleClearEndDate: () => void,
   handleClearStartDate: () => void,
 |};
