@@ -77,8 +77,8 @@ export const LedgerViewer = ({
   const {ledger} = useLedger();
   const classes = useStyles();
   const [allocation, setAllocation] = useState<Allocation | null>(null);
-  const [startDateFilter, setStartDateFilter] = useState<Date>(null);
-  const [endDateFilter, setEndDateFilter] = useState<Date>(null);
+  const [startDateFilter, setStartDateFilter] = useState<Date | null>(null);
+  const [endDateFilter, setEndDateFilter] = useState<Date | null>(null);
 
   const handleClickOpen = useCallback((allocation: Allocation) => {
     setAllocation(allocation);
