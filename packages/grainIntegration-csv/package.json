@@ -7,7 +7,8 @@
   "private": true,
   "scripts": {
     "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
-    "flow": "flow"
+    "flow": "flow",
+    "test": "./scripts/test.sh"
   },
   "devDependencies": {
     "flow-bin": "^0.135.0",
