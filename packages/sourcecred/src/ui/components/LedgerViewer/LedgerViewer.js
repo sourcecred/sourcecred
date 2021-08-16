@@ -102,14 +102,6 @@ export const LedgerViewer = ({
     }
   );
 
-  const handleChangeStartDate = useCallback((date) => {
-    setStartDateFilter(date);
-  }, []);
-
-  const handleChangeEndDate = useCallback((date) => {
-    setEndDateFilter(date);
-  }, []);
-
   const handleClearStartDate = useCallback(() => {
     setStartDateFilter(null);
   }, []);
@@ -122,26 +114,26 @@ export const LedgerViewer = ({
   useEffect(() => {
     if (startDateFilter && !endDateFilter) {
       ts.createOrUpdateFilterFn(
-        "Date",
+        "ledgerTimestamp",
         (ledgerEvent) =>
           ledgerEvent.ledgerTimestamp >= startDateFilter.getTime()
       );
     } else if (!startDateFilter && endDateFilter) {
       ts.createOrUpdateFilterFn(
-        "Date",
+        "ledgerTimestamp",
         (ledgerEvent) =>
           ledgerEvent.ledgerTimestamp >= 0 &&
           ledgerEvent.ledgerTimestamp <= endDateFilter.getTime()
       );
     } else if (startDateFilter && endDateFilter) {
       ts.createOrUpdateFilterFn(
-        "Date",
+        "ledgerTimestamp",
         (ledgerEvent) =>
           ledgerEvent.ledgerTimestamp >= startDateFilter.getTime() &&
           ledgerEvent.ledgerTimestamp <= endDateFilter.getTime()
       );
     } else {
-      ts.createOrUpdateFilterFn("Date", () => true);
+      ts.createOrUpdateFilterFn("ledgerTimestamp", () => true);
     }
   }, [startDateFilter, endDateFilter]);
 
@@ -156,8 +148,8 @@ export const LedgerViewer = ({
           endDateFilter={endDateFilter}
           handleClearEndDate={handleClearEndDate}
           handleClearStartDate={handleClearStartDate}
-          handleChangeStartDate={handleChangeStartDate}
-          handleChangeEndDate={handleChangeEndDate}
+          handleChangeStartDate={setStartDateFilter}
+          handleChangeEndDate={setEndDateFilter}
         />
       </Toolbar>
       <TableContainer className={classes.table}>
