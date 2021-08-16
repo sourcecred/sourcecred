@@ -12,7 +12,7 @@
     "build": "lerna run build --stream",
     "install": "lerna bootstrap && ./scripts/flow-mono.sh",
     "start": "lerna run start --stream",
-    "clean": "lerna clean"
+    "clean": "lerna clean --yes && rm -rf node_modules"
   },
   "workspaces": [
     "packages/*"
