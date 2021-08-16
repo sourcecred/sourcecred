@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
   useState,
+  useEffect,
 } from "react";
 import deepFreeze from "deep-freeze";
 import Table from "@material-ui/core/Table";
@@ -32,6 +33,7 @@ import {
 } from "../../../webutil/tableState";
 import LedgerEventRow from "./LedgerEventRow";
 import GrainReceiptTable from "./GrainReceiptTable";
+import {LedgerDateFilter} from "./LedgerDateFilter";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -48,6 +50,8 @@ const useStyles = makeStyles((theme) => {
     toolbar: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(1),
+      flexDirection: "column",
+      alignItems: "flex-start",
     },
     chip: {
       fontSize: "0.55rem",
@@ -73,6 +77,8 @@ export const LedgerViewer = ({
   const {ledger} = useLedger();
   const classes = useStyles();
   const [allocation, setAllocation] = useState<Allocation | null>(null);
+  const [startDateFilter, setStartDateFilter] = useState<Date | null>(null);
+  const [endDateFilter, setEndDateFilter] = useState<Date | null>(null);
 
   const handleClickOpen = useCallback((allocation: Allocation) => {
     setAllocation(allocation);
@@ -83,6 +89,7 @@ export const LedgerViewer = ({
   }, []);
 
   const eventLog = useMemo(() => [...ledger.eventLog()], [ledger]);
+
   const ts = useTableState(
     {data: eventLog},
     {
@@ -95,12 +102,55 @@ export const LedgerViewer = ({
     }
   );
 
+  const handleClearStartDate = useCallback(() => {
+    setStartDateFilter(null);
+  }, []);
+
+  const handleClearEndDate = useCallback(() => {
+    setEndDateFilter(null);
+  }, []);
+
+  // This Effect Runs Whenever you enter a start date and/or end date
+  useEffect(() => {
+    if (startDateFilter && !endDateFilter) {
+      ts.createOrUpdateFilterFn(
+        "ledgerTimestamp",
+        (ledgerEvent) =>
+          ledgerEvent.ledgerTimestamp >= startDateFilter.getTime()
+      );
+    } else if (!startDateFilter && endDateFilter) {
+      ts.createOrUpdateFilterFn(
+        "ledgerTimestamp",
+        (ledgerEvent) =>
+          ledgerEvent.ledgerTimestamp >= 0 &&
+          ledgerEvent.ledgerTimestamp <= endDateFilter.getTime()
+      );
+    } else if (startDateFilter && endDateFilter) {
+      ts.createOrUpdateFilterFn(
+        "ledgerTimestamp",
+        (ledgerEvent) =>
+          ledgerEvent.ledgerTimestamp >= startDateFilter.getTime() &&
+          ledgerEvent.ledgerTimestamp <= endDateFilter.getTime()
+      );
+    } else {
+      ts.createOrUpdateFilterFn("ledgerTimestamp", () => true);
+    }
+  }, [startDateFilter, endDateFilter]);
+
   return (
     <Paper className={classes.container}>
       <Toolbar className={classes.toolbar}>
         <Typography variant="h6" id="tableTitle" component="div">
           Ledger Event History
         </Typography>
+        <LedgerDateFilter
+          startDateFilter={startDateFilter}
+          endDateFilter={endDateFilter}
+          handleClearEndDate={handleClearEndDate}
+          handleClearStartDate={handleClearStartDate}
+          handleChangeStartDate={setStartDateFilter}
+          handleChangeEndDate={setEndDateFilter}
+        />
       </Toolbar>
       <TableContainer className={classes.table}>
         <Table stickyHeader size="small">
