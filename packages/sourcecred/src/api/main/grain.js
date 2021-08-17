@@ -6,6 +6,10 @@ import {type CurrencyDetails} from "../currencyConfig";
 import {type GrainConfig, toDistributionPolicy} from "../grainConfig";
 import {type Distribution} from "../../core/ledger/distribution";
 import {applyDistributions} from "../../core/ledger/applyDistributions";
+import {
+  executeGrainIntegration,
+  type GrainIntegrationResult,
+} from "../../core/ledger/grainIntegration";
 
 export type GrainInput = {|
   +credGraph: CredGraph,
@@ -36,4 +40,31 @@ export async function grain(input: GrainInput): Promise<GrainOutput> {
     input.allowMultipleDistributionsPerInterval || false
   );
   return {distributions, ledger: input.ledger};
+}
+
+/**
+ * Marshall grainInput from a Grain Configuration file for use with
+ * executeGrainIntegration function
+ */
+export function executeGrainIntegrationsFromGrainInput(
+  grainInput: GrainInput,
+  ledger: Ledger,
+  distributions: $ReadOnlyArray<Distribution>
+): $ReadOnlyArray<GrainIntegrationResult> {
+  const integrationCurrency = grainInput.currencyDetails.integrationCurrency;
+  const grainIntegration = grainInput.grainConfig.integration;
+  const results = [];
+  if (integrationCurrency && grainIntegration) {
+    distributions.forEach((distribution) => {
+      const result = executeGrainIntegration(
+        ledger,
+        grainIntegration.function,
+        distribution,
+        integrationCurrency,
+        false
+      );
+      results.push(result);
+    });
+  }
+  return results;
 }

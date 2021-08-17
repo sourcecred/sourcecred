@@ -7,8 +7,7 @@ import {CredGraph} from "../../core/credrank/credGraph";
 import {CredGrainView} from "../../core/credGrainView";
 import {type WeightedGraph} from "../../core/weightedGraph";
 import {Ledger} from "../../core/ledger/ledger";
-import type {GrainIntegrationOutput} from "../../core/ledger/grainIntegration";
-import type {Distribution} from "../../core/ledger/distribution";
+import type {GrainIntegrationResult} from "../../core/ledger/grainIntegration";
 
 /**
   Simple read interface for inputs and outputs of the main SourceCred API.
@@ -48,8 +47,5 @@ export interface Instance extends ReadOnlyInstance {
   writeLedger(ledger: Ledger): Promise<void>;
 
   /** writes grain integration output */
-  writeGrainIntegrationOutput(
-    output: GrainIntegrationOutput,
-    distribution: Distribution
-  ): Promise<void>;
+  writeGrainIntegrationOutput(result: GrainIntegrationResult): Promise<void>;
 }

@@ -7,8 +7,7 @@ import {allocationMarkdownSummary} from "../core/ledger/distributionSummary/allo
 import * as G from "../core/ledger/grain";
 import {Instance} from "../api/instance/instance";
 import {LocalInstance} from "../api/instance/localInstance";
-import {grain} from "../api/main/grain";
-import {executeGrainIntegration} from "../core/ledger/grainIntegration";
+import {grain, executeGrainIntegrationsFromGrainInput} from "../api/main/grain";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -46,23 +45,14 @@ const grainCommand: Command = async (args, std) => {
 
   const {distributions, ledger} = await grain(grainInput);
 
-  const integrationCurrency = grainInput.currencyDetails.integrationCurrency;
-  const grainIntegration = grainInput.grainConfig.integration;
-  if (integrationCurrency && grainIntegration) {
-    distributions.forEach((distribution) => {
-      const result = executeGrainIntegration(
-        ledger,
-        grainIntegration.function,
-        distribution,
-        integrationCurrency,
-        false
-      );
-      if (result.grainIntegrationOutput)
-        instance.writeGrainIntegrationOutput(
-          result.grainIntegrationOutput,
-          distribution
-        );
-    });
+  const grainIntegrationResults = executeGrainIntegrationsFromGrainInput(
+    grainInput,
+    ledger,
+    distributions
+  );
+
+  for (const result of grainIntegrationResults) {
+    instance.writeGrainIntegrationOutput(result);
   }
 
   let totalDistributed = G.ZERO;

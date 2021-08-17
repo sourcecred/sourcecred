@@ -6,6 +6,7 @@ import {getDistributionBalances} from "./distributionSummary/distributionSummary
 import {type Currency} from "./currency.js";
 import {type IdentityId} from "../identity";
 import * as NullUtil from "../../util/null";
+import {type TimestampMs} from "../../util/timestamp";
 import * as G from "./grain";
 
 type Transfer = {|
@@ -61,6 +62,12 @@ export type GrainIntegrationFunction = (
   IntegrationConfig
 ) => PayoutResult;
 
+export type GrainIntegrationResult = {|
+  ledger: Ledger,
+  output?: GrainIntegrationOutput,
+  distributionCredTimestamp: TimestampMs,
+|};
+
 ///////////////////
 // Helper functions
 ///////////////////
@@ -78,7 +85,7 @@ export function executeGrainIntegration(
   // TODO (@topocount) setup accounting config in ledger and remove this config
   // which is just for proof-of-concept
   accountingEnabled?: boolean = false
-): {ledger: Ledger, grainIntegrationOutput?: GrainIntegrationOutput} {
+): GrainIntegrationResult {
   const {payoutDistributions, payoutAddressToId} = buildDistributionIndexes(
     ledger,
     distribution,
@@ -112,7 +119,11 @@ export function executeGrainIntegration(
       });
     }
   }
-  return {ledger, grainIntegrationOutput: result.outputFile};
+  return {
+    ledger,
+    output: result.outputFile,
+    distributionCredTimestamp: distribution.credTimestamp,
+  };
 }
 
 export function buildDistributionIndexes(

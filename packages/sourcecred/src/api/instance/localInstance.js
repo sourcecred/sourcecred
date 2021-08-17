@@ -25,8 +25,7 @@ import type {PluginDirectoryContext} from "../plugin";
 import {type CredAccountData} from "../../core/ledger/credAccounts";
 import {WritableDataStorage} from "../../core/storage";
 import {type PersonalAttributionsConfig} from "../config/personalAttributionsConfig";
-import type {GrainIntegrationOutput} from "../../core/ledger/grainIntegration";
-import type {Distribution} from "../../core/ledger/distribution";
+import type {GrainIntegrationResult} from "../../core/ledger/grainIntegration";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -121,20 +120,23 @@ export class LocalInstance extends ReadInstance implements Instance {
   }
 
   async writeGrainIntegrationOutput(
-    output: GrainIntegrationOutput,
-    distribution: Distribution
+    result: GrainIntegrationResult
   ): Promise<void> {
+    if (!result.output) {
+      return;
+    }
+    const {fileName, content} = result.output;
     mkdirx(pathJoin(...GRAIN_INTEGRATION_DIRECTORY));
     const credDateString = new Date(
-      distribution.credTimestamp
+      result.distributionCredTimestamp
       // utilise the `SE` datestring format since it appears like `YYYY-MM-DD`
       // with numbers and is therefore easy to sort on and human-readable.
     ).toLocaleDateString("en-SE");
     const grainIntegrationPath = pathJoin(
       ...GRAIN_INTEGRATION_DIRECTORY,
-      credDateString + "_" + output.fileName
+      credDateString + "_" + fileName
     );
-    this._writableStorage.set(grainIntegrationPath, encode(output.content));
+    this._writableStorage.set(grainIntegrationPath, encode(content));
   }
 
   //////////////////////////////
