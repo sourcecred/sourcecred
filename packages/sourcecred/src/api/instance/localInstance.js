@@ -13,6 +13,7 @@ import {
 } from "../../core/weightedGraph";
 import {loadJson} from "../../util/storage";
 import {mkdirx} from "../../util/disk";
+import {toISO} from "../../util/timestamp";
 import {parser as configParser, type InstanceConfig} from "../instanceConfig";
 import {Ledger} from "../../core/ledger/ledger";
 import {type DependenciesConfig} from "../dependenciesConfig";
@@ -127,11 +128,7 @@ export class LocalInstance extends ReadInstance implements Instance {
     }
     const {fileName, content} = result.output;
     mkdirx(pathJoin(...GRAIN_INTEGRATION_DIRECTORY));
-    const credDateString = new Date(
-      result.distributionCredTimestamp
-      // utilise the `SE` datestring format since it appears like `YYYY-MM-DD`
-      // with numbers and is therefore easy to sort on and human-readable.
-    ).toLocaleDateString("en-SE");
+    const credDateString = toISO(result.distributionCredTimestamp);
     const grainIntegrationPath = pathJoin(
       ...GRAIN_INTEGRATION_DIRECTORY,
       credDateString + "_" + fileName
