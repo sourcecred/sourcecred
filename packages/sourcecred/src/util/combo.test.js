@@ -588,6 +588,15 @@ describe("src/util/combo", () => {
     });
   });
 
+  describe("delimited", () => {
+    it("deletes delimiter and text after delimiter", () => {
+      expect(C.delimited("//").parseOrThrow("000//foo")).toEqual("000");
+    });
+    it("returns original string when delimiter not found", () => {
+      expect(C.delimited("//").parseOrThrow("000")).toEqual("000");
+    });
+  });
+
   describe("dict", () => {
     const makeParser = (): C.Parser<{|[string]: number|}> => C.dict(C.number);
     it("is type-safe", () => {

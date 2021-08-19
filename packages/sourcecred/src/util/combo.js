@@ -469,3 +469,6 @@ export const dict: PDict = (function dict<V, K: string>(
     return success(result);
   });
 }: any);
+
+export const delimited: (string) => Parser<string> = (delimiter) =>
+  fmap(string, (s) => s.split(delimiter)[0]);
