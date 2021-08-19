@@ -44,7 +44,7 @@ async function repository(
 export class DiscoursePlugin implements Plugin {
   id: PluginId = pluginIdFromString("sourcecred/discourse");
 
-  declaration(): PluginDeclaration {
+  async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }
 

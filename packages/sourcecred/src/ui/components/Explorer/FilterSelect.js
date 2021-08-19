@@ -12,10 +12,7 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import {makeStyles} from "@material-ui/core/styles";
 import {type NodeAddressT} from "../../../core/graph";
-import {
-  type PluginDeclaration,
-  type PluginDeclarations,
-} from "../../../analysis/pluginDeclaration";
+import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 
 const styles = makeStyles(() => ({
   menuHeader: {fontWeight: "bold"},
@@ -41,7 +38,7 @@ const FilterSelect = ({
   filterState,
   setFilterState,
 }: {
-  pluginDeclarations: PluginDeclarations,
+  pluginDeclarations: $ReadOnlyArray<PluginDeclaration>,
   filterState: FilterState,
   setFilterState: (FilterState) => void,
 }): ReactNode => {

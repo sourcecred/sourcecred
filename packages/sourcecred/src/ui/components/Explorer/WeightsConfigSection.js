@@ -2,14 +2,14 @@
 import React, {type Node as ReactNode} from "react";
 import {Grid} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {type PluginDeclarations} from "../../../analysis/pluginDeclaration";
+import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 import {type WeightsT} from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
 
 export type WeightConfigSectionProps = {|
   show: boolean,
-  pluginDeclarations: PluginDeclarations,
+  pluginDeclarations: $ReadOnlyArray<PluginDeclaration>,
   weights: WeightsT,
   setWeightsState: ({weights: WeightsT}) => void,
 |};

@@ -22,17 +22,15 @@ export type PluginDeclaration = {|
   +userTypes: $ReadOnlyArray<NodeType>,
 |};
 
-export type PluginDeclarations = $ReadOnlyArray<PluginDeclaration>;
-
-export function toJSON(decs: PluginDeclarations): PluginDeclarationsJSON {
-  return toCompat(COMPAT_INFO, decs);
+export function toJSON(dec: PluginDeclaration): PluginDeclarationJSON {
+  return toCompat(COMPAT_INFO, dec);
 }
 
-export function fromJSON(json: PluginDeclarationsJSON): PluginDeclarations {
+export function fromJSON(json: PluginDeclarationJSON): PluginDeclaration {
   return fromCompat(COMPAT_INFO, json);
 }
 
-export type PluginDeclarationsJSON = Compatible<PluginDeclarations>;
+export type PluginDeclarationJSON = Compatible<PluginDeclaration>;
 
 export function combineTypes(
   decs: $ReadOnlyArray<PluginDeclaration>

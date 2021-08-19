@@ -17,7 +17,8 @@ import {
   timestampISOParser,
 } from "../util/timestamp";
 import * as C from "../util/combo";
-import {bundledDeclarations} from "./bundledDeclarations";
+import {getPluginDeclaration} from "./bundledDeclarations";
+import {DataStorage} from "../core/storage";
 
 /**
  * This module contains logic for setting Cred minting budgets over time on a per-plugin basis.
@@ -55,7 +56,7 @@ const rawPeriodParser: C.Parser<RawBudgetPeriod> = C.object({
   budget: C.number,
 });
 
-const rawParser: C.Parser<RawPluginBudgetConfig> = C.object({
+export const rawParser: C.Parser<RawPluginBudgetConfig> = C.object({
   intervalLength: intervalLengthParser,
   plugins: C.dict(C.array(rawPeriodParser), pluginIdParser),
 });
@@ -64,18 +65,21 @@ function upgradeRawPeriod(p: RawBudgetPeriod): BudgetPeriod {
   return {budgetValue: p.budget, startTimeMs: fromISO(p.startTime)};
 }
 
-function upgrade(config: RawPluginBudgetConfig): Budget {
-  const entries = Object.keys(config.plugins).map((key) => {
-    const id = pluginIdFromString(key);
-    const declaration = bundledDeclarations()[id];
-    if (id == null) {
-      throw new Error(`No available plugin with id ${id}`);
-    }
-    const prefix = declaration.nodePrefix;
-    const periods = config.plugins[id].map(upgradeRawPeriod);
-    return {prefix, periods};
-  });
+export async function upgrade(
+  config: RawPluginBudgetConfig,
+  storage: DataStorage
+): Promise<Budget> {
+  const entries = await Promise.all(
+    Object.keys(config.plugins).map(async (key) => {
+      const id = pluginIdFromString(key);
+      const declaration = await getPluginDeclaration(id, storage);
+      if (id == null) {
+        throw new Error(`No available plugin with id ${id}`);
+      }
+      const prefix = declaration.nodePrefix;
+      const periods = config.plugins[id].map(upgradeRawPeriod);
+      return {prefix, periods};
+    })
+  );
   return {entries, intervalLength: config.intervalLength};
 }
-
-export const parser: C.Parser<Budget> = C.fmap(rawParser, upgrade);

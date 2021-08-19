@@ -9,7 +9,7 @@ import type {IdentityProposal} from "../core/ledger/identityProposal";
 
 export interface Plugin {
   +id: PluginId;
-  declaration(): PluginDeclaration;
+  declaration(): Promise<PluginDeclaration>;
   load(PluginDirectoryContext, TaskReporter): Promise<void>;
   graph(
     PluginDirectoryContext,

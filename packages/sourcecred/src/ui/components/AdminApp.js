@@ -22,7 +22,7 @@ import AppBar from "./AppBar";
 import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
 import {LedgerViewer} from "./LedgerViewer/LedgerViewer";
-import {type PluginDeclarations} from "../../analysis/pluginDeclaration";
+import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type WeightsT} from "../../core/weights";
 import {Web3ContextProvider} from "../utils/Web3Context";
 import {MuiPickersUtilsProvider} from "@material-ui/pickers";
@@ -98,7 +98,7 @@ const customRoutes = (
   hasBackend: boolean,
   currency: CurrencyDetails,
   credGrainView: CredGrainView | null,
-  pluginDeclarations: PluginDeclarations,
+  pluginDeclarations: $ReadOnlyArray<PluginDeclaration>,
   isDev: boolean,
   weights: WeightsT
 ) => {

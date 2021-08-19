@@ -85,7 +85,10 @@ export async function load(): Promise<LoadResult> {
         error: `Error processing ledger events: ${ledgerResult.error}`,
       };
     }
-    const bundledPlugins = upgradeRawInstanceConfig(rawInstanceConfig);
+    const bundledPlugins = await upgradeRawInstanceConfig(
+      rawInstanceConfig,
+      originStorage
+    );
     const isDev = new URLSearchParams(location.search).get("dev") === "true";
     return {
       type: "SUCCESS",

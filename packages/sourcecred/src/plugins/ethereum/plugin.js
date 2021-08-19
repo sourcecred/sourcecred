@@ -29,7 +29,7 @@ async function loadEthJson(ctx: PluginDirectoryContext) {
 export class EthereumPlugin implements Plugin {
   id: PluginId = pluginIdFromString("sourcecred/ethereum");
 
-  declaration(): PluginDeclaration {
+  async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }
 
