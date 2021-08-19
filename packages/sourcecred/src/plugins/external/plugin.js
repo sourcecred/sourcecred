@@ -7,7 +7,7 @@ import {
   fromJSON as declarationFromJSON,
 } from "../../analysis/pluginDeclaration";
 import {join as pathJoin} from "path";
-import {type TaskReporter} from "../../util/taskReporter";
+import type {TaskReporter} from "../../util/taskReporter";
 import type {ReferenceDetector} from "../../core/references";
 import {
   type WeightedGraph,
@@ -17,14 +17,14 @@ import {
 import {loadJson, loadJsonWithDefault} from "../../util/storage";
 import {merge as mergeWeights} from "../../core/weights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
-import {type PluginId} from "../../api/pluginId";
+import type {PluginId} from "../../api/pluginId";
 import {ZipStorage} from "../../core/storage/zip";
 import {
   type IdentityProposal,
   identityProposalsParser,
 } from "../../core/ledger/identityProposal";
 import * as Combo from "../../util/combo";
-import {type DataStorage} from "../../core/storage";
+import type {DataStorage} from "../../core/storage";
 import {NetworkStorage} from "../../core/storage/networkStorage";
 import {declaration as defaultDeclaration} from "./defaultDeclaration";
 import * as C from "../../util/combo";
