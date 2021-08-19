@@ -441,16 +441,22 @@ describe("core/ledger/grainAllocation", () => {
         done();
       });
 
-      it("distributes the budget to the stated recipient", () => {
+      it("computeAllocation distributes the budget to the stated recipient", async () => {
         const i1 = aid(0, [1]);
+        const credGraph2 = await GraphUtil.credGraph2();
+        const ledger = ledgerWithActiveIdentities(id3, id4);
+        const credGrainView = CredGrainView.fromCredGraphAndLedger(
+          credGraph2,
+          ledger
+        );
         const policy = {
           policyType: "SPECIAL",
           budget: nng(100),
           memo: "something",
-          recipient: i1.id,
+          recipient: id3,
         };
         const allocation = computeAllocation(policy, [i1], credGrainView, 0);
-        const expectedReceipts = [{id: i1.id, amount: nng(100)}];
+        const expectedReceipts = [{id: id3, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
           id: uuidParser.parseOrThrow(allocation.id),
@@ -474,16 +480,21 @@ describe("core/ledger/grainAllocation", () => {
 
       //Test ComputeAllocationSpecial function
 
-      it("distributes the budget to the stated recipient", () => {
-        const i1 = aid(0, [1]);
+      it("computeAllocationSpecial distributes the budget to the stated recipient", async () => {
+        const credGraph2 = await GraphUtil.credGraph2();
+        const ledger = ledgerWithActiveIdentities(id3, id4);
+        const credGrainView = CredGrainView.fromCredGraphAndLedger(
+          credGraph2,
+          ledger
+        );
         const policy = {
           policyType: "SPECIAL",
           budget: nng(100),
           memo: "something",
-          recipient: i1.id,
+          recipient: id3,
         };
-        const allocation = computeAllocationSpecial(policy, [i1]);
-        const expectedReceipts = [{id: i1.id, amount: nng(100)}];
+        const allocation = computeAllocationSpecial(policy, credGrainView);
+        const expectedReceipts = [{id: id3, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
           id: uuidParser.parseOrThrow(allocation.id),
@@ -491,16 +502,20 @@ describe("core/ledger/grainAllocation", () => {
         };
         expect(allocation).toEqual(expectedAllocation);
       });
-      it("errors if the recipient is not available", () => {
-        const {id} = aid(0, [1]);
-        const other = aid(0, [1]);
+      it("errors if the recipient is not available", async () => {
+        const credGraph = await GraphUtil.credGraph2();
+        const ledger = ledgerWithActiveIdentities(id3, id4);
+        const credGrainView = CredGrainView.fromCredGraphAndLedger(
+          credGraph,
+          ledger
+        );
         const policy = {
           policyType: "SPECIAL",
           budget: nng(100),
           memo: "something",
-          recipient: id,
+          recipient: uuid.random(),
         };
-        const thunk = () => computeAllocationSpecial(policy, [other]);
+        const thunk = () => computeAllocationSpecial(policy, credGrainView);
         expect(thunk).toThrowError("no active grain account for identity");
       });
     });

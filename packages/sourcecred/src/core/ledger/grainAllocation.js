@@ -68,17 +68,15 @@ export function computeAllocation(
   });
 }
 
-/* This is a simplified case that should not require a credGrainView */
 export function computeAllocationSpecial(
   policy: AllocationPolicy,
-  identities: $ReadOnlyArray<AllocationIdentity>
+  credGrainView: CredGrainView
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
-  const processedIdentities = processIdentities(identities);
   if (validatedPolicy.policyType === "SPECIAL") {
     return _validateAllocationBudget({
       policy,
-      receipts: specialReceipts(validatedPolicy, processedIdentities),
+      receipts: specialReceipts(validatedPolicy, credGrainView),
       id: randomUuid(),
     });
   } else {
@@ -121,7 +119,7 @@ function receipts(
     case "BALANCED":
       return balancedReceipts(policy, credGrainView, effectiveTimestamp);
     case "SPECIAL":
-      return specialReceipts(policy, identities);
+      return specialReceipts(policy, credGrainView);
     // istanbul ignore next: unreachable per Flow
     default:
       throw new Error(`Unknown policyType: ${(policy.policyType: empty)}`);

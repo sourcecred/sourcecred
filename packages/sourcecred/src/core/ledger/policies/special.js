@@ -2,10 +2,10 @@
 
 import {parser as uuidParser} from "../../../util/uuid";
 import * as P from "../../../util/combo";
-import {type IdentityId} from "../../identity";
+import type {IdentityId} from "../../identity";
 import * as G from "../grain";
-import {type GrainReceipt} from "../grainAllocation";
-import {type ProcessedIdentities} from "../processedIdentities";
+import type {GrainReceipt} from "../grainAllocation";
+import type {CredGrainView} from "../../../core/credGrainView";
 import {
   type NonnegativeGrain,
   grainParser,
@@ -28,33 +28,51 @@ export type SpecialPolicy = {|
   +budget: NonnegativeGrain,
   +memo: string,
   +recipient: IdentityId,
+  +ignoreActiveStatus?: boolean,
 |};
 
 export function specialReceipts(
   policy: SpecialPolicy,
-  identities: ProcessedIdentities
+  credGrainView: CredGrainView
 ): $ReadOnlyArray<GrainReceipt> {
-  for (const {id} of identities) {
-    if (id === policy.recipient) {
-      return [{id, amount: policy.budget}];
+  const identities = policy.ignoreActiveStatus
+    ? credGrainView.participants()
+    : credGrainView.activeParticipants();
+  for (const {identity} of identities) {
+    if (identity.id === policy.recipient) {
+      return [{id: identity.id, amount: policy.budget}];
     }
   }
-  throw new Error(`no active grain account for identity: ${policy.recipient}`);
+  throw new Error(
+    `no ${
+      policy.ignoreActiveStatus ? "" : "active "
+    }grain account for identity: ${policy.recipient}`
+  );
 }
 
-export const specialConfigParser: P.Parser<SpecialPolicy> = P.object({
-  policyType: P.exactly(["SPECIAL"]),
-  budget: numberOrFloatStringParser,
-  memo: P.string,
-  recipient: uuidParser,
-});
+export const specialConfigParser: P.Parser<SpecialPolicy> = P.object(
+  {
+    policyType: P.exactly(["SPECIAL"]),
+    budget: numberOrFloatStringParser,
+    memo: P.string,
+    recipient: uuidParser,
+  },
+  {
+    ignoreActiveStatus: P.boolean,
+  }
+);
 
-export const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
-  policyType: P.exactly(["SPECIAL"]),
-  budget: grainParser,
-  memo: P.string,
-  recipient: uuidParser,
-});
+export const specialPolicyParser: P.Parser<SpecialPolicy> = P.object(
+  {
+    policyType: P.exactly(["SPECIAL"]),
+    budget: grainParser,
+    memo: P.string,
+    recipient: uuidParser,
+  },
+  {
+    ignoreActiveStatus: P.boolean,
+  }
+);
 
 export function toString(policy: SpecialPolicy): string {
   return [
@@ -62,5 +80,6 @@ export function toString(policy: SpecialPolicy): string {
     "Budget " + G.format(policy.budget, 3),
     "Memo: " + policy.memo,
     "Recepient: " + policy.recipient,
+    "IgnoreActiveStatus: " + (policy.ignoreActiveStatus?.toString() || "false"),
   ].join(`\n`);
 }

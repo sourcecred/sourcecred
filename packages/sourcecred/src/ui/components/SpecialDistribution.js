@@ -4,10 +4,11 @@ import {Button, Container, TextField} from "@material-ui/core";
 import {Alert} from "@material-ui/lab";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, fromFloatString, lt, ZERO} from "../../core/ledger/grain";
-import {type Account} from "../../core/ledger/ledger";
-import {type CurrencyDetails} from "../../api/currencyConfig";
+import type {Account} from "../../core/ledger/ledger";
+import type {CurrencyDetails} from "../../api/currencyConfig";
 import AccountDropdown from "./AccountSelector";
 import {computeAllocationSpecial} from "../../core/ledger/grainAllocation";
+import type {CredGrainView} from "../../core/credGrainView";
 import * as uuid from "../../util/uuid";
 import type {TimestampMs} from "../../util/timestamp";
 import {useLedger} from "../utils/LedgerContext";
@@ -50,11 +51,24 @@ const useStyles = makeStyles((theme) => ({
   headerText: {color: theme.palette.text.primary},
 }));
 
-type SpecialDistributionProps = {|+currency: CurrencyDetails|};
+type SpecialDistributionProps = {|
+  +currency: CurrencyDetails,
+  +credGrainView: CredGrainView | null,
+|};
 
 export const SpecialDistribution = ({
   currency: {name: currencyName},
+  credGrainView,
 }: SpecialDistributionProps): ReactNode => {
+  if (!credGrainView)
+    return (
+      <div className={useStyles.root}>
+        <p>
+          This page is unavailable because Cred information was unable to load.
+          Calculate cred through the CLI in order to use this page.
+        </p>
+      </div>
+    );
   const {ledger, updateLedger, saveToDisk} = useLedger();
 
   const classes = useStyles();
@@ -72,9 +86,7 @@ export const SpecialDistribution = ({
         memo,
         recipient: recipient.identity.id,
       };
-      const allocation = computeAllocationSpecial(policy, [
-        {cred: [1], paid: ZERO, id: recipient.identity.id},
-      ]);
+      const allocation = computeAllocationSpecial(policy, credGrainView);
       const distribution = {
         id: uuid.random(),
         credTimestamp,

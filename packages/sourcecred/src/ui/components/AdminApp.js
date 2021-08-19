@@ -131,7 +131,10 @@ const customRoutes = (
           <Transfer currency={currency} />
         </Route>,
         <Route key="special-distribution" exact path="/special-distribution">
-          <SpecialDistribution currency={currency} />
+          <SpecialDistribution
+            currency={currency}
+            credGrainView={credGrainView}
+          />
         </Route>,
         <Route key="weight-config" exact path="/weight-config">
           <WeightsConfigSection

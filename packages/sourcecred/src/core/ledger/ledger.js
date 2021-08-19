@@ -583,7 +583,7 @@ export class Ledger {
     if (!parseResult.ok) {
       throw new Error(`invalid distribution: ${parseResult.err}`);
     }
-    for (const {receipts} of distribution.allocations) {
+    for (const {receipts, policy} of distribution.allocations) {
       for (const {id, amount} of receipts) {
         if (!this._accounts.has(id)) {
           throw new Error(`cannot distribute; invalid id ${id}`);
@@ -592,7 +592,7 @@ export class Ledger {
           throw new Error(`negative Grain amount: ${amount}`);
         }
         const {active} = this.account(id);
-        if (!active) {
+        if (!active && !policy.ignoreActiveStatus) {
           throw new Error(`attempt to distribute to inactive account: ${id}`);
         }
       }
