@@ -113,7 +113,10 @@ export const serializedWeightsConfigParser: C.Parser<SerializedWeightsConfig> = 
   {
     defaultCategoryWeight: C.number,
     defaultTagWeight: C.number,
-    categoryWeights: C.dict(C.number, C.fmap(C.string, parseCategoryId)),
+    categoryWeights: C.dict(
+      C.number,
+      C.fmap(C.delimited("//"), parseCategoryId)
+    ),
     tagWeights: C.dict(C.number, C.fmap(C.string, parseTagId)),
   }
 );

@@ -86,11 +86,11 @@ const parserJson: C.Parser<DiscordConfigJson> = C.array(
     {
       roleWeightConfig: C.object({
         defaultWeight: C.number,
-        weights: C.dict(C.number),
+        weights: C.dict(C.number, C.delimited("//")),
       }),
       channelWeightConfig: C.object({
         defaultWeight: C.number,
-        weights: C.dict(C.number),
+        weights: C.dict(C.number, C.delimited("//")),
       }),
       propsChannels: C.array(C.string),
       includeNsfwChannels: C.boolean,
