@@ -131,8 +131,12 @@ export class CredGrainView {
   }
 
   validateForGrainAllocation() {
-    this.activeParticipants().map((p) => {
-      p.credPerInterval.map((c) => {
+    if (this.activeParticipants().length === 0) {
+      throw new Error(`must have at least one identity to allocate grain to`);
+    }
+
+    this.activeParticipants().forEach((p) => {
+      p.credPerInterval.forEach((c) => {
         if (typeof c !== "number") {
           throw new Error(`Non numeric cred value found`);
         }
@@ -141,60 +145,44 @@ export class CredGrainView {
       if (typeof p.cred !== "number") {
         throw new Error(`Non numeric cred value found`);
       }
-    });
 
-    this.activeParticipants().map((p) => {
       if (p.credPerInterval.length !== this.intervals().length) {
         throw new Error(`participant cred per interval length mismatch`);
       }
-    });
 
-    this.activeParticipants().map((p) => {
       if (p.grainEarnedPerInterval.length !== this.intervals().length) {
         throw new Error(`participant grain per interval length mismatch`);
       }
-    });
 
-    if (this.activeParticipants().length === 0) {
-      throw new Error(`must have at least one identity to allocate grain to`);
-    }
-
-    this.activeParticipants().map((p) => {
       if (sum(p.credPerInterval) !== p.cred) {
         throw new Error(
           `participant cred per interval mismatched with participant cred total`
         );
       }
-    });
 
-    if (sum(this.totalCredPerInterval()) < 1)
-      throw new Error(
-        "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
-      );
-
-    this.activeParticipants().map((p) => {
       if (!G.eq(G.sum(p.grainEarnedPerInterval), p.grainEarned)) {
         throw new Error(
           `participant grain per interval mismatched with participant grain total:`
         );
       }
-    });
 
-    this.activeParticipants().map((p) => {
       p.grainEarnedPerInterval.map((g) => {
         if (g < G.ZERO) {
           throw new Error(`negative grain paid in interval data`);
         }
       });
-    });
 
-    this.activeParticipants().map((p) => {
       p.credPerInterval.map((c) => {
         if (c < 0) {
           throw new Error(`negative cred in interval data`);
         }
       });
     });
+
+    if (sum(this.totalCredPerInterval()) < 1)
+      throw new Error(
+        "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
+      );
   }
 
   withTimeScope(
