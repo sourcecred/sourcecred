@@ -690,7 +690,7 @@ describe("core/credGrainView", () => {
       )
     );
 
-    it("negative grain", () => {
+    it("negative cred", () => {
       expect(() =>
         credGrainViewNegativeCred.validateForGrainAllocation()
       ).toThrow("negative cred in interval data");
