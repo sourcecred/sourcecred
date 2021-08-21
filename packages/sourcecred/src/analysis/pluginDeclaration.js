@@ -1,12 +1,16 @@
 // @flow
 
-import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
+import {
+  type NodeAddressT,
+  type EdgeAddressT,
+  NodeAddress,
+  EdgeAddress,
+} from "../core/graph";
 import type {EdgeType, NodeType, NodeAndEdgeTypes} from "./types";
+import {nodeTypeParser, edgeTypeParser} from "./types";
 import * as Weights from "../core/weights";
 import {type WeightsT} from "../core/weights";
-import {toCompat, fromCompat, type Compatible} from "../util/compat";
-
-const COMPAT_INFO = {type: "sourcecred/pluginDeclarations", version: "0.1.0"};
+import * as C from "../util/combo";
 
 // TODO(@decentralion): Maybe merge this file with analysis/types
 
@@ -17,20 +21,18 @@ export type PluginDeclaration = {|
   +nodeTypes: $ReadOnlyArray<NodeType>,
   +edgeTypes: $ReadOnlyArray<EdgeType>,
   // Which node types represent user identities.
-  // This is vestigial, as now all users are automatically made into Identities.
-  // It will be removed in the future.
+  // This is used to exclude user node types from the weight configuration UI
   +userTypes: $ReadOnlyArray<NodeType>,
 |};
 
-export function toJSON(dec: PluginDeclaration): PluginDeclarationJSON {
-  return toCompat(COMPAT_INFO, dec);
-}
-
-export function fromJSON(json: PluginDeclarationJSON): PluginDeclaration {
-  return fromCompat(COMPAT_INFO, json);
-}
-
-export type PluginDeclarationJSON = Compatible<PluginDeclaration>;
+export const declarationParser: C.Parser<PluginDeclaration> = C.object({
+  name: C.string,
+  nodePrefix: NodeAddress.parser,
+  edgePrefix: EdgeAddress.parser,
+  nodeTypes: C.array(nodeTypeParser),
+  edgeTypes: C.array(edgeTypeParser),
+  userTypes: C.array(nodeTypeParser),
+});
 
 export function combineTypes(
   decs: $ReadOnlyArray<PluginDeclaration>

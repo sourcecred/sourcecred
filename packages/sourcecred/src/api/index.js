@@ -16,6 +16,8 @@ import * as githubEdges from "../plugins/github/edges";
 import * as githubNodes from "../plugins/github/nodes";
 import * as ethereumDeclaration from "../plugins/ethereum/declaration";
 import * as ethereumUtils from "../plugins/ethereum/utils";
+import {declarationParser} from "../analysis/pluginDeclaration";
+import {identityProposalsParser} from "../core/ledger/identityProposal";
 
 import * as address from "../core/address";
 import * as graph from "../core/graph";
@@ -87,6 +89,8 @@ const api = {
     initiatives: {
       declaration: initiativesDeclaration,
     },
+    declarationParser,
+    identityProposalsParser,
   },
 };
 
