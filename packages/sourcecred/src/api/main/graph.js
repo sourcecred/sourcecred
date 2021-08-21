@@ -33,7 +33,7 @@ export type GraphOutput = {|
  */
 export async function graph(
   input: GraphInput,
-  scope: $ReadOnlyArray<PluginId>,
+  scope?: $ReadOnlyArray<PluginId>,
   taskReporter: TaskReporter = new SilentTaskReporter()
 ): Promise<GraphOutput> {
   // Build Reference Detector
@@ -50,7 +50,7 @@ export async function graph(
   // Build graphs
   const pluginGraphs = [];
   for (const {plugin, directoryContext} of input.plugins) {
-    if (scope.includes(plugin.id)) {
+    if (!scope || scope.includes(plugin.id)) {
       const task = `generating graph for ${plugin.id}`;
       taskReporter.start(task);
       pluginGraphs.push({

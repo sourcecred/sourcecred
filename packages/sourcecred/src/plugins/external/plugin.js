@@ -12,6 +12,7 @@ import {
   type WeightedGraph,
   fromJSON as weightedGraphFromJSON,
   type WeightedGraphJSON,
+  empty as emptyWeightedGraph,
 } from "../../core/weightedGraph";
 import {loadJson, loadJsonWithDefault} from "../../util/storage";
 import {merge as mergeWeights} from "../../core/weights";
@@ -54,6 +55,34 @@ const configParser: C.Parser<ExternalPluginConfig> = C.object(
   }
 );
 
+/**
+A dynamic plugin that allows 3rd parties to rapidly pipe data into an instance.
+
+The External plugin can be used multiple times, because it simply uses the 
+PluginId pattern "external/X" where X can be any name (but preferably an agreed 
+upon name between the 3rd-party software and the instance maintainer).
+
+The External plugin loads its graph and optionally its declaration and 
+identityProposals from either:
+1. the plugin config folder on disk
+    - To use this method, simply place the files into the 
+      `config/plugins/external/X` folder.
+2. a base url that statically serves the files
+    - To use this method, simply serve the files statically with cross-origin 
+      enabled in the same directory, and add a `config.json` file in the 
+      instance's `config/plugins/external/X` folder with form: 
+      `{ "Url": "https://www.myhost.com/path/to/directory" }`
+
+Supported files for either method are:
+1. `graph.json`/`graph.json.gzip` (required) - works whether or not it is 
+    compressed using our library
+2. `declaration.json` (optional) - if omitted, a default declaration with
+    minimal node/edge types is used, but also graphs don't have to adhere to the
+    declaration if they don't desire to be configured using our 
+    Weight Configuration UI.
+3. `identityProposals.json` (optional) - if omitted, no identities are proposed
+
+*/
 export class ExternalPlugin implements Plugin {
   id: PluginId;
   storage: ?DataStorage;
@@ -198,5 +227,57 @@ export class ExternalPlugin implements Plugin {
           () => []
         )
       : [];
+  }
+}
+
+/**
+A way for 3rd-party developers to easily test their External Plugin by piping
+its data into our `graph` api.
+ */
+export class ConstructorPlugin {
+  _weightedGraph: WeightedGraph;
+  _identityProposals: $ReadOnlyArray<IdentityProposal>;
+  _declaration: PluginDeclaration;
+
+  constructor(options: {|
+    +weightedGraph?: WeightedGraph,
+    +identityProposals?: $ReadOnlyArray<IdentityProposal>,
+    +declaration?: PluginDeclaration,
+    +pluginId?: PluginId,
+  |}) {
+    this._weightedGraph = options.weightedGraph || emptyWeightedGraph();
+    this._identityProposals = options.identityProposals || [];
+    if (options.declaration) this._declaration = options.declaration;
+    else if (options.pluginId)
+      this._declaration = defaultDeclaration(options.pluginId);
+    else throw new Error("Must provide either a declaration or a pluginId");
+  }
+
+  async declaration(): Promise<PluginDeclaration> {
+    return this._declaration;
+  }
+
+  async load(
+    _unused_ctx: PluginDirectoryContext,
+    _unused_reporter: TaskReporter
+  ): Promise<void> {}
+
+  async graph(
+    _unused_ctx: PluginDirectoryContext,
+    _unused_rd: ReferenceDetector
+  ): Promise<WeightedGraph> {
+    return this._weightedGraph;
+  }
+
+  async referenceDetector(
+    _unused_ctx: PluginDirectoryContext
+  ): Promise<ReferenceDetector> {
+    return {addressFromUrl: () => undefined};
+  }
+
+  async identities(
+    _unused_ctx: PluginDirectoryContext
+  ): Promise<$ReadOnlyArray<IdentityProposal>> {
+    return this._identityProposals;
   }
 }
