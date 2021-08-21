@@ -166,13 +166,13 @@ export class CredGrainView {
         );
       }
 
-      p.grainEarnedPerInterval.map((g) => {
+      p.grainEarnedPerInterval.forEach((g) => {
         if (g < G.ZERO) {
           throw new Error(`negative grain paid in interval data`);
         }
       });
 
-      p.credPerInterval.map((c) => {
+      p.credPerInterval.forEach((c) => {
         if (c < 0) {
           throw new Error(`negative cred in interval data`);
         }
