@@ -140,6 +140,9 @@ export class CredGrainView {
         if (typeof c !== "number") {
           throw new Error(`Non numeric cred value found`);
         }
+        if (c < 0) {
+          throw new Error(`negative cred in interval data`);
+        }
       });
 
       if (typeof p.cred !== "number") {
@@ -169,12 +172,6 @@ export class CredGrainView {
       p.grainEarnedPerInterval.forEach((g) => {
         if (g < G.ZERO) {
           throw new Error(`negative grain paid in interval data`);
-        }
-      });
-
-      p.credPerInterval.forEach((c) => {
-        if (c < 0) {
-          throw new Error(`negative cred in interval data`);
         }
       });
     });
