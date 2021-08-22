@@ -15,7 +15,7 @@ import {
   random as randomUuid,
   parser as uuidParser,
 } from "../../util/uuid";
-import {type IdentityId} from "../identity";
+import {type IdentityId, type Identity} from "../identity";
 import {
   type AllocationPolicy,
   allocationPolicyParser,
@@ -24,10 +24,6 @@ import {
   recentReceipts,
   specialReceipts,
 } from "./policies";
-import {
-  type ProcessedIdentities,
-  processIdentities,
-} from "./processedIdentities";
 
 export type AllocationId = Uuid;
 
@@ -42,28 +38,16 @@ export type Allocation = {|
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
-export type AllocationIdentity = {|
-  +cred: $ReadOnlyArray<number>,
-  +paid: G.Grain,
-  +id: IdentityId,
-|};
-
 export function computeAllocation(
   policy: AllocationPolicy,
-  identities: $ReadOnlyArray<AllocationIdentity>,
   credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
-  const processedIdentities = processIdentities(identities);
+  credGrainView.validateForGrainAllocation();
   return _validateAllocationBudget({
     policy,
-    receipts: receipts(
-      validatedPolicy,
-      processedIdentities,
-      credGrainView,
-      effectiveTimestamp
-    ),
+    receipts: receipts(validatedPolicy, credGrainView, effectiveTimestamp),
     id: randomUuid(),
   });
 }
@@ -71,14 +55,13 @@ export function computeAllocation(
 /* This is a simplified case that should not require a credGrainView */
 export function computeAllocationSpecial(
   policy: AllocationPolicy,
-  identities: $ReadOnlyArray<AllocationIdentity>
+  identities: $ReadOnlyArray<Identity>
 ): Allocation {
   const validatedPolicy = _validatePolicy(policy);
-  const processedIdentities = processIdentities(identities);
   if (validatedPolicy.policyType === "SPECIAL") {
     return _validateAllocationBudget({
       policy,
-      receipts: specialReceipts(validatedPolicy, processedIdentities),
+      receipts: specialReceipts(validatedPolicy, identities),
       id: randomUuid(),
     });
   } else {
@@ -109,7 +92,6 @@ export function _validateAllocationBudget(a: Allocation): Allocation {
 
 function receipts(
   policy: AllocationPolicy,
-  identities: ProcessedIdentities,
   credGrainView: CredGrainView,
   effectiveTimestamp: TimestampMs
 ): $ReadOnlyArray<GrainReceipt> {
@@ -117,10 +99,13 @@ function receipts(
     case "IMMEDIATE":
       return immediateReceipts(policy, credGrainView, effectiveTimestamp);
     case "RECENT":
-      return recentReceipts(policy.budget, identities, policy.discount);
+      return recentReceipts(policy, credGrainView, effectiveTimestamp);
     case "BALANCED":
       return balancedReceipts(policy, credGrainView, effectiveTimestamp);
     case "SPECIAL":
+      const identities = credGrainView
+        .activeParticipants()
+        .map((participant) => participant.identity);
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow
     default:

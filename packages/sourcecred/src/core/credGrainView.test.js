@@ -499,4 +499,201 @@ describe("core/credGrainView", () => {
       ).toThrow("The graph is missing account");
     });
   });
+
+  describe("validation tests", () => {
+    const credGrainViewNoCred = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA", "subtype":"USER",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+      "name":"steven","aliases":[]},"cred":0,"credPerInterval":[0,0],"grainEarned":"23",\
+      "grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
+      "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
+      "name":"crystal-gems","aliases":[]},"cred":0,"credPerInterval":[0,0],"grainEarned":"27",\
+      "grainEarnedPerInterval":["17","10"]}],"intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("no cred", () => {
+      expect(() => credGrainViewNoCred.validateForGrainAllocation()).toThrow(
+        "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
+      );
+    });
+
+    const credGrainViewCredTotalMismatchedIntervals = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+      "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471486739683,\
+      2.0520521567464285],"grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,\
+      "identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ","subtype":"ORGANIZATION",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
+      "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
+      [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
+      "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("cred total mismatch", () => {
+      expect(() =>
+        credGrainViewCredTotalMismatchedIntervals.validateForGrainAllocation()
+      ).toThrow(
+        "participant cred per interval mismatched with participant cred total"
+      );
+    });
+
+    const credGrainViewNonNumericCred = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+      "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,\
+      2.0520521567464285],"grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,\
+      "identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ","subtype":"ORGANIZATION","address":\
+      "N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000","name":"crystal-gems",\
+      "aliases":[]},"cred":"foo","credPerInterval":[5.146462196976468e-20,7.719693295464702e-20],\
+      "grainEarned":"27","grainEarnedPerInterval":["17","10"]}],"intervals":[{"startTimeMs":0,"endTimeMs":2},\
+      {"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("non numeric cred", () => {
+      expect(() =>
+        credGrainViewNonNumericCred.validateForGrainAllocation()
+      ).toThrow("Non numeric cred value found");
+    });
+
+    const credGrainViewNonNumericCredInterval = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+      "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,\
+      2.0520521567464285],"grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,\
+      "identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ","subtype":"ORGANIZATION","address":\
+      "N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000","name":"crystal-gems",\
+      "aliases":[]},"cred":"20","credPerInterval":["20","bar"],\
+      "grainEarned":"27","grainEarnedPerInterval":["17","10"]}],"intervals":[{"startTimeMs":0,"endTimeMs":2},\
+      {"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("non numeric cred interval", () => {
+      expect(() =>
+        credGrainViewNonNumericCredInterval.validateForGrainAllocation()
+      ).toThrow("Non numeric cred value found");
+    });
+
+    const credGrainViewCredIntervalsLengthMismatch = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+      "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605],\
+      "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":\
+      {"id":"URgLrCxgvjHxtGJ9PgmckQ","subtype":"ORGANIZATION","address":\
+      "N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000","name":\
+      "crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
+      [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
+      "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("cred interval length mismatch", () => {
+      expect(() =>
+        credGrainViewCredIntervalsLengthMismatch.validateForGrainAllocation()
+      ).toThrow("participant cred per interval length mismatch");
+    });
+
+    const credGrainViewGrainIntervalsLengthMismatch = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER","address"\
+      :"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000","name":"steven","aliases":[]}\
+      ,"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],"grainEarned":"23",\
+      "grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
+      "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000"\
+      ,"name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
+      [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["10"]}],\
+      "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("grain interval length mismatch", () => {
+      expect(() =>
+        credGrainViewGrainIntervalsLengthMismatch.validateForGrainAllocation()
+      ).toThrow("participant grain per interval length mismatch");
+    });
+
+    const credGrainViewGrainTotalMismatchWithIntervals = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER","address"\
+      :"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000","name":"steven","aliases":[]},\
+      "cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],"grainEarned":"23",\
+      "grainEarnedPerInterval":["12","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
+      "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
+      "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
+      [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
+      "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("grain total mismatch with grain intervals", () => {
+      expect(() =>
+        credGrainViewGrainTotalMismatchWithIntervals.validateForGrainAllocation()
+      ).toThrow(
+        "participant grain per interval mismatched with participant grain total"
+      );
+    });
+
+    it("grain non numeric", () => {
+      expect(() =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+          "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+          "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],\
+          "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
+          "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
+          "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
+          [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","bar"]}],\
+          "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+          )
+        )
+      ).toThrow("Invalid integer: bar");
+    });
+
+    const credGrainViewNegativeGrain = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+      "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],\
+      "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
+      "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
+      "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
+      [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"15","grainEarnedPerInterval":["17","-2"]}],\
+      "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("negative grain", () => {
+      expect(() =>
+        credGrainViewNegativeGrain.validateForGrainAllocation()
+      ).toThrow("negative grain paid in interval data");
+    });
+
+    const credGrainViewNegativeCred = CredGrainView.fromJSON(
+      JSON.parse(
+        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+      "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+      "name":"steven","aliases":[]},"cred":1.104104975527668,"credPerInterval":[-0.9479471812187605,2.0520521567464285],\
+      "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
+      "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
+      "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
+      [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
+      "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
+      )
+    );
+
+    it("negative cred", () => {
+      expect(() =>
+        credGrainViewNegativeCred.validateForGrainAllocation()
+      ).toThrow("negative cred in interval data");
+    });
+  });
 });

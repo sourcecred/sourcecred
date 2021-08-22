@@ -1,5 +1,4 @@
 // @flow
-
 import {sum} from "d3-array";
 import * as G from "../grain";
 import * as P from "../../../util/combo";

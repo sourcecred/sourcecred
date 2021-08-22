@@ -307,6 +307,7 @@ export function splitBudget(
   if (lt(budget, ZERO)) {
     throw new Error("negative budget");
   }
+
   const totalScore = scores.reduce((a, b) => a + b, 0);
   if (!isFinite(totalScore)) {
     throw new Error(`scores must all be finite, got: ${totalScore}`);

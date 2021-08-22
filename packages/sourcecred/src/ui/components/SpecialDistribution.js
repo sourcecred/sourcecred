@@ -72,9 +72,7 @@ export const SpecialDistribution = ({
         memo,
         recipient: recipient.identity.id,
       };
-      const allocation = computeAllocationSpecial(policy, [
-        {cred: [1], paid: ZERO, id: recipient.identity.id},
-      ]);
+      const allocation = computeAllocationSpecial(policy, [recipient.identity]);
       const distribution = {
         id: uuid.random(),
         credTimestamp,
