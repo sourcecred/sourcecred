@@ -46,7 +46,7 @@ const graphCommand: Command = async (args, std) => {
   const instance: Instance = await new LocalInstance(baseDir);
   const graphInput = await instance.readGraphInput();
 
-  const availablePlugins = graphInput.plugins.map(({plugin}) => plugin.id);
+  const availablePlugins = graphInput.plugins.map(({pluginId}) => pluginId);
   let pluginsToLoad = [];
   if (processedArgs.length === 0) {
     pluginsToLoad = availablePlugins;

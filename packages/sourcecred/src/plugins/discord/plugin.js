@@ -20,10 +20,6 @@ import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph} from "./createGraph";
 import * as Model from "./models";
 import {SqliteMirrorRepository} from "./mirrorRepository";
-import {
-  type PluginId,
-  fromString as pluginIdFromString,
-} from "../../api/pluginId";
 import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {createIdentities} from "./createIdentities";
@@ -48,8 +44,6 @@ function getTokenFromEnv(): DiscordToken {
 }
 
 export class DiscordPlugin implements Plugin {
-  id: PluginId = pluginIdFromString("sourcecred/discord");
-
   async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }

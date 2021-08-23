@@ -15,10 +15,6 @@ import {Fetcher} from "./fetch";
 import {Mirror} from "./mirror";
 import {DiscourseReferenceDetector} from "./referenceDetector";
 import {type TaskReporter} from "../../util/taskReporter";
-import {
-  type PluginId,
-  fromString as pluginIdFromString,
-} from "../../api/pluginId";
 import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {createIdentities} from "./createIdentities";
@@ -42,8 +38,6 @@ async function repository(
 }
 
 export class DiscoursePlugin implements Plugin {
-  id: PluginId = pluginIdFromString("sourcecred/discourse");
-
   async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }
