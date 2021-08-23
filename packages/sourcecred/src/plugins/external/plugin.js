@@ -3,8 +3,7 @@
 import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import {
   type PluginDeclaration,
-  type PluginDeclarationJSON,
-  fromJSON as declarationFromJSON,
+  declarationParser,
 } from "../../analysis/pluginDeclaration";
 import {join as pathJoin} from "path";
 import type {TaskReporter} from "../../util/taskReporter";
@@ -140,11 +139,11 @@ export class ExternalPlugin implements Plugin {
       ? await loadJsonWithDefault(
           result.storage,
           result.path,
-          ((Combo.raw: any): Combo.Parser<PluginDeclarationJSON>),
+          declarationParser,
           () => null
         )
       : null;
-    return json ? declarationFromJSON(json) : defaultDeclaration(this.id);
+    return json ? json : defaultDeclaration(this.id);
   }
 
   async load(

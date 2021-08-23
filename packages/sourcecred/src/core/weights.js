@@ -27,6 +27,10 @@ export type NodeOperator = (NodeWeight, NodeWeight) => NodeWeight;
  * Weights are linear, so 2 is twice as important as 1.
  */
 export type EdgeWeight = {|+forwards: number, +backwards: number|};
+export const edgeWeightParser: C.Parser<EdgeWeight> = C.object({
+  forwards: C.number,
+  backwards: C.number,
+});
 
 export type EdgeOperator = (EdgeWeight, EdgeWeight) => EdgeWeight;
 
@@ -143,10 +147,9 @@ function deserialize_0_2_0(weights: SerializedWeights_0_2_0): WeightsT {
 }
 
 const Parse_0_2_0: C.Parser<SerializedWeights_0_2_0> = (() => {
-  const parseEdgeWeight = C.object({forwards: C.number, backwards: C.number});
   return C.object({
     nodeWeights: C.dict(C.number, NodeAddress.parser),
-    edgeWeights: C.dict(parseEdgeWeight, EdgeAddress.parser),
+    edgeWeights: C.dict(edgeWeightParser, EdgeAddress.parser),
   });
 })();
 

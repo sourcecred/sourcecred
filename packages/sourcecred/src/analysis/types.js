@@ -1,7 +1,13 @@
 // @flow
 
-import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
-import {type EdgeWeight} from "../core/weights";
+import {
+  type NodeAddressT,
+  type EdgeAddressT,
+  NodeAddress,
+  EdgeAddress,
+} from "../core/graph";
+import {type EdgeWeight, edgeWeightParser} from "../core/weights";
+import * as G from "../util/combo";
 
 /**
  * This module defines `NodeType`s and `EdgeType`s, both of which are
@@ -72,6 +78,14 @@ export type NodeType = {|
   +description: string,
 |};
 
+export const nodeTypeParser: G.Parser<NodeType> = G.object({
+  name: G.string,
+  pluralName: G.string,
+  prefix: NodeAddress.parser,
+  defaultWeight: G.number,
+  description: G.string,
+});
+
 /**
  * Represents a "Type" of edge in the graph. See the module docstring
  * for context.
@@ -118,6 +132,14 @@ export type EdgeType = {|
   // strings with clean formatting.)
   +description: string,
 |};
+
+export const edgeTypeParser: G.Parser<EdgeType> = G.object({
+  forwardName: G.string,
+  backwardName: G.string,
+  defaultWeight: edgeWeightParser,
+  prefix: EdgeAddress.parser,
+  description: G.string,
+});
 
 export type NodeAndEdgeTypes = {|
   +nodeTypes: NodeType[],

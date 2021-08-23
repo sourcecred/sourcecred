@@ -7,8 +7,7 @@ import {type NodeType, type EdgeType} from "./types";
 import {
   weightsForDeclaration,
   type PluginDeclaration,
-  toJSON,
-  fromJSON,
+  declarationParser,
 } from "./pluginDeclaration";
 import * as Weights from "../core/weights";
 
@@ -56,24 +55,24 @@ describe("analysis/pluginDeclaration", () => {
     });
   });
 
-  describe("to/fromJSON", () => {
+  describe("declarationParser", () => {
     it("works round-trip on an empty declaration", () => {
-      const json = toJSON(emptyDeclaration);
-      const result = fromJSON(json);
+      const json = emptyDeclaration;
+      const result = declarationParser.parseOrThrow(json);
       expect(result).toEqual(emptyDeclaration);
     });
     it("snapshots on an empty declaration", () => {
       // stringify to avoid having literal NUL bytes in our source.
-      expect(stringify([toJSON(emptyDeclaration)])).toMatchSnapshot();
+      expect(stringify([emptyDeclaration])).toMatchSnapshot();
     });
     it("works round-trip on an non-empty declaration", () => {
-      const json = toJSON(nonEmptyDeclaration);
-      const result = fromJSON(json);
+      const json = nonEmptyDeclaration;
+      const result = declarationParser.parseOrThrow(json);
       expect(result).toEqual(nonEmptyDeclaration);
     });
     it("snapshots on an non-empty declaration", () => {
       // stringify to avoid having literal NUL bytes in our source.
-      expect(stringify([toJSON(nonEmptyDeclaration)])).toMatchSnapshot();
+      expect(stringify([nonEmptyDeclaration])).toMatchSnapshot();
     });
   });
 });
