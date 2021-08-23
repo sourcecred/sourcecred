@@ -24,7 +24,9 @@ commands:
           keys:
             - v1-node<< parameters.node_version >>-dependencies-{{ checksum "yarn.lock" }}
             # fall back to using the latest cache if no exact match is found
-            - v1-node<< parameters.node_version >>-dependencies-
+            # added a versioning suffix to allow for manual cache clearing:
+            # https://support.circleci.com/hc/en-us/articles/115015426888-Clear-project-dependency-cache
+            - v1-node<< parameters.node_version >>-dependencies-v0
       - run: yarn install
       - save_cache:
           paths:
