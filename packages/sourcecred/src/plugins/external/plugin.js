@@ -231,8 +231,13 @@ export class ExternalPlugin implements Plugin {
 }
 
 /**
-A way for 3rd-party developers to easily test their External Plugin by piping
-its data into our `graph` api.
+A way for 3rd-party developers to easily test their External Plugin.
+After generating a WeightedGraph, a Declaration, and IdentityProposals,
+a developer could instantiate a ConstructorPlugin and pass it into our
+`graph` API using our library in environments such as Observable.
+This is a prerequisite for testing using `credrank` because of the 
+IdentityProposals. Once satisfied with the result, they can serve their files
+for consumption by an ExternalPlugin configuration.
  */
 export class ConstructorPlugin {
   _weightedGraph: WeightedGraph;
