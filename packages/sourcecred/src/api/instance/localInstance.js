@@ -36,14 +36,14 @@ const PERSONAL_ATTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
   "personalAttributions.json",
 ];
 const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
-const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
-  "output",
-  "credGraph.json.gzip",
-];
+const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph"];
 const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
-const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph.json.gzip"];
+const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
 const ACCOUNTS_PATH: $ReadOnlyArray<string> = ["output", "accounts.json"];
+
+const JSON_SUFFIX: string = ".json";
+const ZIP_SUFFIX: string = "";
 
 /**
 This is an Instance implementation that reads and writes using relative paths
@@ -86,20 +86,26 @@ export class LocalInstance extends ReadInstance implements Instance {
     };
   }
 
-  async writeGraphOutput(graphOutput: GraphOutput): Promise<void> {
+  async writeGraphOutput(
+    graphOutput: GraphOutput,
+    shouldZip: boolean = true
+  ): Promise<void> {
     await Promise.all([
       this.writeLedger(graphOutput.ledger),
       ...graphOutput.pluginGraphs.map(({pluginId, weightedGraph}) =>
-        this.writePluginGraph(pluginId, weightedGraph)
+        this.writePluginGraph(pluginId, weightedGraph, shouldZip)
       ),
     ]);
   }
 
-  async writeCredrankOutput(credrankOutput: CredrankOutput): Promise<void> {
+  async writeCredrankOutput(
+    credrankOutput: CredrankOutput,
+    shouldZip: boolean = true
+  ): Promise<void> {
     await Promise.all([
       this.writeLedger(credrankOutput.ledger),
-      this.writeCredGraph(credrankOutput.credGraph),
-      this.writeCredGrainView(credrankOutput.credGrainView),
+      this.writeCredGraph(credrankOutput.credGraph, shouldZip),
+      this.writeCredGrainView(credrankOutput.credGrainView, shouldZip),
       this.writeDependenciesConfig(credrankOutput.dependencies),
       this.writePersonalAttributionsConfig(credrankOutput.personalAttributions),
     ]);
@@ -157,28 +163,48 @@ export class LocalInstance extends ReadInstance implements Instance {
     };
   }
 
-  async writeCredGraph(credGraph: CredGraph): Promise<void> {
+  async writeCredGraph(
+    credGraph: CredGraph,
+    shouldZip: boolean = true
+  ): Promise<void> {
     const cgJson = stringify(credGraph.toJSON());
-    const outputPath = pathJoin(...CREDGRAPH_PATH);
-    return this._writableZipStorage.set(outputPath, encode(cgJson));
+    const outputPath =
+      pathJoin(...CREDGRAPH_PATH) + (shouldZip ? ZIP_SUFFIX : JSON_SUFFIX);
+    const storage = shouldZip
+      ? this._writableZipStorage
+      : this._writableStorage;
+    return storage.set(outputPath, encode(cgJson));
   }
 
-  async writeCredGrainView(credGrainView: CredGrainView): Promise<void> {
+  async writeCredGrainView(
+    credGrainView: CredGrainView,
+    shouldZip: boolean = true
+  ): Promise<void> {
     const json = stringify(credGrainView.toJSON());
-    const outputPath = pathJoin(...CREDGRAINVIEW_PATH);
-    return this._writableZipStorage.set(outputPath, encode(json));
+    const outputPath =
+      pathJoin(...CREDGRAINVIEW_PATH) + (shouldZip ? ZIP_SUFFIX : JSON_SUFFIX);
+    const storage = shouldZip
+      ? this._writableZipStorage
+      : this._writableStorage;
+    return storage.set(outputPath, encode(json));
   }
 
   async writePluginGraph(
     pluginId: string,
-    weightedGraph: WeightedGraph
+    weightedGraph: WeightedGraph,
+    shouldZip: boolean = true
   ): Promise<void> {
     const serializedGraph = encode(
       stringify(weightedGraphToJSON(weightedGraph))
     );
     const outputDir = this.createPluginGraphDirectory(pluginId);
-    const outputPath = pathJoin(outputDir, ...GRAPHS_PATH);
-    return this._writableZipStorage.set(outputPath, serializedGraph);
+    const outputPath =
+      pathJoin(outputDir, ...GRAPHS_PATH) +
+      (shouldZip ? ZIP_SUFFIX : JSON_SUFFIX);
+    const storage = shouldZip
+      ? this._writableZipStorage
+      : this._writableStorage;
+    return storage.set(outputPath, serializedGraph);
   }
 
   async writeDependenciesConfig(

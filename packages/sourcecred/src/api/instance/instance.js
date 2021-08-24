@@ -36,9 +36,15 @@ export interface ReadOnlyInstance {
  */
 export interface Instance extends ReadOnlyInstance {
   /** Writes output after running Graph. */
-  writeGraphOutput(graphOutput: GraphOutput): Promise<void>;
+  writeGraphOutput(
+    graphOutput: GraphOutput,
+    shouldZip?: boolean
+  ): Promise<void>;
   /** Writes output after running CredRank. */
-  writeCredrankOutput(credrankOutput: CredrankOutput): Promise<void>;
+  writeCredrankOutput(
+    credrankOutput: CredrankOutput,
+    shouldZip?: boolean
+  ): Promise<void>;
   /** Writes output after running Analysis. */
   writeAnalysisOutput(analysisOutput: AnalysisOutput): Promise<void>;
 

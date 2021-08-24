@@ -1,6 +1,6 @@
 // @flow
 import * as pluginId from "../api/pluginId";
-import {CredGrainView, credGrainViewParser} from "../core/credGrainView";
+import type {CredGrainView} from "../core/credGrainView";
 import {
   type CurrencyDetails,
   parser as currencyParser,
@@ -11,11 +11,11 @@ import {rawParser as rawInstanceConfigParser} from "../api/rawInstanceConfig";
 import {createLedgerDiskStorage} from "./utils/ledgerDiskStorage";
 import * as Combo from "../util/combo";
 import {OriginStorage} from "../core/storage/originStorage";
-import {ZipStorage} from "../core/storage/zip";
 import {loadJson, loadJsonWithDefault} from "../util/storage";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {upgradeRawInstanceConfig} from "../api/bundledDeclarations";
 import * as Weights from "../core/weights";
+import {ReadInstance} from "../api/instance/readInstance";
 
 export type LoadResult = LoadSuccess | LoadFailure;
 export type LoadSuccess = {|
@@ -43,6 +43,7 @@ export async function load(): Promise<LoadResult> {
 
   const diskStorage = createLedgerDiskStorage("data/ledger.json");
   const originStorage = new OriginStorage("");
+  const instance = new ReadInstance(originStorage);
   const ledgerManager = new LedgerManager({
     storage: diskStorage,
   });
@@ -56,12 +57,7 @@ export async function load(): Promise<LoadResult> {
       currencyParser,
       defaultCurrencyConfig
     ),
-    loadJsonWithDefault(
-      new ZipStorage(originStorage),
-      "output/credGrainView",
-      credGrainViewParser,
-      () => null
-    ),
+    instance.readCredGrainView().catch(() => null),
     loadJsonWithDefault(
       originStorage,
       "config/weights.json",
