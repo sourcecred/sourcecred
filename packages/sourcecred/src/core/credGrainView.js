@@ -263,7 +263,7 @@ export class CredGrainView {
         const graphParticipant = graphParticipants.get(account.identity.id);
         if (!graphParticipant)
           throw new Error(
-            `The graph is missing account [${account.identity.name}: ${account.identity.id}] that exists in the ledger.`
+            `The graph is missing account [${account.identity.name}: ${account.identity.id}] that exists in the ledger. Try recalculating the scores.`
           );
 
         const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
