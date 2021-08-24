@@ -43,15 +43,17 @@ const grainCommand: Command = async (args, std) => {
   const grainInput = await instance.readGrainInput();
   grainInput.allowMultipleDistributionsPerInterval = allowMultipleDistributionsPerInterval;
 
-  const {distributions, ledger} = await grain(grainInput);
+  const {distributions, ledger: ledgerBeforeIntegrations} = await grain(
+    grainInput
+  );
 
-  const grainIntegrationResults = executeGrainIntegrationsFromGrainInput(
+  const {results, ledger} = executeGrainIntegrationsFromGrainInput(
     grainInput,
-    ledger,
+    ledgerBeforeIntegrations,
     distributions
   );
 
-  for (const result of grainIntegrationResults) {
+  for (const result of results) {
     instance.writeGrainIntegrationOutput(result);
   }
 
