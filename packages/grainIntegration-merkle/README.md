@@ -8,12 +8,12 @@
 and is a scalable way to distribute rewards in the form of an ERC20 on an EVM
 blockchain. There are 3 roles:
 
-- `DEFAULT-ADMIN`: Assigned to the deployer of the contract. This role
+- `DEFAULT_ADMIN`: Assigned to the deployer of the contract. This role
   is responsible for managing the below two roles
 - `SEEDER_ROLE`: Manually assigned and managed by the `DEFAULT_ADMIN`
   role. Responsible for publishing distributions on chain using the
   `seedAllocations` function.
-- `PAUSER_ROLE`: Manually assigned and managed by the `DEFAULT_ADMIN`
+- `DELAYER_ROLE`: Manually assigned and managed by the `DEFAULT_ADMIN`
   role. Responsible for delaying or canceling a distribution.
 
 ## Process
