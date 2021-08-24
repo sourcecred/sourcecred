@@ -151,7 +151,7 @@ contract("MerkleRedeem", accounts => {
     });
   });
 
-  describe("Delaying Allocations", () => {
+  describe("Delaying Claims", () => {
     const claimBalance = utils.toWei("1000");
     const elements = [utils.soliditySha3(accounts[1], claimBalance)];
     const merkleTree = new MerkleTree(elements);
@@ -162,15 +162,15 @@ contract("MerkleRedeem", accounts => {
       await redeem.seedAllocations(1, root, lastBlock.timestamp + 200);
       DELAYER_ROLE = await redeem.DELAYER_ROLE();
     });
-    it("cannot call delayAllocation without the DELAYER_ROLE", async () => {
-      await truffleAssert.reverts(redeem.delayAllocation(1, 0));
+    it("cannot call delayDistribution without the DELAYER_ROLE", async () => {
+      await truffleAssert.reverts(redeem.delayDistribution(1, 0));
     });
     describe("authorized Delays", async () => {
       beforeEach(async () => {
         await redeem.grantRole(DELAYER_ROLE, admin);
       });
       it("effectively cancels a distibution by passing in zero epoch time", async () => {
-        await redeem.delayAllocation(1, 0);
+        await redeem.delayDistribution(1, 0);
         const claimTime = await redeem.claimTimes(1);
         assert(
           claimTime.toString() == "18446744073709551615",
@@ -187,15 +187,15 @@ contract("MerkleRedeem", accounts => {
       });
       it("cannot delay a live distribution", async () => {
         await increaseTime(1);
-        await truffleAssert.reverts(redeem.delayAllocation(1, 0));
+        await truffleAssert.reverts(redeem.delayDistribution(1, 0));
       });
       it("cannot delay a non-existent distribution", async () => {
-        await truffleAssert.reverts(redeem.delayAllocation(2, 0));
+        await truffleAssert.reverts(redeem.delayDistribution(2, 0));
       });
       it("can claim after the delay timestamp passes", async () => {
         let lastBlock = await web3.eth.getBlock("latest");
         const currentTime = lastBlock.timestamp;
-        await redeem.delayAllocation(1, currentTime + 60 * 60 * 24);
+        await redeem.delayDistribution(1, currentTime + 60 * 60 * 24);
         let claimedBalance = utils.toWei("1000");
 
         const merkleProof = merkleTree.getHexProof(elements[0]);
