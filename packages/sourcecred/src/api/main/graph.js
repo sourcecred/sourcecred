@@ -27,13 +27,16 @@ export type GraphOutput = {|
 |};
 
 /**
- 
+ Iterates through the provided plugins, runs their `graph` and `identities`
+ processes, and updates the ledger with any new IdentityProposals.
  
  Might mutate the ledger that is passed in.
  */
 export async function graph(
   input: GraphInput,
-  scope: $ReadOnlyArray<PluginId>,
+  // Specifies which of the plugins in the GraphInput should be run.
+  // If omitted, all plugins in the GraphInput are run.
+  scope?: $ReadOnlyArray<PluginId>,
   taskReporter: TaskReporter = new SilentTaskReporter()
 ): Promise<GraphOutput> {
   // Build Reference Detector
@@ -50,7 +53,7 @@ export async function graph(
   // Build graphs
   const pluginGraphs = [];
   for (const {plugin, directoryContext} of input.plugins) {
-    if (scope.includes(plugin.id)) {
+    if (!scope || scope.includes(plugin.id)) {
       const task = `generating graph for ${plugin.id}`;
       taskReporter.start(task);
       pluginGraphs.push({

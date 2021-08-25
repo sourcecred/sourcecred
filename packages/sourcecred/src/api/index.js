@@ -18,6 +18,7 @@ import * as ethereumDeclaration from "../plugins/ethereum/declaration";
 import * as ethereumUtils from "../plugins/ethereum/utils";
 import {declarationParser} from "../analysis/pluginDeclaration";
 import {identityProposalsParser} from "../core/ledger/identityProposal";
+import {ConstructorPlugin} from "../plugins/external/plugin";
 
 import * as address from "../core/address";
 import * as graph from "../core/graph";
@@ -69,6 +70,7 @@ const api = {
     storage,
   },
   plugins: {
+    ConstructorPlugin,
     github: {
       declaration: githubDeclaration,
       edges: githubEdges,
