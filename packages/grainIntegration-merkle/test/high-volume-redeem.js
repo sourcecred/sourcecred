@@ -25,7 +25,7 @@ contract("MerkleRedeem - High Volume", accounts => {
     TBAL = tbal.address;
     now = Math.floor(Date.now() / 1000);
 
-    redeem = await Redeem.new(TBAL);
+    redeem = await Redeem.new(TBAL, 0);
 
     const SEEDER_ROLE = await redeem.SEEDER_ROLE();
     await redeem.grantRole(SEEDER_ROLE, admin);
@@ -36,7 +36,7 @@ contract("MerkleRedeem - High Volume", accounts => {
 
   it("stores " + TEST_QUANTITY + " allocations", async () => {
     const lastBlock = await web3.eth.getBlock("latest");
-
+    const now = lastBlock.timestamp;
     let addresses = [...Array(TEST_QUANTITY).keys()].map(
       num => eth.accounts.create().address
     );
@@ -47,7 +47,7 @@ contract("MerkleRedeem - High Volume", accounts => {
     const merkleTree = new MerkleTree(elements);
     const root = merkleTree.getHexRoot();
 
-    await redeem.seedAllocations(1, root, now);
+    await redeem.seedDistribution(1, root, now + 1);
 
     const proof36 = merkleTree.getHexProof(elements[36]);
     let result = await redeem.verifyClaim(
@@ -94,37 +94,21 @@ contract("MerkleRedeem - High Volume", accounts => {
     const merkleTree5 = new MerkleTree(elements5);
     const root5 = merkleTree5.getHexRoot();
 
-    const claimBalance6 = utils.toWei("1555");
-    const elements6 = [utils.soliditySha3(accounts[1], claimBalance5)];
-    const merkleTree6 = new MerkleTree(elements5);
-    const root6 = merkleTree5.getHexRoot();
+    const roots = [root1, root2, root3, root4, root5];
 
     beforeEach(async () => {
-      let lastBlock = await web3.eth.getBlock("latest");
+      for (let i = 0; i < roots.length; i++) {
+        const lastBlock = await web3.eth.getBlock("latest");
+        const now = lastBlock.timestamp;
 
-      await redeem.seedAllocations(1, root1, now);
+        await redeem.seedDistribution(i + 1, roots[i], now + 1);
 
-      await increaseTime(7);
-      lastBlock = await web3.eth.getBlock("latest");
-      let lastBlockHash =
-        "0xb6801f31f93d990dfe65d67d3479c3853d5fafd7a7f2b8fad9e68084d8d409e0"; // set this manually to simplify testing
-      await redeem.seedAllocations(2, root2, now);
-
-      await increaseTime(7);
-      lastBlock = await web3.eth.getBlock("latest");
-      await redeem.seedAllocations(3, root3, now);
-
-      await increaseTime(7);
-      lastBlock = await web3.eth.getBlock("latest");
-      await redeem.seedAllocations(4, root4, now);
-
-      await increaseTime(7);
-      lastBlock = await web3.eth.getBlock("latest");
-      await redeem.seedAllocations(5, root5, now);
+        await increaseTime(7);
+      }
     });
 
     it("Allows the user to claim multiple weeks at once", async () => {
-      await increaseTime(8);
+      await increaseTime(1);
 
       const proof1 = merkleTree1.getHexProof(elements1[0]);
       const proof2 = merkleTree2.getHexProof(elements2[0]);

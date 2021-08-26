@@ -9,6 +9,8 @@ const truffleAssert = require("truffle-assertions");
 
 contract("MerkleRedeem", accounts => {
   const admin = accounts[0];
+  const BYTES32_0 =
+    "0x0000000000000000000000000000000000000000000000000000000000000000";
 
   let redeem;
   let REDEEM;
@@ -17,7 +19,7 @@ contract("MerkleRedeem", accounts => {
   let tbal;
   let TBAL;
   let SEEDER_ROLE;
-  let DELAYER_ROLE;
+  let PAUSER_ROLE;
 
   const MAX = utils.toTwosComplement(-1);
 
@@ -38,352 +40,436 @@ contract("MerkleRedeem", accounts => {
   ];
 
   beforeEach(async () => {
-    const lastBlock = await web3.eth.getBlock("latest");
     tbal = await TToken.new("Test Bal", "TBAL", 18);
     await tbal.mint(admin, utils.toWei("1450000"));
     TBAL = tbal.address;
-    now = lastBlock.timestamp;
-
-    redeem = await Redeem.new(TBAL);
-
-    SEEDER_ROLE = await redeem.SEEDER_ROLE();
-    await redeem.grantRole(SEEDER_ROLE, admin);
-    REDEEM = redeem.address;
-
-    await tbal.mint(REDEEM, utils.toWei("1450000"));
   });
 
-  it("cannot store an allocation without the SEEDER_ROLE", async () => {
-    await redeem.revokeRole(SEEDER_ROLE, admin);
-    let claimBalance = utils.toWei("9876");
-    const elements = [utils.soliditySha3(accounts[0], claimBalance)];
-    const merkleTree = new MerkleTree(elements);
-    const root = merkleTree.getHexRoot();
-    await truffleAssert.reverts(redeem.seedAllocations(1, root, now));
-  });
-
-  it("stores an allocation", async () => {
-    let claimBalance = utils.toWei("9876");
-    const lastBlock = await web3.eth.getBlock("latest");
-
-    const elements = [utils.soliditySha3(accounts[0], claimBalance)];
-    const merkleTree = new MerkleTree(elements);
-    const root = merkleTree.getHexRoot();
-
-    await redeem.seedAllocations(1, root, now);
-
-    const proof = merkleTree.getHexProof(elements[0]);
-
-    let result = await redeem.verifyClaim(accounts[0], 1, claimBalance, proof);
-    assert(result, "user should have an allocation");
-  });
-
-  it("doesn't allow an allocation to be overwritten", async () => {
-    let claimBalance = utils.toWei("9876");
-    const lastBlock = await web3.eth.getBlock("latest");
-
-    const elements = [utils.soliditySha3(accounts[0], claimBalance)];
-    const merkleTree = new MerkleTree(elements);
-    const root = merkleTree.getHexRoot();
-
-    await redeem.seedAllocations(1, root, now);
-
-    // construct tree to attempt to override the allocation
-    const elements2 = [
-      utils.soliditySha3(accounts[0], claimBalance),
-      utils.soliditySha3(accounts[1], claimBalance)
-    ];
-    const merkleTree2 = new MerkleTree(elements);
-    const root2 = merkleTree.getHexRoot();
-
-    await truffleAssert.reverts(redeem.seedAllocations(1, root2, now));
-  });
-
-  it("stores multiple allocations", async () => {
-    const lastBlock = await web3.eth.getBlock("latest");
-
-    let claimBalance0 = utils.toWei("1000");
-    let claimBalance1 = utils.toWei("2000");
-
-    const elements = [
-      utils.soliditySha3(accounts[0], claimBalance0),
-      utils.soliditySha3(accounts[1], claimBalance1)
-    ];
-    const merkleTree = new MerkleTree(elements);
-    const root = merkleTree.getHexRoot();
-
-    await redeem.seedAllocations(1, root, now);
-
-    let proof0 = merkleTree.getHexProof(elements[0]);
-    let result = await redeem.verifyClaim(
-      accounts[0],
-      1,
-      claimBalance0,
-      proof0
-    );
-    assert(result, "account 0 should have an allocation");
-
-    let proof1 = merkleTree.getHexProof(elements[1]);
-    result = await redeem.verifyClaim(accounts[1], 1, claimBalance1, proof1);
-    assert(result, "account 1 should have an allocation");
-  });
-
-  describe("With a week finished", () => {
-    const claimBalance = utils.toWei("1000");
-    const elements = [utils.soliditySha3(accounts[1], claimBalance)];
-    const merkleTree = new MerkleTree(elements);
-    //const root = merkleTree.getHexRoot();
-
+  describe("construction with a non-zero global delay", () => {
+    let root;
+    let now;
+    const dayInSeconds = 86400;
     beforeEach(async () => {
+      redeem = await Redeem.new(TBAL, dayInSeconds);
+
+      SEEDER_ROLE = await redeem.SEEDER_ROLE();
+      await redeem.grantRole(SEEDER_ROLE, admin);
+      REDEEM = redeem.address;
+      let claimBalance = utils.toWei("9876");
+      const elements = [utils.soliditySha3(accounts[0], claimBalance)];
+      const merkleTree = new MerkleTree(elements);
+      root = merkleTree.getHexRoot();
+
+      await tbal.mint(REDEEM, utils.toWei("1449999"));
       const lastBlock = await web3.eth.getBlock("latest");
+      now = lastBlock.timestamp;
     });
-
-    it("Reverts when the user attempts to claim before an allocation is produced", async () => {
-      await increaseTime(9);
-      let claimedBalance = utils.toWei("1000");
-
-      const merkleProof = merkleTree.getHexProof(elements[0]);
+    it("cannot publish a distribution that is claimable before the global delay", async () => {
       await truffleAssert.reverts(
-        redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
-          from: accounts[1]
-        })
+        redeem.seedDistribution(1, root, now),
+        "Delay is too short"
       );
     });
+    it("can publish a distribution that is observes the delay", async () => {
+      // the last additional 1 is needed to account for the timestamp of
+      // the block about to be mined
+      await redeem.seedDistribution(1, root, now + dayInSeconds + 1);
+    });
   });
-
-  describe("Delaying Claims", () => {
-    const claimBalance = utils.toWei("1000");
-    const elements = [utils.soliditySha3(accounts[1], claimBalance)];
-    const merkleTree = new MerkleTree(elements);
-    const root = merkleTree.getHexRoot();
-
+  describe("construction with no delay", () => {
     beforeEach(async () => {
+      redeem = await Redeem.new(TBAL, 0);
+
+      SEEDER_ROLE = await redeem.SEEDER_ROLE();
+      await redeem.grantRole(SEEDER_ROLE, admin);
+      REDEEM = redeem.address;
+
+      await tbal.mint(REDEEM, utils.toWei("1449999"));
+    });
+    it("cannot store an allocation without the SEEDER_ROLE", async () => {
+      await redeem.revokeRole(SEEDER_ROLE, admin);
+      let claimBalance = utils.toWei("9876");
       const lastBlock = await web3.eth.getBlock("latest");
-      await redeem.seedAllocations(1, root, lastBlock.timestamp + 200);
-      DELAYER_ROLE = await redeem.DELAYER_ROLE();
+      const now = lastBlock.timestamp;
+      const elements = [utils.soliditySha3(accounts[0], claimBalance)];
+      const merkleTree = new MerkleTree(elements);
+      const root = merkleTree.getHexRoot();
+      await truffleAssert.reverts(
+        redeem.seedDistribution(1, root, now),
+        "Must have SEEDER_ROLE"
+      );
     });
-    it("cannot call delayDistribution without the DELAYER_ROLE", async () => {
-      await truffleAssert.reverts(redeem.delayDistribution(1, 0));
+
+    it("stores an allocation", async () => {
+      let claimBalance = utils.toWei("9876");
+      const lastBlock = await web3.eth.getBlock("latest");
+      const now = lastBlock.timestamp;
+
+      const elements = [utils.soliditySha3(accounts[0], claimBalance)];
+      const merkleTree = new MerkleTree(elements);
+      const root = merkleTree.getHexRoot();
+      await redeem.seedDistribution(1, root, now + 1);
+
+      const proof = merkleTree.getHexProof(elements[0]);
+
+      let result = await redeem.verifyClaim(
+        accounts[0],
+        1,
+        claimBalance,
+        proof
+      );
+      assert(result, "user should have an allocation");
     });
-    describe("authorized Delays", async () => {
+
+    it("doesn't allow an allocation to be overwritten", async () => {
+      let claimBalance = utils.toWei("9876");
+      const lastBlock = await web3.eth.getBlock("latest");
+      const now = lastBlock.timestamp;
+
+      const elements = [utils.soliditySha3(accounts[0], claimBalance)];
+      const merkleTree = new MerkleTree(elements);
+      const root = merkleTree.getHexRoot();
+
+      await redeem.seedDistribution(1, root, now + 1);
+
+      // construct tree to attempt to override the allocation
+      const elements2 = [
+        utils.soliditySha3(accounts[0], claimBalance),
+        utils.soliditySha3(accounts[1], claimBalance)
+      ];
+      const merkleTree2 = new MerkleTree(elements);
+      const root2 = merkleTree.getHexRoot();
+
+      await truffleAssert.reverts(
+        redeem.seedDistribution(1, root2, now),
+        "cannot rewrite merkle root"
+      );
+    });
+
+    it("stores multiple allocations", async () => {
+      const lastBlock = await web3.eth.getBlock("latest");
+      const now = lastBlock.timestamp;
+
+      let claimBalance0 = utils.toWei("1000");
+      let claimBalance1 = utils.toWei("2000");
+
+      const elements = [
+        utils.soliditySha3(accounts[0], claimBalance0),
+        utils.soliditySha3(accounts[1], claimBalance1)
+      ];
+      const merkleTree = new MerkleTree(elements);
+      const root = merkleTree.getHexRoot();
+
+      await redeem.seedDistribution(1, root, now + 1);
+
+      let proof0 = merkleTree.getHexProof(elements[0]);
+      let result = await redeem.verifyClaim(
+        accounts[0],
+        1,
+        claimBalance0,
+        proof0
+      );
+      assert(result, "account 0 should have an allocation");
+
+      let proof1 = merkleTree.getHexProof(elements[1]);
+      result = await redeem.verifyClaim(accounts[1], 1, claimBalance1, proof1);
+      assert(result, "account 1 should have an allocation");
+    });
+
+    describe("With a week finished", () => {
+      const claimBalance = utils.toWei("1000");
+      const elements = [utils.soliditySha3(accounts[1], claimBalance)];
+      const merkleTree = new MerkleTree(elements);
+
       beforeEach(async () => {
-        await redeem.grantRole(DELAYER_ROLE, admin);
+        const lastBlock = await web3.eth.getBlock("latest");
       });
-      it("effectively cancels a distibution by passing in zero epoch time", async () => {
-        await redeem.delayDistribution(1, 0);
-        const claimTime = await redeem.claimTimes(1);
-        assert(
-          claimTime.toString() == "18446744073709551615",
-          "claim time should be max_uint64"
-        );
+
+      it("Reverts when the user attempts to claim before an allocation is produced", async () => {
+        await increaseTime(9);
         let claimedBalance = utils.toWei("1000");
 
         const merkleProof = merkleTree.getHexProof(elements[0]);
         await truffleAssert.reverts(
           redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
             from: accounts[1]
-          })
+          }),
+          "Incorrect merkle proof"
         );
       });
-      it("cannot delay a live distribution", async () => {
-        await increaseTime(1);
-        await truffleAssert.reverts(redeem.delayDistribution(1, 0));
-      });
-      it("cannot delay a non-existent distribution", async () => {
-        await truffleAssert.reverts(redeem.delayDistribution(2, 0));
-      });
-      it("can claim after the delay timestamp passes", async () => {
-        let lastBlock = await web3.eth.getBlock("latest");
-        const currentTime = lastBlock.timestamp;
-        await redeem.delayDistribution(1, currentTime + 60 * 60 * 24);
-        let claimedBalance = utils.toWei("1000");
+    });
 
+    describe("PAUSER_ROLE", () => {
+      const claimBalance = utils.toWei("1000");
+      const elements = [utils.soliditySha3(accounts[1], claimBalance)];
+      const merkleTree = new MerkleTree(elements);
+      const root = merkleTree.getHexRoot();
+
+      let claimTime;
+
+      beforeEach(async () => {
+        const lastBlock = await web3.eth.getBlock("latest");
+        claimTime = lastBlock.timestamp + 200;
+        await redeem.seedDistribution(1, root, claimTime);
+        PAUSER_ROLE = await redeem.PAUSER_ROLE();
+      });
+      it("cannot call pauseDistribution without the PAUSER_ROLE", async () => {
+        await truffleAssert.reverts(
+          redeem.pauseDistribution(1),
+          "Must have PAUSER_ROLE"
+        );
+      });
+      it("cannot modify the global delay without the PAUSER_ROLE", async () => {
+        await truffleAssert.reverts(
+          redeem.changeMinimumDelay(123456),
+          "Must have PAUSER_ROLE"
+        );
+      });
+      describe("authorized pauser role holder", async () => {
+        beforeEach(async () => {
+          await redeem.grantRole(PAUSER_ROLE, admin);
+        });
+        it("pauses a distribution by resetting the root to zero", async () => {
+          await redeem.pauseDistribution(1);
+          const claimTime = await redeem.claimTimes(1);
+          assert(
+            claimTime.toString() == claimTime,
+            "claim time should be unchanged"
+          );
+          const [root] = await redeem.merkleRoots(1, 1);
+          assert(root === BYTES32_0);
+          let claimedBalance = utils.toWei("1000");
+
+          const merkleProof = merkleTree.getHexProof(elements[0]);
+          await truffleAssert.reverts(
+            redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
+              from: accounts[1]
+            }),
+            "Distribution still paused"
+          );
+        });
+        it("cannot pause a live distribution", async () => {
+          await increaseTime(1);
+          await truffleAssert.reverts(
+            redeem.pauseDistribution(1),
+            "Can't modify a live distribution"
+          );
+        });
+        it("cannot delay a non-existent distribution", async () => {
+          await truffleAssert.reverts(
+            redeem.pauseDistribution(2),
+            "Can't modify a live distribution"
+          );
+        });
+        it("can claim after a new root is published", async () => {
+          await redeem.pauseDistribution(1);
+          let claimedBalance = utils.toWei("1000");
+
+          const merkleProof = merkleTree.getHexProof(elements[0]);
+
+          let lastBlock = await web3.eth.getBlock("latest");
+          const currentTime = lastBlock.timestamp;
+
+          await redeem.seedDistribution(1, root, currentTime + 1);
+          await redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
+            from: accounts[1]
+          });
+        });
+        it("can enforce the new global minimum delay when republishing a paused distribution", async () => {
+          const dayInSeconds = 86400;
+          await redeem.changeMinimumDelay(dayInSeconds);
+          await redeem.pauseDistribution(1);
+
+          let claimedBalance = utils.toWei("1000");
+
+          const merkleProof = merkleTree.getHexProof(elements[0]);
+
+          let lastBlock = await web3.eth.getBlock("latest");
+          const currentTime = lastBlock.timestamp;
+
+          await truffleAssert.reverts(
+            redeem.seedDistribution(1, root, currentTime + 1),
+            "Delay is too short"
+          );
+        });
+      });
+    });
+
+    describe("When a user has an allocation to claim", () => {
+      const claimBalance = utils.toWei("1000");
+      const elements = [utils.soliditySha3(accounts[1], claimBalance)];
+      const merkleTree = new MerkleTree(elements);
+      const root = merkleTree.getHexRoot();
+
+      beforeEach(async () => {
+        const lastBlock = await web3.eth.getBlock("latest");
+        const now = lastBlock.timestamp;
+        let lastBlockHash =
+          "0x7c1b1e7c2eaddafdf52250cba9679e5b30014a9d86a0e2af17ec4cee24a5fc80";
+
+        await redeem.seedDistribution(1, root, now + 1);
+      });
+
+      it("Allows the user to claimWeek", async () => {
+        let claimedBalance = utils.toWei("1000");
+        const merkleProof = merkleTree.getHexProof(elements[0]);
+        await redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
+          from: accounts[1]
+        });
+
+        let result = await tbal.balanceOf(accounts[1]);
+        assert(result == claimedBalance, "user should have an allocation");
+
+        result = await redeem.claimed(1, accounts[1]);
+        assert(result == true, "claim should be marked as claimed");
+      });
+
+      it("Doesn't allow a user to claim for another user", async () => {
+        await increaseTime(6);
+        let claimedBalance = utils.toWei("1000");
+        const merkleProof = merkleTree.getHexProof(elements[0]);
+
+        await truffleAssert.reverts(
+          redeem.claimWeek(accounts[2], 1, claimedBalance, merkleProof, {
+            from: accounts[2]
+          }),
+          "Incorrect merkle proof"
+        );
+      });
+
+      it("Reverts when the user attempts to claim the wrong balance", async () => {
+        await increaseTime(0);
+        let claimedBalance = utils.toWei("666");
         const merkleProof = merkleTree.getHexProof(elements[0]);
         await truffleAssert.reverts(
           redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
             from: accounts[1]
-          })
+          }),
+          "Incorrect merkle proof"
         );
+      });
 
-        await increaseTime(1);
+      it("Reverts when the user attempts to claim twice", async () => {
+        await increaseTime(6);
+        let claimedBalance = utils.toWei("1000");
+        const merkleProof = merkleTree.getHexProof(elements[0]);
 
         await redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
           from: accounts[1]
         });
+
+        await truffleAssert.reverts(
+          redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
+            from: accounts[1]
+          }),
+          "Already claimed"
+        );
       });
     });
-  });
 
-  describe("When a user has an allocation to claim", () => {
-    const claimBalance = utils.toWei("1000");
-    const elements = [utils.soliditySha3(accounts[1], claimBalance)];
-    const merkleTree = new MerkleTree(elements);
-    const root = merkleTree.getHexRoot();
+    describe("When a user has several allocation to claim", () => {
+      const claimBalance1 = utils.toWei("1000");
+      const elements1 = [utils.soliditySha3(accounts[1], claimBalance1)];
+      const merkleTree1 = new MerkleTree(elements1);
+      const root1 = merkleTree1.getHexRoot();
 
-    beforeEach(async () => {
-      const lastBlock = await web3.eth.getBlock("latest");
+      const claimBalance2 = utils.toWei("1234");
+      const elements2 = [utils.soliditySha3(accounts[1], claimBalance2)];
+      const merkleTree2 = new MerkleTree(elements2);
+      const root2 = merkleTree2.getHexRoot();
 
-      let lastBlockHash =
-        "0x7c1b1e7c2eaddafdf52250cba9679e5b30014a9d86a0e2af17ec4cee24a5fc80";
+      beforeEach(async () => {
+        let lastBlock = await web3.eth.getBlock("latest");
+        let now = lastBlock.timestamp;
+        await redeem.seedDistribution(1, root1, now + 1);
 
-      await redeem.seedAllocations(1, root, now);
-    });
-
-    it("Allows the user to claimWeek", async () => {
-      let claimedBalance = utils.toWei("1000");
-      const merkleProof = merkleTree.getHexProof(elements[0]);
-      await redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
-        from: accounts[1]
+        await increaseTime(7);
+        lastBlock = await web3.eth.getBlock("latest");
+        now = lastBlock.timestamp;
+        let lastBlockHash =
+          "0xb6801f31f93d990dfe65d67d3479c3853d5fafd7a7f2b8fad9e68084d8d409e0"; // set this manually to simplify testing
+        await redeem.seedDistribution(2, root2, now + 1);
       });
 
-      let result = await tbal.balanceOf(accounts[1]);
-      assert(result == claimedBalance, "user should have an allocation");
+      it("Allows the user to claim once the time has passed", async () => {
+        //await increaseTime(8);
 
-      result = await redeem.claimed(1, accounts[1]);
-      assert(result == true, "claim should be marked as claimed");
-    });
+        let claimedBalance1 = utils.toWei("1000");
+        let claimedBalance2 = utils.toWei("1234");
 
-    it("Doesn't allow a user to claim for another user", async () => {
-      await increaseTime(6);
-      let claimedBalance = utils.toWei("1000");
-      const merkleProof = merkleTree.getHexProof(elements[0]);
-
-      await truffleAssert.reverts(
-        redeem.claimWeek(accounts[2], 1, claimedBalance, merkleProof, {
-          from: accounts[2]
-        })
-      );
-    });
-
-    it("Reverts when the user attempts to claim the wrong balance", async () => {
-      await increaseTime(0);
-      let claimedBalance = utils.toWei("666");
-      const merkleProof = merkleTree.getHexProof(elements[0]);
-      await truffleAssert.reverts(
-        redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
+        const proof1 = merkleTree1.getHexProof(elements1[0]);
+        await redeem.claimWeek(accounts[1], 1, claimedBalance1, proof1, {
           from: accounts[1]
-        })
-      );
-    });
+        });
 
-    it("Reverts when the user attempts to claim twice", async () => {
-      await increaseTime(6);
-      let claimedBalance = utils.toWei("1000");
-      const merkleProof = merkleTree.getHexProof(elements[0]);
-
-      await redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
-        from: accounts[1]
-      });
-
-      await truffleAssert.reverts(
-        redeem.claimWeek(accounts[1], 1, claimedBalance, merkleProof, {
+        const proof2 = merkleTree2.getHexProof(elements2[0]);
+        await redeem.claimWeek(accounts[1], 2, claimedBalance2, proof2, {
           from: accounts[1]
-        })
-      );
-    });
-  });
+        });
 
-  describe("When a user has several allocation to claim", () => {
-    const claimBalance1 = utils.toWei("1000");
-    const elements1 = [utils.soliditySha3(accounts[1], claimBalance1)];
-    const merkleTree1 = new MerkleTree(elements1);
-    const root1 = merkleTree1.getHexRoot();
-
-    const claimBalance2 = utils.toWei("1234");
-    const elements2 = [utils.soliditySha3(accounts[1], claimBalance2)];
-    const merkleTree2 = new MerkleTree(elements2);
-    const root2 = merkleTree2.getHexRoot();
-
-    beforeEach(async () => {
-      let lastBlock = await web3.eth.getBlock("latest");
-
-      await redeem.seedAllocations(1, root1, now);
-
-      await increaseTime(7);
-      lastBlock = await web3.eth.getBlock("latest");
-      let lastBlockHash =
-        "0xb6801f31f93d990dfe65d67d3479c3853d5fafd7a7f2b8fad9e68084d8d409e0"; // set this manually to simplify testing
-      await redeem.seedAllocations(2, root2, now);
-    });
-
-    it("Allows the user to claim once the time has past", async () => {
-      //await increaseTime(8);
-
-      let claimedBalance1 = utils.toWei("1000");
-      let claimedBalance2 = utils.toWei("1234");
-
-      const proof1 = merkleTree1.getHexProof(elements1[0]);
-      await redeem.claimWeek(accounts[1], 1, claimedBalance1, proof1, {
-        from: accounts[1]
+        let result = await tbal.balanceOf(accounts[1]);
+        assert(
+          result == utils.toWei("2234"),
+          "user should receive all tokens, including current week"
+        );
       });
 
-      const proof2 = merkleTree2.getHexProof(elements2[0]);
-      await redeem.claimWeek(accounts[1], 2, claimedBalance2, proof2, {
-        from: accounts[1]
+      it("Allows the user to claim multiple weeks at once", async () => {
+        await increaseTime(8);
+
+        let claimedBalance1 = utils.toWei("1000");
+        let claimedBalance2 = utils.toWei("1234");
+
+        const proof1 = merkleTree1.getHexProof(elements1[0]);
+        const proof2 = merkleTree2.getHexProof(elements2[0]);
+
+        await redeem.claimWeeks(
+          accounts[1],
+          [[1, claimedBalance1, proof1], [2, claimedBalance2, proof2]],
+          { from: accounts[1] }
+        );
+
+        let result = await tbal.balanceOf(accounts[1]);
+        assert(
+          result == utils.toWei("2234"),
+          "user should receive all tokens, including current week"
+        );
       });
 
-      let result = await tbal.balanceOf(accounts[1]);
-      assert(
-        result == utils.toWei("2234"),
-        "user should receive all tokens, including current week"
-      );
-    });
+      it("Returns an array of week claims", async () => {
+        let expectedResult = [false, false];
+        let result = await redeem.claimStatus(accounts[1], 1, 2);
+        assert.deepEqual(
+          result,
+          expectedResult,
+          "claim status should be accurate"
+        );
+        let claimedBalance1 = utils.toWei("1000");
+        const proof1 = merkleTree1.getHexProof(elements1[0]);
 
-    it("Allows the user to claim multiple weeks at once", async () => {
-      await increaseTime(8);
+        await increaseTime(8);
+        await redeem.claimWeeks(accounts[1], [[1, claimedBalance1, proof1]], {
+          from: accounts[1]
+        });
 
-      let claimedBalance1 = utils.toWei("1000");
-      let claimedBalance2 = utils.toWei("1234");
-
-      const proof1 = merkleTree1.getHexProof(elements1[0]);
-      const proof2 = merkleTree2.getHexProof(elements2[0]);
-
-      await redeem.claimWeeks(
-        accounts[1],
-        [[1, claimedBalance1, proof1], [2, claimedBalance2, proof2]],
-        { from: accounts[1] }
-      );
-
-      let result = await tbal.balanceOf(accounts[1]);
-      assert(
-        result == utils.toWei("2234"),
-        "user should receive all tokens, including current week"
-      );
-    });
-
-    it("Returns an array of week claims", async () => {
-      let expectedResult = [false, false];
-      let result = await redeem.claimStatus(accounts[1], 1, 2);
-      assert.deepEqual(
-        result,
-        expectedResult,
-        "claim status should be accurate"
-      );
-      let claimedBalance1 = utils.toWei("1000");
-      const proof1 = merkleTree1.getHexProof(elements1[0]);
-
-      await increaseTime(8);
-      await redeem.claimWeeks(accounts[1], [[1, claimedBalance1, proof1]], {
-        from: accounts[1]
+        expectedResult = [true, false];
+        result = await redeem.claimStatus(accounts[1], 1, 2);
+        assert.deepEqual(
+          result,
+          expectedResult,
+          "claim status should be accurate"
+        );
       });
 
-      expectedResult = [true, false];
-      result = await redeem.claimStatus(accounts[1], 1, 2);
-      assert.deepEqual(
-        result,
-        expectedResult,
-        "claim status should be accurate"
-      );
-    });
-
-    it("Returns an array of merkle roots", async () => {
-      let expectedResult = [root1, root2];
-      let result = await redeem.merkleRoots(1, 2);
-      assert.deepEqual(
-        result,
-        expectedResult,
-        "claim status should be accurate"
-      );
+      it("Returns an array of merkle roots", async () => {
+        let expectedResult = [root1, root2];
+        let result = await redeem.merkleRoots(1, 2);
+        assert.deepEqual(
+          result,
+          expectedResult,
+          "claim status should be accurate"
+        );
+      });
     });
   });
 });
