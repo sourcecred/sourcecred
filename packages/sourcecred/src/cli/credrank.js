@@ -22,6 +22,7 @@ const credrankCommand: Command = async (args, std) => {
   let shouldIncludeDiff = false;
   let isSimulation = false;
   let shouldRunStealth = false;
+  let shouldZipOutput = true;
   const processedArgs = args.filter((arg) => {
     switch (arg) {
       case "-d":
@@ -34,6 +35,9 @@ const credrankCommand: Command = async (args, std) => {
       case "--simulation":
         isSimulation = true;
         return false;
+      case "--no-zip":
+        shouldZipOutput = false;
+        return false;
       default:
         return true;
     }
@@ -42,7 +46,7 @@ const credrankCommand: Command = async (args, std) => {
   if (processedArgs.length !== 0) {
     return die(
       std,
-      "usage: sourcecred credrank [-d] [-s | --simulation] [--stealth]"
+      "usage: sourcecred credrank [-d] [-s | --simulation] [--stealth] [--no-zip]"
     );
   }
   const taskReporter = new LoggingTaskReporter();
@@ -77,7 +81,7 @@ const credrankCommand: Command = async (args, std) => {
 
   if (!isSimulation) {
     taskReporter.start("writing changes");
-    instance.writeCredrankOutput(credrankOutput);
+    instance.writeCredrankOutput(credrankOutput, shouldZipOutput);
     taskReporter.finish("writing changes");
   }
 
@@ -146,6 +150,7 @@ export const credRankHelp: Command = async (args, std) => {
       -d                    outputs a comparison table between the current graph and the prior graph        
       -s, --simulation      doesn't update the current graph and ledger json
           --stealth         skip the output of the summary table
+          --no-zip          write the output as JSON without compressing large files
 
       Calculate cred scores from existing graph
       `.trimRight()

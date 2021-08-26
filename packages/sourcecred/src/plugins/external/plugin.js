@@ -33,7 +33,7 @@ export const ExternalPluginIdOwner = "external";
 
 const FileNames = {
   GRAPH: "graph.json",
-  GRAPH_ZIP: "graph.json.gzip",
+  GRAPH_ZIP: "graph",
   DECLARATION: "declaration.json",
   IDENTITIES: "identityProposals.json",
 };

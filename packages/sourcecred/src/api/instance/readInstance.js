@@ -81,13 +81,13 @@ const PERSONAL_ATTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
 ];
 const RAW_INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
-const CREDGRAPH_PATH: $ReadOnlyArray<string> = [
-  "output",
-  "credGraph.json.gzip",
-];
+const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph"];
 const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_DIRECTORY: $ReadOnlyArray<string> = ["output", "graphs"];
-const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph.json.gzip"];
+const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph"];
+
+const JSON_SUFFIX: string = ".json";
+const ZIP_SUFFIX: string = "";
 
 /**
 This is an Instance implementation that reads and writes using relative paths
@@ -178,12 +178,24 @@ export class ReadInstance implements ReadOnlyInstance {
 
   async readCredGraph(): Promise<CredGraph> {
     const credGraphPath = pathJoin(...CREDGRAPH_PATH);
-    return await loadJson(this._zipStorage, credGraphPath, credGraphParser);
+    return await loadJson(
+      this._zipStorage,
+      credGraphPath + ZIP_SUFFIX,
+      credGraphParser
+    ).catch(() =>
+      loadJson(this._storage, credGraphPath + JSON_SUFFIX, credGraphParser)
+    );
   }
 
   async readCredGrainView(): Promise<CredGrainView> {
     const path = pathJoin(...CREDGRAINVIEW_PATH);
-    return loadJson(this._zipStorage, path, credGrainViewParser);
+    return loadJson(
+      this._zipStorage,
+      path + ZIP_SUFFIX,
+      credGrainViewParser
+    ).catch(() =>
+      loadJson(this._storage, path + JSON_SUFFIX, credGrainViewParser)
+    );
   }
 
   async readLedger(): Promise<Ledger> {
@@ -234,8 +246,14 @@ export class ReadInstance implements ReadOnlyInstance {
         const outputPath = pathJoin(outputDir, ...GRAPHS_PATH);
         const graphJSON = await loadJson(
           this._zipStorage,
-          outputPath,
+          outputPath + ZIP_SUFFIX,
           ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
+        ).catch(() =>
+          loadJson(
+            this._storage,
+            outputPath + JSON_SUFFIX,
+            ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
+          )
         );
         return weightedGraphFromJSON(graphJSON);
       })

@@ -26,6 +26,7 @@ function die(std, message) {
 const graphCommand: Command = async (args, std) => {
   let shouldIncludeDiff = false;
   let isSimulation = false;
+  let shouldZipOutput = true;
   const processedArgs = args.filter((arg) => {
     switch (arg) {
       case "-d":
@@ -34,6 +35,9 @@ const graphCommand: Command = async (args, std) => {
       case "--simulation":
       case "-s":
         isSimulation = true;
+        return false;
+      case "--no-zip":
+        shouldZipOutput = false;
         return false;
       default:
         return true;
@@ -86,7 +90,7 @@ const graphCommand: Command = async (args, std) => {
 
   if (!isSimulation) {
     taskReporter.start("writing files");
-    await instance.writeGraphOutput(graphOutput);
+    await instance.writeGraphOutput(graphOutput, shouldZipOutput);
     taskReporter.finish("writing files");
   }
   taskReporter.finish("graph");
@@ -101,6 +105,7 @@ export const graphHelp: Command = async (args, std) => {
       options:
       -d  Outputs the diff of changes compared to the last saved graph.
       -s, --simulation  Skips writing changes to the graph and ledger jsons.
+      --no-zip  Writes the output as JSON without compressing large files
 
       Generate a graph from cached plugin data
 
