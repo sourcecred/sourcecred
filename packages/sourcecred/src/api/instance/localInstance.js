@@ -74,10 +74,11 @@ export class LocalInstance extends ReadInstance implements Instance {
       this.readLedger(),
     ]);
     const plugins = [];
-    for (const plugin of instanceConfig.bundledPlugins.values()) {
+    for (const [pluginId, plugin] of instanceConfig.bundledPlugins.entries()) {
       plugins.push({
+        pluginId,
         plugin,
-        directoryContext: this.pluginDirectoryContext(plugin.id),
+        directoryContext: this.pluginDirectoryContext(pluginId),
       });
     }
     return {

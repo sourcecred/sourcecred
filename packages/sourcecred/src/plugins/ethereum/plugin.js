@@ -8,10 +8,6 @@ import {
 } from "../../core/references";
 import {declaration} from "./declaration";
 import {parser as ethJsonParser} from "./ethAddress";
-import {
-  type PluginId,
-  fromString as pluginIdFromString,
-} from "../../api/pluginId";
 import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {
@@ -27,8 +23,6 @@ async function loadEthJson(ctx: PluginDirectoryContext) {
 }
 
 export class EthereumPlugin implements Plugin {
-  id: PluginId = pluginIdFromString("sourcecred/ethereum");
-
   async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }

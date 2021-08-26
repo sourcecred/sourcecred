@@ -8,10 +8,6 @@ import type {ReferenceDetector} from "../../core/references";
 import type {WeightedGraph} from "../../core/weightedGraph";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createWeightedGraph} from "./createGraph";
-import {
-  type PluginId,
-  fromString as pluginIdFromString,
-} from "../../api/pluginId";
 import {loadJson} from "../../util/storage";
 import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
 import * as Weights from "../../core/weights";
@@ -30,8 +26,6 @@ function getDirectoryFromContext(ctx: PluginDirectoryContext): string {
 }
 
 export class InitiativesPlugin implements Plugin {
-  id: PluginId = pluginIdFromString("sourcecred/initiatives");
-
   async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }

@@ -21,10 +21,6 @@ import {validateToken, type GithubToken} from "./token";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type TaskReporter} from "../../util/taskReporter";
 import {repoIdToString} from "./repoId";
-import {
-  type PluginId,
-  fromString as pluginIdFromString,
-} from "../../api/pluginId";
 import {loadJson} from "../../util/storage";
 import {createIdentities} from "./createIdentities";
 import {DiskStorage} from "../../core/storage/disk";
@@ -62,8 +58,6 @@ function getTokenFromEnv(): GithubToken {
 }
 
 export class GithubPlugin implements Plugin {
-  id: PluginId = pluginIdFromString("sourcecred/github");
-
   async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }

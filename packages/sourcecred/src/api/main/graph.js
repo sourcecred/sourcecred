@@ -14,6 +14,7 @@ export type GraphInput = {|
   +plugins: Array<{|
     +plugin: Plugin,
     +directoryContext: PluginDirectoryContext,
+    +pluginId: PluginId,
   |}>,
   +ledger: Ledger,
 |};
@@ -41,8 +42,8 @@ export async function graph(
 ): Promise<GraphOutput> {
   // Build Reference Detector
   const rds = [];
-  for (const {plugin, directoryContext} of input.plugins) {
-    const task = `reference detector for ${plugin.id}`;
+  for (const {pluginId, plugin, directoryContext} of input.plugins) {
+    const task = `reference detector for ${pluginId}`;
     taskReporter.start(task);
     const rd = await plugin.referenceDetector(directoryContext, taskReporter);
     rds.push(rd);
@@ -52,12 +53,12 @@ export async function graph(
   const rd = new CascadingReferenceDetector(rds);
   // Build graphs
   const pluginGraphs = [];
-  for (const {plugin, directoryContext} of input.plugins) {
-    if (!scope || scope.includes(plugin.id)) {
-      const task = `generating graph for ${plugin.id}`;
+  for (const {pluginId, plugin, directoryContext} of input.plugins) {
+    if (!scope || scope.includes(pluginId)) {
+      const task = `generating graph for ${pluginId}`;
       taskReporter.start(task);
       pluginGraphs.push({
-        pluginId: plugin.id,
+        pluginId: pluginId,
         weightedGraph: await plugin.graph(directoryContext, rd, taskReporter),
       });
       const identities = await plugin.identities(
