@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.8;
 pragma experimental ABIEncoderV2;
 
@@ -6,12 +8,15 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MerkleRedeem is AccessControl {
-    bytes32 public constant DELAYER_ROLE = keccak256("DELAYER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant SEEDER_ROLE = keccak256("SEEDER_ROLE");
 
     IERC20 public token;
+    uint64 public minDelay;
 
     event Claimed(address _contributor, uint256 _balance);
+    event DistributionPublished(uint indexed _id, bytes32 _root);
+    event DistributionPaused(uint indexed _id);
 
     // Recorded Distributions
     mapping(uint => bytes32) public distributionMerkleRoots;
@@ -19,10 +24,12 @@ contract MerkleRedeem is AccessControl {
     mapping(uint => uint64) public claimTimes;
 
     constructor(
-        address _token
+        address _token,
+        uint64 _minDelay
     ) public {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
+        minDelay = _minDelay;
         token = IERC20(_token);
     }
 
@@ -34,7 +41,7 @@ contract MerkleRedeem is AccessControl {
     {
         if (_balance > 0) {
             emit Claimed(_contributor, _balance);
-            require(token.transfer(_contributor, _balance), "ERR_TRANSFER_FAILED");
+            require(token.transfer(_contributor, _balance), "MerkleRedeem: ERR_TRANSFER_FAILED");
         }
     }
 
@@ -50,9 +57,9 @@ contract MerkleRedeem is AccessControl {
     )
         public
     {
-        require(!claimed[_distribution][_contributor]);
-        require(block.timestamp > claimTimes[_distribution], "Distribution Still Paused");
-        require(verifyClaim(_contributor, _distribution, _claimedBalance, _merkleProof), 'Incorrect merkle proof');
+        require(!claimed[_distribution][_contributor], "MerkleRedeem: Already claimed");
+        require(block.timestamp > claimTimes[_distribution], "MerkleRedeem: Distribution still paused");
+        require(verifyClaim(_contributor, _distribution, _claimedBalance, _merkleProof), 'MerkleRedeem: Incorrect merkle proof');
 
         claimed[_distribution][_contributor] = true;
         disburse(_contributor, _claimedBalance);
@@ -66,7 +73,7 @@ contract MerkleRedeem is AccessControl {
 
     /**
       * @dev  ensure the contract's token balance is sufficient before calling
-      *       a claimWeeks function.
+      *       the claimWeeks function.
       */
     function claimWeeks(
         address _contributor,
@@ -79,9 +86,9 @@ contract MerkleRedeem is AccessControl {
         for(uint i = 0; i < claims.length; i++) {
             claim = claims[i];
 
-            require(block.timestamp > claimTimes[claim.distributionIdx], "Distribution Still Delayed");
+            require(block.timestamp > claimTimes[claim.distributionIdx], "MerkleRedeem: Distribution still paused");
             require(!claimed[claim.distributionIdx][_contributor]);
-            require(verifyClaim(_contributor, claim.distributionIdx, claim.balance, claim.merkleProof), 'Incorrect merkle proof');
+            require(verifyClaim(_contributor, claim.distributionIdx, claim.balance, claim.merkleProof), 'MerkleRedeem: Incorrect merkle proof');
 
             totalBalance += claim.balance;
             claimed[claim.distributionIdx][_contributor] = true;
@@ -91,8 +98,7 @@ contract MerkleRedeem is AccessControl {
 
     /**
      * Get the claim status for a user for a slice of distributions.
-     * This will error if an index for non-existent distribution is
-     * passed.
+     * Will return false for a non-existent distribution.
      *
      * The `_end` value is included in the returned array
      */
@@ -115,8 +121,9 @@ contract MerkleRedeem is AccessControl {
 
     /**
      * Get the bytes32 hash merkle root for a slice of all valid
-     * distributions. This will error if an index for a non-existent
-     * distribution is passed.
+     * distributions. This will return bytes32(0) if a distribution is
+     * paused or non-existent. Non-existent distributions have a `claimTime`
+     * of zero.
      *
      * The `_end` value is included in the returned array
      */
@@ -156,42 +163,42 @@ contract MerkleRedeem is AccessControl {
     /**
      * Publish a merkleRoot that contributors can validate against to claim
      * funds. Currently the _claimTime can be set to any time past or present,
-     * but this may not be the case when ultimately released. Allocations
+     * but this may not be the case when ultimately released. Distributions
      * might need to observe some minimum delay period before claims
      * can successfully execute against it.
      */
-    function seedAllocations(
+    function seedDistribution(
         uint _distribution,
         bytes32 _merkleRoot,
         uint64 _claimTime
     )
         external
     {
-        require(hasRole(SEEDER_ROLE, msg.sender), "MerkleRedeem: Must have Seeder role to post allocation roots");
-        require(distributionMerkleRoots[_distribution] == bytes32(0), "cannot rewrite merkle root");
+        require(hasRole(SEEDER_ROLE, msg.sender), "MerkleRedeem: Must have SEEDER_ROLE to post allocation roots");
+        require(distributionMerkleRoots[_distribution] == bytes32(0), "MerkleRedeem: cannot rewrite merkle root");
+        require(block.timestamp + minDelay <= _claimTime, "MerkleRedeem: Delay is too short");
         distributionMerkleRoots[_distribution] = _merkleRoot;
         claimTimes[_distribution] = _claimTime;
+        emit DistributionPublished(_distribution, _merkleRoot);
     }
 
     /**
-     * Passing a zero will delay the claim until MAX_UINT64, which is
-     * July 21, 2554
+     * Pause a Distribution indefinitely by resetting the merkle root to zero
+     * The distribution can be re-seeded with a new merkle root.
      */
-    function delayDistribution(uint _distribution, uint64 _newClaimTime) external {
-        require(hasRole(DELAYER_ROLE, msg.sender), "MerkleRedeem: Must have pauser role to modify allocations");
-        require(distributionMerkleRoots[_distribution] != bytes32(0), "MerkleRedeem: cannot delay a non-existent distribution");
-        // It seems unfair to pause a live distribution. This probably warrants
-        // further discussion, but I'd hate to prevent some people from
-        // rightfully claiming funds and not others.
-        require(block.timestamp < claimTimes[_distribution], "MerkleRedeem: Can't Delay a Live Distribution");
+    function pauseDistribution(uint _distribution) external {
+        require(hasRole(PAUSER_ROLE, msg.sender), "MerkleRedeem: Must have PAUSER_ROLE to modify allocations");
+        require(block.timestamp < claimTimes[_distribution], "MerkleRedeem: Can't modify a live distribution");
 
-        if(_newClaimTime == 0) {
-          _newClaimTime = uint64(-1);
-        }
-        // The below `require` might not be necessary, and in fact might
-        // inhibit some desired user stories, where the `DELAYER_ROLE` holder
-        // has the authority to reauthorize a distribution.
-        require(_newClaimTime > claimTimes[_distribution], "MerkleRedeem: Delayed Claim Time must be in the future");
-        claimTimes[_distribution] = _newClaimTime;
+        distributionMerkleRoots[_distribution] = bytes32(0);
+        emit DistributionPaused(_distribution);
+    }
+
+    /**
+     * Pauser Role can modify the global minumum delay
+     */
+    function changeMinimumDelay(uint64 _newDelay) external {
+        require(hasRole(PAUSER_ROLE, msg.sender), "MerkleRedeem: Must have PAUSER_ROLE to modify allocations");
+        minDelay = _newDelay;
     }
 }
