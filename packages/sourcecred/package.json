@@ -3,7 +3,7 @@
   "description": "a tool for communities to measure and reward value creation",
   "homepage": "https://sourcecred.io",
   "repository": "github:sourcecred/sourcecred",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": false,
   "dependencies": {
     "@material-ui/core": "^4.11.2",
