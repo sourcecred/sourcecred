@@ -1,7 +1,7 @@
 // @flow
 
 import {bundledGrainIntegrations} from "./bundledGrainIntegrations";
-import {csvIntegration} from "sc-grainIntegration-csv";
+import {csvIntegration} from "@sourcecred/grain-integration-csv";
 describe("api/bundledGrainIntegrations", () => {
   it("returns the csv parser", () => {
     const result = bundledGrainIntegrations("csv");

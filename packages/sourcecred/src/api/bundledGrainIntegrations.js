@@ -3,7 +3,7 @@
 import type {GrainIntegrationFunction} from "../core/ledger/grainIntegration";
 import * as C from "../util/combo";
 
-import {csvIntegration} from "sc-grainIntegration-csv";
+import {csvIntegration} from "@sourcecred/grain-integration-csv";
 
 export type GrainIntegration = {|
   name: string,
