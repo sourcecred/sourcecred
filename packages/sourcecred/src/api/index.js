@@ -19,6 +19,7 @@ import * as ethereumUtils from "../plugins/ethereum/utils";
 import {declarationParser} from "../analysis/pluginDeclaration";
 import {identityProposalsParser} from "../core/ledger/identityProposal";
 import {ConstructorPlugin} from "../plugins/external/plugin";
+import {coerce as coerceNameFromString} from "../core/identity/name";
 
 import * as address from "../core/address";
 import * as graph from "../core/graph";
@@ -93,6 +94,7 @@ const api = {
     },
     declarationParser,
     identityProposalsParser,
+    coerceNameFromString,
   },
 };
 
