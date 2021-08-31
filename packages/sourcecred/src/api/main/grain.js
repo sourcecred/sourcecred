@@ -6,9 +6,10 @@ import type {CurrencyDetails} from "../currencyConfig";
 import {type GrainConfig, toDistributionPolicy} from "../grainConfig";
 import type {Distribution} from "../../core/ledger/distribution";
 import {applyDistributions} from "../../core/ledger/applyDistributions";
+import {type TimestampMs} from "../../util/timestamp";
 import {
   executeGrainIntegration,
-  type GrainIntegrationResult,
+  type GrainIntegrationOutput,
 } from "../../core/ledger/grainIntegration";
 
 export type GrainInput = {|
@@ -24,8 +25,15 @@ export type GrainOutput = {|
   +ledger: Ledger,
 |};
 
+// Similar to GrainIntegrationResult but excludes the ledger
+// since only the most recent ledger is relevant
+export type GrainIntegrationMultiResult = {|
+  output?: GrainIntegrationOutput,
+  distributionCredTimestamp: TimestampMs,
+|};
+
 export type GrainIntegrationResults = {|
-  +results: $ReadOnlyArray<GrainIntegrationResult>,
+  +results: $ReadOnlyArray<GrainIntegrationMultiResult>,
   // A top-level pointer to the most recently updated Ledger instance
   +ledger: Ledger,
 |};
@@ -74,8 +82,9 @@ export function executeGrainIntegrationsFromGrainInput(
         integrationCurrency,
         false
       );
-      ledgerResult = result.ledger;
-      results.push(result);
+      const {output, distributionCredTimestamp, ledger: nextLedger} = result;
+      ledgerResult = nextLedger;
+      results.push({output, distributionCredTimestamp});
     });
   }
   return {ledger: ledgerResult, results};

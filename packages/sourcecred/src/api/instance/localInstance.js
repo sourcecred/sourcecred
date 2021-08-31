@@ -26,7 +26,7 @@ import type {PluginDirectoryContext} from "../plugin";
 import {type CredAccountData} from "../../core/ledger/credAccounts";
 import {WritableDataStorage} from "../../core/storage";
 import {type PersonalAttributionsConfig} from "../config/personalAttributionsConfig";
-import type {GrainIntegrationResult} from "../../core/ledger/grainIntegration";
+import type {GrainIntegrationMultiResult} from "../main/grain";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -121,7 +121,7 @@ export class LocalInstance extends ReadInstance implements Instance {
   }
 
   async writeGrainIntegrationOutput(
-    result: GrainIntegrationResult
+    result: $Shape<GrainIntegrationMultiResult>
   ): Promise<void> {
     if (!result.output) {
       return;
