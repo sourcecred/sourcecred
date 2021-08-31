@@ -73,6 +73,7 @@ const useStyles = makeStyles((theme) => ({
   element: {flex: 1, margin: "20px"},
   arrowInput: {width: "40%", display: "inline-block"},
   pageHeader: {color: theme.palette.text.primary},
+  noTransform: {textTransform: "none"}
 }));
 
 type TransferProps = {|+currency: CurrencyDetails|};
@@ -117,8 +118,6 @@ export const Transfer = ({
     setHasUnsavedChanges(false);
     saveToDisk();
     setMemo("");
-    setReceiver(null);
-    setSender(null);
     setAmount("");
   };
 
@@ -135,6 +134,10 @@ export const Transfer = ({
         </div>
       );
     }
+  };
+
+  const handleMax = () => {
+    if (sender) setAmount(format(sender.balance, 2, "").replace(/,/g, ""));
   };
 
   return (
@@ -156,6 +159,7 @@ export const Transfer = ({
             ledger={ledger}
             setCurrentAccount={setSender}
             placeholder="From..."
+            currentAccount={sender}
           />
         </div>
         <div
@@ -175,9 +179,9 @@ export const Transfer = ({
               value={amount}
               onChange={(e) => setAmount(e.currentTarget.value)}
             />
-            <span>
-              {sender && ` max: ${format(sender.balance, 2, currencySuffix)}`}
-            </span>
+            <Button onClick={handleMax} className={classes.noTransform}>
+                {sender && ` max: ${format(sender.balance, 2, currencySuffix)}`}
+            </Button>
           </div>
           <div className={`${isXSmall ? "" : classes.triangle}`} />
         </div>
@@ -188,6 +192,7 @@ export const Transfer = ({
             ledger={ledger}
             setCurrentAccount={setReceiver}
             placeholder="To..."
+            currentAccount={receiver}
           />
         </div>
       </div>
