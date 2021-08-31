@@ -9,7 +9,6 @@ type DropdownProps = {|
   +ledger: Ledger,
   +setCurrentAccount: (Account | null) => void,
   +placeholder?: string,
-  +currentAccount: Account | null,
 |};
 
 const useStyles = makeStyles({combobox: {margin: "0px 32px 16px"}});
@@ -18,14 +17,12 @@ export default function AccountDropdown({
   placeholder,
   setCurrentAccount,
   ledger,
-  currentAccount,
 }: DropdownProps): ReactNode {
   const classes = useStyles();
   const items = ledger.accounts().filter((a) => a.active);
 
   return (
     <Autocomplete
-      value={currentAccount}
       size="medium"
       className={classes.combobox}
       onChange={(...args) => {
