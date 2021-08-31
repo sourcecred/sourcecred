@@ -71,8 +71,13 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
   },
   element: {flex: 1, margin: "20px"},
-  arrowInput: {width: "40%", display: "inline-block"},
+  arrowInput: {
+    width: "40%",
+    minWidth: "86px",
+    display: "inline-block",
+  },
   pageHeader: {color: theme.palette.text.primary},
+  arrowButton: {textTransform: "none", whiteSpace: "nowrap"},
 }));
 
 type TransferProps = {|+currency: CurrencyDetails|};
@@ -117,24 +122,23 @@ export const Transfer = ({
     setHasUnsavedChanges(false);
     saveToDisk();
     setMemo("");
-    setReceiver(null);
-    setSender(null);
     setAmount("");
+    setSender(null);
+    setReceiver(null);
   };
 
   const handleSaveToLedgerWarning = (_) => {
-    if (
-      hasUnsavedChanges ||
-      sender !== null ||
-      receiver !== null ||
-      amount !== ""
-    ) {
+    if (hasUnsavedChanges) {
       return (
         <div className={classes.saveToLedgerAlert}>
           Changes not saved to ledger
         </div>
       );
     }
+  };
+
+  const handleMax = () => {
+    if (sender) setAmount(format(sender.balance, 2, "").replace(/,/g, ""));
   };
 
   return (
@@ -156,6 +160,7 @@ export const Transfer = ({
             ledger={ledger}
             setCurrentAccount={setSender}
             placeholder="From..."
+            currentAccount={sender}
           />
         </div>
         <div
@@ -175,9 +180,9 @@ export const Transfer = ({
               value={amount}
               onChange={(e) => setAmount(e.currentTarget.value)}
             />
-            <span>
+            <Button onClick={handleMax} className={classes.arrowButton}>
               {sender && ` max: ${format(sender.balance, 2, currencySuffix)}`}
-            </span>
+            </Button>
           </div>
           <div className={`${isXSmall ? "" : classes.triangle}`} />
         </div>
@@ -188,6 +193,7 @@ export const Transfer = ({
             ledger={ledger}
             setCurrentAccount={setReceiver}
             placeholder="To..."
+            currentAccount={receiver}
           />
         </div>
       </div>

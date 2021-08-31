@@ -126,6 +126,7 @@ export const SpecialDistribution = ({
             ledger={ledger}
             setCurrentAccount={setRecipient}
             placeholder="Recipient"
+            currentAccount={recipient}
           />
         </div>
       </div>
