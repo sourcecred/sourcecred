@@ -10,7 +10,7 @@
   "scripts": {
     "test": "lerna run test --stream --",
     "build": "lerna run build --stream",
-    "install": "lerna bootstrap && ./scripts/flow-mono.sh",
+    "postinstall": "./scripts/flow-mono.sh",
     "start": "lerna run start --stream",
     "clean": "lerna clean --yes && rm -rf node_modules"
   },
