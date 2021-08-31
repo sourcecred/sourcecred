@@ -71,9 +71,13 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
   },
   element: {flex: 1, margin: "20px"},
-  arrowInput: {width: "40%", display: "inline-block"},
+  arrowInput: {
+    width: "40%",
+    minWidth: "86px",
+    display: "inline-block",
+  },
   pageHeader: {color: theme.palette.text.primary},
-  noTransform: {textTransform: "none"},
+  arrowButton: {textTransform: "none", whiteSpace: "nowrap"},
 }));
 
 type TransferProps = {|+currency: CurrencyDetails|};
@@ -179,7 +183,7 @@ export const Transfer = ({
               value={amount}
               onChange={(e) => setAmount(e.currentTarget.value)}
             />
-            <Button onClick={handleMax} className={classes.noTransform}>
+            <Button onClick={handleMax} className={classes.arrowButton}>
               {sender && ` max: ${format(sender.balance, 2, currencySuffix)}`}
             </Button>
           </div>
