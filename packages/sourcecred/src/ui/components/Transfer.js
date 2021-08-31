@@ -123,15 +123,12 @@ export const Transfer = ({
     saveToDisk();
     setMemo("");
     setAmount("");
+    setSender(null);
+    setReceiver(null);
   };
 
   const handleSaveToLedgerWarning = (_) => {
-    if (
-      hasUnsavedChanges ||
-      sender !== null ||
-      receiver !== null ||
-      amount !== ""
-    ) {
+    if (hasUnsavedChanges) {
       return (
         <div className={classes.saveToLedgerAlert}>
           Changes not saved to ledger
