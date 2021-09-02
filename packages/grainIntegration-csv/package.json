@@ -1,6 +1,6 @@
 {
   "name": "@sourcecred/grain-integration-csv",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1",
   "description": "print out a csv for each grain distribution",
   "main": "index.js",
   "license": "(MIT OR Apache-2.0)",
