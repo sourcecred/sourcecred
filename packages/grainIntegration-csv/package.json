@@ -1,6 +1,6 @@
 {
   "name": "@sourcecred/grain-integration-csv",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.0",
   "description": "print out a csv for each grain distribution",
   "main": "index.js",
   "license": "(MIT OR Apache-2.0)",
@@ -14,5 +14,8 @@
     "flow-bin": "^0.135.0",
     "jest": "^26.0.1",
     "tmp": "^0.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
