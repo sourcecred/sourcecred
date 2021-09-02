@@ -14,5 +14,8 @@
     "flow-bin": "^0.135.0",
     "jest": "^26.0.1",
     "tmp": "^0.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
