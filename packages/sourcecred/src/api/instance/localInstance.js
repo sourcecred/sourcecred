@@ -13,6 +13,7 @@ import {
 } from "../../core/weightedGraph";
 import {loadJson} from "../../util/storage";
 import {mkdirx} from "../../util/disk";
+import {toISO} from "../../util/timestamp";
 import {parser as configParser, type InstanceConfig} from "../instanceConfig";
 import {Ledger} from "../../core/ledger/ledger";
 import {type DependenciesConfig} from "../dependenciesConfig";
@@ -23,8 +24,9 @@ import {WritableZipStorage} from "../../core/storage/zip";
 import {encode} from "../../core/storage/textEncoding";
 import type {PluginDirectoryContext} from "../plugin";
 import {type CredAccountData} from "../../core/ledger/credAccounts";
-import {type PersonalAttributionsConfig} from "../config/personalAttributionsConfig";
 import {WritableDataStorage} from "../../core/storage";
+import {type PersonalAttributionsConfig} from "../config/personalAttributionsConfig";
+import type {GrainIntegrationMultiResult} from "../main/grain";
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -41,6 +43,10 @@ const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
 const ACCOUNTS_PATH: $ReadOnlyArray<string> = ["output", "accounts.json"];
+const GRAIN_INTEGRATION_DIRECTORY: $ReadOnlyArray<string> = [
+  "output",
+  "grainIntegration",
+];
 
 const JSON_SUFFIX: string = ".json";
 const ZIP_SUFFIX: string = "";
@@ -119,6 +125,22 @@ export class LocalInstance extends ReadInstance implements Instance {
   async writeLedger(ledger: Ledger): Promise<void> {
     const ledgerPath = pathJoin(...LEDGER_PATH);
     return this._writableStorage.set(ledgerPath, encode(ledger.serialize()));
+  }
+
+  async writeGrainIntegrationOutput(
+    result: $Shape<GrainIntegrationMultiResult>
+  ): Promise<void> {
+    if (!result.output) {
+      return;
+    }
+    const {fileName, content} = result.output;
+    mkdirx(pathJoin(...GRAIN_INTEGRATION_DIRECTORY));
+    const credDateString = toISO(result.distributionCredTimestamp);
+    const grainIntegrationPath = pathJoin(
+      ...GRAIN_INTEGRATION_DIRECTORY,
+      credDateString + "_" + fileName
+    );
+    this._writableStorage.set(grainIntegrationPath, encode(content));
   }
 
   //////////////////////////////
