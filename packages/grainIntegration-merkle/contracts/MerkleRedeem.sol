@@ -14,7 +14,7 @@ contract MerkleRedeem is AccessControl {
     IERC20 public token;
     uint64 public minDelay;
 
-    event Claimed(address _contributor, uint256 _balance);
+    event Claimed(address indexed _contributor, uint256 _balance);
     event DistributionPublished(uint indexed _id, bytes32 _root);
     event DistributionPaused(uint indexed _id);
 
@@ -200,5 +200,14 @@ contract MerkleRedeem is AccessControl {
     function changeMinimumDelay(uint64 _newDelay) external {
         require(hasRole(PAUSER_ROLE, msg.sender), "MerkleRedeem: Must have PAUSER_ROLE to modify allocations");
         minDelay = _newDelay;
+    }
+
+    /**
+     *  Used to withdraw unclaimed funds or empty the contract in the event
+     *  of an emergency.
+     */
+    function withdrawFunds(uint _amount) external {
+      require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "MerkleRedeem: Must have DEFAULT_ADMIN_ROLE to withdraw funds from the contract");
+      require(token.transfer(msg.sender, _amount), "MerkleRedeem: ERR_TRANSFER_FAILED");
     }
 }

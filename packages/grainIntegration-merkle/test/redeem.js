@@ -367,7 +367,7 @@ contract("MerkleRedeem", accounts => {
       });
     });
 
-    describe("When a user has several allocation to claim", () => {
+    describe("When a user has several allocations to claim", () => {
       const claimBalance1 = utils.toWei("1000");
       const elements1 = [utils.soliditySha3(accounts[1], claimBalance1)];
       const merkleTree1 = new MerkleTree(elements1);
@@ -468,6 +468,23 @@ contract("MerkleRedeem", accounts => {
           result,
           expectedResult,
           "claim status should be accurate"
+        );
+      });
+    });
+    describe("withdraw funds", () => {
+      it("allows admin to reclaim undistributed funds", async () => {
+        const adminBalance = await tbal.balanceOf(accounts[0]);
+        await redeem.withdrawFunds(utils.toWei("1000"));
+        const expectedNewBalance = adminBalance.add(
+          new utils.BN(utils.toWei("1000"))
+        );
+        const newBalance = await tbal.balanceOf(accounts[0]);
+        assert(newBalance.toString() === expectedNewBalance.toString());
+      });
+      it("cannot be invoked by a non-admin", async () => {
+        await truffleAssert.reverts(
+          redeem.withdrawFunds(utils.toWei("1000"), { from: accounts[1] }),
+          "Must have DEFAULT_ADMIN_ROLE"
         );
       });
     });
