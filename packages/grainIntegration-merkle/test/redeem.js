@@ -3,9 +3,17 @@ const Redeem = artifacts.require("./MerkleRedeem.sol");
 const should = require("chai").should();
 const { promisify } = require("util");
 const { utils } = web3;
-const { MerkleTree } = require("../lib/merkleTree");
+const { MerkleTree } = require("merkletreejs");
+const keccak256 = require("keccak256");
 const { increaseTime } = require("./helpers");
 const truffleAssert = require("truffle-assertions");
+
+function createMerkleTree(elements) {
+  return new MerkleTree(elements, keccak256, {
+    hashLeaves: false,
+    sortPairs: true
+  });
+}
 
 contract("MerkleRedeem", accounts => {
   const admin = accounts[0];
@@ -57,7 +65,7 @@ contract("MerkleRedeem", accounts => {
       REDEEM = redeem.address;
       let claimBalance = utils.toWei("9876");
       const elements = [utils.soliditySha3(accounts[0], claimBalance)];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
       root = merkleTree.getHexRoot();
 
       await tbal.mint(REDEEM, utils.toWei("1449999"));
@@ -92,7 +100,7 @@ contract("MerkleRedeem", accounts => {
       const lastBlock = await web3.eth.getBlock("latest");
       const now = lastBlock.timestamp;
       const elements = [utils.soliditySha3(accounts[0], claimBalance)];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
       const root = merkleTree.getHexRoot();
       await truffleAssert.reverts(
         redeem.seedDistribution(1, root, now),
@@ -106,7 +114,7 @@ contract("MerkleRedeem", accounts => {
       const now = lastBlock.timestamp;
 
       const elements = [utils.soliditySha3(accounts[0], claimBalance)];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
       const root = merkleTree.getHexRoot();
       await redeem.seedDistribution(1, root, now + 1);
 
@@ -127,7 +135,7 @@ contract("MerkleRedeem", accounts => {
       const now = lastBlock.timestamp;
 
       const elements = [utils.soliditySha3(accounts[0], claimBalance)];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
       const root = merkleTree.getHexRoot();
 
       await redeem.seedDistribution(1, root, now + 1);
@@ -137,7 +145,7 @@ contract("MerkleRedeem", accounts => {
         utils.soliditySha3(accounts[0], claimBalance),
         utils.soliditySha3(accounts[1], claimBalance)
       ];
-      const merkleTree2 = new MerkleTree(elements);
+      const merkleTree2 = createMerkleTree(elements);
       const root2 = merkleTree.getHexRoot();
 
       await truffleAssert.reverts(
@@ -157,7 +165,7 @@ contract("MerkleRedeem", accounts => {
         utils.soliditySha3(accounts[0], claimBalance0),
         utils.soliditySha3(accounts[1], claimBalance1)
       ];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
       const root = merkleTree.getHexRoot();
 
       await redeem.seedDistribution(1, root, now + 1);
@@ -179,7 +187,7 @@ contract("MerkleRedeem", accounts => {
     describe("With a week finished", () => {
       const claimBalance = utils.toWei("1000");
       const elements = [utils.soliditySha3(accounts[1], claimBalance)];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
 
       beforeEach(async () => {
         const lastBlock = await web3.eth.getBlock("latest");
@@ -202,7 +210,7 @@ contract("MerkleRedeem", accounts => {
     describe("PAUSER_ROLE", () => {
       const claimBalance = utils.toWei("1000");
       const elements = [utils.soliditySha3(accounts[1], claimBalance)];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
       const root = merkleTree.getHexRoot();
 
       let claimTime;
@@ -298,7 +306,7 @@ contract("MerkleRedeem", accounts => {
     describe("When a user has an allocation to claim", () => {
       const claimBalance = utils.toWei("1000");
       const elements = [utils.soliditySha3(accounts[1], claimBalance)];
-      const merkleTree = new MerkleTree(elements);
+      const merkleTree = createMerkleTree(elements);
       const root = merkleTree.getHexRoot();
 
       beforeEach(async () => {
@@ -370,12 +378,12 @@ contract("MerkleRedeem", accounts => {
     describe("When a user has several allocations to claim", () => {
       const claimBalance1 = utils.toWei("1000");
       const elements1 = [utils.soliditySha3(accounts[1], claimBalance1)];
-      const merkleTree1 = new MerkleTree(elements1);
+      const merkleTree1 = createMerkleTree(elements1);
       const root1 = merkleTree1.getHexRoot();
 
       const claimBalance2 = utils.toWei("1234");
       const elements2 = [utils.soliditySha3(accounts[1], claimBalance2)];
-      const merkleTree2 = new MerkleTree(elements2);
+      const merkleTree2 = createMerkleTree(elements2);
       const root2 = merkleTree2.getHexRoot();
 
       beforeEach(async () => {
