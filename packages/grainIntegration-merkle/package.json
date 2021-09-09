@@ -32,6 +32,8 @@
     "@truffle/hdwallet-provider": "^1.0.29",
     "bn.js": "^4.11.0",
     "ethereumjs-util": "^7.0.4",
+    "keccak256": "^1.0.3",
+    "merkletreejs": "^0.2.24",
     "truffle": "^5.1.39",
     "web3-utils": "^1.2.11"
   },
