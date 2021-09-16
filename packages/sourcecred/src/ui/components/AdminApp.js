@@ -34,29 +34,10 @@ const theme = createMuiTheme({
   palette: {
     type: "dark",
     backgroundColor: "#303030",
-    primary: pink,
-    blueish: "#6174CC",
-    lavender: "#C5A2C5",
-    orange: "#FFDDC6",
-    darkOrange: "#FFAA3D",
-    peach: "#FFF1E8",
-    white: "#FAFBFD",
-    scPink: "#FDBBD1",
-    green: "#4BD76D",
-    sunset: "#FFE9DB",
-    salmon: "#FFE5E1",
-    coral: "#F9D1CB",
-    pink: "#FEDDE8",
-    blue: "#728DFF",
-    purple: "#C5A2C5",
-    violet: "#EDDAEE",
-    warning: {
-      main: "#FFAA3D",
-    },
-    danger: "#FF594D",
-    text: {
-      link: "#31AAEE",
-    },
+    blue: "#6174CC", // color for cred on explorer home
+    orange: "#FFDDC6", // color for project/organizations on explorer home
+    darkOrange: "#FFAA3D", // color for grain on explorer home
+    purple: "#C5A2C5", // color for bots on explorer home
   },
   overrides: {
     MuiChip: {
