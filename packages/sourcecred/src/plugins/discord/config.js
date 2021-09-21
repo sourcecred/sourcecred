@@ -48,7 +48,7 @@ export type DiscordConfigJson = $ReadOnlyArray<{|
   // Note that roles use a snowflake id only.
   // defaultWeight is used to set weights for members who don't have a specified role
   +roleWeightConfig?: RoleWeightConfig,
-  // An object mapping a channel to a weight, as in:
+  // An object mapping a channel or a channel category to a weight, as in:
   // {
   //   "defaultWeight": 0,
   //   "weights": {
@@ -56,7 +56,10 @@ export type DiscordConfigJson = $ReadOnlyArray<{|
   //   }
   // }
   // Note that channels use a snowflake id only.
-  // defaultWeight is used to set weights for channels that don't have a specified weight
+  // If both a channel and a category weight apply to a channel, they will be multiplied
+  // defaultWeight is used to set weights for channels and categories that don't have a specified weight
+  // this means that defaultWeight^2 is used when neither a channel nor a category weight is specified
+  // we therefore only recommend a defaultWeight of 1 or 0
   +channelWeightConfig?: ChannelWeightConfig,
   // List of channels which are considered "props channels".
   // In a props channel, we have an extra rule: if someone is mentioned in a message,

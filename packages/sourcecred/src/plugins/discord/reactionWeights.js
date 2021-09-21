@@ -12,6 +12,7 @@ export type RoleWeightConfig = {|
 
 export type ChannelWeightConfig = {|
   +defaultWeight: NodeWeight,
+  // May contain channel IDs or channel category IDs
   +weights: {[Model.Snowflake]: NodeWeight},
 |};
 
@@ -35,7 +36,8 @@ export function reactionWeight(
   reaction: Model.Reaction,
   reactingMember: Model.GuildMember,
   propsChannels: Set<Model.Snowflake>,
-  reactions: $ReadOnlyArray<GraphReaction>
+  reactions: $ReadOnlyArray<GraphReaction>,
+  channelParentId: ?Model.Snowflake
 ): NodeWeight {
   if (
     message.authorId === reaction.authorId &&
@@ -64,7 +66,7 @@ export function reactionWeight(
 
   return (
     _roleWeight(weights.roleWeights, reactingMember) *
-    _channelWeight(weights.channelWeights, reaction) *
+    _channelWeight(weights.channelWeights, reaction, channelParentId) *
     _emojiWeight(weights.emojiWeights, reaction) *
     averagingMultiplier
   );
@@ -87,10 +89,17 @@ export function _roleWeight(
 
 export function _channelWeight(
   config: ChannelWeightConfig,
-  reaction: Model.Reaction
+  reaction: Model.Reaction,
+  channelParentId: ?Model.Snowflake
 ): NodeWeight {
   const {defaultWeight, weights} = config;
-  return NullUtil.orElse(weights[reaction.channelId], defaultWeight);
+  let parentWeight = channelParentId ? weights[channelParentId] : undefined;
+  let channelWeight = weights[reaction.channelId];
+  if (parentWeight === undefined && channelWeight === undefined)
+    return defaultWeight * defaultWeight;
+  if (channelWeight === undefined) channelWeight = defaultWeight || 1;
+  if (parentWeight === undefined) parentWeight = defaultWeight || 1;
+  return parentWeight * channelWeight;
 }
 
 export function _emojiWeight(

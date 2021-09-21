@@ -1,10 +1,11 @@
 [
   {
     "roles": [
-      "678349848684003359",
-      "678350026946117694"
+      "678350026946117694",
+      "678349848684003359"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-02-15T21:16:40.215000+00:00",
     "is_pending": false,
@@ -24,6 +25,7 @@
       "678349848684003359"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-11-02T18:02:40.116000+00:00",
     "is_pending": false,
@@ -43,6 +45,7 @@
       "678349848684003359"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2021-04-27T01:08:45.585000+00:00",
     "is_pending": false,
@@ -50,7 +53,7 @@
     "user": {
       "id": "318552163649454081",
       "username": "hz",
-      "avatar": "9354e5b8f1227fc95c494d3b08df59a5",
+      "avatar": "4dd1aa262e7e332bf2680428f03793bf",
       "discriminator": "8826",
       "public_flags": 0
     },
@@ -59,18 +62,19 @@
   },
   {
     "roles": [
-      "678349848684003359",
-      "678350026946117694"
+      "678350026946117694",
+      "678349848684003359"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-02-15T22:31:31.243000+00:00",
     "is_pending": false,
     "pending": false,
     "user": {
       "id": "420341518948237331",
-      "username": "DandeLion",
-      "avatar": "ccec4bb861a03f5c30fb7c68ca672a92",
+      "username": "dandelion",
+      "avatar": "43653169c81b2fdbb9b93cc39d1f0e2a",
       "discriminator": "3370",
       "public_flags": 0
     },
@@ -79,10 +83,11 @@
   },
   {
     "roles": [
-      "678349848684003359",
-      "678350026946117694"
+      "678350026946117694",
+      "678349848684003359"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-02-15T22:21:55.613000+00:00",
     "is_pending": false,
@@ -99,10 +104,11 @@
   },
   {
     "roles": [
-      "678349848684003359",
-      "678350026946117694"
+      "678350026946117694",
+      "678349848684003359"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-02-16T00:45:23.478000+00:00",
     "is_pending": false,
@@ -119,10 +125,11 @@
   },
   {
     "roles": [
-      "678349848684003359",
-      "678350026946117694"
+      "678350026946117694",
+      "678349848684003359"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-10-02T18:07:37.732000+00:00",
     "is_pending": false,
@@ -130,7 +137,7 @@
     "user": {
       "id": "489154203714060300",
       "username": "topocount",
-      "avatar": "ae3bc648fc34000087134ff7eb9a7533",
+      "avatar": "bfeb654e20eb959163e64a206c517e1d",
       "discriminator": "1337",
       "public_flags": 0
     },
@@ -142,6 +149,7 @@
       "678350026946117694"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-10-02T18:07:44.893000+00:00",
     "is_pending": false,
@@ -157,10 +165,29 @@
     "deaf": false
   },
   {
+    "roles": [],
+    "nick": null,
+    "avatar": null,
+    "premium_since": null,
+    "joined_at": "2021-05-10T10:30:53.883000+00:00",
+    "is_pending": false,
+    "pending": false,
+    "user": {
+      "id": "664562775770791966",
+      "username": "BrianBelhumeur",
+      "avatar": "02425177ceec3724217793f7e26b2b7b",
+      "discriminator": "7902",
+      "public_flags": 0
+    },
+    "mute": false,
+    "deaf": false
+  },
+  {
     "roles": [
       "678359229433905152"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-02-15T21:57:23.609000+00:00",
     "is_pending": false,
@@ -181,6 +208,7 @@
       "728740243926286386"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-07-03T22:33:33.496000+00:00",
     "is_pending": false,
@@ -201,6 +229,7 @@
       "767909888226492448"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-10-20T00:39:44.545000+00:00",
     "is_pending": false,
@@ -221,6 +250,7 @@
       "761706197606334535"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-10-02T21:48:29.344000+00:00",
     "is_pending": false,
@@ -241,6 +271,7 @@
       "772890579632652339"
     ],
     "nick": null,
+    "avatar": null,
     "premium_since": null,
     "joined_at": "2020-11-02T18:31:13.848000+00:00",
     "is_pending": false,

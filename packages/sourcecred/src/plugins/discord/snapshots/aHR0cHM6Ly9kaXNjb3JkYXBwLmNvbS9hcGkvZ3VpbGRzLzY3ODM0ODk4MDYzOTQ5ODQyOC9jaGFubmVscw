@@ -21,7 +21,7 @@
   },
   {
     "id": "678348980849213472",
-    "last_message_id": "837852251984363589",
+    "last_message_id": "841261006906327070",
     "type": 0,
     "name": "general",
     "position": 0,
@@ -34,6 +34,7 @@
   },
   {
     "id": "678348980878573661",
+    "last_message_id": null,
     "type": 2,
     "name": "General",
     "position": 0,
@@ -95,7 +96,7 @@
   },
   {
     "id": "830088231538130965",
-    "last_message_id": "830088232083521567",
+    "last_message_id": "870202554259214396",
     "type": 0,
     "name": "moderator-only",
     "position": 0,
@@ -123,7 +124,7 @@
     "parent_id": "678348980798881844",
     "topic": null,
     "bitrate": 40000,
-    "user_limit": 1000,
+    "user_limit": 10000,
     "rtc_region": null,
     "guild_id": "678348980639498428",
     "permission_overwrites": [
