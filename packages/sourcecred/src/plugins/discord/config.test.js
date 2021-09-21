@@ -6,7 +6,7 @@ describe("plugins/discord/config", () => {
   it("can load a basic config", () => {
     const raw = [
       {
-        guildId: "453243919774253079",
+        guildId: "453243919774253079//sourcecred",
         reactionWeightConfig: {
           weights: {
             "🥰": 4,
