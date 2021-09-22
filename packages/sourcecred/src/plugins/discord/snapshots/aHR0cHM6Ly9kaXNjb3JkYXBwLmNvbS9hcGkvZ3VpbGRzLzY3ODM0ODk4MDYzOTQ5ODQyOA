@@ -6,8 +6,8 @@
   "splash": null,
   "discovery_splash": null,
   "features": [
-    "COMMUNITY",
-    "NEWS"
+    "NEWS",
+    "COMMUNITY"
   ],
   "emojis": [
     {
@@ -20,6 +20,7 @@
       "available": true
     }
   ],
+  "stickers": [],
   "banner": null,
   "owner_id": "420341518948237331",
   "application_id": null,
@@ -40,7 +41,9 @@
       "hoist": false,
       "managed": false,
       "mentionable": false,
-      "permissions_new": "6476071936"
+      "icon": null,
+      "unicode_emoji": null,
+      "permissions_new": "1071627961344"
     },
     {
       "id": "678349848684003359",
@@ -51,6 +54,8 @@
       "hoist": false,
       "managed": false,
       "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
       "permissions_new": "6546775617"
     },
     {
@@ -62,6 +67,8 @@
       "hoist": false,
       "managed": false,
       "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
       "permissions_new": "6546775625"
     },
     {
@@ -73,6 +80,8 @@
       "hoist": false,
       "managed": true,
       "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
       "tags": {
         "bot_id": "678351352770068560"
       },
@@ -87,6 +96,8 @@
       "hoist": false,
       "managed": true,
       "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
       "tags": {
         "bot_id": "728738433199112280"
       },
@@ -101,6 +112,8 @@
       "hoist": false,
       "managed": true,
       "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
       "tags": {
         "bot_id": "761705425870782516"
       },
@@ -115,6 +128,8 @@
       "hoist": false,
       "managed": true,
       "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
       "tags": {
         "bot_id": "758370311774404618"
       },
@@ -129,6 +144,8 @@
       "hoist": false,
       "managed": true,
       "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
       "tags": {
         "bot_id": "772886503830323210"
       },
@@ -139,7 +156,7 @@
   "mfa_level": 0,
   "explicit_content_filter": 2,
   "max_presences": null,
-  "max_members": 100000,
+  "max_members": 250000,
   "max_video_channel_users": 25,
   "vanity_url_code": null,
   "premium_tier": 0,
@@ -148,7 +165,9 @@
   "preferred_locale": "en-US",
   "rules_channel_id": "830088231538130964",
   "public_updates_channel_id": "830088231538130965",
+  "hub_type": null,
   "nsfw": false,
+  "nsfw_level": 0,
   "embed_enabled": false,
   "embed_channel_id": null
 }

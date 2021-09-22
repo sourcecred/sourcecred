@@ -231,6 +231,7 @@ export type GraphMessage = {|
   +channelId: Model.Snowflake,
   // Included because we want the channel name in the node description.
   +channelName: string,
+  +channelParentId?: Model.Snowflake,
 |};
 
 /**
@@ -284,6 +285,7 @@ export function* findGraphMessages(
         mentions,
         channelName: channel.name,
         channelId: channel.id,
+        channelParentId: channel.parentId,
       };
     }
   }
@@ -316,6 +318,7 @@ export function _createGraphFromMessages(
       mentions,
       channelName,
       channelId,
+      channelParentId,
     } = graphMessage;
     if (author) {
       wg.graph.addNode(memberNode(author));
@@ -333,7 +336,8 @@ export function _createGraphFromMessages(
           reaction,
           reactingMember,
           propsChannels,
-          reactions
+          reactions,
+          channelParentId
         )
       );
       wg.graph.addNode(node);

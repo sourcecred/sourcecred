@@ -8,7 +8,9 @@
     "hoist": false,
     "managed": false,
     "mentionable": false,
-    "permissions_new": "6476071936"
+    "icon": null,
+    "unicode_emoji": null,
+    "permissions_new": "1071627961344"
   },
   {
     "id": "678349848684003359",
@@ -19,6 +21,8 @@
     "hoist": false,
     "managed": false,
     "mentionable": false,
+    "icon": null,
+    "unicode_emoji": null,
     "permissions_new": "6546775617"
   },
   {
@@ -30,6 +34,8 @@
     "hoist": false,
     "managed": false,
     "mentionable": false,
+    "icon": null,
+    "unicode_emoji": null,
     "permissions_new": "6546775625"
   },
   {
@@ -41,6 +47,8 @@
     "hoist": false,
     "managed": true,
     "mentionable": false,
+    "icon": null,
+    "unicode_emoji": null,
     "tags": {
       "bot_id": "678351352770068560"
     },
@@ -55,6 +63,8 @@
     "hoist": false,
     "managed": true,
     "mentionable": false,
+    "icon": null,
+    "unicode_emoji": null,
     "tags": {
       "bot_id": "728738433199112280"
     },
@@ -69,6 +79,8 @@
     "hoist": false,
     "managed": true,
     "mentionable": false,
+    "icon": null,
+    "unicode_emoji": null,
     "tags": {
       "bot_id": "761705425870782516"
     },
@@ -83,6 +95,8 @@
     "hoist": false,
     "managed": true,
     "mentionable": false,
+    "icon": null,
+    "unicode_emoji": null,
     "tags": {
       "bot_id": "758370311774404618"
     },
@@ -97,6 +111,8 @@
     "hoist": false,
     "managed": true,
     "mentionable": false,
+    "icon": null,
+    "unicode_emoji": null,
     "tags": {
       "bot_id": "772886503830323210"
     },

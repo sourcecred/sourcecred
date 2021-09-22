@@ -34,7 +34,7 @@ export class Mirror {
     for (const channel of channels) {
       reporter.start(`discord/${guild.name}/#${channel.name}`);
       try {
-        await this.addMessages(channel.id);
+        await this.addMessages(channel.id, channel.parentId);
       } catch (e) {
         const warn = e?.message?.includes("403")
           ? "Skipping private channel."
@@ -82,6 +82,7 @@ export class Mirror {
 
   async addMessages(
     channel: Model.Snowflake,
+    category?: Model.Snowflake,
     messageLimit?: number
   ): Promise<$ReadOnlyArray<Model.Message>> {
     const loadStart = this._repo.nthMessageFromTail(channel, RELOAD_DEPTH);

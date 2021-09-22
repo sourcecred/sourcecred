@@ -6,60 +6,70 @@ Array [
     "id": "678348980756938813",
     "name": "Text Channels",
     "nsfw": false,
+    "parentId": null,
     "type": "GUILD_CATEGORY",
   },
   Object {
     "id": "678348980798881844",
     "name": "Voice Channels",
     "nsfw": false,
+    "parentId": null,
     "type": "GUILD_CATEGORY",
   },
   Object {
     "id": "678348980849213472",
     "name": "general",
     "nsfw": false,
+    "parentId": "678348980756938813",
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "678348980878573661",
     "name": "General",
     "nsfw": false,
+    "parentId": "678348980798881844",
     "type": "GUILD_VOICE",
   },
   Object {
     "id": "678394406507905129",
     "name": "pagination",
     "nsfw": false,
+    "parentId": "678348980756938813",
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "678696874869522446",
     "name": "notmymessage",
     "nsfw": false,
+    "parentId": "678348980756938813",
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "830088231538130964",
     "name": "rules",
     "nsfw": false,
+    "parentId": null,
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "830088231538130965",
     "name": "moderator-only",
     "nsfw": false,
+    "parentId": null,
     "type": "GUILD_TEXT",
   },
   Object {
     "id": "830089044695187586",
     "name": "test stage",
     "nsfw": false,
+    "parentId": "678348980798881844",
     "type": "UNKNOWN",
   },
   Object {
     "id": "837851969795129344",
     "name": "test-nsfw",
     "nsfw": true,
+    "parentId": "678348980756938813",
     "type": "GUILD_TEXT",
   },
 ]
@@ -89,8 +99,8 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
-      "678349848684003359",
       "678350026946117694",
+      "678349848684003359",
     ],
     "user": Object {
       "bot": false,
@@ -126,21 +136,21 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
-      "678349848684003359",
       "678350026946117694",
+      "678349848684003359",
     ],
     "user": Object {
       "bot": false,
       "discriminator": "3370",
       "id": "420341518948237331",
-      "username": "DandeLion",
+      "username": "dandelion",
     },
   },
   Object {
     "nick": null,
     "roles": Array [
-      "678349848684003359",
       "678350026946117694",
+      "678349848684003359",
     ],
     "user": Object {
       "bot": false,
@@ -152,8 +162,8 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
-      "678349848684003359",
       "678350026946117694",
+      "678349848684003359",
     ],
     "user": Object {
       "bot": false,
@@ -165,8 +175,8 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
-      "678349848684003359",
       "678350026946117694",
+      "678349848684003359",
     ],
     "user": Object {
       "bot": false,
@@ -185,6 +195,16 @@ Array [
       "discriminator": "3969",
       "id": "579830927287386126",
       "username": "sandpiper",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [],
+    "user": Object {
+      "bot": false,
+      "discriminator": "7902",
+      "id": "664562775770791966",
+      "username": "BrianBelhumeur",
     },
   },
   Object {

@@ -74,7 +74,8 @@ export class SqliteMirrorRepository {
         CREATE TABLE channels (
             id TEXT PRIMARY KEY,
             type TEXT NOT NULL,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            parent_id TEXT
         )
       `,
       dedent`\
@@ -173,10 +174,17 @@ export class SqliteMirrorRepository {
         SELECT
           id,
           type,
-          name
+          name,
+          parent_id
         FROM channels`
       )
-      .all();
+      .all()
+      .map((res) => ({
+        id: res.id,
+        type: res.type,
+        name: res.name,
+        parentId: res.parent_id,
+      }));
   }
 
   messages(channel: Model.Snowflake): $ReadOnlyArray<Model.Message> {
@@ -314,11 +322,13 @@ export class SqliteMirrorRepository {
           INSERT OR IGNORE INTO channels (
               id,
               type,
-              name
+              name,
+              parent_id
           ) VALUES (
               :id,
               :type,
-              :name
+              :name,
+              :parent_id
           )
         `
       )
@@ -326,6 +336,7 @@ export class SqliteMirrorRepository {
         id: channel.id,
         type: channel.type,
         name: channel.name,
+        parent_id: channel.parentId || null,
       });
   }
 

@@ -50,6 +50,7 @@ export type Channel = {|
   +type: ChannelType,
   +name: string,
   +nsfw?: boolean,
+  +parentId?: Snowflake,
 |};
 
 export type Role = {|

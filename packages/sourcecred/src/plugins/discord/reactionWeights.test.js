@@ -20,6 +20,7 @@ describe("plugins/discord/reactionWeights", () => {
   const heartEmoji = {name: "💜", id: null};
   const sourcecredEmojiId = "8";
   const sourcecredEmoji = {name: "sourcecred", id: sourcecredEmojiId};
+  const categoryId = "9";
 
   const message: Message = deepFreeze({
     id: messageId,
@@ -55,6 +56,13 @@ describe("plugins/discord/reactionWeights", () => {
   });
 
   const authorSelfReaction: Reaction = deepFreeze({
+    channelId,
+    messageId,
+    authorId,
+    emoji: heartEmoji,
+  });
+
+  const categoryReaction: Reaction = deepFreeze({
     channelId,
     messageId,
     authorId,
@@ -97,13 +105,43 @@ describe("plugins/discord/reactionWeights", () => {
   });
 
   describe("_channelWeight", () => {
-    it("defaults to the defaultWeight if no weights match", () => {
-      const cw = {defaultWeight: 7, weights: {}};
-      expect(_channelWeight(cw, authorSelfReaction)).toEqual(cw.defaultWeight);
+    it("defaults to the defaultWeight squared if no weights match", () => {
+      const cw = {defaultWeight: 3, weights: {}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(9);
     });
-    it("chooses a matching channel weight", () => {
-      const cw = {defaultWeight: 7, weights: {[channelId]: 99}};
-      expect(_channelWeight(cw, authorSelfReaction)).toEqual(99);
+    it("defaults to the 0 defaultWeight if no weights match", () => {
+      const cw = {defaultWeight: 0, weights: {}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(
+        cw.defaultWeight
+      );
+    });
+    it("chooses a matching channel weight and defaults category weight", () => {
+      const cw = {defaultWeight: 3, weights: {[channelId]: 2}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(6);
+    });
+    it("chooses a matching category weight and defaults channel weight", () => {
+      const cw = {defaultWeight: 3, weights: {[categoryId]: 2}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(6);
+    });
+    it("chooses a matching channel weight when defaultWeight is 0", () => {
+      const cw = {defaultWeight: 0, weights: {[channelId]: 2}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(2);
+    });
+    it("chooses a matching category weight when defaultWeight is 0", () => {
+      const cw = {defaultWeight: 0, weights: {[categoryId]: 2}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(2);
+    });
+    it("multiplies category and channel weight", () => {
+      const cw = {defaultWeight: 7, weights: {[categoryId]: 2, [channelId]: 2}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(4);
+    });
+    it("respects 0 channel weight", () => {
+      const cw = {defaultWeight: 7, weights: {[categoryId]: 2, [channelId]: 0}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(0);
+    });
+    it("respects 0 category weight", () => {
+      const cw = {defaultWeight: 7, weights: {[categoryId]: 0, [channelId]: 2}};
+      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(0);
     });
   });
 
@@ -263,7 +301,7 @@ describe("plugins/discord/reactionWeights", () => {
           propsChannelSet,
           reactions
         )
-      ).toEqual(5 * 2 * 3);
+      ).toEqual(5 * 2 * 3 * 3);
     });
   });
 });

@@ -123,6 +123,7 @@ export class Fetcher implements DiscordApi {
     const channels = await this._fetchJson(`/guilds/${guild}/channels`);
     return channels.map((x) => ({
       id: x.id,
+      parentId: x.parent_id,
       name: x.name,
       type: Model.channelTypeFromId(x.type),
       nsfw: x.nsfw,
