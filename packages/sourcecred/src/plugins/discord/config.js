@@ -71,7 +71,7 @@ export type DiscordConfigJson = $ReadOnlyArray<{|
 const parserJson: C.Parser<DiscordConfigJson> = C.array(
   C.object(
     {
-      guildId: C.string,
+      guildId: C.delimited("//"),
       reactionWeightConfig: C.object(
         {
           weights: C.dict(C.number),
