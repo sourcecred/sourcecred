@@ -63,11 +63,11 @@ export const LedgerDateFilter = (props: LedgerDateFilterProps): ReactNode => {
           <IconButton
             onClick={handleClearStartDate}
             disabled={!startDateFilter}
-            color="secondary"
+            color="primary"
             className={classes.clearButton}
           >
             <span className={classes.clearButtonText}>Clear</span>
-            <ClearIcon color="secondary" fontSize="small" />
+            <ClearIcon color="primary" fontSize="small" />
           </IconButton>
         )}
       </div>
@@ -86,11 +86,11 @@ export const LedgerDateFilter = (props: LedgerDateFilterProps): ReactNode => {
           <IconButton
             onClick={handleClearEndDate}
             disabled={!endDateFilter}
-            color="secondary"
+            color="primary"
             className={classes.clearButton}
           >
             <span className={classes.clearButtonText}>Clear</span>
-            <ClearIcon color="secondary" fontSize="small" />
+            <ClearIcon color="primary" fontSize="small" />
           </IconButton>
         )}
       </div>

@@ -38,6 +38,18 @@ const theme = createMuiTheme({
     orange: "#FFDDC6", // color for project/organizations on explorer home
     darkOrange: "#FFAA3D", // color for grain on explorer home
     purple: "#C5A2C5", // color for bots on explorer home
+    white: "#FAFBFD",
+    primary: {
+      main: "#AB92B1",
+      dark: "#7C6881",
+      contrastText: "#fff",
+    },
+    secondary: {
+      light: "#FFD4BD",
+      main: "#DE966F",
+      dark: "#C08565",
+      contrastText: "#fff",
+    },
   },
   overrides: {
     MuiChip: {
