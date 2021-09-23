@@ -4,7 +4,6 @@ import React, {type Node as ReactNode, useEffect, useState} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
-import pink from "@material-ui/core/colors/pink";
 import {makeStyles} from "@material-ui/core/styles";
 import fakeDataProvider from "ra-data-fakerest";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
