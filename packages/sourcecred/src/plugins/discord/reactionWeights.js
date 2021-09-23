@@ -66,7 +66,7 @@ export function reactionWeight(
 
   return (
     _roleWeight(weights.roleWeights, reactingMember) *
-    _channelWeight(weights.channelWeights, reaction, channelParentId) *
+    channelWeight(weights.channelWeights, reaction.channelId, channelParentId) *
     _emojiWeight(weights.emojiWeights, reaction) *
     averagingMultiplier
   );
@@ -87,14 +87,14 @@ export function _roleWeight(
   return weight;
 }
 
-export function _channelWeight(
+export function channelWeight(
   config: ChannelWeightConfig,
-  reaction: Model.Reaction,
+  channelId: Model.Snowflake,
   channelParentId: ?Model.Snowflake
 ): NodeWeight {
   const {defaultWeight, weights} = config;
   let parentWeight = channelParentId ? weights[channelParentId] : undefined;
-  let channelWeight = weights[reaction.channelId];
+  let channelWeight = weights[channelId];
   if (parentWeight === undefined && channelWeight === undefined)
     return defaultWeight * defaultWeight;
   if (channelWeight === undefined) channelWeight = defaultWeight || 1;

@@ -55,9 +55,9 @@ export class DiscordPlugin implements Plugin {
     const configs = await loadConfig(ctx);
     const token = getTokenFromEnv();
     const fetcher = new Fetcher({token});
-    for (const {guildId, includeNsfwChannels} of configs) {
-      const repo = await repository(ctx, guildId);
-      const mirror = new Mirror(repo, fetcher, guildId, includeNsfwChannels);
+    for (const config of configs) {
+      const repo = await repository(ctx, config.guildId);
+      const mirror = new Mirror(repo, fetcher, config);
       await mirror.update(reporter);
     }
   }
