@@ -4,6 +4,8 @@ import {TaskReporter} from "../../util/taskReporter";
 import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import * as Model from "./models";
+import type {DiscordConfig} from "./config";
+import {channelWeight} from "./reactionWeights";
 
 // How many messages for each channel to reload.
 const RELOAD_DEPTH = 50;
@@ -11,19 +13,16 @@ const RELOAD_DEPTH = 50;
 export class Mirror {
   +_repo: SqliteMirrorRepository;
   +_api: DiscordApi;
-  +guild: Model.Snowflake;
-  +includeNsfwChannels: boolean;
+  +config: DiscordConfig;
 
   constructor(
     repo: SqliteMirrorRepository,
     api: DiscordApi,
-    guild: Model.Snowflake,
-    includeNsfwChannels: boolean
+    config: DiscordConfig
   ) {
     this._repo = repo;
     this._api = api;
-    this.guild = guild;
-    this.includeNsfwChannels = includeNsfwChannels;
+    this.config = config;
   }
 
   async update(reporter: TaskReporter) {
@@ -52,10 +51,10 @@ export class Mirror {
     +permissions: number,
   |}> {
     const guilds = await this._api.guilds();
-    const guild = guilds.find((g) => g.id === this.guild);
+    const guild = guilds.find((g) => g.id === this.config.guildId);
     if (!guild) {
       throw new Error(
-        `Couldn't find guild with ID ${this.guild}\nMaybe the bot has no access to it?`
+        `Couldn't find guild with ID ${this.config.guildId}\nMaybe the bot has no access to it?`
       );
     }
     // TODO: validate bot permissions
@@ -63,7 +62,7 @@ export class Mirror {
   }
 
   async addMembers(): Promise<$ReadOnlyArray<Model.GuildMember>> {
-    const members = await this._api.members(this.guild);
+    const members = await this._api.members(this.config.guildId);
     for (const member of members) {
       this._repo.addMember(member);
     }
@@ -71,10 +70,18 @@ export class Mirror {
   }
 
   async addTextChannels(): Promise<$ReadOnlyArray<Model.Channel>> {
-    const channels = await this._api.channels(this.guild);
+    const channels = await this._api.channels(this.config.guildId);
     for (const channel of channels) {
       if (channel.type !== "GUILD_TEXT") continue;
-      if (!this.includeNsfwChannels && channel.nsfw) continue;
+      if (
+        !channelWeight(
+          this.config.weights.channelWeights,
+          channel.id,
+          channel.parentId
+        )
+      )
+        continue;
+      if (!this.config.includeNsfwChannels && channel.nsfw) continue;
       this._repo.addChannel(channel);
     }
     return this._repo.channels();

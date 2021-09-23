@@ -3,7 +3,7 @@
 import deepFreeze from "deep-freeze";
 import type {Message, Reaction, GuildMember} from "./models";
 import {
-  _channelWeight,
+  channelWeight,
   _roleWeight,
   _emojiWeight,
   reactionWeight,
@@ -62,13 +62,6 @@ describe("plugins/discord/reactionWeights", () => {
     emoji: heartEmoji,
   });
 
-  const categoryReaction: Reaction = deepFreeze({
-    channelId,
-    messageId,
-    authorId,
-    emoji: heartEmoji,
-  });
-
   const reacterReaction: Reaction = deepFreeze({
     channelId,
     messageId,
@@ -104,44 +97,44 @@ describe("plugins/discord/reactionWeights", () => {
     });
   });
 
-  describe("_channelWeight", () => {
+  describe("channelWeight", () => {
     it("defaults to the defaultWeight squared if no weights match", () => {
       const cw = {defaultWeight: 3, weights: {}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(9);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(9);
     });
     it("defaults to the 0 defaultWeight if no weights match", () => {
       const cw = {defaultWeight: 0, weights: {}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(
         cw.defaultWeight
       );
     });
     it("chooses a matching channel weight and defaults category weight", () => {
       const cw = {defaultWeight: 3, weights: {[channelId]: 2}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(6);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(6);
     });
     it("chooses a matching category weight and defaults channel weight", () => {
       const cw = {defaultWeight: 3, weights: {[categoryId]: 2}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(6);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(6);
     });
     it("chooses a matching channel weight when defaultWeight is 0", () => {
       const cw = {defaultWeight: 0, weights: {[channelId]: 2}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(2);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(2);
     });
     it("chooses a matching category weight when defaultWeight is 0", () => {
       const cw = {defaultWeight: 0, weights: {[categoryId]: 2}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(2);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(2);
     });
     it("multiplies category and channel weight", () => {
       const cw = {defaultWeight: 7, weights: {[categoryId]: 2, [channelId]: 2}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(4);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(4);
     });
     it("respects 0 channel weight", () => {
       const cw = {defaultWeight: 7, weights: {[categoryId]: 2, [channelId]: 0}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(0);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(0);
     });
     it("respects 0 category weight", () => {
       const cw = {defaultWeight: 7, weights: {[categoryId]: 0, [channelId]: 2}};
-      expect(_channelWeight(cw, categoryReaction, categoryId)).toEqual(0);
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(0);
     });
   });
 
