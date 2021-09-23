@@ -751,6 +751,7 @@ export const ExplorerHome = ({
             <FormControlLabel
               control={
                 <Checkbox
+                  color="primary"
                   checked={checkboxes[IdentityTypes.USER]}
                   onChange={handleCheckboxFilter}
                   name={IdentityTypes.USER}
@@ -761,6 +762,7 @@ export const ExplorerHome = ({
             <FormControlLabel
               control={
                 <Checkbox
+                  color="primary"
                   checked={checkboxes[IdentityTypes.BOT]}
                   onChange={handleCheckboxFilter}
                   name={IdentityTypes.BOT}
@@ -771,6 +773,7 @@ export const ExplorerHome = ({
             <FormControlLabel
               control={
                 <Checkbox
+                  color="primary"
                   checked={checkboxes[IdentityTypes.PROJECT]}
                   onChange={handleCheckboxFilter}
                   name={IdentityTypes.PROJECT}
@@ -781,6 +784,7 @@ export const ExplorerHome = ({
             <FormControlLabel
               control={
                 <Checkbox
+                  color="primary"
                   checked={checkboxes[IdentityTypes.ORGANIZATION]}
                   onChange={handleCheckboxFilter}
                   name={IdentityTypes.ORGANIZATION}
