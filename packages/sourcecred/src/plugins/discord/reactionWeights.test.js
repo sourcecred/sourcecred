@@ -98,42 +98,34 @@ describe("plugins/discord/reactionWeights", () => {
   });
 
   describe("channelWeight", () => {
-    it("defaults to the defaultWeight squared if no weights match", () => {
+    it("defaults to the defaultWeight if no weights match", () => {
       const cw = {defaultWeight: 3, weights: {}};
-      expect(channelWeight(cw, channelId, categoryId)).toEqual(9);
-    });
-    it("defaults to the 0 defaultWeight if no weights match", () => {
-      const cw = {defaultWeight: 0, weights: {}};
       expect(channelWeight(cw, channelId, categoryId)).toEqual(
         cw.defaultWeight
       );
     });
-    it("chooses a matching channel weight and defaults category weight", () => {
+    it("chooses a matching channel weight", () => {
       const cw = {defaultWeight: 3, weights: {[channelId]: 2}};
-      expect(channelWeight(cw, channelId, categoryId)).toEqual(6);
-    });
-    it("chooses a matching category weight and defaults channel weight", () => {
-      const cw = {defaultWeight: 3, weights: {[categoryId]: 2}};
-      expect(channelWeight(cw, channelId, categoryId)).toEqual(6);
-    });
-    it("chooses a matching channel weight when defaultWeight is 0", () => {
-      const cw = {defaultWeight: 0, weights: {[channelId]: 2}};
       expect(channelWeight(cw, channelId, categoryId)).toEqual(2);
     });
-    it("chooses a matching category weight when defaultWeight is 0", () => {
-      const cw = {defaultWeight: 0, weights: {[categoryId]: 2}};
+    it("chooses a matching category weight", () => {
+      const cw = {defaultWeight: 3, weights: {[categoryId]: 7}};
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(7);
+    });
+    it("overrides category weight with channel weight", () => {
+      const cw = {defaultWeight: 3, weights: {[categoryId]: 7, [channelId]: 2}};
       expect(channelWeight(cw, channelId, categoryId)).toEqual(2);
     });
-    it("multiplies category and channel weight", () => {
-      const cw = {defaultWeight: 7, weights: {[categoryId]: 2, [channelId]: 2}};
-      expect(channelWeight(cw, channelId, categoryId)).toEqual(4);
+    it("respects 0 default weight", () => {
+      const cw = {defaultWeight: 0, weights: {}};
+      expect(channelWeight(cw, channelId, categoryId)).toEqual(0);
     });
     it("respects 0 channel weight", () => {
-      const cw = {defaultWeight: 7, weights: {[categoryId]: 2, [channelId]: 0}};
+      const cw = {defaultWeight: 3, weights: {[categoryId]: 7, [channelId]: 0}};
       expect(channelWeight(cw, channelId, categoryId)).toEqual(0);
     });
     it("respects 0 category weight", () => {
-      const cw = {defaultWeight: 7, weights: {[categoryId]: 0, [channelId]: 2}};
+      const cw = {defaultWeight: 3, weights: {[categoryId]: 0}};
       expect(channelWeight(cw, channelId, categoryId)).toEqual(0);
     });
   });
@@ -294,7 +286,7 @@ describe("plugins/discord/reactionWeights", () => {
           propsChannelSet,
           reactions
         )
-      ).toEqual(5 * 2 * 3 * 3);
+      ).toEqual(5 * 2 * 3);
     });
   });
 });

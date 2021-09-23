@@ -1,7 +1,7 @@
 // @flow
 
 import * as Model from "./models";
-import * as NullUtil from "../../util/null";
+import {orElse} from "../../util/null";
 import {type NodeWeight} from "../../core/weights";
 import {type GraphReaction} from "./createGraph";
 
@@ -93,13 +93,12 @@ export function channelWeight(
   channelParentId: ?Model.Snowflake
 ): NodeWeight {
   const {defaultWeight, weights} = config;
-  let parentWeight = channelParentId ? weights[channelParentId] : undefined;
-  let channelWeight = weights[channelId];
-  if (parentWeight === undefined && channelWeight === undefined)
-    return defaultWeight * defaultWeight;
-  if (channelWeight === undefined) channelWeight = defaultWeight || 1;
-  if (parentWeight === undefined) parentWeight = defaultWeight || 1;
-  return parentWeight * channelWeight;
+  return orElse(
+    channelParentId
+      ? orElse(weights[channelId], weights[channelParentId])
+      : weights[channelId],
+    defaultWeight
+  );
 }
 
 export function _emojiWeight(
@@ -107,8 +106,5 @@ export function _emojiWeight(
   reaction: Model.Reaction
 ): NodeWeight {
   const {defaultWeight, weights} = config;
-  return NullUtil.orElse(
-    weights[Model.emojiToRef(reaction.emoji)],
-    defaultWeight
-  );
+  return orElse(weights[Model.emojiToRef(reaction.emoji)], defaultWeight);
 }
