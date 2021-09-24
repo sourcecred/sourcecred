@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress} from "../graph";
-import {Ledger} from "./ledger";
+import {Ledger, type AccountingStatus} from "./ledger";
 import {newIdentity} from "../identity";
 import {
   parseAddress as parseEthAddress,
@@ -11,6 +11,7 @@ import {
   type EvmChainId,
   parseEvmChainId,
   protocolSymbolParser,
+  buildCurrency,
 } from "./currency";
 import * as G from "./grain";
 import * as uuid from "../../util/uuid";
@@ -1753,6 +1754,135 @@ describe("core/ledger/ledger", () => {
               true
             );
           });
+        });
+      });
+      describe("balance accounting", () => {
+        function getAccountingStatus(
+          enabled: boolean,
+          chainId = "1"
+        ): AccountingStatus {
+          return {
+            enabled,
+            currency: enabled
+              ? undefined
+              : buildCurrency(chainId, ETH_CURRENCY_ADDRESS),
+          };
+        }
+        const fullAddress = parseEthAddress(
+          "0xffffffffffffffffffffffffffffffffffffffff"
+        );
+        const nearlyFullAddress = parseEthAddress(
+          "0xfffffffffffffffffffffffffffffffffffffff0"
+        );
+        it("is enabled by default", () => {
+          const l = ledgerWithActiveIdentities();
+          expect(l.accounting()).toEqual(getAccountingStatus(true));
+        });
+        it("can be disabled and reenabled", () => {
+          const l = ledgerWithActiveIdentities();
+          expect(
+            l
+              .disableAccounting(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS)
+              .accounting()
+          ).toEqual(getAccountingStatus(false));
+          expect(l.enableAccounting().accounting()).toEqual(
+            getAccountingStatus(true)
+          );
+        });
+        it("can call disableAccounting to update external currency", () => {
+          const ledger = ledgerWithActiveIdentities()
+            .disableAccounting(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS)
+            .disableAccounting(parseEvmChainId("100"), ETH_CURRENCY_ADDRESS);
+          expect(ledger.accounting()).toEqual(
+            getAccountingStatus(false, "100")
+          );
+        });
+        it("zeros out grain balances and disables accounts without Payout Addresses", () => {
+          const ledger = ledgerWithActiveIdentities();
+          ledger._allocateGrain({
+            grainReceipt: {id: id1, amount: g("2")},
+            allocationId: allocationId1,
+            credTimestampMs: 1,
+          });
+          expect(ledger.account(id1).balance).toBe(g("2"));
+          expect(ledger.account(id1).active).toBe(true);
+          ledger.disableAccounting(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS);
+          expect(ledger.account(id1).balance).toBe(G.ZERO);
+          expect(ledger.account(id1).active).toBe(false);
+        });
+        it("accounts with relevant payout addresses can be active", () => {
+          const ledger = ledgerWithActiveIdentities();
+          ledger._allocateGrain({
+            grainReceipt: {id: id1, amount: g("2")},
+            allocationId: allocationId1,
+            credTimestampMs: 1,
+          });
+          ledger._allocateGrain({
+            grainReceipt: {id: id2, amount: g("5")},
+            allocationId: allocationId2,
+            credTimestampMs: 1,
+          });
+          ledger.setPayoutAddress(
+            id1,
+            fullAddress,
+            parseEvmChainId("1"),
+            ETH_CURRENCY_ADDRESS
+          );
+          ledger.setPayoutAddress(
+            id2,
+            nearlyFullAddress,
+            // inactive chainID
+            parseEvmChainId("2"),
+            ETH_CURRENCY_ADDRESS
+          );
+          ledger.disableAccounting(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS);
+          expect(ledger.account(id1).active).toBe(true);
+          expect(ledger.account(id2).active).toBe(false);
+        });
+        it("disables grain transfers when accounting is disabled", () => {
+          const ledger = ledgerWithActiveIdentities();
+          ledger._allocateGrain({
+            grainReceipt: {id: id1, amount: g("2")},
+            allocationId: allocationId1,
+            credTimestampMs: 1,
+          });
+          ledger._allocateGrain({
+            grainReceipt: {id: id2, amount: g("5")},
+            allocationId: allocationId2,
+            credTimestampMs: 1,
+          });
+          ledger.disableAccounting(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS);
+          const thunk = () =>
+            ledger.transferGrain({
+              from: id2,
+              to: id1,
+              amount: g("1"),
+              memo: null,
+            });
+          expect(thunk).toThrowError("Transfers are disabled");
+        });
+        it("cannot activate a user missing the matching payoutaddress when accounting is disabled", () => {
+          const ledger = ledgerWithActiveIdentities();
+          ledger.disableAccounting(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS);
+          const thunk = () => ledger.activate(id1);
+          expect(thunk).toThrowError("No payout address set");
+
+          ledger.setPayoutAddress(
+            id1,
+            fullAddress,
+            parseEvmChainId("2"),
+            ETH_CURRENCY_ADDRESS
+          );
+          expect(thunk).toThrowError("No payout address set");
+
+          ledger.setPayoutAddress(
+            id1,
+            fullAddress,
+            parseEvmChainId("1"),
+            ETH_CURRENCY_ADDRESS
+          );
+          ledger.activate(id1);
+          expect(ledger.account(id1).active).toBe(true);
         });
       });
     });

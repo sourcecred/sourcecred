@@ -60,11 +60,19 @@ type AllocationReceipt = {|
 |};
 
 /**
+ * The state of the Ledger's accounting configuration. If accounting is not
+ * enabled, currency is empty. Otherwise an external currency is returned when
+ * accounting is disabled.
+ */
+export type AccountingStatus = {|enabled: boolean, currency: ?Currency|};
+
+/**
  * Every Identity in the ledger has an Account.
  */
 type MutableAccount = {|
   identity: Identity,
-  // The current Grain balance of this account
+  // The current Grain balance of this account. All balances are zero when
+  // accounting is disabled.
   balance: G.Grain,
   // The amount of Grain this account has received in past Distributions
   paid: G.Grain,
@@ -145,6 +153,8 @@ export class Ledger {
   _lastDistributionTimestamp: TimestampMs | null = null;
   _shouldTrackGrainIntegration: boolean = false;
   _grainIntegrationStatuses: Map<DistributionId, boolean>;
+  _balanceAccountingEnabled: boolean = true;
+  _externalCurrency: ?Currency;
 
   constructor() {
     this._ledgerEventLog = new JsonLog();
@@ -523,7 +533,13 @@ export class Ledger {
     if (!this._accounts.has(id)) {
       throw new Error(`identity ${id} not found`);
     }
-    const {active} = this.account(id);
+    const {active, payoutAddresses} = this.account(id);
+    if (this._externalCurrency) {
+      const currencyId = JSON.stringify(this._externalCurrency);
+      if (!payoutAddresses.get(currencyId)) {
+        throw new Error("Cannot activate user: No payout address set");
+      }
+    }
     if (active) {
       // no-op; account already active
       return this;
@@ -640,6 +656,9 @@ export class Ledger {
     amount: G.Grain,
     memo: string | null,
   |}): this {
+    if (!this._balanceAccountingEnabled) {
+      throw new Error("Transfers are disabled when Accounting is is disabled");
+    }
     const {from, to, amount, memo} = opts;
     this._createAndProcessEvent({
       from,
@@ -853,6 +872,93 @@ export class Ledger {
   }
 
   /**
+   * Disabling accounting has the following effects on the ledger:
+   * - enables grain transfers
+   * - all accounts will start with zero balance again, and it will accumulate
+   *   normally from distributions
+   */
+  enableAccounting(): Ledger {
+    if (!this._balanceAccountingEnabled) {
+      this._createAndProcessEvent({
+        type: "ENABLE_ACCOUNTING",
+      });
+    }
+    // no-op if already enabled
+    return this;
+  }
+
+  _enableAccounting(_: EnableAccounting) {
+    this._balanceAccountingEnabled = true;
+    delete this._externalCurrency;
+  }
+
+  /**
+   * Disabling accounting has the following effects on the ledger:
+   * - disables grain transfers
+   * - zeroes out all balances
+   * - deactivates accounts that don't have a PayoutAddress set for the
+   *   current instance configuration, and prevents them from activating until
+   *   they do.
+   *
+   *   This function can be called while accounting is disabled to update
+   *   the ledger's external currency configuration. Note that this will also
+   *   deactivate identities missing a payout address that matches the new
+   *   configuration.
+   */
+  disableAccounting(chainId: ChainId, tokenAddress?: EthAddress): Ledger {
+    // ensure accounting isn't already disabled
+    const currency = buildCurrency(chainId, tokenAddress);
+    if (
+      this._balanceAccountingEnabled ||
+      JSON.stringify(currency) !== JSON.stringify(this._externalCurrency)
+    ) {
+      this._createAndProcessEvent({
+        type: "DISABLE_ACCOUNTING",
+        currency,
+      });
+    }
+    // no-op if already disabled
+    return this;
+  }
+
+  _disableAccounting({currency}: DisableAccounting) {
+    const currencyResult = currencyParser.parse(currency);
+    if (!currencyResult.ok) {
+      throw new Error(`Invalid chainId or tokenAddress: ${currencyResult.err}`);
+    }
+
+    this._balanceAccountingEnabled = false;
+    this._externalCurrency = currency;
+
+    const currencyId = JSON.stringify(currencyResult.value);
+
+    // Warning! Mutations below
+    const accountsIterator = this._accounts.values();
+    for (const account of accountsIterator) {
+      // zero out all balances, so there is no confusion about them
+      // By zeroing them out, they cannot be compared to external balances
+      // in any meaningful way.
+      account.balance = G.ZERO;
+      // deactivate accounts that don't have a payout address assigned
+      // recursive operations are occuring here. Need to be careful with
+      // these next op calls
+      const payoutAddress = account.payoutAddresses.get(currencyId);
+      if (!payoutAddress) this.deactivate(account.identity.id);
+    }
+  }
+  /**
+   * Returns the state of the ledger's accounting configuration. If accounting
+   * is enabled, currency will be undefined. if accounting is disabled, a
+   * Currency will be set.
+   */
+  accounting(): AccountingStatus {
+    return {
+      enabled: this._balanceAccountingEnabled,
+      currency: this._externalCurrency,
+    };
+  }
+
+  /**
    * Retrieve the log of all actions in the Ledger's history.
    *
    * May be used to reconstruct the Ledger after serialization.
@@ -939,6 +1045,12 @@ export class Ledger {
       case "MARK_DISTRIBUTION_EXECUTED":
         this._markDistributionExecuted(action);
         break;
+      case "ENABLE_ACCOUNTING":
+        this._enableAccounting(action);
+        break;
+      case "DISABLE_ACCOUNTING":
+        this._disableAccounting(action);
+        break;
       // istanbul ignore next: unreachable per Flow
       default:
         throw new Error(`Unknown type: ${(action.type: empty)}`);
@@ -981,7 +1093,8 @@ export class Ledger {
     const account = this._mutableAccount(params.grainReceipt.id);
     account.paid = G.add(params.grainReceipt.amount, account.paid);
     account.allocationHistory.push(params);
-    account.balance = G.add(params.grainReceipt.amount, account.balance);
+    if (this._balanceAccountingEnabled)
+      account.balance = G.add(params.grainReceipt.amount, account.balance);
   }
 }
 
@@ -1009,7 +1122,9 @@ type Action =
   | SetPayoutAddress
   | EnableGrainIntegration
   | DisableGrainIntegration
-  | MarkDistributionExecuted;
+  | MarkDistributionExecuted
+  | EnableAccounting
+  | DisableAccounting;
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
@@ -1142,6 +1257,24 @@ const executeDistributionParser: C.Parser<MarkDistributionExecuted> = C.object({
   id: uuid.parser,
 });
 
+type EnableAccounting = {|
+  +type: "ENABLE_ACCOUNTING",
+|};
+
+const enableAccountingParser: C.Parser<EnableAccounting> = C.object({
+  type: C.exactly(["ENABLE_ACCOUNTING"]),
+});
+
+type DisableAccounting = {|
+  +type: "DISABLE_ACCOUNTING",
+  currency: Currency,
+|};
+
+const disableAccountingParser: C.Parser<DisableAccounting> = C.object({
+  type: C.exactly(["DISABLE_ACCOUNTING"]),
+  currency: currencyParser,
+});
+
 const actionParser: C.Parser<Action> = C.orElse([
   createIdentityParser,
   renameIdentityParser,
@@ -1155,6 +1288,8 @@ const actionParser: C.Parser<Action> = C.orElse([
   enableGrainIntegrationParser,
   disableGrainIntegrationParser,
   executeDistributionParser,
+  enableAccountingParser,
+  disableAccountingParser,
 ]);
 
 const ledgerEventParser: C.Parser<LedgerEvent> = C.object({
