@@ -10,6 +10,7 @@ import {
   grainParser,
   numberOrFloatStringParser,
 } from "../nonnegativeGrain";
+import {delimitedIdentityIdParser, type IdentityId} from "../../identity";
 
 /**
  * The Recent policy distributes cred using a time discount factor, weighing
@@ -35,6 +36,7 @@ export type RecentPolicy = {|
   +policyType: Recent,
   +budget: NonnegativeGrain,
   +discount: Discount,
+  +exclusions: $ReadOnlyArray<IdentityId>,
 |};
 
 /**
@@ -52,10 +54,14 @@ export function recentReceipts(
     effectiveTimestamp,
     lookback
   );
-  const timeLimitedParticipants = timeLimitedCredGrainView.activeParticipants();
+  const timeLimitedParticipants = timeLimitedCredGrainView
+    .activeParticipants()
+    .filter(
+      (participant) => !policy.exclusions.includes(participant.identity.id)
+    );
 
-  const computeDecayedCred = (i) => {
-    return i.credPerInterval.reduce(
+  const computeDecayedCred = (participant) => {
+    return participant.credPerInterval.reduce(
       (acc, cred) => acc * (1 - policy.discount) + cred,
       0
     );
@@ -72,17 +78,39 @@ export function recentReceipts(
   }));
 }
 
-export const recentConfigParser: P.Parser<RecentPolicy> = P.object({
-  policyType: P.exactly(["RECENT"]),
-  budget: numberOrFloatStringParser,
-  discount: P.fmap(P.number, toDiscount),
-});
+export const recentConfigParser: P.Parser<RecentPolicy> = P.fmap(
+  P.object(
+    {
+      policyType: P.exactly(["RECENT"]),
+      budget: numberOrFloatStringParser,
+      discount: P.fmap(P.number, toDiscount),
+    },
+    {
+      exclusions: P.array(delimitedIdentityIdParser),
+    }
+  ),
+  (p) => ({
+    ...p,
+    exclusions: p.exclusions || [],
+  })
+);
 
-export const recentPolicyParser: P.Parser<RecentPolicy> = P.object({
-  policyType: P.exactly(["RECENT"]),
-  budget: grainParser,
-  discount: P.fmap(P.number, toDiscount),
-});
+export const recentPolicyParser: P.Parser<RecentPolicy> = P.fmap(
+  P.object(
+    {
+      policyType: P.exactly(["RECENT"]),
+      budget: grainParser,
+      discount: P.fmap(P.number, toDiscount),
+    },
+    {
+      exclusions: P.array(delimitedIdentityIdParser),
+    }
+  ),
+  (p) => ({
+    ...p,
+    exclusions: p.exclusions || [],
+  })
+);
 
 export opaque type Discount: number = number;
 export function toDiscount(n: number): Discount {

@@ -124,3 +124,8 @@ export function fromString(s: string): Uuid {
  * with the same semantics as `fromString`.
  */
 export const parser: C.Parser<Uuid> = C.fmap(C.string, fromString);
+
+export const delimitedUuidParser: C.Parser<Uuid> = C.fmap(
+  C.delimited("//"),
+  (s) => fromString(s)
+);

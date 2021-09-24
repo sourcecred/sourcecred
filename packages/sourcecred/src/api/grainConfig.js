@@ -79,6 +79,7 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
       budget: recentPerWeek,
       policyType: "RECENT",
       discount: toDiscount(recentWeeklyDecayRate),
+      exclusions: [],
     });
   }
   if (G.gt(balancedPerWeek, G.ZERO)) {

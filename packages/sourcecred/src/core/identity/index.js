@@ -1,7 +1,7 @@
 // @flow
 
 export type {IdentityId} from "./id";
-export {identityIdParser} from "./id";
+export {identityIdParser, delimitedIdentityIdParser} from "./id";
 export type {Identity} from "./identity";
 export {
   newIdentity,
