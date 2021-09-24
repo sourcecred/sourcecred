@@ -25,10 +25,11 @@ const useStyles = makeStyles(
   (theme) => ({
     toolbar: {
       paddingRight: 24,
+      backgroundColor: theme.palette.primary.dark,
     },
     menuButton: {
-      marginLeft: "0.5em",
-      marginRight: "0.5em",
+      marginLeft: "4px",
+      marginRight: "16px",
     },
     menuButtonIconClosed: {
       transition: theme.transitions.create(["transform"], {
@@ -58,7 +59,7 @@ type Props = {
   children: React.Node,
   classes: Object,
   className: string,
-  color: "default" | "inherit" | "primary" | "secondary" | "transparent",
+  color: "default" | "inherit" | "primary" | "transparent",
   open: boolean,
   isDev: boolean,
 };
@@ -95,7 +96,7 @@ const AppBar = (props: Props): React.Node => {
     children,
     classes: _ /*classesOverride*/,
     className,
-    color = "secondary",
+    color = "primary",
     isDev,
     /*logo*/
     open,
@@ -124,7 +125,7 @@ const AppBar = (props: Props): React.Node => {
             enterDelay={500}
           >
             <IconButton
-              color="inherit"
+              color="white"
               onClick={() => dispatch(toggleSidebar())}
               className={classNames(classes.menuButton)}
             >

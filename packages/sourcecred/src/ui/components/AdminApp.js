@@ -4,7 +4,6 @@ import React, {type Node as ReactNode, useEffect, useState} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
-import pink from "@material-ui/core/colors/pink";
 import {makeStyles} from "@material-ui/core/styles";
 import fakeDataProvider from "ra-data-fakerest";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
@@ -34,28 +33,21 @@ const theme = createMuiTheme({
   palette: {
     type: "dark",
     backgroundColor: "#303030",
-    primary: pink,
-    blueish: "#6174CC",
-    lavender: "#C5A2C5",
-    orange: "#FFDDC6",
-    darkOrange: "#FFAA3D",
-    peach: "#FFF1E8",
+    blue: "#6174CC", // color for cred on explorer home
+    orange: "#FFDDC6", // color for project/organizations on explorer home
+    darkOrange: "#FFAA3D", // color for grain on explorer home
+    purple: "#C5A2C5", // color for bots on explorer home
     white: "#FAFBFD",
-    scPink: "#FDBBD1",
-    green: "#4BD76D",
-    sunset: "#FFE9DB",
-    salmon: "#FFE5E1",
-    coral: "#F9D1CB",
-    pink: "#FEDDE8",
-    blue: "#728DFF",
-    purple: "#C5A2C5",
-    violet: "#EDDAEE",
-    warning: {
-      main: "#FFAA3D",
+    primary: {
+      main: "#AB92B1",
+      dark: "#7C6881",
+      contrastText: "#fff",
     },
-    danger: "#FF594D",
-    text: {
-      link: "#31AAEE",
+    secondary: {
+      light: "#FFD4BD",
+      main: "#DE966F",
+      dark: "#C08565",
+      contrastText: "#fff",
     },
   },
   overrides: {
