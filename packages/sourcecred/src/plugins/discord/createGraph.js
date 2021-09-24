@@ -296,7 +296,9 @@ export function createGraph(
   repo: SqliteMirrorRepository
 ): WeightedGraphT {
   const graphMessages = findGraphMessages(repo);
-  return _createGraphFromMessages(config, graphMessages);
+  return config.simplifyGraph
+    ? _createSimpleGraphFromMessages(config, graphMessages)
+    : _createGraphFromMessages(config, graphMessages);
 }
 
 export function _createGraphFromMessages(
@@ -320,48 +322,116 @@ export function _createGraphFromMessages(
       channelId,
       channelParentId,
     } = graphMessage;
-    if (author) {
-      wg.graph.addNode(memberNode(author));
-      wg.graph.addEdge(authorsMessageEdge(message, author));
-    }
-    wg.graph.addNode(messageNode(message, guildId, channelName));
 
+    let messageWeight = 0;
     for (const {reaction, reactingMember} of reactions) {
-      const node = reactionNode(reaction, message.timestampMs, guildId);
-      wg.weights.nodeWeights.set(
-        node.address,
-        reactionWeight(
-          weights,
-          message,
-          reaction,
-          reactingMember,
-          propsChannels,
-          reactions,
-          channelParentId
-        )
+      const weight = reactionWeight(
+        weights,
+        message,
+        reaction,
+        reactingMember,
+        propsChannels,
+        reactions,
+        channelParentId
       );
-      wg.graph.addNode(node);
-      wg.graph.addNode(memberNode(reactingMember));
-      wg.graph.addEdge(reactsToEdge(reaction, message));
-      wg.graph.addEdge(
-        addsReactionEdge(reaction, reactingMember, message.timestampMs)
+      if (weight) {
+        messageWeight += weight;
+        const node = reactionNode(reaction, message.timestampMs, guildId);
+        wg.weights.nodeWeights.set(node.address, weight);
+        wg.graph.addNode(node);
+        wg.graph.addNode(memberNode(reactingMember));
+        wg.graph.addEdge(reactsToEdge(reaction, message));
+        wg.graph.addEdge(
+          addsReactionEdge(reaction, reactingMember, message.timestampMs)
+        );
+      }
+    }
+    if (messageWeight) {
+      if (author) {
+        wg.graph.addNode(memberNode(author));
+        wg.graph.addEdge(authorsMessageEdge(message, author));
+      }
+      wg.graph.addNode(messageNode(message, guildId, channelName));
+      for (const {member, count} of mentions) {
+        wg.graph.addNode(memberNode(member));
+        let edge;
+        if (propsChannels.has(channelId)) {
+          edge = propsEdge(message, member);
+        } else {
+          edge = mentionsEdge(message, member);
+        }
+        wg.graph.addEdge(edge);
+        if (count > 1)
+          wg.weights.edgeWeights.set(edge.address, {
+            forwards: count,
+            backwards: 1,
+          });
+      }
+    }
+  }
+
+  return wg;
+}
+
+// Excludes reaction nodes, reaction-related edges, and members that
+// react but have no messages with positive weight. Instead sums reaction
+// weights and adds them directly onto the message.
+export function _createSimpleGraphFromMessages(
+  config: DiscordConfig,
+  messages: Iterable<GraphMessage>
+): WeightedGraphT {
+  const wg = {
+    graph: new Graph(),
+    weights: emptyWeights(),
+  };
+  const {guildId, weights} = config;
+  const propsChannels = new Set(config.propsChannels);
+
+  for (const graphMessage of messages) {
+    const {
+      message,
+      author,
+      reactions,
+      mentions,
+      channelName,
+      channelId,
+      channelParentId,
+    } = graphMessage;
+
+    let messageWeight = 0;
+    for (const {reaction, reactingMember} of reactions) {
+      messageWeight += reactionWeight(
+        weights,
+        message,
+        reaction,
+        reactingMember,
+        propsChannels,
+        reactions,
+        channelParentId
       );
     }
-
-    for (const {member, count} of mentions) {
-      wg.graph.addNode(memberNode(member));
-      let edge;
-      if (propsChannels.has(channelId)) {
-        edge = propsEdge(message, member);
-      } else {
-        edge = mentionsEdge(message, member);
+    if (messageWeight) {
+      if (author) {
+        wg.graph.addNode(memberNode(author));
+        wg.graph.addEdge(authorsMessageEdge(message, author));
       }
-      wg.graph.addEdge(edge);
-      if (count > 1)
-        wg.weights.edgeWeights.set(edge.address, {
-          forwards: count,
-          backwards: 1,
-        });
+      wg.graph.addNode(messageNode(message, guildId, channelName));
+      wg.weights.nodeWeights.set(messageAddress(message), messageWeight);
+      for (const {member, count} of mentions) {
+        wg.graph.addNode(memberNode(member));
+        let edge;
+        if (propsChannels.has(channelId)) {
+          edge = propsEdge(message, member);
+        } else {
+          edge = mentionsEdge(message, member);
+        }
+        wg.graph.addEdge(edge);
+        if (count > 1)
+          wg.weights.edgeWeights.set(edge.address, {
+            forwards: count,
+            backwards: 1,
+          });
+      }
     }
   }
 

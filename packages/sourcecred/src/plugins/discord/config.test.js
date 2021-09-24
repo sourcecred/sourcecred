@@ -30,6 +30,7 @@ describe("plugins/discord/config", () => {
           },
         },
         includeNsfwChannels: true,
+        simplifyGraph: true,
       },
     ];
     const expected = [
@@ -61,6 +62,7 @@ describe("plugins/discord/config", () => {
           },
         },
         includeNsfwChannels: true,
+        simplifyGraph: true,
       },
     ];
     const parsed: DiscordConfigs = parser.parseOrThrow(raw);
@@ -90,6 +92,7 @@ describe("plugins/discord/config", () => {
       defaultWeight: 1,
     });
     expect(parsed[0].includeNsfwChannels).toEqual(false);
+    expect(parsed[0].simplifyGraph).toEqual(false);
   });
   it("can work with delimiters", () => {
     const raw = [
@@ -149,6 +152,7 @@ describe("plugins/discord/config", () => {
           },
         },
         includeNsfwChannels: true,
+        simplifyGraph: false,
       },
     ];
     const parsed: DiscordConfigs = parser.parseOrThrow(raw);

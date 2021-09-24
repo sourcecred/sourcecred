@@ -69,6 +69,8 @@ export type DiscordConfigJson = $ReadOnlyArray<{|
   +propsChannels?: $ReadOnlyArray<Model.Snowflake>,
   // Whether to include NSFW channels in cred distribution or not
   +includeNsfwChannels?: boolean,
+  // This reduces graph size by replacing reaction nodes with message node weights.
+  +simplifyGraph?: boolean,
 |}>;
 
 const parserJson: C.Parser<DiscordConfigJson> = C.array(
@@ -97,6 +99,7 @@ const parserJson: C.Parser<DiscordConfigJson> = C.array(
       }),
       propsChannels: C.array(C.string),
       includeNsfwChannels: C.boolean,
+      simplifyGraph: C.boolean,
     }
   )
 );
@@ -106,6 +109,7 @@ export type DiscordConfig = {|
   +weights: WeightConfig,
   +propsChannels: $ReadOnlyArray<Model.Snowflake>,
   +includeNsfwChannels: boolean,
+  +simplifyGraph: boolean,
 |};
 export type DiscordConfigs = $ReadOnlyArray<DiscordConfig>;
 
@@ -139,6 +143,7 @@ export function _upgrade(json: DiscordConfigJson): DiscordConfigs {
     },
     propsChannels: config.propsChannels || [],
     includeNsfwChannels: config.includeNsfwChannels || false,
+    simplifyGraph: config.simplifyGraph || false,
   }));
 }
 
