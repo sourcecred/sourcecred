@@ -3,6 +3,8 @@
 // Simple parser combinator library for structured types rather than
 // bytestring parsing.
 
+import stringify from "json-stable-stringify";
+
 export type JsonObject =
   | string
   | number
@@ -25,9 +27,11 @@ export class Parser<+T> {
   constructor(f: (JsonObject) => ParseResult<T>) {
     this._f = f;
   }
+
   parse(raw: JsonObject): ParseResult<T> {
     return this._f(raw);
   }
+
   parseOrThrow(raw: JsonObject): T {
     const result = this.parse(raw);
     if (result.ok) {
@@ -228,7 +232,7 @@ export function fmap<T, U>(p: Parser<T>, f: (T) => U): Parser<U> {
 export function orElse<T: $ReadOnlyArray<Parser<mixed>>>(
   parsers: T,
   errorFn?: (string[]) => string = (errors) =>
-    `no parse matched: ${JSON.stringify(errors)}`
+    `no parse matched: ${stringify(errors, {space: 4})}`
 ): Parser<$ElementType<$TupleMap<T, ExtractParserOutput>, number>> {
   return new Parser((x) => {
     const errors = [];
@@ -281,6 +285,7 @@ export function rename<T>(oldKey: string, parser: Parser<T>): RenameField<T> {
 
 class RenameFieldImpl<+T> extends Parser<T> {
   +oldKey: string;
+
   constructor(oldKey: string, parser: Parser<T>) {
     super(parser._f);
     this.oldKey = oldKey;
