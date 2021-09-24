@@ -25,10 +25,15 @@ describe("core/ledger/grainAllocation", () => {
     budget: nng(n),
     numIntervalsLookback: 1,
   });
-  const recent = (n: number, discount: number) => ({
+  const recent = (
+    n: number,
+    discount: number,
+    exclusions: $ReadOnlyArray<uuid.Uuid>
+  ) => ({
     policyType: "RECENT",
     budget: nng(n),
     discount: toDiscount(discount),
+    exclusions,
   });
   const balanced = (n: number, lookbackIntervals = 0) => ({
     policyType: "BALANCED",
@@ -164,7 +169,7 @@ describe("core/ledger/grainAllocation", () => {
       });
 
       it("splits based on discounted cred", () => {
-        const policy = recent(100, 0.1);
+        const policy = recent(100, 0.1, []);
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalancedUnpaid,
@@ -182,8 +187,24 @@ describe("core/ledger/grainAllocation", () => {
         expect(allocation).toEqual(expectedAllocation);
       });
 
+      it("excludes the exclusions", () => {
+        const policy = recent(100, 0.1, [id3]);
+        const allocation = computeAllocation(
+          policy,
+          credGrainViewUnbalancedUnpaid,
+          4
+        );
+        const expectedReceipts = [{id: id4, amount: nng(100)}];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+
       it("is not influenced by grain paid", () => {
-        const policy = recent(100, 0.1);
+        const policy = recent(100, 0.1, []);
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
@@ -202,7 +223,7 @@ describe("core/ledger/grainAllocation", () => {
       });
 
       it("handles full discount correctly", () => {
-        const policy = recent(100, 1);
+        const policy = recent(100, 1, []);
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
@@ -221,7 +242,7 @@ describe("core/ledger/grainAllocation", () => {
       });
 
       it("handles 0 budget correctly", () => {
-        const policy = recent(0, 0.1);
+        const policy = recent(0, 0.1, []);
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,

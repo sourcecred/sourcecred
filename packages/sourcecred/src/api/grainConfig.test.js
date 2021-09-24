@@ -36,6 +36,7 @@ const recent = (budget: number | string, discount: number): RecentPolicy => ({
   policyType: "RECENT",
   budget: toNonnegativeGrain(budget),
   discount: toDiscount(discount),
+  exclusions: [],
 });
 const special = (
   budget: number | string,
