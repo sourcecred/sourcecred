@@ -9,12 +9,15 @@
 # production
 /build
 /build2
+**/build
 
 # backend
 /bin
+**/bin
 
 # api
 /dist
+**/dist
 
 # misc
 .token
@@ -29,3 +32,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log
 .DS_Store
+
+# hardhat tooling
+**/artifacts
+**/cache
