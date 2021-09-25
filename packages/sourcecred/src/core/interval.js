@@ -56,15 +56,12 @@ export function intervalSequence(
   }));
 }
 
-export const intervalSequenceParser: C.Parser<IntervalSequence> = C.fmap(
-  C.array(
-    C.object({
-      startTimeMs: C.number,
-      endTimeMs: C.number,
-    })
-  ),
-  (arr) => intervalSequence(arr)
-);
+export const intervalSequenceParser: C.Parser<IntervalSequence> = C.array(
+  C.object({
+    startTimeMs: C.number,
+    endTimeMs: C.number,
+  })
+).fmap((arr) => intervalSequence(arr));
 
 /**
  * Represents a slice of a time-partitioned graph

@@ -22,4 +22,4 @@ function upgrade(raw: RawInstanceConfig): InstanceConfig {
   return {bundledPlugins};
 }
 
-export const parser: P.Parser<InstanceConfig> = P.fmap(rawParser, upgrade);
+export const parser: P.Parser<InstanceConfig> = rawParser.fmap(upgrade);
