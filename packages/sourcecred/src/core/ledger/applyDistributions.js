@@ -4,20 +4,11 @@ import {type TimestampMs} from "../../util/timestamp";
 import * as NullUtil from "../../util/null";
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {Ledger} from "./ledger";
-import {type AllocationPolicy} from "./policies";
 import {CredGraph} from "../credrank/credGraph";
 import {computeDistribution} from "./computeDistribution";
 import {type Distribution} from "./distribution";
 import {CredGrainView} from "../credGrainView";
-
-export type DistributionPolicy = {|
-  // Each distribution will include each of the specified allocation policies
-  +allocationPolicies: $ReadOnlyArray<AllocationPolicy>,
-  // How many old distributions we may create (e.g. if the project has never
-  // had a Grain distribution in the past, do you want to create distributions
-  // going back the whole history, or limit to only 1 or 2 recent distributions).
-  +maxSimultaneousDistributions: number,
-|};
+import type {GrainConfig} from "../../api/grainConfig";
 
 /**
  * Iteratively compute and distribute Grain, based on the provided CredGraph,
@@ -40,7 +31,7 @@ export type DistributionPolicy = {|
  * diagnostics, printing a summary, etc.
  */
 export function applyDistributions(
-  policy: DistributionPolicy,
+  config: GrainConfig,
   credGraph: CredGraph,
   ledger: Ledger,
   currentTimestamp: TimestampMs,
@@ -51,7 +42,7 @@ export function applyDistributions(
     credIntervals,
     NullUtil.orElse(ledger.lastDistributionTimestamp(), -Infinity),
     currentTimestamp,
-    policy.maxSimultaneousDistributions,
+    config.maxSimultaneousDistributions,
     allowMultipleDistributionsPerInterval
   );
   return distributionIntervals.map((interval) => {
@@ -63,7 +54,7 @@ export function applyDistributions(
       ledger
     );
     const distribution = computeDistribution(
-      policy.allocationPolicies,
+      config.allocationPolicies,
       credGrainView,
       interval.endTimeMs
     );
