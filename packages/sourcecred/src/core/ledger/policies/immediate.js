@@ -27,6 +27,12 @@ export type ImmediatePolicy = {|
   +numIntervalsLookback: number,
 |};
 
+export type ImmediateConfig = {|
+  +policyType: Immediate,
+  +budget: string | number,
+  +numIntervalsLookback: number,
+|};
+
 /**
  * Split a grain budget in proportion to the cred scores in
  * the most recent time interval, with the option to extend the interval
@@ -64,6 +70,12 @@ export function immediateReceipts(
     amount: amounts[i],
   }));
 }
+
+export const immediateRawParser: P.Parser<ImmediateConfig> = P.object({
+  policyType: P.exactly(["IMMEDIATE"]),
+  budget: P.orElse([P.string, P.number]),
+  numIntervalsLookback: P.number,
+});
 
 export const immediateConfigParser: P.Parser<ImmediatePolicy> = P.object({
   policyType: P.exactly(["IMMEDIATE"]),

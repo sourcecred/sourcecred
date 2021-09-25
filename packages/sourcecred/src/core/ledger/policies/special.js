@@ -29,6 +29,13 @@ export type SpecialPolicy = {|
   +recipient: IdentityId,
 |};
 
+export type SpecialConfig = {|
+  +policyType: Special,
+  +budget: string | number,
+  +memo: string,
+  +recipient: IdentityId,
+|};
+
 export function specialReceipts(
   policy: SpecialPolicy,
   identities: $ReadOnlyArray<Identity>
@@ -40,6 +47,13 @@ export function specialReceipts(
   }
   throw new Error(`no active grain account for identity: ${policy.recipient}`);
 }
+
+export const specialRawParser: P.Parser<SpecialConfig> = P.object({
+  policyType: P.exactly(["SPECIAL"]),
+  budget: P.orElse([P.string, P.number]),
+  memo: P.string,
+  recipient: uuidParser,
+});
 
 export const specialConfigParser: P.Parser<SpecialPolicy> = P.object({
   policyType: P.exactly(["SPECIAL"]),
