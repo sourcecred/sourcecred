@@ -109,7 +109,7 @@ export function toPersonalAttributions(
   });
 }
 
-const proportionParser = C.fmap(C.number, (n) => {
+const proportionParser = C.number.fmap((n) => {
   if (n < 0 || n > 1) {
     throw new Error(`Proportion ${n} is not in range [0,1]`);
   }

@@ -174,29 +174,43 @@ describe("src/util/combo", () => {
     it("handles the success case", () => {
       const p: C.Parser<Color> = C.fmap(C.string, stringToColor);
       expect(p.parseOrThrow("blu")).toEqual("BLUE");
+      const p2: C.Parser<Color> = C.string.fmap(stringToColor);
+      expect(p2.parseOrThrow("blu")).toEqual("BLUE");
     });
     it("handles failure of the base parser", () => {
       const p: C.Parser<Color> = C.fmap(C.string, stringToColor);
       const thunk = () => p.parseOrThrow(77);
       expect(thunk).toThrow("expected string, got number");
+      const p2: C.Parser<Color> = C.string.fmap(stringToColor);
+      const thunk2 = () => p2.parseOrThrow(77);
+      expect(thunk2).toThrow("expected string, got number");
     });
     it("handles `Error`s thrown by the mapping function", () => {
       const p: C.Parser<Color> = C.fmap(C.string, stringToColor);
       // Avoid `.toThrow` because that checks for a substring, and we
       // want to ensure no "Error: " prefix is included.
       expect(p.parse("wat")).toEqual({ok: false, err: 'unknown color: "wat"'});
+      const p2: C.Parser<Color> = C.string.fmap(stringToColor);
+      expect(p2.parse("wat")).toEqual({ok: false, err: 'unknown color: "wat"'});
     });
     it("handles failure of the mapping function", () => {
       const p: C.Parser<Color> = C.fmap(C.string, () => {
         throw 123;
       });
       expect(p.parse("wat")).toEqual({ok: false, err: "123"});
+      const p2: C.Parser<Color> = C.string.fmap(() => {
+        throw 123;
+      });
+      expect(p2.parse("wat")).toEqual({ok: false, err: "123"});
     });
     it("composes", () => {
       const raw: C.Parser<string> = C.string;
       const trimmed: C.Parser<string> = C.fmap(raw, (s) => s.trim());
       const color: C.Parser<Color> = C.fmap(trimmed, stringToColor);
       expect(color.parseOrThrow("  blu\n\n")).toEqual("BLUE");
+      const trimmed2: C.Parser<string> = raw.fmap((s) => s.trim());
+      const color2: C.Parser<Color> = trimmed2.fmap(stringToColor);
+      expect(color2.parseOrThrow("  blu\n\n")).toEqual("BLUE");
     });
     it("is type-safe", () => {
       // input safety
@@ -205,6 +219,12 @@ describe("src/util/combo", () => {
       // output safety
       // $FlowExpectedError[incompatible-cast]
       (C.fmap(C.number, (n: number) => n.toFixed()): C.Parser<number>);
+      // input safety
+      // $FlowExpectedError[incompatible-call]
+      C.string.fmap((n: number) => n.toFixed());
+      // output safety
+      // $FlowExpectedError[incompatible-cast]
+      (C.number.fmap((n: number) => n.toFixed()): C.Parser<number>);
     });
   });
 

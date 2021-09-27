@@ -55,22 +55,19 @@ export type CredGrainViewJSON = {|
   +participants: $ReadOnlyArray<ParticipantCredGrain>,
   +intervals: IntervalSequence,
 |};
-export const credGrainViewParser: C.Parser<CredGrainView> = C.fmap(
-  C.object({
-    participants: C.array(
-      C.object({
-        active: C.boolean,
-        identity: identityParser,
-        cred: C.number,
-        credPerInterval: C.array(C.number),
-        grainEarned: G.parser,
-        grainEarnedPerInterval: C.array(G.parser),
-      })
-    ),
-    intervals: intervalSequenceParser,
-  }),
-  (json) => CredGrainView.fromJSON(json)
-);
+export const credGrainViewParser: C.Parser<CredGrainView> = C.object({
+  participants: C.array(
+    C.object({
+      active: C.boolean,
+      identity: identityParser,
+      cred: C.number,
+      credPerInterval: C.array(C.number),
+      grainEarned: G.parser,
+      grainEarnedPerInterval: C.array(G.parser),
+    })
+  ),
+  intervals: intervalSequenceParser,
+}).fmap((json) => CredGrainView.fromJSON(json));
 
 /**
  * Aggregates data across a CredGraph and Ledger.

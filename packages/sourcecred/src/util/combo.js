@@ -36,6 +36,9 @@ export class Parser<+T> {
       throw new Error(result.err);
     }
   }
+  fmap<U>(f: (T) => U): Parser<U> {
+    return fmap(this, f);
+  }
 }
 
 // Helper type to extract the underlying type of a parser: for instance,
