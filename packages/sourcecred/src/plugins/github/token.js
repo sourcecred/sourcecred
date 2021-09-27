@@ -1,6 +1,6 @@
 // @flow
 
-export opaque type GithubToken: string = string;
+export type GithubToken = string;
 
 /**
  * Validates a token against know formatting.
