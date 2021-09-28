@@ -6,7 +6,6 @@ import type {GithubToken} from "../../plugins/github/token";
 import type {RepoId, RepoIdString} from "../../plugins/github/repoId";
 import fetch from "cross-fetch";
 import {decode as base64Decode} from "base-64";
-import {Ledger} from "../ledger/ledger";
 import {decode, encode} from "./textEncoding";
 
 const GET_LEDGER_QUERY = `

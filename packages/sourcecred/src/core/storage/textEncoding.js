@@ -19,7 +19,6 @@ if (typeof window !== "undefined" && typeof process === "undefined") {
   /* eslint-disable no-undef */
   // $FlowIssue[cannot-resolve-name]
   decoder = importedTextDecoder || globalThis.TextDecoder;
-  /* eslint-disable no-undef */
   // $FlowIssue[cannot-resolve-name]
   encoder = importedTextEncoder || globalThis.TextEncoder;
 }

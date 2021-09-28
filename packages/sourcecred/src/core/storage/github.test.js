@@ -1,21 +1,14 @@
 // @flow
 
-import {NetworkStorage} from "./networkStorage";
 import {GithubStorage} from "./github";
 import {encode} from "./textEncoding";
-import type {RepoId, RepoIdString} from "../../plugins/github/repoId";
-import type {GithubToken} from "../../plugins/github/token";
+import {encode as base64Encode} from "base-64";
 
-const shit = {
-  name: "string",
-  owner: "string",
-};
-
+const mockContent = base64Encode("");
 const owner = "sourcecred";
 const name = "sourcecred";
 const oid = "55adb2945959a87de3a492ce950473a30449e54e";
 const ENDPOINT = "https://api.github.com";
-const mockEncode = encode;
 
 jest.mock("cross-fetch", () => ({
   // needed to utilize fetch as a default export.
@@ -24,15 +17,15 @@ jest.mock("cross-fetch", () => ({
     switch (path) {
       case `${ENDPOINT}/graphql`:
         return Promise.resolve({
-          json: () => {
-            // data: {
-            //   repository: {
-            //     object: {
-            //       oid: "${oid}";
-            //     }
-            //   }
-            // }
-          },
+          json: () => ({
+            data: {
+              repository: {
+                object: {
+                  oid,
+                },
+              },
+            },
+          }),
           ok: true,
           status: 200,
           statusText: "OK",
@@ -40,6 +33,9 @@ jest.mock("cross-fetch", () => ({
       case `${ENDPOINT}/repos/${owner}/${name}/git/blobs/${oid}`:
         return Promise.resolve({
           arrayBuffer: () => new ArrayBuffer(0),
+          json: () => ({
+            content: mockContent,
+          }),
           ok: false,
           status: 500,
           statusText: "INTERNAL ERROR",
@@ -67,7 +63,7 @@ describe("core/storage/github", () => {
       });
 
       const result = await storage.get("data/ledger.json");
-      await expect(result).toEqual("value");
+      await expect(result).toEqual(encode(""));
     });
     // it("throws on upward traversal when the base is a url", async () => {
     //   expect.hasAssertions();
