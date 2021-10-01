@@ -125,7 +125,7 @@ const AppBar = (props: Props): React.Node => {
             enterDelay={500}
           >
             <IconButton
-              color="white"
+              color="default"
               onClick={() => dispatch(toggleSidebar())}
               className={classNames(classes.menuButton)}
             >
