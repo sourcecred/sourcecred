@@ -28,6 +28,12 @@ export type BalancedPolicy = {|
   +numIntervalsLookback: number,
 |};
 
+export type BalancedConfig = {|
+  +policyType: Balanced,
+  +budget: string | number,
+  +numIntervalsLookback: number,
+|};
+
 /**
  * Allocate a fixed budget of Grain to the users who were "most underpaid".
  *
@@ -107,6 +113,12 @@ export function balancedReceipts(
     amount: grainAmounts[i],
   }));
 }
+
+export const balancedRawParser: P.Parser<BalancedConfig> = P.object({
+  policyType: P.exactly(["BALANCED"]),
+  budget: P.orElse([P.string, P.number]),
+  numIntervalsLookback: P.number,
+});
 
 export const balancedConfigParser: P.Parser<BalancedPolicy> = P.object({
   policyType: P.exactly(["BALANCED"]),

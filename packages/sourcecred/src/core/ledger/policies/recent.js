@@ -39,6 +39,13 @@ export type RecentPolicy = {|
   +exclusions: $ReadOnlyArray<IdentityId>,
 |};
 
+export type RecentConfig = {|
+  +policyType: Recent,
+  +budget: string | number,
+  +discount: Discount,
+  +exclusions?: $ReadOnlyArray<IdentityId>,
+|};
+
 /**
  * Split a grain budget based on exponentially weighted recent
  * cred.
@@ -78,6 +85,17 @@ export function recentReceipts(
   }));
 }
 
+export const recentRawParser: P.Parser<RecentConfig> = P.object(
+  {
+    policyType: P.exactly(["RECENT"]),
+    budget: P.orElse([P.string, P.number]),
+    discount: P.fmap(P.number, toDiscount),
+  },
+  {
+    exclusions: P.array(delimitedIdentityIdParser),
+  }
+);
+
 export const recentConfigParser: P.Parser<RecentPolicy> = P.fmap(
   P.object(
     {
@@ -89,10 +107,7 @@ export const recentConfigParser: P.Parser<RecentPolicy> = P.fmap(
       exclusions: P.array(delimitedIdentityIdParser),
     }
   ),
-  (p) => ({
-    ...p,
-    exclusions: p.exclusions || [],
-  })
+  (config) => ({...config, exclusions: config.exclusions || []})
 );
 
 export const recentPolicyParser: P.Parser<RecentPolicy> = P.fmap(
@@ -106,10 +121,7 @@ export const recentPolicyParser: P.Parser<RecentPolicy> = P.fmap(
       exclusions: P.array(delimitedIdentityIdParser),
     }
   ),
-  (p) => ({
-    ...p,
-    exclusions: p.exclusions || [],
-  })
+  (config) => ({...config, exclusions: config.exclusions || []})
 );
 
 export opaque type Discount: number = number;
