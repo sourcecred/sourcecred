@@ -205,7 +205,7 @@ export function fmap<T, U>(p: Parser<T>, f: (T) => U): Parser<U> {
 // Create a parser that tries each of the given parsers on the same
 // input, taking the first successful parse or failing if all parsers
 // fail. In the failure case, the provided `errorFn` will be called with
-// the error messages from all the subparsers to form the resulting
+// the error messages from all the sub-parsers to form the resulting
 // error; the default error function includes the full text of all the
 // error messages, but a user-supplied error function may act with
 // domain-specific precision.
