@@ -22,7 +22,7 @@ const baseConfig = {
     __filename: false,
   },
   entry: {
-    api: paths.apiIndexJs,
+    api: paths.apiBaseJs,
   },
   output: {
     path: paths.apiBuild,
@@ -88,6 +88,12 @@ const client = {
 const server = {
   ...baseConfig,
   target: "node",
+  entry: {
+    api: paths.apiNodeJs,
+  },
+  externals: {
+    "better-sqlite3": "commonjs better-sqlite3",
+  },
   output: {
     ...baseConfig.output,
     path: `${paths.apiBuild}/server`,
