@@ -344,29 +344,30 @@ export function _createGraphFromMessages(
         );
       }
     }
-    if (messageWeight) {
-      if (author) {
-        wg.graph.addNode(memberNode(author));
-        wg.graph.addEdge(authorsMessageEdge(message, author));
+    if (!messageWeight) continue;
+
+    if (author) {
+      wg.graph.addNode(memberNode(author));
+      wg.graph.addEdge(authorsMessageEdge(message, author));
+    }
+    wg.graph.addNode(messageNode(message, guildId, channelName));
+    if (config.simplifyGraph)
+      wg.weights.nodeWeights.set(messageAddress(message), messageWeight);
+
+    for (const {member, count} of mentions) {
+      wg.graph.addNode(memberNode(member));
+      let edge;
+      if (propsChannels.has(channelId)) {
+        edge = propsEdge(message, member);
+      } else {
+        edge = mentionsEdge(message, member);
       }
-      wg.graph.addNode(messageNode(message, guildId, channelName));
-      for (const {member, count} of mentions) {
-        wg.graph.addNode(memberNode(member));
-        let edge;
-        if (propsChannels.has(channelId)) {
-          edge = propsEdge(message, member);
-        } else {
-          edge = mentionsEdge(message, member);
-        }
-        wg.graph.addEdge(edge);
-        if (count > 1)
-          wg.weights.edgeWeights.set(edge.address, {
-            forwards: count,
-            backwards: 1,
-          });
-      }
-      if (config.simplifyGraph)
-        wg.weights.nodeWeights.set(messageAddress(message), messageWeight);
+      wg.graph.addEdge(edge);
+      if (count > 1)
+        wg.weights.edgeWeights.set(edge.address, {
+          forwards: count,
+          backwards: 1,
+        });
     }
   }
 
