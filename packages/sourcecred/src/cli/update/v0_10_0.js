@@ -1,6 +1,6 @@
 // @flow
 
-import {buildObject} from "./utils";
+import {buildObject} from "../../util/buildObject";
 import * as C from "../../util/combo";
 import * as G from "../../core/ledger/grain";
 import {
