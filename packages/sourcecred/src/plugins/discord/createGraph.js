@@ -320,33 +320,39 @@ export function _createGraphFromMessages(
       channelId,
       channelParentId,
     } = graphMessage;
+
+    let messageWeight = 0;
+    for (const {reaction, reactingMember} of reactions) {
+      const weight = reactionWeight({
+        weights,
+        message,
+        reaction,
+        reactingMember,
+        propsChannels,
+        reactions,
+        channelParentId,
+      });
+      messageWeight += weight;
+      if (weight && !config.simplifyGraph) {
+        const node = reactionNode(reaction, message.timestampMs, guildId);
+        wg.weights.nodeWeights.set(node.address, weight);
+        wg.graph.addNode(node);
+        wg.graph.addNode(memberNode(reactingMember));
+        wg.graph.addEdge(reactsToEdge(reaction, message));
+        wg.graph.addEdge(
+          addsReactionEdge(reaction, reactingMember, message.timestampMs)
+        );
+      }
+    }
+    if (!messageWeight) continue;
+
     if (author) {
       wg.graph.addNode(memberNode(author));
       wg.graph.addEdge(authorsMessageEdge(message, author));
     }
     wg.graph.addNode(messageNode(message, guildId, channelName));
-
-    for (const {reaction, reactingMember} of reactions) {
-      const node = reactionNode(reaction, message.timestampMs, guildId);
-      wg.weights.nodeWeights.set(
-        node.address,
-        reactionWeight(
-          weights,
-          message,
-          reaction,
-          reactingMember,
-          propsChannels,
-          reactions,
-          channelParentId
-        )
-      );
-      wg.graph.addNode(node);
-      wg.graph.addNode(memberNode(reactingMember));
-      wg.graph.addEdge(reactsToEdge(reaction, message));
-      wg.graph.addEdge(
-        addsReactionEdge(reaction, reactingMember, message.timestampMs)
-      );
-    }
+    if (config.simplifyGraph)
+      wg.weights.nodeWeights.set(messageAddress(message), messageWeight);
 
     for (const {member, count} of mentions) {
       wg.graph.addNode(memberNode(member));

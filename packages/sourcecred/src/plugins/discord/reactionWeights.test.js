@@ -163,14 +163,15 @@ describe("plugins/discord/reactionWeights", () => {
       const channelWeights = {defaultWeight: 1, weights: {[channelId]: 6}};
       const weights = {emojiWeights, roleWeights, channelWeights};
       expect(
-        reactionWeight(
+        reactionWeight({
           weights,
           message,
-          reacterReaction,
-          reacterMember,
-          new Set(),
-          reactions
-        )
+          reaction: reacterReaction,
+          reactingMember: reacterMember,
+          propsChannels: new Set(),
+          reactions,
+          channelParentId: undefined,
+        })
       ).toEqual(4 * 5 * 6);
     });
     it("averages across role-weighted users when averaging is enabled", () => {
@@ -188,14 +189,15 @@ describe("plugins/discord/reactionWeights", () => {
       // This is the role weight of the reactor and excludes the author
       const expectedAveragingModifier = 5;
       expect(
-        reactionWeight(
+        reactionWeight({
           weights,
           message,
-          reacterReaction,
-          reacterMember,
-          new Set(),
-          reactions
-        )
+          reaction: reacterReaction,
+          reactingMember: reacterMember,
+          propsChannels: new Set(),
+          reactions,
+          channelParentId: undefined,
+        })
       ).toEqual((4 * 5 * 6) / expectedAveragingModifier);
     });
     it("averaging is safe against divide-by-zero when all roles are zero", () => {
@@ -211,14 +213,15 @@ describe("plugins/discord/reactionWeights", () => {
       const channelWeights = {defaultWeight: 1, weights: {[channelId]: 6}};
       const weights = {emojiWeights, roleWeights, channelWeights};
       expect(
-        reactionWeight(
+        reactionWeight({
           weights,
           message,
-          reacterReaction,
-          reacterMember,
-          new Set(),
-          reactions
-        )
+          reaction: reacterReaction,
+          reactingMember: reacterMember,
+          propsChannels: new Set(),
+          reactions,
+          channelParentId: undefined,
+        })
       ).toEqual(0);
     });
     it("dampens emoji average when dampener >0", () => {
@@ -237,14 +240,15 @@ describe("plugins/discord/reactionWeights", () => {
       // This is the role weight of the reactor and excludes the author
       const expectedAveragingModifier = 7;
       expect(
-        reactionWeight(
+        reactionWeight({
           weights,
           message,
-          reacterReaction,
-          reacterMember,
-          new Set(),
-          reactions
-        )
+          reaction: reacterReaction,
+          reactingMember: reacterMember,
+          propsChannels: new Set(),
+          reactions,
+          channelParentId: undefined,
+        })
       ).toEqual((4 * 5 * 6) / expectedAveragingModifier);
     });
     it("sets the weight to 0 for a self-reaction", () => {
@@ -257,17 +261,18 @@ describe("plugins/discord/reactionWeights", () => {
       const channelWeights = {defaultWeight: 1, weights: {}};
       const weights = {emojiWeights, roleWeights, channelWeights};
       expect(
-        reactionWeight(
+        reactionWeight({
           weights,
           message,
-          authorSelfReaction,
-          authorMember,
-          new Set(),
-          reactions
-        )
+          reaction: authorSelfReaction,
+          reactingMember: authorMember,
+          propsChannels: new Set(),
+          reactions,
+          channelParentId: undefined,
+        })
       ).toEqual(0);
     });
-    it("sets a  nonzero-weight for a self-reaction in a props channel", () => {
+    it("sets a nonzero-weight for a self-reaction in a props channel", () => {
       const emojiWeights = {
         defaultWeight: 5,
         weights: {},
@@ -278,14 +283,15 @@ describe("plugins/discord/reactionWeights", () => {
       const weights = {emojiWeights, roleWeights, channelWeights};
       const propsChannelSet = new Set([message.channelId]);
       expect(
-        reactionWeight(
+        reactionWeight({
           weights,
           message,
-          authorSelfReaction,
-          authorMember,
-          propsChannelSet,
-          reactions
-        )
+          reaction: authorSelfReaction,
+          reactingMember: authorMember,
+          propsChannels: propsChannelSet,
+          reactions,
+          channelParentId: undefined,
+        })
       ).toEqual(5 * 2 * 3);
     });
   });

@@ -30,15 +30,24 @@ export type WeightConfig = {|
   +emojiWeights: ReactionWeightConfig,
 |};
 
-export function reactionWeight(
-  weights: WeightConfig,
-  message: Model.Message,
-  reaction: Model.Reaction,
-  reactingMember: Model.GuildMember,
-  propsChannels: Set<Model.Snowflake>,
-  reactions: $ReadOnlyArray<GraphReaction>,
-  channelParentId: ?Model.Snowflake
-): NodeWeight {
+export function reactionWeight(options: {|
+  +weights: WeightConfig,
+  +message: Model.Message,
+  +reaction: Model.Reaction,
+  +reactingMember: Model.GuildMember,
+  +propsChannels: Set<Model.Snowflake>,
+  +reactions: $ReadOnlyArray<GraphReaction>,
+  +channelParentId: ?Model.Snowflake,
+|}): NodeWeight {
+  const {
+    weights,
+    message,
+    reaction,
+    reactingMember,
+    propsChannels,
+    reactions,
+    channelParentId,
+  } = options;
   if (
     message.authorId === reaction.authorId &&
     !propsChannels.has(message.channelId)
