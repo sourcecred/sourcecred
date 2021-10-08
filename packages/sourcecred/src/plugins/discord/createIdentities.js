@@ -6,11 +6,21 @@ import * as Model from "./models";
 import {memberAddress} from "./createGraph";
 import {type IdentityProposal} from "../../core/ledger/identityProposal";
 import {coerce, nameFromString} from "../../core/identity/name";
+import tryEach from "../../util/tryEach";
+
+const MAX_LENGTH = 40;
 
 export function createIdentity(member: Model.GuildMember): IdentityProposal {
-  let name = member.nick || member.user.username;
-  // Discord allows very long names. Let's ensure the length is reasonable.
-  name = name.slice(0, 39);
+  let name =
+    member.nick?.slice(0, MAX_LENGTH - 1) ||
+    member.user.username.slice(0, MAX_LENGTH - 1);
+  let id = "discord-" + member.user.id.slice(0, MAX_LENGTH - 1);
+
+  name = tryEach(
+    () => coerce(name),
+    () => coerce(id)
+  );
+
   const description = `discord/${escape(name)}#${member.user.discriminator}`;
   const alias = {
     description,
@@ -19,7 +29,7 @@ export function createIdentity(member: Model.GuildMember): IdentityProposal {
   const type = member.user.bot ? "BOT" : "USER";
   return {
     pluginName: nameFromString("discord"),
-    name: coerce(name),
+    name,
     type,
     alias,
   };
