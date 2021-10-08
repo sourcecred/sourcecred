@@ -7,6 +7,7 @@ import {loadFileWithDefault} from "../util/storage";
 import {join as pathJoin} from "path";
 import {encode} from "../core/storage/textEncoding";
 import {v0_9_0} from "./update/v0_9_0";
+import {v0_10_0} from "./update/v0_10_0";
 
 /**
   The `update` CLI can be used by instance maintainers to magically update
@@ -26,6 +27,7 @@ import {v0_9_0} from "./update/v0_9_0";
  */
 const updatesRegistry: $ReadOnlyArray<[string, () => Promise<void>]> = [
   ["0.9.0", v0_9_0],
+  ["0.10.0", v0_10_0],
 ];
 
 ///
