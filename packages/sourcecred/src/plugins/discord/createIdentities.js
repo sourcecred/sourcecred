@@ -9,8 +9,8 @@ import {coerce, nameFromString} from "../../core/identity/name";
 
 export function createIdentity(member: Model.GuildMember): IdentityProposal {
   let name = member.nick || member.user.username;
-  // Discord allows very long names. Let's ensure the length is reasonable.
-  name = name.slice(0, 39);
+  name = coerce(name.slice(0, 39));
+  if (name.match(/^\-+$/) name = coerce(member.user.id);
   const description = `discord/${escape(name)}#${member.user.discriminator}`;
   const alias = {
     description,
@@ -19,7 +19,7 @@ export function createIdentity(member: Model.GuildMember): IdentityProposal {
   const type = member.user.bot ? "BOT" : "USER";
   return {
     pluginName: nameFromString("discord"),
-    name: coerce(name),
+    name,
     type,
     alias,
   };
