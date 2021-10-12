@@ -93,7 +93,7 @@ export const AccountOverview = ({
               <TableCell align="right">Active?</TableCell>
 
               {sortingOptions.map((value) => (
-                  <TableCell key={value.name.description} align="right">
+                <TableCell key={value.name.description} align="right">
                   <TableSortLabel
                     active={tsAccounts.sortName === value.name}
                     direction={
