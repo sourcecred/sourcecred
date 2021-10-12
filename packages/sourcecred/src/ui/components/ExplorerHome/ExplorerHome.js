@@ -521,6 +521,8 @@ export const ExplorerHome = ({
   //   .attr('transform', `translate(${margin}, ${margin})`);
   // }
 
+  const sortingOptions = [CRED_SORT, GRAIN_SORT];
+
   return (
     <Container className={classes.root}>
       <h1 className={`${classes.centerRow} ${classes.pageHeader}`}>
@@ -597,36 +599,25 @@ export const ExplorerHome = ({
                   <TableCell>
                     <b>Participant</b>
                   </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={tsParticipants.sortName === CRED_SORT.name}
-                      direction={
-                        tsParticipants.sortName === CRED_SORT.name
-                          ? tsParticipants.sortOrder
-                          : DEFAULT_SORT
-                      }
-                      onClick={() =>
-                        tsParticipants.setSortFn(CRED_SORT.name, CRED_SORT.fn)
-                      }
-                    >
-                      <b>{CRED_SORT.name.description}</b>
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={tsParticipants.sortName === GRAIN_SORT.name}
-                      direction={
-                        tsParticipants.sortName === GRAIN_SORT.name
-                          ? tsParticipants.sortOrder
-                          : DEFAULT_SORT
-                      }
-                      onClick={() =>
-                        tsParticipants.setSortFn(GRAIN_SORT.name, GRAIN_SORT.fn)
-                      }
-                    >
-                      <b>{currencyName}</b>
-                    </TableSortLabel>
-                  </TableCell>
+
+                  {sortingOptions.map((value) => (
+                    <TableCell key={value.name.description}>
+                      <TableSortLabel
+                        active={tsParticipants.sortName === value.name}
+                        direction={
+                          tsParticipants.sortName === value.name
+                            ? tsParticipants.sortOrder
+                            : DEFAULT_SORT
+                        }
+                        onClick={() =>
+                          tsParticipants.setSortFn(value.name, value.fn)
+                        }
+                      >
+                        <b>{value.name.description}</b>
+                      </TableSortLabel>
+                    </TableCell>
+                  ))}
+
                   <TableCell>
                     {showTableChart && <b>Contributions Chart (ALL TIME)</b>}
                   </TableCell>
