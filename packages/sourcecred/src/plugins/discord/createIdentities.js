@@ -10,7 +10,9 @@ import {coerce, nameFromString} from "../../core/identity/name";
 export function createIdentity(member: Model.GuildMember): IdentityProposal {
   let name = member.nick || member.user.username;
   name = coerce(name.slice(0, 39));
-  if (name.match(/^\-+$/) name = coerce("discord-" + member.user.id);
+  if (name.match(/^-+$/)) {
+    name = coerce("discord-" + member.user.id);
+  }
   const description = `discord/${escape(name)}#${member.user.discriminator}`;
   const alias = {
     description,
