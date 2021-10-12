@@ -15,6 +15,14 @@ import {useLedger} from "../utils/LedgerContext";
 import {formatTimestamp} from "../utils/dateHelpers";
 import {makeStyles} from "@material-ui/core/styles";
 import IdentityDetails from "./LedgerViewer/IdentityDetails";
+import {
+  DEFAULT_SORT,
+  SortOrders,
+  useTableState,
+} from "../../webutil/tableState";
+import deepFreeze from "deep-freeze";
+import TableSortLabel from "@material-ui/core/TableSortLabel";
+import bigInt from "big-integer";
 
 type OverviewProps = {|+currency: CurrencyDetails|};
 
@@ -26,12 +34,15 @@ const useStyles = makeStyles(() => {
   };
 });
 
-function comparator(a: Account, b: Account) {
-  if (a.balance === b.balance) {
-    return 0;
-  }
-  return G.gt(a.paid, b.paid) ? -1 : 1;
-}
+const BALANCE_SORT = deepFreeze({
+  name: Symbol("Current Balance"),
+  fn: (n) => bigInt(n.balance),
+});
+
+const EARNED_SORT = deepFreeze({
+  name: Symbol("Earned"),
+  fn: (n) => bigInt(n.paid),
+});
 
 export const AccountOverview = ({
   currency: {
@@ -52,11 +63,19 @@ export const AccountOverview = ({
     [lastDistributionTimestamp]
   );
 
-  const accounts = useMemo(() => ledger.accounts(), []);
+  const accounts = useMemo(() => Array.from(ledger.accounts()), []);
 
-  const sortedAccounts = useMemo(() => accounts.slice().sort(comparator), [
-    accounts,
-  ]);
+  const tsAccounts = useTableState(
+    {data: accounts},
+    {
+      initialSort: {
+        sortName: BALANCE_SORT.name,
+        sortOrder: SortOrders.DESC,
+        sortFn: BALANCE_SORT.fn,
+      },
+    }
+  );
+
   return (
     <>
       <TableContainer component={Paper} className={classes.container}>
@@ -65,12 +84,43 @@ export const AccountOverview = ({
             <TableRow>
               <TableCell>Username</TableCell>
               <TableCell align="right">Active?</TableCell>
-              <TableCell align="right">Current Balance</TableCell>
-              <TableCell align="right">{`${currencyName}`} Earned</TableCell>
+              <TableCell align="right">
+                <TableSortLabel
+                  active={tsAccounts.sortName === BALANCE_SORT.name}
+                  direction={
+                    tsAccounts.sortName === BALANCE_SORT.name
+                      ? tsAccounts.sortOrder
+                      : DEFAULT_SORT
+                  }
+                  onClick={() =>
+                    tsAccounts.setSortFn(BALANCE_SORT.name, BALANCE_SORT.fn)
+                  }
+                >
+                  <b>{BALANCE_SORT.name.description}</b>
+                </TableSortLabel>
+              </TableCell>
+              {/*<TableCell align="right">{GRAIN_EARNED_SORT.name(currencyName)}</TableCell>*/}
+              <TableCell align="right">
+                <TableSortLabel
+                  active={tsAccounts.sortName === EARNED_SORT.name}
+                  direction={
+                    tsAccounts.sortName === EARNED_SORT.name
+                      ? tsAccounts.sortOrder
+                      : DEFAULT_SORT
+                  }
+                  onClick={() =>
+                    tsAccounts.setSortFn(EARNED_SORT.name, EARNED_SORT.fn)
+                  }
+                >
+                  <b>{`${currencyName} ${
+                    EARNED_SORT.name.description || ""
+                  }`}</b>
+                </TableSortLabel>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedAccounts.map((a) =>
+            {tsAccounts.currentPage.map((a) =>
               AccountRow(a, currencySuffix, decimalsToDisplay)
             )}
           </TableBody>
