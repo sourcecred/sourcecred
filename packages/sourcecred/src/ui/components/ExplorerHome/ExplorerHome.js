@@ -648,10 +648,9 @@ export const ExplorerHome = ({
                         {showTableChart && (
                           <ExplorerTimeline
                             timelines={{
-                              cred:
-                                allTimeContributionCharts[
-                                  String(row.identity.id)
-                                ],
+                              cred: allTimeContributionCharts[
+                                String(row.identity.id)
+                              ],
                             }}
                             responsive={true}
                           />

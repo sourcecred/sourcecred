@@ -128,7 +128,8 @@ export class GithubStorage implements LedgerStorage {
       }
     );
 
-    const uploadLedgerBlobTree: CreateBlobRes = await uploadLedgerBlobResult.json();
+    const uploadLedgerBlobTree: CreateBlobRes =
+      await uploadLedgerBlobResult.json();
 
     // Create a commit with the new tree on top of the target branch
     const commitLedgerResult = await fetch(

@@ -171,9 +171,8 @@ describe("plugins/wip-discord/fetcher", () => {
       ];
       const fetch = jest.fn(() => Promise.resolve(response));
       const fetcher = new DiscordFetcher(fetch, options());
-      const {endCursor} = (
-        await fetcher.reactions("1", "2", emoji, "0")
-      ).pageInfo;
+      const {endCursor} = (await fetcher.reactions("1", "2", emoji, "0"))
+        .pageInfo;
       expect(endCursor).toBe("2");
     });
 
@@ -186,9 +185,8 @@ describe("plugins/wip-discord/fetcher", () => {
           messagesLimit: 100,
           reactionsLimit: 1,
         });
-        const {hasNextPage} = (
-          await fetcher.reactions("1", "2", emoji, "0")
-        ).pageInfo;
+        const {hasNextPage} = (await fetcher.reactions("1", "2", emoji, "0"))
+          .pageInfo;
         expect(hasNextPage).toBe(true);
       });
 
@@ -200,9 +198,8 @@ describe("plugins/wip-discord/fetcher", () => {
           messagesLimit: 100,
           reactionsLimit: 2,
         });
-        const {hasNextPage} = (
-          await fetcher.reactions("1", "2", emoji, "0")
-        ).pageInfo;
+        const {hasNextPage} = (await fetcher.reactions("1", "2", emoji, "0"))
+          .pageInfo;
         expect(hasNextPage).toBe(false);
       });
     });

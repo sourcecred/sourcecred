@@ -447,34 +447,35 @@ export class MarkovProcessGraph {
       +timestamp: TimestampMs,
       +weight: number,
     |};
-    const unidirectionalGraphEdges = function* (): Iterator<_UnidirectionalGraphEdge> {
-      const ewe = edgeWeightEvaluator(weightedGraph.weights);
-      for (const edge of (function* () {
-        for (const edge of weightedGraph.graph.edges({showDangling: false})) {
-          const weight = ewe(edge.address);
-          yield {
-            address: edge.address,
-            reversed: false,
-            src: edge.src,
-            dst: edge.dst,
-            timestamp: edge.timestampMs,
-            weight: weight.forwards,
-          };
-          yield {
-            address: edge.address,
-            reversed: true,
-            src: edge.dst,
-            dst: edge.src,
-            timestamp: edge.timestampMs,
-            weight: weight.backwards,
-          };
+    const unidirectionalGraphEdges =
+      function* (): Iterator<_UnidirectionalGraphEdge> {
+        const ewe = edgeWeightEvaluator(weightedGraph.weights);
+        for (const edge of (function* () {
+          for (const edge of weightedGraph.graph.edges({showDangling: false})) {
+            const weight = ewe(edge.address);
+            yield {
+              address: edge.address,
+              reversed: false,
+              src: edge.src,
+              dst: edge.dst,
+              timestamp: edge.timestampMs,
+              weight: weight.forwards,
+            };
+            yield {
+              address: edge.address,
+              reversed: true,
+              src: edge.dst,
+              dst: edge.src,
+              timestamp: edge.timestampMs,
+              weight: weight.backwards,
+            };
+          }
+        })()) {
+          if (edge.weight > 0) {
+            yield edge;
+          }
         }
-      })()) {
-        if (edge.weight > 0) {
-          yield edge;
-        }
-      }
-    };
+      };
 
     const srcNodes: Map<
       NodeAddressT /* domain: nodes with positive weight from base edges */,
@@ -742,9 +743,9 @@ export class MarkovProcessGraph {
       dst: NullUtil.get(this.nodeIndex(e.dst)),
       transitionProbability: e.transitionProbability,
     }));
-    const indexedMints = Array.from(
-      this._mintTransitionProbabilties
-    ).map(([addr, pr]) => [NullUtil.get(this.nodeIndex(addr)), pr]);
+    const indexedMints = Array.from(this._mintTransitionProbabilties).map(
+      ([addr, pr]) => [NullUtil.get(this.nodeIndex(addr)), pr]
+    );
     return {
       nodes: [...this._nodes.values()],
       indexedEdges,
@@ -754,7 +755,8 @@ export class MarkovProcessGraph {
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
       indexedMints,
-      personalAttributions: this._indexedPersonalAttributions.toPersonalAttributions(),
+      personalAttributions:
+        this._indexedPersonalAttributions.toPersonalAttributions(),
     };
   }
 
@@ -949,9 +951,8 @@ function virtualizedMarkovEdge(
     );
   }
   if (MarkovEdgeAddress.hasPrefix(address, personalAttributionGadget.prefix)) {
-    const personalAttributionAddress = personalAttributionGadget.fromRaw(
-      address
-    );
+    const personalAttributionAddress =
+      personalAttributionGadget.fromRaw(address);
     const proportionValue =
       indexedPersonalAttributions.getProportionValue(
         personalAttributionAddress.epochStart,

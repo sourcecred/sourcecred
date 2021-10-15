@@ -95,7 +95,8 @@ describe("core/credrank/personalAttribution", () => {
     });
 
     it("throws when a proportion is less than 0", () => {
-      personalAttributions[0].recipients[0].proportions[0].proportionValue = -0.1;
+      personalAttributions[0].recipients[0].proportions[0].proportionValue =
+        -0.1;
       expect(() => {
         validatePersonalAttributions(personalAttributions);
       }).toThrow("Personal Attribution proportion value must be between");

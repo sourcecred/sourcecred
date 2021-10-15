@@ -78,26 +78,25 @@ describe("src/core/ledger/grainIntegration", () => {
         currency.chainId
       );
     });
-    const getmockIntegration: (?boolean) => GrainIntegrationFunction = (
-      returnTransfers = false,
-      returnOutput = false
-    ) => (distributions = [], _unused_config) => {
-      const _ = currency;
-      const transferResult = distributions.map(([payoutAddress, amount]) => ({
-        payoutAddress,
-        amount,
-        memo: "hello transfer",
-      }));
-      const result = returnTransfers
-        ? {transferredGrain: transferResult, outputFile: undefined}
-        : {transferredGrain: [], outputFile: undefined};
-      if (returnOutput)
-        result.outputFile = {
-          fileName: "testName.csv",
-          content: "this is a result from a grain integration.",
-        };
-      return result;
-    };
+    const getmockIntegration: (?boolean) => GrainIntegrationFunction =
+      (returnTransfers = false, returnOutput = false) =>
+      (distributions = [], _unused_config) => {
+        const _ = currency;
+        const transferResult = distributions.map(([payoutAddress, amount]) => ({
+          payoutAddress,
+          amount,
+          memo: "hello transfer",
+        }));
+        const result = returnTransfers
+          ? {transferredGrain: transferResult, outputFile: undefined}
+          : {transferredGrain: [], outputFile: undefined};
+        if (returnOutput)
+          result.outputFile = {
+            fileName: "testName.csv",
+            content: "this is a result from a grain integration.",
+          };
+        return result;
+      };
     const currency = buildCurrency("BTC");
     it("can execute GrainIntegration that doesn't update the ledger", () => {
       const ledgerSnapshot = ledger.serialize();

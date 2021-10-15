@@ -116,27 +116,28 @@ const proportionParser = C.number.fmap((n) => {
   return n;
 });
 
-export const personalAttributionsConfigParser: C.Parser<PersonalAttributionsConfig> = C.array(
-  C.object(
-    {
-      fromParticipantName: nameParser,
-      recipients: C.array(
-        C.object(
-          {
-            toParticipantName: nameParser,
-            proportions: C.array(
-              C.object({
-                startDate: timestampISOParser,
-                decimalProportion: proportionParser,
-              })
-            ),
-          },
-          {
-            toParticipantId: identityIdParser,
-          }
-        )
-      ),
-    },
-    {fromParticipantId: identityIdParser}
-  )
-);
+export const personalAttributionsConfigParser: C.Parser<PersonalAttributionsConfig> =
+  C.array(
+    C.object(
+      {
+        fromParticipantName: nameParser,
+        recipients: C.array(
+          C.object(
+            {
+              toParticipantName: nameParser,
+              proportions: C.array(
+                C.object({
+                  startDate: timestampISOParser,
+                  decimalProportion: proportionParser,
+                })
+              ),
+            },
+            {
+              toParticipantId: identityIdParser,
+            }
+          )
+        ),
+      },
+      {fromParticipantId: identityIdParser}
+    )
+  );

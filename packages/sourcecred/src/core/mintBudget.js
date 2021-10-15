@@ -99,9 +99,10 @@ export function _computeReweighting(
 ): Reweighting {
   const evaluator = nodeWeightEvaluator(wg.weights);
   const partition = partitionGraph(wg.graph);
-  const reweightingsForEachBudget: $ReadOnlyArray<Reweighting> = budget.entries.map(
-    (entry) => _reweightingForEntry({evaluator, partition, entry})
-  );
+  const reweightingsForEachBudget: $ReadOnlyArray<Reweighting> =
+    budget.entries.map((entry) =>
+      _reweightingForEntry({evaluator, partition, entry})
+    );
   return [].concat(...reweightingsForEachBudget);
 }
 

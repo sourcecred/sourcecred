@@ -8,13 +8,8 @@ import {
 } from "../../plugins/ethereum/ethAddress";
 
 export const LoginButton = (): React.Node => {
-  const {
-    address,
-    connectWeb3,
-    disconnect,
-    isConnected,
-    isConnecting,
-  } = useWeb3();
+  const {address, connectWeb3, disconnect, isConnected, isConnecting} =
+    useWeb3();
 
   const handleLoginClick = React.useCallback(async () => {
     await connectWeb3();

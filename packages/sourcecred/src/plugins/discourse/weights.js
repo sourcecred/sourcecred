@@ -108,18 +108,19 @@ function upgrade(s: SerializedWeightsConfig): WeightsConfig {
   };
 }
 
-export const serializedWeightsConfigParser: C.Parser<SerializedWeightsConfig> = C.object(
-  {},
-  {
-    defaultCategoryWeight: C.number,
-    defaultTagWeight: C.number,
-    categoryWeights: C.dict(
-      C.number,
-      C.fmap(C.delimited("//"), parseCategoryId)
-    ),
-    tagWeights: C.dict(C.number, C.fmap(C.string, parseTagId)),
-  }
-);
+export const serializedWeightsConfigParser: C.Parser<SerializedWeightsConfig> =
+  C.object(
+    {},
+    {
+      defaultCategoryWeight: C.number,
+      defaultTagWeight: C.number,
+      categoryWeights: C.dict(
+        C.number,
+        C.fmap(C.delimited("//"), parseCategoryId)
+      ),
+      tagWeights: C.dict(C.number, C.fmap(C.string, parseTagId)),
+    }
+  );
 
 export const weightsConfigParser: C.Parser<WeightsConfig> = C.fmap(
   serializedWeightsConfigParser,

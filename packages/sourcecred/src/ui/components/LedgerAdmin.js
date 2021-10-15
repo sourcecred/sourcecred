@@ -146,9 +146,10 @@ export const LedgerAdmin = (): ReactNode => {
     []
   );
 
-  const nameIsEmpty = useMemo(() => nextIdentityName.trim().length === 0, [
-    nextIdentityName,
-  ]);
+  const nameIsEmpty = useMemo(
+    () => nextIdentityName.trim().length === 0,
+    [nextIdentityName]
+  );
 
   return (
     <Container className={classes.root}>

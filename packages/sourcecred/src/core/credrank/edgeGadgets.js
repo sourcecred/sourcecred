@@ -220,38 +220,39 @@ export type PersonalAttributionAddress = {|
   +toParticipantId: IdentityId,
 |};
 
-export const personalAttributionGadget: EdgeGadget<PersonalAttributionAddress> = (() => {
-  const edgePrefix = EdgeAddress.append(GADGET_EDGE_PREFIX, "ATTRIBUTION");
-  const prefix = markovEdgeAddress(edgePrefix, "F");
-  const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
-  const toRaw = ({epochStart, fromParticipantId, toParticipantId}) =>
-    MarkovEdgeAddress.append(
-      prefix,
-      String(epochStart),
-      fromParticipantId,
-      toParticipantId
-    );
-  const fromRaw = (addr) => {
-    const parts = MarkovEdgeAddress.toParts(addr).slice(prefixLength);
-    const epochStart = +parts[0];
-    const fromParticipantId = uuidFromString(parts[1]);
-    const toParticipantId = uuidFromString(parts[2]);
-    return {epochStart, fromParticipantId, toParticipantId};
-  };
-  const markovEdge = (
-    {epochStart, fromParticipantId, toParticipantId},
-    transitionProbability
-  ) => ({
-    address: EdgeAddress.append(
-      edgePrefix,
-      String(epochStart),
-      fromParticipantId,
-      toParticipantId
-    ),
-    reversed: false,
-    src: epochGadget.toRaw({owner: fromParticipantId, epochStart}),
-    dst: epochGadget.toRaw({owner: toParticipantId, epochStart}),
-    transitionProbability,
-  });
-  return Object.freeze({prefix, toRaw, fromRaw, markovEdge});
-})();
+export const personalAttributionGadget: EdgeGadget<PersonalAttributionAddress> =
+  (() => {
+    const edgePrefix = EdgeAddress.append(GADGET_EDGE_PREFIX, "ATTRIBUTION");
+    const prefix = markovEdgeAddress(edgePrefix, "F");
+    const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
+    const toRaw = ({epochStart, fromParticipantId, toParticipantId}) =>
+      MarkovEdgeAddress.append(
+        prefix,
+        String(epochStart),
+        fromParticipantId,
+        toParticipantId
+      );
+    const fromRaw = (addr) => {
+      const parts = MarkovEdgeAddress.toParts(addr).slice(prefixLength);
+      const epochStart = +parts[0];
+      const fromParticipantId = uuidFromString(parts[1]);
+      const toParticipantId = uuidFromString(parts[2]);
+      return {epochStart, fromParticipantId, toParticipantId};
+    };
+    const markovEdge = (
+      {epochStart, fromParticipantId, toParticipantId},
+      transitionProbability
+    ) => ({
+      address: EdgeAddress.append(
+        edgePrefix,
+        String(epochStart),
+        fromParticipantId,
+        toParticipantId
+      ),
+      reversed: false,
+      src: epochGadget.toRaw({owner: fromParticipantId, epochStart}),
+      dst: epochGadget.toRaw({owner: toParticipantId, epochStart}),
+      transitionProbability,
+    });
+    return Object.freeze({prefix, toRaw, fromRaw, markovEdge});
+  })();

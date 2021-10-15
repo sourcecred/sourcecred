@@ -166,9 +166,8 @@ class MockFetcher implements Discourse {
   }
 
   _topicLatest(topicId: TopicId): TopicLatest {
-    const {id, title, timestampMs, categoryId, bumpedMs, tags} = this._topic(
-      topicId
-    );
+    const {id, title, timestampMs, categoryId, bumpedMs, tags} =
+      this._topic(topicId);
     return {id, title, timestampMs, categoryId, bumpedMs, tags};
   }
 

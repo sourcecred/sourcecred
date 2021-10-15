@@ -1106,10 +1106,9 @@ export class Mirror {
           // transitively upward-pruning the query and seems unlikely to
           // be worth it at this time.
           ...typenameQuery,
-          ...this._schemaInfo.unionTypes[
-            typename
-          ].clauses.map((clause: Schema.Typename) =>
-            b.inlineFragment(clause, [b.field("id")])
+          ...this._schemaInfo.unionTypes[typename].clauses.map(
+            (clause: Schema.Typename) =>
+              b.inlineFragment(clause, [b.field("id")])
           ),
         ];
       // istanbul ignore next

@@ -140,7 +140,8 @@ function toAddResult({
 }
 
 export class SqliteMirrorRepository
-  implements ReadRepository, MirrorRepository {
+  implements ReadRepository, MirrorRepository
+{
   +_db: Database;
 
   constructor(db: Database, serverUrl: string) {

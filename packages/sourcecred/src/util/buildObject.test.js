@@ -14,9 +14,7 @@ describe("src/util/buildObject", () => {
     });
   });
   it("excludes optionals with manually-defined exclusions", () => {
-    expect(
-      buildObject<TestT>({s: "test"}, {n: 1}, [1])
-    ).toEqual({
+    expect(buildObject<TestT>({s: "test"}, {n: 1}, [1])).toEqual({
       s: "test",
     });
   });
