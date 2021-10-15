@@ -15,12 +15,10 @@ export type MirrorOptions = {|
 const optionsParserFields = {
   recheckCategoryDefinitionsAfterMs: Combo.number,
 };
-export const optionsParser: Combo.Parser<MirrorOptions> = Combo.object(
-  optionsParserFields
-);
-export const optionsShapeParser: Combo.Parser<
-  $Shape<MirrorOptions>
-> = Combo.shape(optionsParserFields);
+export const optionsParser: Combo.Parser<MirrorOptions> =
+  Combo.object(optionsParserFields);
+export const optionsShapeParser: Combo.Parser<$Shape<MirrorOptions>> =
+  Combo.shape(optionsParserFields);
 
 const defaultOptions: MirrorOptions = {
   recheckCategoryDefinitionsAfterMs: 24 * 3600 * 1000, // 24h

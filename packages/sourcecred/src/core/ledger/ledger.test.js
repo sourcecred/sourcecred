@@ -28,12 +28,8 @@ import {
 
 const uuidMock = createUuidMock();
 const dateMock = createDateMock();
-const {
-  identity1,
-  identity2,
-  ledgerWithIdentities,
-  ledgerWithActiveIdentities,
-} = createTestLedgerFixture(uuidMock, dateMock);
+const {identity1, identity2, ledgerWithIdentities, ledgerWithActiveIdentities} =
+  createTestLedgerFixture(uuidMock, dateMock);
 const {resetFakeUuid, setNextUuid} = uuidMock;
 const {setFakeDate} = dateMock;
 

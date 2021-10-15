@@ -58,6 +58,7 @@ export const COMPAT_INFO = {
 
 const addressEntriesParser = C.array(ethAddressParser);
 
-export const parser: C.Parser<
-  Array<EthAddress>
-> = compatibleParser(COMPAT_INFO.type, {"0.0.1": addressEntriesParser});
+export const parser: C.Parser<Array<EthAddress>> = compatibleParser(
+  COMPAT_INFO.type,
+  {"0.0.1": addressEntriesParser}
+);

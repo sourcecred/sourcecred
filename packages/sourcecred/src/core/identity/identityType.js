@@ -11,9 +11,8 @@ const ValidIdentityTypes = {
 };
 
 // export a read-only version of the ValidIdentityTypes object for programmatic reference
-export const IdentityTypes: typeof ValidIdentityTypes = deepFreeze(
-  ValidIdentityTypes
-);
+export const IdentityTypes: typeof ValidIdentityTypes =
+  deepFreeze(ValidIdentityTypes);
 export type IdentityType = $Keys<typeof IdentityTypes>;
 export const parser: C.Parser<IdentityType> = C.exactly(
   Object.keys(IdentityTypes)

@@ -24,13 +24,12 @@ export type MarkovEdge = {|
 |};
 
 export opaque type MarkovEdgeAddressT: string = string;
-export const MarkovEdgeAddress: AddressModule<MarkovEdgeAddressT> = (makeAddressModule(
-  {
+export const MarkovEdgeAddress: AddressModule<MarkovEdgeAddressT> =
+  (makeAddressModule({
     name: "MarkovEdgeAddress",
     nonce: "ME",
     otherNonces: new Map().set("N", "NodeAddress").set("E", "EdgeAddress"),
-  }
-): AddressModule<string>);
+  }): AddressModule<string>);
 
 export function markovEdgeAddress(
   edgeAddress: EdgeAddressT,

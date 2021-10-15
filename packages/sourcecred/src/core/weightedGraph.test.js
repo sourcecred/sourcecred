@@ -91,8 +91,10 @@ describe("core/weightedGraph", () => {
       expected.nodeWeights.set(bar.address, 102);
       expected.edgeWeights.set(foobar.address, {forwards: 103, backwards: 103});
       expected.edgeWeights.set(EdgeAddress.empty, {forwards: 3, backwards: 3});
-      const actual = WeightedGraph.overrideWeights(example(), overrides)
-        .weights;
+      const actual = WeightedGraph.overrideWeights(
+        example(),
+        overrides
+      ).weights;
       expect(expected).toEqual(actual);
     });
   });

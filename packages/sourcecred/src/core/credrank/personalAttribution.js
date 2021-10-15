@@ -45,19 +45,20 @@ export type PersonalAttribution = {|
   they are attributing it.
  */
 export type PersonalAttributions = $ReadOnlyArray<PersonalAttribution>;
-export const personalAttributionsParser: C.Parser<PersonalAttributions> = C.array(
-  C.object({
-    fromParticipantId: identityIdParser,
-    recipients: C.array(
-      C.object({
-        toParticipantId: identityIdParser,
-        proportions: C.array(
-          C.object({timestampMs: C.number, proportionValue: C.number})
-        ),
-      })
-    ),
-  })
-);
+export const personalAttributionsParser: C.Parser<PersonalAttributions> =
+  C.array(
+    C.object({
+      fromParticipantId: identityIdParser,
+      recipients: C.array(
+        C.object({
+          toParticipantId: identityIdParser,
+          proportions: C.array(
+            C.object({timestampMs: C.number, proportionValue: C.number})
+          ),
+        })
+      ),
+    })
+  );
 
 /**
   Validates that:

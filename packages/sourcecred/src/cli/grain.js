@@ -41,7 +41,8 @@ const grainCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const instance: Instance = new LocalInstance(baseDir);
   const grainInput = await instance.readGrainInput();
-  grainInput.allowMultipleDistributionsPerInterval = allowMultipleDistributionsPerInterval;
+  grainInput.allowMultipleDistributionsPerInterval =
+    allowMultipleDistributionsPerInterval;
 
   const {distributions, ledger: ledgerBeforeIntegrations} = await grain(
     grainInput

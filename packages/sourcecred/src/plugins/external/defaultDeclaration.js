@@ -5,9 +5,7 @@ import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type PluginId, getPluginName, getPluginOwner} from "../../api/pluginId";
 import {NodeAddress, EdgeAddress, type NodeAddressT} from "../../core/graph";
 
-export function contributionNodeType(
-  id: PluginId
-): {|
+export function contributionNodeType(id: PluginId): {|
   +defaultWeight: number,
   +description: string,
   +name: string,
@@ -27,9 +25,7 @@ export function contributionNodeType(
   });
 }
 
-export function participantNodeType(
-  id: PluginId
-): {|
+export function participantNodeType(id: PluginId): {|
   +defaultWeight: number,
   +description: string,
   +name: string,

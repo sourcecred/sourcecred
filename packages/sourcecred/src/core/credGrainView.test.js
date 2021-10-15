@@ -8,11 +8,8 @@ import {Ledger} from "./ledger/ledger";
 import * as uuid from "../util/uuid";
 
 describe("core/credGrainView", () => {
-  const {
-    identity1,
-    identity2,
-    ledgerWithActiveIdentities,
-  } = createTestLedgerFixture();
+  const {identity1, identity2, ledgerWithActiveIdentities} =
+    createTestLedgerFixture();
   const allocationId1 = uuid.random();
   const allocationId2 = uuid.random();
 

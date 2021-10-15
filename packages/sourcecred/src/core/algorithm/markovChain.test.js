@@ -324,11 +324,7 @@ describe("core/algorithm/markovChain", () => {
       // >>piStar = alpha * seed * np.linalg.inv(np.eye(n) -(1-alpha)*A)
       // >>print(piStar)
       const expected = new Float64Array([
-        0.37931034,
-        0.15517241,
-        0.15517241,
-        0.15517241,
-        0.15517241,
+        0.37931034, 0.15517241, 0.15517241, 0.15517241, 0.15517241,
       ]);
 
       const result = await findStationaryDistribution(

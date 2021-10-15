@@ -113,9 +113,8 @@ export const expectedParticipant4: Participant = {
 
 //Create a very uneven graph
 
-export const participants: $ReadOnlyArray<MarkovProcessParticipant> = deepFreeze(
-  [participant1, participant2]
-);
+export const participants: $ReadOnlyArray<MarkovProcessParticipant> =
+  deepFreeze([participant1, participant2]);
 
 export const intervals: IntervalSequence = deepFreeze(
   intervalSequence([

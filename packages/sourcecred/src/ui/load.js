@@ -66,13 +66,8 @@ export async function load(): Promise<LoadResult> {
     ),
   ];
   try {
-    const [
-      rawInstanceConfig,
-      {hasBackend},
-      currency,
-      credGrainView,
-      weights,
-    ] = await Promise.all(queries);
+    const [rawInstanceConfig, {hasBackend}, currency, credGrainView, weights] =
+      await Promise.all(queries);
 
     const ledgerResult = await ledgerManager.reloadLedger();
     if (ledgerResult.error) {

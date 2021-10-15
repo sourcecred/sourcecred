@@ -22,7 +22,8 @@ export class ZipStorage implements DataStorage {
 
 export class WritableZipStorage
   extends ZipStorage
-  implements WritableDataStorage {
+  implements WritableDataStorage
+{
   +_baseStorage: WritableDataStorage;
 
   constructor(baseStorage: WritableDataStorage) {

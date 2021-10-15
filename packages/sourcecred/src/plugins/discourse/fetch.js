@@ -242,9 +242,8 @@ export class Fetcher implements Discourse {
       );
       failIfMissing(subResponse);
       failForNotOk(subResponse);
-      const {categories: subCategories} = (
-        await subResponse.json()
-      ).category_list;
+      const {categories: subCategories} = (await subResponse.json())
+        .category_list;
       for (const cat of subCategories) {
         if (cat.topic_url != null) {
           urls.push(cat.topic_url);

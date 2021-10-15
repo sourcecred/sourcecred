@@ -73,9 +73,8 @@ export function recentReceipts(
       0
     );
   };
-  const decayedCredPerIdentity = timeLimitedParticipants.map(
-    computeDecayedCred
-  );
+  const decayedCredPerIdentity =
+    timeLimitedParticipants.map(computeDecayedCred);
 
   const amounts = G.splitBudget(policy.budget, decayedCredPerIdentity);
 

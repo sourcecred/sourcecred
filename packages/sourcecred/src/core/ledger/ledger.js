@@ -1126,11 +1126,10 @@ type DisableGrainIntegration = {|
   +type: "DISABLE_GRAIN_INTEGRATION",
 |};
 
-const disableGrainIntegrationParser: C.Parser<DisableGrainIntegration> = C.object(
-  {
+const disableGrainIntegrationParser: C.Parser<DisableGrainIntegration> =
+  C.object({
     type: C.exactly(["DISABLE_GRAIN_INTEGRATION"]),
-  }
-);
+  });
 
 type MarkDistributionExecuted = {|
   +type: "MARK_DISTRIBUTION_EXECUTED",

@@ -8,9 +8,9 @@ import {intervalSequence} from "../interval";
 describe("core/ledger/credAccounts", () => {
   describe("_computeCredAccounts", () => {
     it("works in an empty case", () => {
-      expect(
-        _computeCredAccounts([], new Map(), intervalSequence([]))
-      ).toEqual({"accounts": [], "intervals": [], unclaimedAliases: []});
+      expect(_computeCredAccounts([], new Map(), intervalSequence([]))).toEqual(
+        {"accounts": [], "intervals": [], unclaimedAliases: []}
+      );
     });
     it("works in a simple case", () => {
       const ledger = new Ledger();

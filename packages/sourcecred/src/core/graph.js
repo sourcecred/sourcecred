@@ -1183,9 +1183,7 @@ export function edgeToString(edge: Edge): string {
  * This is useful for storing edges in human-readable formats that
  * should not include NUL characters, such as Jest snapshots.
  */
-export function edgeToStrings(
-  edge: Edge
-): {|
+export function edgeToStrings(edge: Edge): {|
   +address: string,
   +src: string,
   +dst: string,
@@ -1199,9 +1197,7 @@ export function edgeToStrings(
   };
 }
 
-export function edgeToParts(
-  edge: Edge
-): {|
+export function edgeToParts(edge: Edge): {|
   +addressParts: string[],
   +srcParts: string[],
   +dstParts: string[],

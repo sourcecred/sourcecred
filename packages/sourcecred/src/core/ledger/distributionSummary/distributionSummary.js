@@ -15,9 +15,8 @@ export function distributionMarkdownSummary(
   currencyDetails: CurrencyDetails
 ): string {
   const {name: currencyName, suffix: currencySuffix} = currencyDetails;
-  const distributionBalances: DistributionBalances = getDistributionBalances(
-    distribution
-  );
+  const distributionBalances: DistributionBalances =
+    getDistributionBalances(distribution);
   const totalDistributed: G.Grain = getTotalDistributed(distributionBalances);
 
   const columnHeaders = `|          name          |    total    |     %     |`;

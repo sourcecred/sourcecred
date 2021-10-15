@@ -82,9 +82,9 @@ describe("plugins/github/parseReferences", () => {
       ]);
     });
     it("a link with surrounding context", () => {
-      expect(
-        parseReferences("please see sourcecred/example_.repo#12")
-      ).toEqual([{refType: "BASIC", ref: repoRef}]);
+      expect(parseReferences("please see sourcecred/example_.repo#12")).toEqual(
+        [{refType: "BASIC", ref: repoRef}]
+      );
     });
   });
 
@@ -131,8 +131,7 @@ https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863b
       },
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/exa_mple-git.hub/issues/1#issue-300934818",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/1#issue-300934818",
       },
       {
         refType: "BASIC",
@@ -140,33 +139,27 @@ https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863b
       },
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/exa_mple-git.hub/pull/3#issue-171887741",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/pull/3#issue-171887741",
       },
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/exa_mple-git.hub/issues/6#issuecomment-373768442",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/6#issuecomment-373768442",
       },
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/exa_mple-git.hub/pull/5#pullrequestreview-100313899",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/pull/5#pullrequestreview-100313899",
       },
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/exa_mple-git.hub/pull/5#discussion_r171460198",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/pull/5#discussion_r171460198",
       },
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222",
       },
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
       },
     ];
 
@@ -293,8 +286,7 @@ https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863b
       {refType: "BASIC", ref: "#125"},
       {
         refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/example_.repo/pull/125#pullrequestreview-113402856",
+        ref: "https://github.com/sourcecred/example_.repo/pull/125#pullrequestreview-113402856",
       },
       {refType: "BASIC", ref: "@wchargin"},
     ]);
