@@ -4,6 +4,7 @@ import {
   ethAddressParser,
   type EthAddress,
 } from "../../plugins/ethereum/ethAddress";
+import stringify from "json-stable-stringify";
 import * as C from "../../util/combo";
 
 /**
@@ -82,6 +83,17 @@ export const currencyParser: C.Parser<Currency> = C.orElse([
   evmParser,
   protocolParser,
 ]);
+
+/**
+ * The Currency key must be stringified to ensure the data is retrievable.
+ * Keying on the raw Currency object means keying on the object reference,
+ * rather than the contents of the object.
+ */
+export opaque type CurrencyKey = string;
+
+export function getCurrencyKey(currency: Currency): CurrencyKey {
+  return stringify(currency);
+}
 
 export function buildCurrency(
   chainId: string,

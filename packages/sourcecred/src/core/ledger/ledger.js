@@ -23,9 +23,11 @@ import {
 } from "../identity";
 import {
   type Currency,
+  type CurrencyKey,
   type ChainId,
   currencyParser,
   buildCurrency,
+  getCurrencyKey,
 } from "./currency";
 import {type NodeAddressT, NodeAddress} from "../graph";
 import {type TimestampMs} from "../../util/timestamp";
@@ -85,13 +87,6 @@ type MutableAccount = {|
 |};
 export type Account = $ReadOnly<MutableAccount>;
 
-/**
- * The Currency key must be stringified to ensure the data is retrievable.
- * Keying on the raw Currency object means keying on the object reference,
- * rather than the contents of the object.
- */
-export type CurrencyId = string;
-
 // Only Eth Addresses are supported at the moment
 export type PayoutAddress = EthAddress;
 
@@ -102,7 +97,7 @@ export type PayoutAddress = EthAddress;
  * themselves that the address they are supplying is capable of receiving their
  * share of a grain distribution.
  */
-type PayableAddressStore = Map<CurrencyId, PayoutAddress>;
+type PayableAddressStore = Map<CurrencyKey, PayoutAddress>;
 
 /**
  * The Ledger is an append-only auditable data store which tracks
@@ -765,13 +760,13 @@ export class Ledger {
       }
       // Mutations! Method must not fail below this comment.
       account.payoutAddresses.set(
-        JSON.stringify(currencyResult.value),
+        getCurrencyKey(currencyResult.value),
         payoutAddress
       );
       return;
     }
     // else (payoutAddress === null) and we delete the entry
-    account.payoutAddresses.delete(JSON.stringify(currencyResult.value));
+    account.payoutAddresses.delete(getCurrencyKey(currencyResult.value));
   }
 
   /**
