@@ -1,11 +1,29 @@
 // @flow
 
-import {OriginStorage} from "./originStorage";
+import {createPostableLedgerStorage, OriginStorage} from "./originStorage";
+
+
+const MockServerTempValue = new Map();
 
 jest.mock("cross-fetch", () => ({
   // needed to utilize fetch as a default export.
   __esModule: true,
-  default: (path) => {
+  default: (path, options) => {
+
+    if (options) {
+      if (options.method === 'POST') {
+
+        MockServerTempValue.set(path, options.body)
+
+        return Promise.resolve({
+          arrayBuffer: () => options.body,
+          ok: true,
+          status: 200,
+          statusText: "OK",
+        })
+      }
+    }
+
     switch (path) {
       case "base/validPath":
         return Promise.resolve({
@@ -27,6 +45,14 @@ jest.mock("cross-fetch", () => ({
           ok: false,
           status: 500,
           statusText: "INTERNAL ERROR",
+        });
+
+      case "post/validPath":
+        return Promise.resolve({
+          arrayBuffer: () => MockServerTempValue.get(path),
+          ok: true,
+          status: 200,
+          statusText: "OK",
         });
       default:
         return Promise.resolve({
@@ -83,6 +109,15 @@ describe("core/storage/originStorage", () => {
       await expect(dunk()).rejects.toThrow(
         "Error fetching serverError: 500 INTERNAL ERROR"
       );
+    });
+
+
+    it("works when base path is empty", async () => {
+      expect.hasAssertions();
+      const storage = createPostableLedgerStorage("");
+      await storage.set("post/validPath", value);
+      const result = await storage.get("post/validPath");
+      await expect(result).toEqual(value);
     });
   });
 });
