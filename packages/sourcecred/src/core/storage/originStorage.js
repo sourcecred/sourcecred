@@ -1,8 +1,8 @@
 // @flow
 
-import {DataStorage} from "./index";
+import {DataStorage, WritableDataStorage} from "./index";
 import normalize from "../../util/pathNormalize";
-import {join as pathJoin, isAbsolute} from "path";
+import {join as pathJoin, isAbsolute} from 'path';
 import fetch from "cross-fetch";
 
 /**
@@ -37,4 +37,40 @@ export class OriginStorage implements DataStorage {
 
     return new Uint8Array(await result.arrayBuffer());
   }
+}
+
+
+export class PostableOriginStorage
+  extends OriginStorage
+  implements WritableDataStorage {
+
+  _headers: { [string]: string | number}
+
+  constructor(base: string, headers: {[string]: string | number}) {
+    super(base);
+    this._headers = headers;
+  }
+
+  async set(path: string, body: Uint8Array): Promise<void> {
+
+    let payload;
+    if (typeof window !== 'undefined') {
+      payload = new Blob([body.buffer])
+    } else {
+      payload = body.buffer
+    }
+
+    await fetch(path, {
+      headers: this._headers,
+      method: "POST",
+      body: payload,
+    });
+  }
+}
+
+export const createPostableLedgerStorage = (base: string): PostableOriginStorage => {
+  return new PostableOriginStorage(base, {
+      Accept: "text/plain",
+      "Content-Type": "text/plain",
+  })
 }
