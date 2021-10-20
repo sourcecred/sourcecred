@@ -117,7 +117,7 @@ const customRoutes = (
   const backendRoutes = hasBackend
     ? [
         <Route key="admin" exact path="/admin">
-          <LedgerAdmin />
+          <LedgerAdmin currency={currency} />
         </Route>,
         <Route key="transfer" exact path="/transfer">
           <Transfer currency={currency} />
