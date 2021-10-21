@@ -2,6 +2,8 @@
 
 import {Ledger, type LedgerLog} from "../core/ledger/ledger";
 import {diffLedger, type LedgerDiff} from "../core/ledger/diffLedger";
+import type {WritableDataStorage} from "../core/storage";
+import {decode, encode} from "../core/storage/textEncoding";
 
 /**
  * Generic adaptor for persisting a Ledger to some storage backend
@@ -13,8 +15,9 @@ export interface LedgerStorage {
 }
 
 type LedgerManagerConfig = {|
-  +storage: LedgerStorage,
+  +storage: WritableDataStorage,
   +initLogs?: LedgerLog,
+  +path?: string,
 |};
 
 type ReloadResult = {|
@@ -25,9 +28,11 @@ type ReloadResult = {|
 
 export class LedgerManager {
   _ledger: Ledger;
-  +_storage: LedgerStorage;
+  +_storage: WritableDataStorage;
+  _path: string;
 
   constructor(config: LedgerManagerConfig) {
+    this._path = config.path ?? 'data/ledger.json';
     this._storage = config.storage;
     this._ledger = config.initLogs
       ? Ledger.fromEventLog(config.initLogs)
@@ -75,7 +80,7 @@ export class LedgerManager {
     if (preWriteReloadRes.error) {
       return preWriteReloadRes;
     }
-    await this._storage.write(this._ledger);
+    await this._storage.set(this._path, encode(this._ledger.serialize()));
     // END RACE CONDITION
 
     // Reload ledger again to ensure all the changes were persisted into storage
@@ -108,7 +113,7 @@ export class LedgerManager {
   async reloadLedger(): Promise<ReloadResult> {
     let remoteLedger: Ledger;
     try {
-      remoteLedger = await this._storage.read();
+      remoteLedger = await this._getLedger();
     } catch (e) {
       return {
         error: e.message,
@@ -138,12 +143,18 @@ export class LedgerManager {
       };
     } catch (e) {
       // Reset local ledger to the remote state
-      this._ledger = await this._storage.read();
+      this._ledger = await this._getLedger()
+
       return {
         error: `Unable to apply local changes: ${e.message}, resetting to remote ledger`,
         remoteChanges,
         localChanges,
       };
     }
+  }
+
+  async _getLedger(): Promise<Ledger> {
+    const decodedLedger = await this._storage.get(this._path);
+    return Ledger.parse(decode(decodedLedger));
   }
 }
