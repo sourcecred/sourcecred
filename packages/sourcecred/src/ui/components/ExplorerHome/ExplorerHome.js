@@ -643,9 +643,14 @@ export const ExplorerHome = ({
                         {Math.round(row.cred).toLocaleString()}
                       </TableCell>
                       <TableCell className={classes.labelCred}>
-                        {`${((row.cred / totalCredThisPeriod) * 100)
-                          .toFixed(1)
-                          .toLocaleString()}%`}
+                        {(row.cred / totalCredThisPeriod).toLocaleString(
+                          undefined,
+                          {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                            style: "percent",
+                          }
+                        )}
                       </TableCell>
                       <TableCell className={classes.labelGrain}>
                         {format(
