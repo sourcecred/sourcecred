@@ -51,7 +51,7 @@ export class PostableOriginStorage
 
   async set(path: string, body: Uint8Array): Promise<void> {
     let payload;
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && typeof process === "undefined") {
       payload = new Blob([body.buffer]);
     } else {
       payload = body.buffer;

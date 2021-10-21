@@ -1164,6 +1164,4 @@ const ledgerEventParser: C.Parser<LedgerEvent> = C.object({
   uuid: uuid.parser,
 });
 
-export const ledgerParser: C.Parser<Ledger> = C.fmap(C.string, Ledger.parse);
-
 const _getTimestamp = () => Date.now();

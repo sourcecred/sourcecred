@@ -12,6 +12,9 @@ jest.mock("cross-fetch", () => ({
       if (options.method === "POST") {
         MockServerTempValue.set(path, options.body);
 
+        console.log(`::: ${path} is called! and SAVED.`);
+        console.log({value: MockServerTempValue.get(path)});
+
         return Promise.resolve({
           arrayBuffer: () => options.body,
           ok: true,
@@ -45,6 +48,9 @@ jest.mock("cross-fetch", () => ({
         });
 
       case "post/validPath":
+        console.log(`::: ${path} is called!`);
+        console.log({value: MockServerTempValue.get(path)});
+
         return Promise.resolve({
           arrayBuffer: () => MockServerTempValue.get(path),
           ok: true,
@@ -108,11 +114,12 @@ describe("core/storage/originStorage", () => {
       );
     });
 
-    it("works when base path is empty", async () => {
+    it("works when posting and getting data again.", async () => {
       expect.hasAssertions();
+      const path = "post/validPath";
       const storage = createPostableLedgerStorage("");
-      await storage.set("post/validPath", value);
-      const result = await storage.get("post/validPath");
+      await storage.set(path, value);
+      const result = await storage.get(path);
       await expect(result).toEqual(value);
     });
   });
