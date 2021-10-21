@@ -103,7 +103,7 @@ function printCredSummaryTable(credGraph: CredGraph, std) {
       1
     )}% |`;
   }
-  sortedParticipants.slice(0, 20).forEach((n) => std.out(row(n)));
+  sortedParticipants.slice(0, 100).forEach((n) => std.out(row(n)));
 }
 
 function printCredDiffTable(

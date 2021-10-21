@@ -1,6 +1,7 @@
 // @flow
 
 import {escape} from "entities";
+import stringify from "json-stable-stringify";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import {empty as emptyWeights} from "../../core/weights";
 import {
@@ -27,6 +28,13 @@ import * as Model from "./models";
 
 import {type DiscordConfig} from "./config";
 import {reactionWeight} from "./reactionWeights";
+import {
+  score,
+  type UnscoredContribution,
+  type Contribution,
+  type WeightConfig,
+} from "../../api/plugin";
+import {LocalInstance} from "../../api/instance/localInstance";
 
 // Display this many characters in description.
 const MESSAGE_LENGTH = 30;
@@ -291,12 +299,145 @@ export function* findGraphMessages(
   }
 }
 
-export function createGraph(
+export async function createGraph(
   config: DiscordConfig,
   repo: SqliteMirrorRepository
-): WeightedGraphT {
-  const graphMessages = findGraphMessages(repo);
-  return _createGraphFromMessages(config, graphMessages);
+): Promise<WeightedGraphT> {
+  await logContributionScores(config, findGraphMessages(repo));
+  return _createGraphFromMessages(config, findGraphMessages(repo));
+}
+
+export async function logContributionScores(
+  config: DiscordConfig,
+  messages: Iterable<GraphMessage>
+): Promise<void> {
+  const instance = new LocalInstance(process.cwd());
+  const ledger = await instance.readLedger();
+  const unscoredContributions: Array<UnscoredContribution> = Array.from(
+    messages
+  ).map((msg) => {
+    const shareMultiplier = config.propsChannels.includes(msg.channelId)
+      ? 19
+      : 1;
+    return {
+      id: msg.channelId + "/" + msg.message.id,
+      plugin: "discord",
+      type: "message",
+      participants: msg.mentions.filter(m => m.count)
+        .map((m) => ({
+          id:
+            ledger.accountByAddress(
+              NodeAddress.fromRaw(memberAddress(m.member))
+            )?.identity.name || "",
+          shares: m.count * shareMultiplier,
+        }))
+        .concat(
+          msg.author
+            ? [
+                {
+                  id:
+                    ledger.accountByAddress(
+                      NodeAddress.fromRaw(memberAddress(msg.author))
+                    )?.identity.name || "",
+                  shares: 1,
+                },
+              ]
+            : []
+        ),
+      equation: {
+        type: "MULTIPLY",
+        description: "contribution attributes",
+        factors: [{key: "channel", value: msg.channelId}],
+        equationFactors: [
+          {
+            type: "ADD",
+            description: "reactions",
+            factors: [],
+            equationFactors: msg.reactions.map((r) => ({
+              type: "MULTIPLY",
+              description: "reaction attributes",
+              factors: [
+                {key: "emoji", value: Model.emojiToRef(r.reaction.emoji)},
+              ],
+              equationFactors: [
+                {
+                  type: "MAX",
+                  description: "reacting member roles",
+                  factors: r.reactingMember.roles.map((role) => ({
+                    key: "role",
+                    value: role,
+                  })),
+                  equationFactors: [],
+                },
+              ],
+            })),
+          },
+        ],
+      },
+    };
+  });
+  const weightConfig: WeightConfig = [
+    {
+      key: "channel",
+      default: config.weights.channelWeights.defaultWeight,
+      values: Object.entries(config.weights.channelWeights.weights).map(
+        ([value, weight]) => ({
+          value,
+          // $FlowIgnore
+          weight,
+        })
+      ),
+    },
+    {
+      key: "role",
+      default: config.weights.roleWeights.defaultWeight,
+      values: Object.entries(config.weights.roleWeights.weights).map(
+        ([value, weight]) => ({
+          value,
+          // $FlowIgnore
+          weight,
+        })
+      ),
+    },
+    {
+      key: "emoji",
+      default: config.weights.emojiWeights.defaultWeight,
+      values: Object.entries(config.weights.emojiWeights.weights).map(
+        ([value, weight]) => ({
+          value,
+          // $FlowIgnore
+          weight,
+        })
+      ),
+    },
+  ];
+  const contributions = unscoredContributions.map((contribution) =>
+    score(contribution, weightConfig)
+  );
+  const scorePerName = {};
+  contributions.forEach((c) => {
+    c.participants.forEach((p) => {
+      scorePerName[p.id] = (scorePerName[p.id] || 0) + p.score;
+    });
+  });
+  const totalCred = Object.values(scorePerName).reduce((a, b) => {
+    // $FlowIgnore
+    return a + b;
+  }, 0);
+  console.log("| Description | Cred | % |")
+  console.log("| --- | --- | --- |")
+  Object.entries(scorePerName)
+    // $FlowIgnore
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 100)
+    .forEach(([address, score]) =>
+      console.log(
+        `| ${
+          address
+          // $FlowIgnore
+        } | ${score.toFixed(2)} | ${((score / totalCred) * 100).toFixed(2)}% |`
+      )
+    );
 }
 
 export function _createGraphFromMessages(

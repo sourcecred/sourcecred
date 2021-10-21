@@ -40,10 +40,8 @@ import * as credrank from "../main/credrank";
 import * as graphApi from "../main/graph";
 import * as grainApi from "../main/grain";
 import * as readInstance from "../../api/instance/readInstance";
-import * as test from "../plugin";
 
 const api = {
-  test,
   api: {
     graph: graphApi,
     credrank,

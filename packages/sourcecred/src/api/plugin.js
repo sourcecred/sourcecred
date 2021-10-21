@@ -36,10 +36,11 @@ export type Factor = {|
 |};
 
 export type Equation = {|
-  type: "MULTIPLY" | "ADD",
+  type: "MULTIPLY" | "ADD" | "MAX",
   description: string,
   factors: Array<Factor>,
   equationFactors: Array<Equation>,
+  score?: number,
 |};
 
 export type WeightConfig = Array<{|
@@ -69,6 +70,7 @@ export type Contribution = {|
   participants: Array<{|
     id: string,
     shares: number,
+    score: number,
   |}>,
   score: number,
 |};
@@ -131,7 +133,7 @@ const evaluate: (Equation, WeightConfig) => number = (
   equation,
   weightConfig
 ) => {
-  let equationFactorResult, factorResult;
+  let equationFactorResult, factorResult, result;
   switch (equation.type) {
     case "MULTIPLY":
       equationFactorResult = equation.equationFactors.reduce(
@@ -154,7 +156,9 @@ const evaluate: (Equation, WeightConfig) => number = (
       if (equationFactorResult === undefined || factorResult === undefined) {
         throw "not supposed to happen";
       }
-      return factorResult * equationFactorResult;
+      result = factorResult * equationFactorResult;
+      equation.score = result;
+      return result;
 
     case "ADD":
       equationFactorResult = equation.equationFactors.reduce(
@@ -177,7 +181,33 @@ const evaluate: (Equation, WeightConfig) => number = (
       if (equationFactorResult === undefined || factorResult === undefined) {
         throw "not supposed to happen";
       }
-      return factorResult + equationFactorResult;
+      result = factorResult + equationFactorResult;
+      equation.score = result;
+      return result;
+    case "MAX":
+      equationFactorResult = Math.max(
+        ...equation.equationFactors.map((factor) => {
+          return evaluate(factor, weightConfig);
+        }),
+        -Infinity
+      );
+      let lastDefault = undefined;
+      factorResult = Math.max(
+        ...equation.factors.map((factor) => {
+          const config = weightConfig.find((x) => x.key === factor.key);
+          if (config === undefined) throw "Unexpected factor key " + factor.key;
+          lastDefault = config.default;
+          return (
+            config.values.find((x) => x.value === factor.value)?.weight ||
+            -Infinity
+          );
+        }, -Infinity)
+      );
+      result = Math.max(factorResult, equationFactorResult);
+      if (result > -Infinity) return result;
+      result = lastDefault ? lastDefault : 0;
+      equation.score = result;
+      return result;
   }
 };
 
@@ -185,8 +215,17 @@ export function score(
   contribution: UnscoredContribution,
   weightConfig: WeightConfig
 ): Contribution {
+  const score = evaluate(contribution.equation, weightConfig);
+  const totalShares = contribution.participants
+    .map((x) => x.shares)
+    .reduce((a, b) => a + b, 0);
+  const participants = contribution.participants.map((p) => ({
+    ...p,
+    score: (score * p.shares) / totalShares,
+  }));
   return {
     ...contribution,
+    participants,
     score: evaluate(contribution.equation, weightConfig),
   };
 }
