@@ -158,6 +158,11 @@ const CRED_SORT = deepFreeze({
   name: Symbol("Cred"),
   fn: (n) => n.cred,
 });
+
+const CRED_PERCENTAGE_SORT = deepFreeze({
+  name: Symbol("% Cred"),
+  fn: (n) => n.cred,
+});
 const GRAIN_SORT = deepFreeze({
   name: Symbol("Grain"),
   fn: (n) => bigInt(n.grainEarned),
@@ -521,7 +526,7 @@ export const ExplorerHome = ({
   //   .attr('transform', `translate(${margin}, ${margin})`);
   // }
 
-  const sortingOptions = [CRED_SORT, GRAIN_SORT];
+  const sortingOptions = [CRED_SORT, CRED_PERCENTAGE_SORT, GRAIN_SORT];
 
   return (
     <Container className={classes.root}>
@@ -636,6 +641,11 @@ export const ExplorerHome = ({
                       </TableCell>
                       <TableCell className={classes.labelCred}>
                         {Math.round(row.cred).toLocaleString()}
+                      </TableCell>
+                      <TableCell className={classes.labelCred}>
+                        {`${((row.cred / totalCredThisPeriod) * 100)
+                          .toFixed(1)
+                          .toLocaleString()}%`}
                       </TableCell>
                       <TableCell className={classes.labelGrain}>
                         {format(
