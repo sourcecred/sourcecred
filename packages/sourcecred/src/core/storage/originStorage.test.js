@@ -10,13 +10,19 @@ jest.mock("cross-fetch", () => ({
   default: (path, options) => {
     if (options) {
       if (options.method === "POST") {
-        MockServerTempValue.set(path, options.body);
-
-        return Promise.resolve({
-          arrayBuffer: () => options.body,
-          ok: true,
-          status: 200,
-          statusText: "OK",
+        return new Promise((res) => {
+          const fileReader = new global.FileReader();
+          fileReader.onload = () => {
+            const buffer = fileReader.result;
+            res({
+              arrayBuffer: () => buffer,
+              ok: true,
+              status: 200,
+              statusText: "OK",
+            });
+            MockServerTempValue.set(path, buffer);
+          };
+          fileReader.readAsArrayBuffer(options.body);
         });
       }
     }
