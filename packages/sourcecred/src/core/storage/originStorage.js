@@ -2,7 +2,7 @@
 
 import {DataStorage, WritableDataStorage} from "./index";
 import normalize from "../../util/pathNormalize";
-import {join as pathJoin, isAbsolute} from 'path';
+import {join as pathJoin, isAbsolute} from "path";
 import fetch from "cross-fetch";
 
 /**
@@ -39,12 +39,10 @@ export class OriginStorage implements DataStorage {
   }
 }
 
-
 export class PostableOriginStorage
   extends OriginStorage
   implements WritableDataStorage {
-
-  _headers: { [string]: string | number}
+  _headers: {[string]: string | number};
 
   constructor(base: string, headers: {[string]: string | number}) {
     super(base);
@@ -52,12 +50,11 @@ export class PostableOriginStorage
   }
 
   async set(path: string, body: Uint8Array): Promise<void> {
-
     let payload;
-    if (typeof window !== 'undefined') {
-      payload = new Blob([body.buffer])
+    if (typeof window !== "undefined") {
+      payload = new Blob([body.buffer]);
     } else {
-      payload = body.buffer
+      payload = body.buffer;
     }
 
     await fetch(path, {
@@ -68,9 +65,11 @@ export class PostableOriginStorage
   }
 }
 
-export const createPostableLedgerStorage = (base: string): PostableOriginStorage => {
+export const createPostableLedgerStorage = (
+  base: string
+): PostableOriginStorage => {
   return new PostableOriginStorage(base, {
-      Accept: "text/plain",
-      "Content-Type": "text/plain",
-  })
-}
+    Accept: "text/plain",
+    "Content-Type": "text/plain",
+  });
+};

@@ -2,25 +2,22 @@
 
 import {createPostableLedgerStorage, OriginStorage} from "./originStorage";
 
-
 const MockServerTempValue = new Map();
 
 jest.mock("cross-fetch", () => ({
   // needed to utilize fetch as a default export.
   __esModule: true,
   default: (path, options) => {
-
     if (options) {
-      if (options.method === 'POST') {
-
-        MockServerTempValue.set(path, options.body)
+      if (options.method === "POST") {
+        MockServerTempValue.set(path, options.body);
 
         return Promise.resolve({
           arrayBuffer: () => options.body,
           ok: true,
           status: 200,
           statusText: "OK",
-        })
+        });
       }
     }
 
@@ -110,7 +107,6 @@ describe("core/storage/originStorage", () => {
         "Error fetching serverError: 500 INTERNAL ERROR"
       );
     });
-
 
     it("works when base path is empty", async () => {
       expect.hasAssertions();
