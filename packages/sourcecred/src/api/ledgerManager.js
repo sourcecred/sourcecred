@@ -32,7 +32,7 @@ export class LedgerManager {
   _path: string;
 
   constructor(config: LedgerManagerConfig) {
-    this._path = config.path ?? 'data/ledger.json';
+    this._path = config.path ?? "data/ledger.json";
     this._storage = config.storage;
     this._ledger = config.initLogs
       ? Ledger.fromEventLog(config.initLogs)
@@ -143,7 +143,7 @@ export class LedgerManager {
       };
     } catch (e) {
       // Reset local ledger to the remote state
-      this._ledger = await this._getLedger()
+      this._ledger = await this._getLedger();
 
       return {
         error: `Unable to apply local changes: ${e.message}, resetting to remote ledger`,

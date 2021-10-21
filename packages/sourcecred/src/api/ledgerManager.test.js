@@ -11,22 +11,29 @@ import {
   id2,
   createTestLedgerFixture,
 } from "../core/ledger/testUtils";
+import {encode} from "../core/storage/textEncoding";
 
 const {ledgerWithIdentities} = createTestLedgerFixture();
 
 describe("api/ledgerManager", () => {
+  const emptyEncodedLedger = new Uint8Array([]);
+
   const mockStorage = {
-    read: jest.fn(() => Promise.resolve(new Ledger())),
-    write: jest.fn((ledger: Ledger) => {
+    get: jest.fn(() => Promise.resolve(emptyEncodedLedger)),
+    set: jest.fn((_: string, ledger: Uint8Array) => {
       setRemoteLedger(ledger);
       return Promise.resolve();
     }),
   };
 
-  const setRemoteLedger = (remoteLedger: Ledger) => {
-    mockStorage.read.mockImplementation(() =>
-      Promise.resolve(Ledger.fromEventLog(remoteLedger.eventLog()))
-    );
+  const setRemoteLedger = (remoteLedger: Uint8Array) => {
+    mockStorage.get.mockImplementation(() => {
+      return Promise.resolve(remoteLedger);
+    });
+  };
+
+  const setRemoteLedgerUsingLedger = (remoteLedger: Ledger) => {
+    return setRemoteLedger(encode(remoteLedger.serialize()));
   };
 
   const createLedgerManager = (initLogs?: LedgerLog) => {
@@ -73,8 +80,7 @@ describe("api/ledgerManager", () => {
       amount: g("6"),
       memo: "remote transfer",
     });
-    setRemoteLedger(remoteLedger);
-
+    setRemoteLedgerUsingLedger(remoteLedger);
     return {manager, remoteLedger, baseEventLog};
   };
 
@@ -93,8 +99,8 @@ describe("api/ledgerManager", () => {
 
   describe("reloadLedger", () => {
     beforeEach(() => {
-      mockStorage.read.mockClear();
-      setRemoteLedger(new Ledger());
+      mockStorage.get.mockClear();
+      setRemoteLedger(emptyEncodedLedger);
     });
 
     it("should load an empty remote ledger with empty local ledger", async () => {
@@ -104,12 +110,12 @@ describe("api/ledgerManager", () => {
       expect(res.error).toBe(null);
       expect(res.remoteChanges).toEqual([]);
       expect(res.localChanges).toEqual([]);
-      expect(mockStorage.read).toBeCalledTimes(1);
+      expect(mockStorage.get).toBeCalledTimes(1);
     });
 
     it("should load events from remote ledger with an empty local ledger", async () => {
       const remoteLedger = ledgerWithIdentities();
-      setRemoteLedger(remoteLedger);
+      setRemoteLedgerUsingLedger(remoteLedger);
 
       const manager = createLedgerManager();
       const res = await manager.reloadLedger();
@@ -117,7 +123,7 @@ describe("api/ledgerManager", () => {
       expect(res.error).toBe(null);
       expect(res.remoteChanges).toEqual(remoteLedger.eventLog());
       expect(res.localChanges).toEqual([]);
-      expect(mockStorage.read).toBeCalledTimes(1);
+      expect(mockStorage.get).toBeCalledTimes(1);
       expect(manager.ledger).toEqual(remoteLedger);
     });
 
@@ -134,7 +140,7 @@ describe("api/ledgerManager", () => {
 
     it("should load a remote ledger with existing events while preserving local ledger changes", async () => {
       const remoteLedger = ledgerWithIdentities();
-      setRemoteLedger(remoteLedger);
+      setRemoteLedgerUsingLedger(remoteLedger);
 
       const manager = createLedgerManager(remoteLedger.eventLog());
       manager.ledger.activate(id1);
@@ -355,9 +361,9 @@ describe("api/ledgerManager", () => {
 
   describe("persist", () => {
     beforeEach(() => {
-      mockStorage.read.mockClear();
-      mockStorage.write.mockClear();
-      setRemoteLedger(new Ledger());
+      mockStorage.get.mockClear();
+      mockStorage.set.mockClear();
+      setRemoteLedger(emptyEncodedLedger);
     });
 
     it("should not write local changes if there is a conflict with remote ledger", async () => {
@@ -372,8 +378,8 @@ describe("api/ledgerManager", () => {
 
       const res = await manager.persist();
 
-      expect(mockStorage.read).toBeCalledTimes(2);
-      expect(mockStorage.write).not.toBeCalled();
+      expect(mockStorage.get).toBeCalledTimes(2);
+      expect(mockStorage.set).not.toBeCalled();
       expect(res.error && res.error.indexOf("insufficient balance") > 0).toBe(
         true
       );
@@ -393,8 +399,8 @@ describe("api/ledgerManager", () => {
 
       const res = await manager.persist();
 
-      expect(mockStorage.read).toBeCalledTimes(2);
-      expect(mockStorage.write).toBeCalledTimes(1);
+      expect(mockStorage.get).toBeCalledTimes(2);
+      expect(mockStorage.set).toBeCalledTimes(1);
       expect(res.error).toBe(null);
       expect(res.remoteChanges).toEqual([]);
       expect(res.localChanges).toEqual([]);
@@ -426,7 +432,7 @@ describe("api/ledgerManager", () => {
       });
 
       // prevent update of remote ledger
-      manager._storage.write.mockImplementationOnce(() => {
+      manager._storage.set.mockImplementationOnce(() => {
         return Promise.resolve();
       });
 
@@ -445,8 +451,8 @@ describe("api/ledgerManager", () => {
 
       const res = await manager.persist();
 
-      expect(mockStorage.read).toBeCalledTimes(2);
-      expect(mockStorage.write).toBeCalledTimes(1);
+      expect(mockStorage.get).toBeCalledTimes(2);
+      expect(mockStorage.set).toBeCalledTimes(1);
       expect(res.error).toBe("Some local changes have not been persisted");
       expect(res.remoteChanges).toEqual([]);
       expect(res.localChanges).toEqual([expectedLocalEvent]);
