@@ -24,8 +24,16 @@ import {useLedger} from "../utils/LedgerContext";
 import {useTableState} from "../../webutil/tableState";
 import {IdentityMerger} from "./IdentityMerger";
 import {type Identity, type IdentityId} from "../../core/identity";
+import {PayableAddressView} from "./PayableAddressView";
 import {AliasView} from "./AliasView";
 import {IdentityListItems} from "./IdentityListItems";
+import {type CurrencyDetails} from "../../api/currencyConfig";
+import {getCurrencyKey} from "../../core/ledger/currency";
+import {
+  type EthAddress,
+  ethAddressParser,
+  parseAddress,
+} from "../../plugins/ethereum/ethAddress.js";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -78,25 +86,70 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-export const LedgerAdmin = (): ReactNode => {
+type Props = {|
+  +currency: CurrencyDetails,
+|};
+
+export const LedgerAdmin = ({currency}: Props): ReactNode => {
   const {ledger, updateLedger, saveToDisk} = useLedger();
+  const {integrationCurrency} = currency;
 
   const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [selectedId, setSelectedId] = useState<IdentityId | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
+  const [nextPayoutAddress, setPayoutAddress] = useState<string>("");
   const accounts = useMemo(() => Array.from(ledger.accounts()), [ledger]);
   const accountsTableState = useTableState({data: accounts});
 
   const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
     setIdentityName(event.currentTarget.value);
 
+  const nullifyUnsetPayoutAddress = (): EthAddress | null =>
+    nextPayoutAddress ? parseAddress(nextPayoutAddress) : null;
+
+  function addNextPayoutAddressToLedger(
+    selectedId: IdentityId,
+    integrationCurrency
+  ) {
+    if (integrationCurrency.type === "EVM") {
+      const {chainId, tokenAddress} = integrationCurrency;
+      ledger.setPayoutAddress(
+        selectedId,
+        nullifyUnsetPayoutAddress(),
+        chainId,
+        tokenAddress
+      );
+    } else {
+      const {chainId} = integrationCurrency;
+      ledger.setPayoutAddress(selectedId, nullifyUnsetPayoutAddress(), chainId);
+    }
+  }
+
+  function modifyExistingIdentity(id: IdentityId) {
+    // don't write an unchanged name to the ledger
+    if (ledger.account(id).identity.name !== nextIdentityName)
+      ledger.renameIdentity(id, nextIdentityName);
+    if (
+      // don't update the payout address if no integration currency is
+      // configured
+      integrationCurrency &&
+      // don't write an unchanged payout address to the ledger
+      getPayoutAddress(id) !== nextPayoutAddress
+    ) {
+      addNextPayoutAddressToLedger(id, integrationCurrency);
+    }
+  }
   const createOrUpdateIdentity = () => {
+    // If no ID is selected, create a new identity
     if (!selectedId) {
+      // create the new identity with the entered name
       const newID = ledger.createIdentity("USER", nextIdentityName);
       setActiveIdentity(ledger.account(newID).identity);
     } else {
-      ledger.renameIdentity(selectedId, nextIdentityName);
+      // Otherwise, an identity is selected, Update it according to the
+      // changes made to Component state.
+      modifyExistingIdentity(selectedId);
     }
     updateLedger(ledger);
   };
@@ -114,6 +167,18 @@ export const LedgerAdmin = (): ReactNode => {
     [ledger]
   );
 
+  const getPayoutAddress = (identityId: IdentityId) => {
+    if (!currency.integrationCurrency) {
+      return "";
+    }
+    const key = getCurrencyKey(currency.integrationCurrency);
+    const currentPayableAddress = ledger
+      .account(identityId)
+      ?.payoutAddresses.get(key);
+
+    return currentPayableAddress ?? "";
+  };
+
   const resetIdentity = () => {
     setIdentityName("");
     setSelectedId(null);
@@ -122,6 +187,8 @@ export const LedgerAdmin = (): ReactNode => {
 
   const setActiveIdentity = useCallback((identity: Identity) => {
     setIdentityName(identity.name);
+    const payoutAddress = getPayoutAddress(identity.id);
+    setPayoutAddress(payoutAddress);
     setSelectedId(identity.id);
     setPromptString("Update Identity: ");
   }, []);
@@ -146,9 +213,17 @@ export const LedgerAdmin = (): ReactNode => {
     []
   );
 
+  const payableAddressIsInvalid = useMemo(() => {
+    if (!currency.integrationCurrency) return false;
+    if (nextPayoutAddress === "") return false;
+    return !ethAddressParser.parse(nextPayoutAddress).ok;
+  }, [nextPayoutAddress]);
+
   const nameIsEmpty = useMemo(() => nextIdentityName.trim().length === 0, [
     nextIdentityName,
   ]);
+
+  const formIsInvalid = payableAddressIsInvalid || nameIsEmpty;
 
   return (
     <Container className={classes.root}>
@@ -182,9 +257,21 @@ export const LedgerAdmin = (): ReactNode => {
           />
         )}
       </div>
+      {selectedId && currency.integrationCurrency && (
+        <div className={classes.updateElement}>
+          <PayableAddressView
+            nextPayoutAddress={nextPayoutAddress}
+            setPayoutAddress={setPayoutAddress}
+            error={payableAddressIsInvalid}
+          />
+        </div>
+      )}
+
       <ButtonGroup color="primary" variant="contained">
-        <Button onClick={createOrUpdateIdentity} disabled={nameIsEmpty}>
-          {selectedId ? "update username" : "create identity"}
+        <Button onClick={createOrUpdateIdentity} disabled={formIsInvalid}>
+          {selectedId
+            ? `update name${currency.integrationCurrency ? " and address" : ""}`
+            : "create identity"}
         </Button>
         <Button onClick={saveToDisk}>save ledger to disk</Button>
         {selectedId && <Button onClick={resetIdentity}>New identity</Button>}
@@ -199,10 +286,10 @@ export const LedgerAdmin = (): ReactNode => {
           <AliasView selectedId={selectedId} />
           <IdentityMerger selectedId={selectedId} />
         </>
-      )}{" "}
+      )}
       <div className={classes.spreadRow}>
         <h3>
-          Identities{" "}
+          Identities
           {accountsTableState.length > 0 && (
             <small> (click one to update it)</small>
           )}
