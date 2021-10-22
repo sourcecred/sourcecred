@@ -588,7 +588,7 @@ export const ExplorerHome = ({
                   <TablePagination
                     rowsPerPageOptions={PAGINATION_OPTIONS}
                     className={classes.paginator}
-                    colSpan={4}
+                    colSpan={5}
                     count={tsParticipants.length}
                     rowsPerPage={tsParticipants.rowsPerPage}
                     page={tsParticipants.pageIndex}
