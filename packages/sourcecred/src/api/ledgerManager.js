@@ -154,7 +154,7 @@ export class LedgerManager {
   }
 
   async _getLedger(): Promise<Ledger> {
-    const decodedLedger = await this._storage.get(this._path);
-    return Ledger.parse(decode(decodedLedger));
+    const encodedLedger = await this._storage.get(this._path);
+    return Ledger.parse(decode(encodedLedger));
   }
 }
