@@ -21,7 +21,7 @@ if (typeof window !== "undefined" && typeof process === "undefined") {
   decoder = importedTextDecoder || globalThis.TextDecoder;
   /* eslint-disable no-undef */
   // $FlowIssue[cannot-resolve-name]
-  encoder = importedTextEncoder || globalThis.TextEncoder;
+  encoder = importedTextEncoder || globalThis.TextDecoder;
 }
 
 // $FlowIssue[incompatible-call]
