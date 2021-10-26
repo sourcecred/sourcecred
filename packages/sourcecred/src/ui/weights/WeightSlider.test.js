@@ -1,5 +1,5 @@
 /**
- *  @flow
+ * @flow
  * @jest-environment jsdom
  */
 
