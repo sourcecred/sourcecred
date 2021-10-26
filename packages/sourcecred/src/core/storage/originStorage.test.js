@@ -1,4 +1,7 @@
-// @flow
+/**
+ * @flow
+ * @jest-environment node
+ */
 
 import {createPostableLedgerStorage, OriginStorage} from "./originStorage";
 
@@ -10,20 +13,7 @@ jest.mock("cross-fetch", () => ({
   default: (path, options) => {
     if (options) {
       if (options.method === "POST") {
-        return new Promise((res) => {
-          const fileReader = new global.FileReader();
-          fileReader.onload = () => {
-            const buffer = fileReader.result;
-            res({
-              arrayBuffer: () => buffer,
-              ok: true,
-              status: 200,
-              statusText: "OK",
-            });
-            MockServerTempValue.set(path, buffer);
-          };
-          fileReader.readAsArrayBuffer(options.body);
-        });
+        MockServerTempValue.set(path, options.body);
       }
     }
 
@@ -51,9 +41,6 @@ jest.mock("cross-fetch", () => ({
         });
 
       case "post/validPath":
-        console.log(`::: ${path} is called!`);
-        console.log({value: MockServerTempValue.get(path)});
-
         return Promise.resolve({
           arrayBuffer: () => MockServerTempValue.get(path),
           ok: true,
