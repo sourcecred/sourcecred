@@ -3,9 +3,17 @@ const TToken = artifacts.require("./TToken.sol");
 const Redeem = artifacts.require("./MerkleRedeem.sol");
 const should = require("chai").should();
 const { utils, eth } = web3;
-const { MerkleTree } = require("../lib/merkleTree");
+const { MerkleTree } = require("merkletreejs");
+const keccak256 = require("keccak256");
 const { soliditySha3 } = require("web3-utils");
 const { increaseTime } = require("./helpers");
+
+function createMerkleTree(elements) {
+  return new MerkleTree(elements, keccak256, {
+    hashLeaves: false,
+    sortPairs: true
+  });
+}
 
 contract("MerkleRedeem - High Volume", accounts => {
   const admin = accounts[0];
@@ -44,7 +52,7 @@ contract("MerkleRedeem - High Volume", accounts => {
     const elements = addresses.map((address, num) =>
       soliditySha3(address, utils.toWei((num * 10).toString()))
     );
-    const merkleTree = new MerkleTree(elements);
+    const merkleTree = createMerkleTree(elements);
     const root = merkleTree.getHexRoot();
 
     await redeem.seedDistribution(1, root, now + 1);
@@ -71,27 +79,27 @@ contract("MerkleRedeem - High Volume", accounts => {
   describe("When a user has several allocation to claim", () => {
     const claimBalance1 = utils.toWei("1111");
     const elements1 = [utils.soliditySha3(accounts[1], claimBalance1)];
-    const merkleTree1 = new MerkleTree(elements1);
+    const merkleTree1 = createMerkleTree(elements1);
     const root1 = merkleTree1.getHexRoot();
 
     const claimBalance2 = utils.toWei("1222");
     const elements2 = [utils.soliditySha3(accounts[1], claimBalance2)];
-    const merkleTree2 = new MerkleTree(elements2);
+    const merkleTree2 = createMerkleTree(elements2);
     const root2 = merkleTree2.getHexRoot();
 
     const claimBalance3 = utils.toWei("1333");
     const elements3 = [utils.soliditySha3(accounts[1], claimBalance3)];
-    const merkleTree3 = new MerkleTree(elements3);
+    const merkleTree3 = createMerkleTree(elements3);
     const root3 = merkleTree3.getHexRoot();
 
     const claimBalance4 = utils.toWei("1444");
     const elements4 = [utils.soliditySha3(accounts[1], claimBalance4)];
-    const merkleTree4 = new MerkleTree(elements4);
+    const merkleTree4 = createMerkleTree(elements4);
     const root4 = merkleTree4.getHexRoot();
 
     const claimBalance5 = utils.toWei("1555");
     const elements5 = [utils.soliditySha3(accounts[1], claimBalance5)];
-    const merkleTree5 = new MerkleTree(elements5);
+    const merkleTree5 = createMerkleTree(elements5);
     const root5 = merkleTree5.getHexRoot();
 
     const roots = [root1, root2, root3, root4, root5];
