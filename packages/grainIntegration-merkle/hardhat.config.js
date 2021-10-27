@@ -8,11 +8,11 @@ module.exports = {
   solidity: "0.6.8",
   watcher: {
     compiling: {
-      tasks: ["compile"]
+      tasks: ["compile"],
     },
     testing: {
       tasks: [{ command: "test" }],
-      files: ["./test/**/*", "./contracts/**/*"]
-    }
-  }
+      files: ["./test/**/*", "./contracts/**/*"],
+    },
+  },
 };
