@@ -1,7 +1,6 @@
-//@flow
+/* global artifacts, contract, web3, assert */
 const TToken = artifacts.require("./TToken.sol");
 const Redeem = artifacts.require("./MerkleRedeem.sol");
-const should = require("chai").should();
 const { utils, eth } = web3;
 const { MerkleTree } = require("merkletreejs");
 const keccak256 = require("keccak256");
@@ -11,7 +10,7 @@ const { increaseTime } = require("./helpers");
 function createMerkleTree(elements) {
   return new MerkleTree(elements, keccak256, {
     hashLeaves: false,
-    sortPairs: true
+    sortPairs: true,
   });
 }
 
@@ -23,15 +22,12 @@ contract("MerkleRedeem - High Volume", accounts => {
 
   let tbal;
   let TBAL;
-  let now;
 
   const TEST_QUANTITY = 200;
-  const MAX = utils.toTwosComplement(-1);
 
   beforeEach(async () => {
     tbal = await TToken.new("Test Bal", "TBAL", 18);
     TBAL = tbal.address;
-    now = Math.floor(Date.now() / 1000);
 
     redeem = await Redeem.new(TBAL, 0);
 
@@ -45,8 +41,8 @@ contract("MerkleRedeem - High Volume", accounts => {
   it("stores " + TEST_QUANTITY + " allocations", async () => {
     const lastBlock = await web3.eth.getBlock("latest");
     const now = lastBlock.timestamp;
-    let addresses = [...Array(TEST_QUANTITY).keys()].map(
-      num => eth.accounts.create().address
+    const addresses = [...Array(TEST_QUANTITY).keys()].map(
+      () => eth.accounts.create().address
     );
 
     const elements = addresses.map((address, num) =>
@@ -131,14 +127,14 @@ contract("MerkleRedeem - High Volume", accounts => {
           [2, claimBalance2, proof2],
           [3, claimBalance3, proof3],
           [4, claimBalance4, proof4],
-          [5, claimBalance5, proof5]
+          [5, claimBalance5, proof5],
         ],
         { from: accounts[1] }
       );
 
-      let result = await tbal.balanceOf(accounts[1]);
+      const result = await tbal.balanceOf(accounts[1]);
       assert(
-        result == utils.toWei("6665"),
+        result.toString() === utils.toWei("6665"),
         "user should receive all tokens, including current week"
       );
     });

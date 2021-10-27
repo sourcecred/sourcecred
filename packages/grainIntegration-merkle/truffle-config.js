@@ -19,7 +19,7 @@
  */
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
-const infuraKey = process.env.INFURA_KEY;
+// const infuraKey = process.env.INFURA_KEY;
 const fs = require("fs");
 const path = require("path");
 const ganacheMnemonic =
@@ -29,7 +29,7 @@ function walletProvider(filepath) {
   if (fs.existsSync(filepath)) {
     return () => {
       const file = fs.readFileSync(path.join(__dirname, filepath), "utf8");
-      let { mnemonic, providerUrl } = JSON.parse(file);
+      const { mnemonic, providerUrl } = JSON.parse(file);
       var HDWalletProvider = require("@truffle/hdwallet-provider");
 
       return new HDWalletProvider(mnemonic, providerUrl, 0, 3);
@@ -41,8 +41,8 @@ function walletProvider(filepath) {
   }
 }
 
-const gas = 6250000;
-const gasPrice = 3000000000;
+// const gas = 6250000;
+// const gasPrice = 3000000000;
 
 module.exports = {
   networks: {
@@ -50,7 +50,7 @@ module.exports = {
       //host: "127.0.0.1", // Localhost (default: none)
       host: "localhost", // Localhost (default: none)
       port: 8545, // Standard Ethereum port (default: none)
-      network_id: "*" // Any network (default: none)
+      network_id: "*", // Any network (default: none)
     },
     dockerGanache: {
       provider: new HDWalletProvider(
@@ -59,26 +59,26 @@ module.exports = {
         0,
         3
       ),
-      network_id: "*" // Any network (default: none)
+      network_id: "*", // Any network (default: none)
     },
     kovan: {
       confirmations: 2,
       provider: walletProvider("secrets_kovan.json"),
-      network_id: 42
+      network_id: 42,
       //gas,
       //gasPrice
-    }
+    },
   },
   mocha: {
     reporter: "eth-gas-reporter",
     reporterOptions: {
       currency: "USD",
-      gasPrice: 50
-    }
+      gasPrice: 50,
+    },
   },
   compilers: {
     solc: {
-      version: "0.6.8" // Fetch exact version from solc-bin (default: truffle's version)
-    }
-  }
+      version: "0.6.8", // Fetch exact version from solc-bin (default: truffle's version)
+    },
+  },
 };
