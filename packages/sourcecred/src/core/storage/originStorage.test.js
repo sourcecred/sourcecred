@@ -1,7 +1,4 @@
-/**
- * @flow
- * @jest-environment node
- */
+// @flow
 
 import {createPostableLedgerStorage, OriginStorage} from "./originStorage";
 
