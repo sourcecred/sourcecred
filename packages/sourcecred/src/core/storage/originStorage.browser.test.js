@@ -52,7 +52,7 @@ jest.mock("cross-fetch", () => ({
   },
 }));
 
-describe("core/storage/originStorage", () => {
+describe("core/storage/originStorage.browser", () => {
   describe("OriginStorage", () => {
     const value = new Uint8Array([1, 2]);
 
