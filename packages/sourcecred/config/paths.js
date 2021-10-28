@@ -22,7 +22,8 @@ module.exports = {
   yarnLockFile: (resolveApp("yarn.lock") /*: string */),
   appNodeModules: (resolveApp("node_modules") /*: string */),
 
-  apiIndexJs: (resolveApp("src/api/index.js") /*: string */),
+  apiBaseJs: (resolveApp("src/api/lib/base.js") /*: string */),
+  apiNodeJs: (resolveApp("src/api/lib/node.js") /*: string */),
   apiBuild: (resolveApp("dist") /*: string */),
 
   backendBuild: (resolveApp("bin") /*: string */),

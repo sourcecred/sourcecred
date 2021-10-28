@@ -11,6 +11,7 @@ import {
   type EvmChainId,
   parseEvmChainId,
   protocolSymbolParser,
+  getCurrencyKey,
 } from "./currency";
 import * as G from "./grain";
 import * as uuid from "../../util/uuid";
@@ -921,7 +922,7 @@ describe("core/ledger/ledger", () => {
       it("can set a payout address for an existing user", () => {
         const ledger = setupLedgerwithPayoutAddress();
         const account = ledger.account(id1);
-        expect(account.payoutAddresses.get(JSON.stringify(evmId))).toBe(
+        expect(account.payoutAddresses.get(getCurrencyKey(evmId))).toBe(
           fullAddress
         );
       });
@@ -929,7 +930,9 @@ describe("core/ledger/ledger", () => {
         const ledger = setupLedgerwithPayoutAddress();
         ledger.setPayoutAddress(id1, null, evmChainId, ethAddress);
         const account = ledger.account(id1);
-        expect(account.payoutAddresses.get(evmId.toString())).toBe(undefined);
+        expect(account.payoutAddresses.get(getCurrencyKey(evmId))).toBe(
+          undefined
+        );
       });
       it("cannot set an address for a non-existent user", () => {
         const badId = uuid.random();
@@ -952,7 +955,7 @@ describe("core/ledger/ledger", () => {
         const ledger = ledgerWithIdentities();
         ledger.setPayoutAddress(id1, fullAddress, btcChainId);
         const account = ledger.account(id1);
-        expect(account.payoutAddresses.get(JSON.stringify(protocolId))).toBe(
+        expect(account.payoutAddresses.get(getCurrencyKey(protocolId))).toBe(
           fullAddress
         );
       });

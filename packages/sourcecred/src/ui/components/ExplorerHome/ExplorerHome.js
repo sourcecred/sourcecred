@@ -158,6 +158,11 @@ const CRED_SORT = deepFreeze({
   name: Symbol("Cred"),
   fn: (n) => n.cred,
 });
+
+const CRED_PERCENTAGE_SORT = deepFreeze({
+  name: Symbol("% Cred"),
+  fn: (n) => n.cred,
+});
 const GRAIN_SORT = deepFreeze({
   name: Symbol("Grain"),
   fn: (n) => bigInt(n.grainEarned),
@@ -521,6 +526,8 @@ export const ExplorerHome = ({
   //   .attr('transform', `translate(${margin}, ${margin})`);
   // }
 
+  const sortingOptions = [CRED_SORT, CRED_PERCENTAGE_SORT, GRAIN_SORT];
+
   return (
     <Container className={classes.root}>
       <h1 className={`${classes.centerRow} ${classes.pageHeader}`}>
@@ -581,7 +588,7 @@ export const ExplorerHome = ({
                   <TablePagination
                     rowsPerPageOptions={PAGINATION_OPTIONS}
                     className={classes.paginator}
-                    colSpan={4}
+                    colSpan={5}
                     count={tsParticipants.length}
                     rowsPerPage={tsParticipants.rowsPerPage}
                     page={tsParticipants.pageIndex}
@@ -597,36 +604,25 @@ export const ExplorerHome = ({
                   <TableCell>
                     <b>Participant</b>
                   </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={tsParticipants.sortName === CRED_SORT.name}
-                      direction={
-                        tsParticipants.sortName === CRED_SORT.name
-                          ? tsParticipants.sortOrder
-                          : DEFAULT_SORT
-                      }
-                      onClick={() =>
-                        tsParticipants.setSortFn(CRED_SORT.name, CRED_SORT.fn)
-                      }
-                    >
-                      <b>{CRED_SORT.name.description}</b>
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={tsParticipants.sortName === GRAIN_SORT.name}
-                      direction={
-                        tsParticipants.sortName === GRAIN_SORT.name
-                          ? tsParticipants.sortOrder
-                          : DEFAULT_SORT
-                      }
-                      onClick={() =>
-                        tsParticipants.setSortFn(GRAIN_SORT.name, GRAIN_SORT.fn)
-                      }
-                    >
-                      <b>{currencyName}</b>
-                    </TableSortLabel>
-                  </TableCell>
+
+                  {sortingOptions.map((value) => (
+                    <TableCell key={value.name.description}>
+                      <TableSortLabel
+                        active={tsParticipants.sortName === value.name}
+                        direction={
+                          tsParticipants.sortName === value.name
+                            ? tsParticipants.sortOrder
+                            : DEFAULT_SORT
+                        }
+                        onClick={() =>
+                          tsParticipants.setSortFn(value.name, value.fn)
+                        }
+                      >
+                        <b>{value.name.description}</b>
+                      </TableSortLabel>
+                    </TableCell>
+                  ))}
+
                   <TableCell>
                     {showTableChart && <b>Contributions Chart (ALL TIME)</b>}
                   </TableCell>
@@ -645,6 +641,16 @@ export const ExplorerHome = ({
                       </TableCell>
                       <TableCell className={classes.labelCred}>
                         {Math.round(row.cred).toLocaleString()}
+                      </TableCell>
+                      <TableCell className={classes.labelCred}>
+                        {(row.cred / totalCredThisPeriod).toLocaleString(
+                          undefined,
+                          {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                            style: "percent",
+                          }
+                        )}
                       </TableCell>
                       <TableCell className={classes.labelGrain}>
                         {format(

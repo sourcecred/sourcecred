@@ -161,11 +161,11 @@ export function format(
  *
  * Here are some examples of its behavior
  *
- * format(100000000000000) === "0.0001g"
- * format(150000000000000000000) === "150g"
- * format(15000000000000000000000) === "15,000g"
- * format(15000000000000000000000, "seeds") === "15,000seeds"
- * format(15000000000000000000000, "") === "15,000"
+ * formatAndTrim(100000000000000) === "0.0001g"
+ * formatAndTrim(150000000000000000000) === "150g"
+ * formatAndTrim(15000000000000000000000) === "15,000g"
+ * formatAndTrim(15000000000000000000000, "seeds") === "15,000seeds"
+ * formatAndTrim(15000000000000000000000, "") === "15,000"
  *
  */
 export function formatAndTrim(
@@ -255,6 +255,13 @@ export function fromFloatString(
 
   return bigInt(`${whole}${paddedDecimal}`).toString();
 }
+
+// Returns a string containing a float representation of the grain,
+// which can be rehydrated into grain losslessly using fromFloatString
+// Example: toFloatString(15000111000000000000000) === "15000.111"
+export const toFloatString = (g: Grain): string => {
+  return formatAndTrim(g, "").replace(/,/g, "");
+};
 
 /**
  * Approximately create a grain balance from a float.

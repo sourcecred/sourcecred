@@ -1,9 +1,9 @@
 // @flow
 
-import {Ledger, type PayoutAddress, type CurrencyId} from "./ledger";
+import {Ledger, type PayoutAddress} from "./ledger";
 import {type Distribution} from "./distribution";
 import {getDistributionBalances} from "./distributionSummary/distributionSummary.js";
-import {type Currency} from "./currency.js";
+import {type Currency, type CurrencyKey, getCurrencyKey} from "./currency.js";
 import {type IdentityId} from "../identity";
 import * as NullUtil from "../../util/null";
 import {type TimestampMs} from "../../util/timestamp";
@@ -89,7 +89,7 @@ export function executeGrainIntegration(
   const {payoutDistributions, payoutAddressToId} = buildDistributionIndexes(
     ledger,
     distribution,
-    JSON.stringify(currency)
+    getCurrencyKey(currency)
   );
   // Need to receive actual allocations so users don't lose funds if
   // decimals are truncated in L2 or in some other environment that must modify
@@ -129,7 +129,7 @@ export function executeGrainIntegration(
 export function buildDistributionIndexes(
   ledger: Ledger,
   distribution: Distribution,
-  currencyId: CurrencyId
+  currencyId: CurrencyKey
 ): {
   payoutDistributions: PayoutDistributions,
   payoutAddressToId: PayoutAddressToId,

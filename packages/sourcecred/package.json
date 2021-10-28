@@ -3,7 +3,7 @@
   "description": "a tool for communities to measure and reward value creation",
   "homepage": "https://sourcecred.io",
   "repository": "github:sourcecred/sourcecred",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "private": false,
   "dependencies": {
     "@date-io/date-fns": "1.3.11",
@@ -130,14 +130,15 @@
     "build:api": "NODE_ENV=production webpack --config config/webpack.config.api.js",
     "test": "node ./config/test.js",
     "createLedger": "babel-node ./scripts/createLedgerFromLegacyProject.js",
-    "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
+    "unit": "BABEL_ENV=test NODE_ENV=test jest",
     "sharness": "make -sC ./sharness prove PROVE_OPTS=-f TEST_OPTS='--chain-lint'",
     "sharness-full": "make -sC ./sharness prove PROVE_OPTS=-vf TEST_OPTS='-v --chain-lint --long'",
     "coverage": "yarn run unit --coverage",
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0",
     "prepublishOnly": "yarn build",
-    "docs": "node ./scripts/build-docs.js"
+    "docs": "node ./scripts/build-docs.js",
+    "shell": "node ./scripts/shell.js"
   },
   "engines": {
     "node": ">=12"

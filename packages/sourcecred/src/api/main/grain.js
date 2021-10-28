@@ -3,7 +3,7 @@
 import {CredGraph} from "../../core/credrank/credGraph";
 import {Ledger} from "../../core/ledger/ledger";
 import type {CurrencyDetails} from "../currencyConfig";
-import {type GrainConfig, toDistributionPolicy} from "../grainConfig";
+import {type GrainConfig} from "../grainConfig";
 import type {Distribution} from "../../core/ledger/distribution";
 import {applyDistributions} from "../../core/ledger/applyDistributions";
 import {type TimestampMs} from "../../util/timestamp";
@@ -45,9 +45,8 @@ export type GrainIntegrationResults = {|
   May mutate the ledger that is passed in.
  */
 export async function grain(input: GrainInput): Promise<GrainOutput> {
-  const distributionPolicy = toDistributionPolicy(input.grainConfig);
   const distributions = applyDistributions(
-    distributionPolicy,
+    input.grainConfig,
     input.credGraph,
     input.ledger,
     +Date.now(),

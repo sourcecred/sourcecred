@@ -347,4 +347,11 @@ describe("core/ledger/grain", () => {
       expect(G.sum([n(1), n(-2), n(-3)])).toEqual(n(-4));
     });
   });
+  describe("toFloatString", () => {
+    it("works with numbers > 1,000,000 and with decimals", () => {
+      expect(
+        G.toFloatString(G.fromString("1500000111000000000000000"))
+      ).toEqual("1500000.111");
+    });
+  });
 });
