@@ -1,4 +1,4 @@
-/**
+/*
  * @flow
  * @jest-environment jsdom
  */
