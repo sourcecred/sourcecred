@@ -8,9 +8,8 @@ import {
 } from "../api/currencyConfig";
 import {LedgerManager} from "../api/ledgerManager";
 import {rawParser as rawInstanceConfigParser} from "../api/rawInstanceConfig";
-import {createLedgerDiskStorage} from "./utils/ledgerDiskStorage";
 import * as Combo from "../util/combo";
-import {OriginStorage} from "../core/storage/originStorage";
+import {createPostableLedgerStorage} from "../core/storage/originStorage";
 import {loadJson, loadJsonWithDefault} from "../util/storage";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {upgradeRawInstanceConfig} from "../api/bundledDeclarations";
@@ -41,13 +40,13 @@ export async function load(): Promise<LoadResult> {
   // Optional loads require some better organization
   // than ternaries. There's also a lot of repeated code here
 
-  const diskStorage = createLedgerDiskStorage("data/ledger.json");
-  const originStorage = new OriginStorage("");
+  const originStorage = createPostableLedgerStorage("");
   const instance = new ReadInstance(originStorage);
   const ledgerManager = new LedgerManager({
-    storage: diskStorage,
+    storage: originStorage,
   });
 
+  // noinspection ES6MissingAwait
   const queries = [
     loadJson(originStorage, "sourcecred.json", rawInstanceConfigParser),
     loadJson(originStorage, "static/server-info.json", backendParser),

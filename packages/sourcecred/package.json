@@ -130,7 +130,7 @@
     "build:api": "NODE_ENV=production webpack --config config/webpack.config.api.js",
     "test": "node ./config/test.js",
     "createLedger": "babel-node ./scripts/createLedgerFromLegacyProject.js",
-    "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
+    "unit": "BABEL_ENV=test NODE_ENV=test jest",
     "sharness": "make -sC ./sharness prove PROVE_OPTS=-f TEST_OPTS='--chain-lint'",
     "sharness-full": "make -sC ./sharness prove PROVE_OPTS=-vf TEST_OPTS='-v --chain-lint --long'",
     "coverage": "yarn run unit --coverage",

@@ -1,4 +1,7 @@
-// @flow
+/**
+ * @flow
+ * @jest-environment jsdom
+ */
 
 import React from "react";
 import {mount} from "enzyme";
