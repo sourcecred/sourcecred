@@ -1,11 +1,19 @@
 // @flow
 
-import {OriginStorage} from "./originStorage";
+import {createPostableLedgerStorage, OriginStorage} from "./originStorage";
+
+const MockServerTempValue = new Map();
 
 jest.mock("cross-fetch", () => ({
   // needed to utilize fetch as a default export.
   __esModule: true,
-  default: (path) => {
+  default: (path, options) => {
+    if (options) {
+      if (options.method === "POST") {
+        MockServerTempValue.set(path, options.body);
+      }
+    }
+
     switch (path) {
       case "base/validPath":
         return Promise.resolve({
@@ -27,6 +35,14 @@ jest.mock("cross-fetch", () => ({
           ok: false,
           status: 500,
           statusText: "INTERNAL ERROR",
+        });
+
+      case "post/validPath":
+        return Promise.resolve({
+          arrayBuffer: () => MockServerTempValue.get(path),
+          ok: true,
+          status: 200,
+          statusText: "OK",
         });
       default:
         return Promise.resolve({
@@ -83,6 +99,15 @@ describe("core/storage/originStorage", () => {
       await expect(dunk()).rejects.toThrow(
         "Error fetching serverError: 500 INTERNAL ERROR"
       );
+    });
+
+    it("works when posting and getting data again.", async () => {
+      expect.hasAssertions();
+      const path = "post/validPath";
+      const storage = createPostableLedgerStorage("");
+      await storage.set(path, value);
+      const result = await storage.get(path);
+      await expect(result).toEqual(value);
     });
   });
 });
