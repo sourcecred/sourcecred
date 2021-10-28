@@ -1,7 +1,5 @@
-/**
- * @flow
- * @jest-environment jsdom
- */
+// @flow
+// @jest-environment jsdom
 
 import tmp from "tmp";
 import path from "path";
