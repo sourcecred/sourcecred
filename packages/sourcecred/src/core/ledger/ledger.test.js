@@ -45,10 +45,12 @@ const allocationId3: uuid.Uuid = uuid.random();
 
 function getAccountingStatus(
   enabled: boolean,
-  chainId = "1"
+  chainId = "1",
+  trackDistributions = false
 ): AccountingStatus {
   return {
     enabled,
+    trackDistributions,
     currency: buildCurrency(chainId, ETH_CURRENCY_ADDRESS),
   };
 }
@@ -1791,7 +1793,10 @@ describe("core/ledger/ledger", () => {
             parseEvmChainId("1"),
             ETH_CURRENCY_ADDRESS
           ).removeExternalCurrency();
-          expect(l.accounting()).toEqual({enabled: true});
+          expect(l.accounting()).toEqual({
+            enabled: true,
+            trackDistributions: false,
+          });
         });
         it("cannot be unset if accounting is disabled", () => {
           const l = ledgerWithActiveIdentities();

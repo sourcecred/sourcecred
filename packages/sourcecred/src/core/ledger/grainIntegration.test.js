@@ -77,6 +77,7 @@ describe("src/core/ledger/grainIntegration", () => {
         parseAddress("0x0000000000000000000000000000000000000002"),
         currency.chainId
       );
+      ledger.setExternalCurrency(buildCurrency("BTC").chainId);
     });
     const getmockIntegration: (?boolean) => GrainIntegrationFunction = (
       returnTransfers = false,
@@ -105,8 +106,6 @@ describe("src/core/ledger/grainIntegration", () => {
         ledger,
         getmockIntegration(),
         distribution,
-        currency,
-        true,
         sink
       );
       const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
@@ -116,20 +115,19 @@ describe("src/core/ledger/grainIntegration", () => {
             "id": "000000000000000000000A",
             "type": "MARK_DISTRIBUTION_EXECUTED",
           },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
+          "ledgerTimestamp": 11,
+          "uuid": "000000000000000000012A",
           "version": "1",
         },
       ]);
     });
     it("doesn't transfer grain if processDistributions isn't set", () => {
+      ledger.disableIntegrationTracking();
       const ledgerSnapshot = ledger.serialize();
       const {ledger: newLedger} = executeGrainIntegration(
         ledger,
         getmockIntegration(true),
         distribution,
-        currency,
-        false,
         sink
       );
       const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
@@ -137,36 +135,30 @@ describe("src/core/ledger/grainIntegration", () => {
     });
     it("doesn't transfer grain if a accounting isn't enabled", () => {
       const ledgerSnapshot = ledger.serialize();
+      ledger.disableAccounting();
       const {ledger: newLedger} = executeGrainIntegration(
         ledger,
         getmockIntegration(true),
         distribution,
-        currency,
-        true,
-        sink,
-        false
+        sink
       );
       const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
-      expect(result).toEqual([
-        {
-          "action": {
-            "id": "000000000000000000000A",
-            "type": "MARK_DISTRIBUTION_EXECUTED",
-          },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
-          "version": "1",
+      expect(result).toContainEqual({
+        "action": {
+          "id": "000000000000000000000A",
+          "type": "MARK_DISTRIBUTION_EXECUTED",
         },
-      ]);
+        "ledgerTimestamp": 13,
+        "uuid": "000000000000000000014A",
+        "version": "1",
+      });
     });
     it("doesn't transfer grain if a sink isn't set", () => {
       const ledgerSnapshot = ledger.serialize();
       const {ledger: newLedger} = executeGrainIntegration(
         ledger,
         getmockIntegration(true),
-        distribution,
-        currency,
-        true
+        distribution
       );
       const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
       expect(result).toEqual([
@@ -175,24 +167,32 @@ describe("src/core/ledger/grainIntegration", () => {
             "id": "000000000000000000000A",
             "type": "MARK_DISTRIBUTION_EXECUTED",
           },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
+          "ledgerTimestamp": 11,
+          "uuid": "000000000000000000012A",
           "version": "1",
         },
       ]);
     });
-    it("Throws if the ledger does not have integrations enabled when it's expected to", () => {
+    it("does not mark a distribution as executed if Integration tracking is disabled", () => {
+      const ledgerSnapshot = ledger.serialize();
       ledger.disableIntegrationTracking();
-      const thunk = () =>
-        executeGrainIntegration(
-          ledger,
-          getmockIntegration(),
-          distribution,
-          currency,
-          true,
-          sink
-        );
-      expect(thunk).toThrow("integration tracking not enabled");
+      const {ledger: newLedger} = executeGrainIntegration(
+        ledger,
+        getmockIntegration(),
+        distribution,
+        sink
+      );
+      const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
+      expect(result).toEqual([
+        {
+          "action": {
+            "type": "DISABLE_GRAIN_INTEGRATION",
+          },
+          "ledgerTimestamp": 11,
+          "uuid": "000000000000000000012A",
+          "version": "1",
+        },
+      ]);
     });
     it("updates the ledger when balances are returned by the integration", () => {
       const ledgerSnapshot = ledger.serialize();
@@ -200,10 +200,7 @@ describe("src/core/ledger/grainIntegration", () => {
         ledger,
         getmockIntegration(true),
         distribution,
-        currency,
-        true,
-        sink,
-        true
+        sink
       );
       const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
       expect(result).toEqual([
@@ -212,12 +209,11 @@ describe("src/core/ledger/grainIntegration", () => {
             "id": "000000000000000000000A",
             "type": "MARK_DISTRIBUTION_EXECUTED",
           },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
+          "ledgerTimestamp": 11,
+          "uuid": "000000000000000000012A",
           "version": "1",
         },
         {
-          ledgerTimestamp: 11,
           action: {
             from: "YVZhbGlkVXVpZEF0TGFzdA",
             to: "000000000000000000006A",
@@ -226,10 +222,10 @@ describe("src/core/ledger/grainIntegration", () => {
             type: "TRANSFER_GRAIN",
           },
           version: "1",
-          uuid: "000000000000000000012A",
+          "ledgerTimestamp": 12,
+          uuid: "000000000000000000013A",
         },
         {
-          ledgerTimestamp: 12,
           action: {
             from: "URgLrCxgvjHxtGJ9PgmckQ",
             to: "000000000000000000006A",
@@ -238,7 +234,8 @@ describe("src/core/ledger/grainIntegration", () => {
             type: "TRANSFER_GRAIN",
           },
           version: "1",
-          uuid: "000000000000000000013A",
+          ledgerTimestamp: 13,
+          uuid: "000000000000000000014A",
         },
       ]);
     });

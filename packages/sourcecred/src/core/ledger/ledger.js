@@ -68,6 +68,7 @@ type AllocationReceipt = {|
  */
 export type AccountingStatus = {|
   +enabled: boolean,
+  +trackDistributions: boolean,
   +currency: ?Currency,
 |};
 /**
@@ -903,7 +904,7 @@ export class Ledger {
    */
   disableAccounting(): Ledger {
     // ensure an external currency is set
-    this._getExternalCurrency();
+    this.externalCurrency();
     // ensure accounting isn't already disabled
     if (this._balanceAccountingEnabled) {
       this._createAndProcessEvent({
@@ -917,7 +918,7 @@ export class Ledger {
   _disableAccounting(_: DisableAccounting) {
     this._balanceAccountingEnabled = false;
 
-    const currencyKey = getCurrencyKey(this._getExternalCurrency());
+    const currencyKey = getCurrencyKey(this.externalCurrency());
 
     // Warning! Mutations below
     const accountsIterator = this._accounts.values();
@@ -1000,6 +1001,7 @@ export class Ledger {
   accounting(): AccountingStatus {
     return {
       enabled: this._balanceAccountingEnabled,
+      trackDistributions: this._shouldTrackGrainIntegration,
       currency: this._externalCurrency,
     };
   }
@@ -1009,7 +1011,7 @@ export class Ledger {
    * externalCurrency prop. This should only be invoked when accounting
    * is disabled.
    */
-  _getExternalCurrency(): Currency {
+  externalCurrency(): Currency {
     if (!this._externalCurrency) throw new Error("No External Currency Set");
     return this._externalCurrency;
   }

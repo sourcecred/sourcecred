@@ -11,6 +11,7 @@ import {
   executeGrainIntegration,
   type GrainIntegrationOutput,
 } from "../../core/ledger/grainIntegration";
+import deepEqual from "lodash.isequal";
 
 export type GrainInput = {|
   +credGraph: CredGraph,
@@ -67,6 +68,19 @@ export function executeGrainIntegrationsFromGrainInput(
   const integrationCurrency = grainInput.currencyDetails.integrationCurrency;
   const grainIntegration = grainInput.grainConfig.integration;
   const results = [];
+  if (!ledger.accounting().enabled) {
+    const ledgerCurrency = ledger.accounting().currency;
+    if (!deepEqual(ledgerCurrency, integrationCurrency)) {
+      integrationCurrency
+        ? ledger.setExternalCurrency(
+            integrationCurrency.chainId,
+            integrationCurrency.tokenAddress
+              ? integrationCurrency.tokenAddress
+              : undefined
+          )
+        : ledger.removeExternalCurrency();
+    }
+  }
   // track the latest ledger in the for-loop for the purposes of returning it
   // at the top level, observing that any function may deep-copy
   // the ledger (thus creating a new reference we'll need to track) and also
@@ -77,9 +91,7 @@ export function executeGrainIntegrationsFromGrainInput(
       const result = executeGrainIntegration(
         ledgerResult,
         grainIntegration.function,
-        distribution,
-        integrationCurrency,
-        false
+        distribution
       );
       const {output, distributionCredTimestamp, ledger: nextLedger} = result;
       ledgerResult = nextLedger;
