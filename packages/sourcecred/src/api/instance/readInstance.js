@@ -58,6 +58,16 @@ import * as Combo from "../../util/combo";
 
 export const getNetworkReadInstance = (base: string): ReadInstance =>
   new ReadInstance(new NetworkStorage(base));
+export const getRawGithubReadInstance = (
+  organization: string,
+  repository: string,
+  branch: string
+): ReadInstance =>
+  new ReadInstance(
+    new NetworkStorage(
+      `https://raw.githubusercontent.com/${organization}/${repository}/${branch}/`
+    )
+  );
 export const getOriginReadInstance = (base: string): ReadInstance =>
   new ReadInstance(new OriginStorage(base));
 
