@@ -1713,30 +1713,30 @@ describe("core/ledger/ledger", () => {
               "action": {
                 type: "ENABLE_GRAIN_INTEGRATION",
               },
-              ledgerTimestamp: 5,
-              uuid: "000000000000000000024A",
+              ledgerTimestamp: 6,
+              uuid: "000000000000000000025A",
               version: "1",
             },
             {
-              uuid: "000000000000000000025A",
+              uuid: "000000000000000000026A",
               version: "1",
-              ledgerTimestamp: 6,
+              ledgerTimestamp: 7,
               action: {
                 "distribution": {
                   "allocations": [],
                   "credTimestamp": 1,
-                  "id": "000000000000000000023A",
+                  "id": "000000000000000000024A",
                 },
                 type: "DISTRIBUTE_GRAIN",
               },
             },
             {
               "action": {
-                "id": "000000000000000000023A",
+                "id": "000000000000000000024A",
                 "type": "MARK_DISTRIBUTION_EXECUTED",
               },
-              "ledgerTimestamp": 7,
-              "uuid": "000000000000000000026A",
+              "ledgerTimestamp": 8,
+              "uuid": "000000000000000000027A",
               "version": "1",
             },
           ]);
@@ -1906,10 +1906,9 @@ describe("core/ledger/ledger", () => {
             "payoutaddress when accounting is disabled",
           () => {
             const ledger = ledgerWithActiveIdentities();
-            ledger.setExternalCurrency(
-              parseEvmChainId("1"),
-              ETH_CURRENCY_ADDRESS
-            );
+            ledger
+              .setExternalCurrency(parseEvmChainId("1"), ETH_CURRENCY_ADDRESS)
+              .disableAccounting();
             const thunk = () => ledger.activate(id1);
             expect(thunk).toThrowError("No payout address set");
 
@@ -1929,6 +1928,7 @@ describe("core/ledger/ledger", () => {
             );
             ledger.activate(id1);
             expect(ledger.account(id1).active).toBe(true);
+            expect(ledger.accounting().enabled).toBe(false);
           }
         );
         it("cannot disable accounting without a configured external currency", () => {
