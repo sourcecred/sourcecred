@@ -14,6 +14,8 @@ import {
   parser as bundledGrainIntegrationParser,
 } from "./bundledGrainIntegrations";
 
+// NOTE: This type is deprecated since v0.10.0 and should not be modified
+// further
 export type RawGrainConfig = {|
   +allocationPolicies: $ReadOnlyArray<AllocationConfig>,
   +maxSimultaneousDistributions?: number,
@@ -25,6 +27,7 @@ export type RawGrainConfig = {|
 export type GrainConfig = {|
   +allocationPolicies: $ReadOnlyArray<AllocationPolicy>,
   +maxSimultaneousDistributions: number,
+  +accountingEnabled: boolean,
   +sinkIdentity?: Name,
   +processDistributions?: boolean,
   +integration?: GrainIntegration,
@@ -51,6 +54,7 @@ export const parser: C.Parser<GrainConfig> = C.fmap(
       maxSimultaneousDistributions: C.number,
       sinkIdentity: nameParser,
       processDistributions: C.boolean,
+      accountingEnabled: C.boolean,
       integration: bundledGrainIntegrationParser,
     }
   ),
@@ -60,5 +64,6 @@ export const parser: C.Parser<GrainConfig> = C.fmap(
       config.maxSimultaneousDistributions,
       Infinity
     ),
+    accountingEnabled: NullUtil.orElse(config.accountingEnabled, true),
   })
 );

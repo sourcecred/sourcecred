@@ -54,6 +54,7 @@ describe("api/grainConfig", () => {
       expect(parser.parseOrThrow({allocationPolicies: []})).toEqual({
         allocationPolicies: [],
         maxSimultaneousDistributions: Infinity,
+        accountingEnabled: true,
       });
     });
 
@@ -86,9 +87,10 @@ describe("api/grainConfig", () => {
         EXTRA: 30,
       };
 
-      const to = {
+      const to: GrainConfig = {
         allocationPolicies: [],
         maxSimultaneousDistributions: 2,
+        accountingEnabled: true,
       };
 
       expect(parser.parseOrThrow(grainConfig)).toEqual(to);
@@ -100,7 +102,7 @@ describe("api/grainConfig", () => {
         maxSimultaneousDistributions: -5,
       };
 
-      expect(parser.parseOrThrow(grainConfig)).toEqual(grainConfig);
+      expect(() => parser.parseOrThrow(grainConfig)).not.toThrow();
     });
 
     it("rejects improperly formatted allocation policies", () => {
@@ -149,6 +151,7 @@ describe("api/grainConfig", () => {
         maxSimultaneousDistributions: 2,
         sinkIdentity: "testName",
         processDistributions: true,
+        accountingEnabled: false,
       };
 
       const expected: GrainConfig = {
@@ -161,6 +164,7 @@ describe("api/grainConfig", () => {
         maxSimultaneousDistributions: 2,
         sinkIdentity: nameFromString("testName"),
         processDistributions: true,
+        accountingEnabled: false,
       };
 
       expect(parser.parseOrThrow(grainConfig)).toEqual(expected);
@@ -203,6 +207,7 @@ describe("api/grainConfig", () => {
           special("100.11", "howdy", uuid),
         ],
         maxSimultaneousDistributions: 2,
+        accountingEnabled: true,
       };
 
       expect(parser.parseOrThrow(grainConfig)).toEqual(expected);
@@ -228,6 +233,7 @@ describe("api/grainConfig", () => {
       const expected: GrainConfig = {
         allocationPolicies: [recent(20, 0.1), recent(20, 0.1)],
         maxSimultaneousDistributions: 2,
+        accountingEnabled: true,
       };
 
       expect(parser.parseOrThrow(config)).toEqual(expected);

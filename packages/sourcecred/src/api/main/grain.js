@@ -4,6 +4,7 @@ import {CredGraph} from "../../core/credrank/credGraph";
 import {Ledger} from "../../core/ledger/ledger";
 import type {CurrencyDetails} from "../currencyConfig";
 import {type GrainConfig} from "../grainConfig";
+import {type Currency as IntegrationCurrency} from "../../core/ledger/currency";
 import type {Distribution} from "../../core/ledger/distribution";
 import {applyDistributions} from "../../core/ledger/applyDistributions";
 import {type TimestampMs} from "../../util/timestamp";
@@ -11,7 +12,6 @@ import {
   executeGrainIntegration,
   type GrainIntegrationOutput,
 } from "../../core/ledger/grainIntegration";
-import deepEqual from "lodash.isequal";
 
 export type GrainInput = {|
   +credGraph: CredGraph,
@@ -68,19 +68,7 @@ export function executeGrainIntegrationsFromGrainInput(
   const integrationCurrency = grainInput.currencyDetails.integrationCurrency;
   const grainIntegration = grainInput.grainConfig.integration;
   const results = [];
-  if (!ledger.accounting().enabled) {
-    const ledgerCurrency = ledger.accounting().currency;
-    if (!deepEqual(ledgerCurrency, integrationCurrency)) {
-      integrationCurrency
-        ? ledger.setExternalCurrency(
-            integrationCurrency.chainId,
-            integrationCurrency.tokenAddress
-              ? integrationCurrency.tokenAddress
-              : undefined
-          )
-        : ledger.removeExternalCurrency();
-    }
-  }
+  ledger = configureLedger(ledger, grainInput);
   // track the latest ledger in the for-loop for the purposes of returning it
   // at the top level, observing that any function may deep-copy
   // the ledger (thus creating a new reference we'll need to track) and also
@@ -99,4 +87,53 @@ export function executeGrainIntegrationsFromGrainInput(
     });
   }
   return {ledger: ledgerResult, results};
+}
+
+function configureLedger(ledger: Ledger, input: GrainInput): Ledger {
+  const {grainConfig} = input;
+  ledger = configureLedgerAccounting(ledger, grainConfig.accountingEnabled);
+  ledger = configureDistributionProcessing(
+    ledger,
+    grainConfig.processDistributions
+  );
+  ledger = configureIntegrationCurrency(
+    ledger,
+    input.currencyDetails.integrationCurrency
+  );
+  return ledger;
+}
+
+function configureLedgerAccounting(
+  ledger: Ledger,
+  accountingEnabled: boolean
+): Ledger {
+  accountingEnabled ? ledger.enableAccounting() : ledger.disableAccounting();
+  return ledger;
+}
+
+function configureDistributionProcessing(
+  ledger: Ledger,
+  processDistributions: ?boolean
+): Ledger {
+  processDistributions
+    ? ledger.enableIntegrationTracking
+    : ledger.disableIntegrationTracking;
+  return ledger;
+}
+
+function configureIntegrationCurrency(
+  ledger: Ledger,
+  integrationCurrency: ?IntegrationCurrency
+): Ledger {
+  if (!ledger.accounting().enabled) {
+    integrationCurrency
+      ? ledger.setExternalCurrency(
+          integrationCurrency.chainId,
+          integrationCurrency.tokenAddress
+            ? integrationCurrency.tokenAddress
+            : undefined
+        )
+      : ledger.removeExternalCurrency();
+  }
+  return ledger;
 }
