@@ -12,9 +12,13 @@
     "build": "lerna run build --stream",
     "postinstall": "./scripts/flow-mono.sh",
     "start": "lerna run start --stream",
-    "clean": "lerna clean --yes && rm -rf node_modules"
+    "clean": "lerna clean --yes && rm -rf node_modules",
+    "docs": "lerna run docs"
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "documentation": "^13.2.5"
+  }
 }
