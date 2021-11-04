@@ -25,6 +25,7 @@ describe("plugins/github/repoId", () => {
   });
   describe("RepoIdString type", () => {
     it("manually constructing a RepoIdString is illegal", () => {
+      // $FlowExpectedError[incompatible-type]
       const _unused_repoIdString: RepoIdString = "foobar";
     });
   });

@@ -6,7 +6,7 @@ import type {GithubToken} from "../../plugins/github/token";
 import type {RepoId, RepoIdString} from "../../plugins/github/repoId";
 import fetch from "cross-fetch";
 import {decode as base64Decode} from "base-64";
-import {decode, encode} from "./textEncoding";
+import {encode} from "./textEncoding";
 import {toBase64} from "@aws-sdk/util-base64-browser";
 
 
