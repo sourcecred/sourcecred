@@ -9,8 +9,10 @@ import {decode as base64Decode} from "base-64";
 import {decode, encode} from "./textEncoding";
 import {toBase64} from "@aws-sdk/util-base64-browser";
 
-const GET_LEDGER_QUERY = `
-query getLedger($owner: String!, $repo: String!, $expression:String!) {
+
+// content keyword for matching GitHub's API terminology.
+const GET_CONTENT_QUERY = `
+query getContent($owner: String!, $repo: String!, $expression:String!) {
   repository(owner: $owner, name: $repo) {
     object(expression: $expression) {
       ... on Blob {
@@ -32,6 +34,11 @@ type Opts = {
   branch: string,
 };
 
+type Author = {
+    name: string,
+    email: string,
+};
+
 export class GithubStorage implements DataStorage {
   static ENDPOINT: string = "https://api.github.com";
 
@@ -46,9 +53,10 @@ export class GithubStorage implements DataStorage {
   _branch: string;
 
   /**
-   * data/ledger.json
-   * @param path data/ledger.json
-   * @returns {Promise<Ledger>}
+   * get method loads the content specified by path in the GitHub repository.
+   *
+   * @param path relative path to the content.
+   * @returns {Promise<Uint8Array>}
    */
   async get(path: string): Promise<Uint8Array> {
     const options = {
@@ -57,7 +65,7 @@ export class GithubStorage implements DataStorage {
         Authorization: `Bearer ${this._token}`,
       },
       body: JSON.stringify({
-        query: GET_LEDGER_QUERY,
+        query: GET_CONTENT_QUERY,
         variables: {
           owner: this._repoId.owner,
           repo: this._repoId.name,
@@ -71,7 +79,7 @@ export class GithubStorage implements DataStorage {
     const {data} = await result.json();
     const blobSha = data.repository.object.oid;
 
-    const ledgerBlobRes = await fetch(
+    const contentBlobRes = await fetch(
       `${this._getRepoEndpoint()}/git/blobs/${blobSha}`,
       {
         method: "GET",
@@ -81,9 +89,9 @@ export class GithubStorage implements DataStorage {
       }
     );
 
-    const ledgerDataBase64 = await ledgerBlobRes.json();
-    const rawLedger = base64Decode(ledgerDataBase64.content);
-    return encode(rawLedger);
+    const contentDataBase64 = await contentBlobRes.json();
+    const rawContent = base64Decode(contentDataBase64.content);
+    return encode(rawContent);
   }
 
   _getRepoEndpoint(): string {
@@ -93,7 +101,7 @@ export class GithubStorage implements DataStorage {
 }
 
 export class WritableGithubStorage extends GithubStorage implements  WritableDataStorage {
-  async set(path: string, ledger: Uint8Array, message?: string): Promise<void> {
+  async set(path: string, content: Uint8Array, message?: string, author?: Author): Promise<void> {
     // Get latest commit hash of target branch
     const targetBranchResult = await fetch(
         `${this._getRepoEndpoint()}/git/ref/heads/${this._branch}`,
@@ -118,7 +126,7 @@ export class WritableGithubStorage extends GithubStorage implements  WritableDat
           body: JSON.stringify({
             owner: this._repoId.owner,
             repo: this._repoId.name,
-            content: toBase64(ledger),
+            content: toBase64(content),
             encoding: 'base64'
           }),
         }
@@ -128,8 +136,8 @@ export class WritableGithubStorage extends GithubStorage implements  WritableDat
     const createBlobSha = createBlobData.sha;
 
 
-    // Create a new tree from the latest commit and update the ledger blob
-    const uploadLedgerBlobResult = await fetch(
+    // Create a new tree from the latest commit and update the content blob
+    const uploadBlobResult = await fetch(
         `${this._getRepoEndpoint()}/git/trees`,
         {
           method: "POST",
@@ -150,10 +158,10 @@ export class WritableGithubStorage extends GithubStorage implements  WritableDat
         }
     );
 
-    const uploadLedgerBlobTree: CreateBlobRes = await uploadLedgerBlobResult.json();
+    const uploadContentBlobTree: CreateBlobRes = await uploadBlobResult.json();
 
     // Create a commit with the new tree on top of the target branch
-    const commitLedgerResult = await fetch(
+    const commitContentResult = await fetch(
         `${this._getRepoEndpoint()}/git/commits`,
         {
           method: "POST",
@@ -161,17 +169,17 @@ export class WritableGithubStorage extends GithubStorage implements  WritableDat
             Authorization: `Bearer ${this._token}`,
           },
           body: JSON.stringify({
-            message: `Ledger Update${message ? `: ${message}` : ""}`,
-            tree: uploadLedgerBlobTree.sha,
+            message: message ?? "",
+            tree: uploadContentBlobTree.sha,
             parents: [baseCommit],
-            author: {
+            author: author ?? {
               name: "credbot",
               email: "credbot@users.noreply.github.com",
             },
           }),
         }
     );
-    const newLedgerCommit = await commitLedgerResult.json();
+    const newCommit = await commitContentResult.json();
 
     // Update the target branch to point to the new commit
     await fetch(`${this._getRepoEndpoint()}/git/refs/heads/${this._branch}`, {
@@ -180,7 +188,7 @@ export class WritableGithubStorage extends GithubStorage implements  WritableDat
         Authorization: `Bearer ${this._token}`,
       },
       body: JSON.stringify({
-        sha: newLedgerCommit.sha,
+        sha: newCommit.sha,
       }),
     });
   }
