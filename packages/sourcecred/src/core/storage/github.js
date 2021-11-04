@@ -7,6 +7,7 @@ import type {RepoId, RepoIdString} from "../../plugins/github/repoId";
 import fetch from "cross-fetch";
 import {decode as base64Decode} from "base-64";
 import {decode, encode} from "./textEncoding";
+import {toBase64} from "@aws-sdk/util-base64-browser";
 
 const GET_LEDGER_QUERY = `
 query getLedger($owner: String!, $repo: String!, $expression:String!) {
@@ -91,11 +92,8 @@ export class GithubStorage implements DataStorage {
   }
 }
 
-class WritableGithubStorage extends GithubStorage implements  WritableDataStorage {
+export class WritableGithubStorage extends GithubStorage implements  WritableDataStorage {
   async set(path: string, ledger: Uint8Array, message?: string): Promise<void> {
-    // get ledger from value
-    const ledgerData = decode(ledger);
-
     // Get latest commit hash of target branch
     const targetBranchResult = await fetch(
         `${this._getRepoEndpoint()}/git/ref/heads/${this._branch}`,
@@ -110,6 +108,26 @@ class WritableGithubStorage extends GithubStorage implements  WritableDataStorag
     const targetBranchData = await targetBranchResult.json();
     const baseCommit = targetBranchData.object.sha;
 
+    const createBlobResult = await fetch(
+        `${this._getRepoEndpoint()}/git/blobs`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this._token}`,
+          },
+          body: JSON.stringify({
+            owner: this._repoId.owner,
+            repo: this._repoId.name,
+            content: toBase64(ledger),
+            encoding: 'base64'
+          }),
+        }
+    );
+
+    const createBlobData = await createBlobResult.json();
+    const createBlobSha = createBlobData.sha;
+
+
     // Create a new tree from the latest commit and update the ledger blob
     const uploadLedgerBlobResult = await fetch(
         `${this._getRepoEndpoint()}/git/trees`,
@@ -121,7 +139,7 @@ class WritableGithubStorage extends GithubStorage implements  WritableDataStorag
           body: JSON.stringify({
             tree: [
               {
-                content: ledgerData,
+                sha: createBlobSha,
                 type: "blob",
                 path: path,
                 mode: "100644", // see https://docs.github.com/en/rest/reference/git#create-a-tree
@@ -166,5 +184,4 @@ class WritableGithubStorage extends GithubStorage implements  WritableDataStorag
       }),
     });
   }
-
 }
