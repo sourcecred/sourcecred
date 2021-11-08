@@ -192,9 +192,9 @@ contract("MerkleRedeem", accounts => {
         await redeem.seedDistribution(1, root, claimTime);
         PAUSER_ROLE = await redeem.PAUSER_ROLE();
       });
-      it("cannot call pauseDistribution without the PAUSER_ROLE", async () => {
+      it("cannot call removeDistribution without the PAUSER_ROLE", async () => {
         await truffleAssert.reverts(
-          redeem.pauseDistribution(1),
+          redeem.removeDistribution(1),
           "Must have PAUSER_ROLE"
         );
       });
@@ -210,7 +210,7 @@ contract("MerkleRedeem", accounts => {
         });
         it("pauses a distribution by resetting the root to zero", async () => {
           const originalClaimTime = await redeem.claimTimes(1);
-          await redeem.pauseDistribution(1);
+          await redeem.removeDistribution(1);
           const claimTime = await redeem.claimTimes(1);
           assert(
             claimTime.toString() === originalClaimTime.toString(),
@@ -231,18 +231,18 @@ contract("MerkleRedeem", accounts => {
         it("cannot pause a live distribution", async () => {
           await increaseTime(1);
           await truffleAssert.reverts(
-            redeem.pauseDistribution(1),
+            redeem.removeDistribution(1),
             "Can't modify a live distribution"
           );
         });
         it("cannot delay a non-existent distribution", async () => {
           await truffleAssert.reverts(
-            redeem.pauseDistribution(2),
+            redeem.removeDistribution(2),
             "Can't modify a live distribution"
           );
         });
         it("can claim after a new root is published", async () => {
-          await redeem.pauseDistribution(1);
+          await redeem.removeDistribution(1);
           const claimedBalance = utils.toWei("1000");
 
           const merkleProof = merkleTree.getHexProof(elements[0]);
@@ -258,7 +258,7 @@ contract("MerkleRedeem", accounts => {
         it("can enforce the new global minimum delay when republishing a paused distribution", async () => {
           const dayInSeconds = 86400;
           await redeem.changeMinimumDelay(dayInSeconds);
-          await redeem.pauseDistribution(1);
+          await redeem.removeDistribution(1);
 
           const lastBlock = await web3.eth.getBlock("latest");
           const currentTime = lastBlock.timestamp;
