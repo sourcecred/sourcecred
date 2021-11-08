@@ -174,7 +174,7 @@ const evaluate: (Equation, WeightConfig) => number = (
         const config = weightConfig.find((x) => x.key === factor.key);
         if (config === undefined) throw "Unexpected factor key " + factor.key;
         return (
-          (config.values.find((x) => x.value === factor.value)?.weight ||
+          (config.values.find((x) => x.value === factor.value)?.weight ??
             config.default) + (accumulator === undefined ? 1 : accumulator)
         );
       }, 0);
