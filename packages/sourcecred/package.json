@@ -137,7 +137,7 @@
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0",
     "prepublishOnly": "yarn build",
-    "docs": "node ./scripts/build-docs.js",
+    "docs": "bash ../../scripts/generate-docs.sh ./src/api/lib",
     "shell": "node ./scripts/shell.js"
   },
   "engines": {
