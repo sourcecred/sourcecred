@@ -1,87 +1,120 @@
 // @flow
 
-import {GithubStorage} from "./github";
+import {GithubStorage, WritableGithubStorage} from "./github";
 import {encode} from "./textEncoding";
 import {encode as base64Encode} from "base-64";
 
 const mockContent = base64Encode("");
-const owner = "sourcecred";
-const name = "sourcecred";
-const oid = "55adb2945959a87de3a492ce950473a30449e54e";
-const ENDPOINT = "https://api.github.com";
+const mockOwner = "sourcecred";
+const mockName = "sourcecred";
+const mockBranch = "random-mockName";
+const mockOid = "55adb2945959a87de3a492ce950473a30449e54e";
+const mockEndpoint = "https://api.github.com";
+const mockRepoEndpoint = `${mockEndpoint}/repos/${mockOwner}/${mockName}`;
 
-jest.mock("cross-fetch", () => ({
-  // needed to utilize fetch as a default export.
-  __esModule: true,
-  default: (path) => {
-    switch (path) {
-      case `${ENDPOINT}/graphql`:
-        return Promise.resolve({
-          json: () => ({
-            data: {
-              repository: {
-                object: {
-                  oid,
+// Note: variables that meant to be used with jest's mocks must be prefixed
+// with 'mock' in order to for tests to work properly.
+let mockServerTempValue;
+
+function mock200ResponseWithJson(object: any) {
+  return Promise.resolve({
+    json: async () => object,
+    ok: true,
+    status: 200,
+    statusText: "OK",
+  });
+}
+
+jest.mock("cross-fetch", () => {
+  return {
+    // needed to utilize fetch as a default export.
+    __esModule: true,
+    default: (path, options) => {
+      switch (path) {
+        case `${mockEndpoint}/graphql`:
+          return Promise.resolve({
+            json: () => ({
+              data: {
+                repository: {
+                  object: {
+                    oid: mockOid,
+                  },
                 },
               },
+            }),
+            ok: true,
+            status: 200,
+            statusText: "OK",
+          });
+        case `${mockEndpoint}/repos/${mockOwner}/${mockName}/git/blobs/${mockOid}`:
+          return mock200ResponseWithJson({
+            content: mockServerTempValue ?? mockContent,
+          });
+        case `${mockRepoEndpoint}/git/ref/heads/${mockBranch}`:
+          return mock200ResponseWithJson({
+            object: {
+              sha: "sodifnoweinfw",
             },
-          }),
-          ok: true,
-          status: 200,
-          statusText: "OK",
-        });
-      case `${ENDPOINT}/repos/${owner}/${name}/git/blobs/${oid}`:
-        return Promise.resolve({
-          arrayBuffer: () => new ArrayBuffer(0),
-          json: () => ({
-            content: mockContent,
-          }),
-          ok: false,
-          status: 500,
-          statusText: "INTERNAL ERROR",
-        });
-      default:
-        return Promise.resolve({
-          arrayBuffer: () => new ArrayBuffer(0),
-          ok: false,
-          status: 404,
-          statusText: "NOT FOUND",
-        });
-    }
-  },
-}));
+          });
+        case `${mockRepoEndpoint}/git/blobs`:
+          mockServerTempValue = JSON.parse(options.body).content;
+          return mock200ResponseWithJson({
+            sha: "sodifnoweinfw",
+          });
+        case `${mockRepoEndpoint}/git/trees`:
+          return mock200ResponseWithJson({
+            sha: "sodifnoweinfw",
+          });
+        case `${mockRepoEndpoint}/git/commits`:
+          return mock200ResponseWithJson({
+            sha: "sodifnoweinfw",
+          });
+        case `${mockRepoEndpoint}/git/refs/heads/${mockBranch}`:
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            statusText: "OK",
+          });
+        default:
+          return Promise.resolve({
+            arrayBuffer: () => new ArrayBuffer(0),
+            ok: false,
+            status: 404,
+            statusText: "NOT FOUND",
+          });
+      }
+    },
+  };
+});
 
 describe("core/storage/github", () => {
   describe("GithubStorage", () => {
-    // const value = new Uint8Array([1, 2]);
     it("make sure everything is working.", async () => {
-      // expect.hasAssertions();
+      expect.hasAssertions();
       const storage = new GithubStorage({
         apiToken: `GithubToken`,
-        repo: `${owner}/${name}`,
-        branch: "string",
+        repo: `${mockOwner}/${mockName}`,
+        branch: mockBranch,
       });
 
       const result = await storage.get("data/ledger.json");
       await expect(result).toEqual(encode(""));
     });
-    // it("throws on upward traversal when the base is a url", async () => {
-    //   expect.hasAssertions();
-    //   const storage = new NetworkStorage("https://sourcecred.io/base/");
-    //   const thunk = async () => storage.get("../validPath");
-    //   await expect(thunk()).rejects.toThrow("Path traversal is not allowed");
-    // });
-    // it("throws an error if the http response is not ok", async () => {
-    //   expect.hasAssertions();
-    //   const storage = new NetworkStorage("https://sourcecred.io/base/");
-    //   const thunk = async () => storage.get("invalidPath");
-    //   await expect(thunk()).rejects.toThrow(
-    //     "Error fetching invalidPath: 404 NOT FOUND"
-    //   );
-    //   const dunk = async () => storage.get("serverError");
-    //   await expect(dunk()).rejects.toThrow(
-    //     "Error fetching serverError: 500 INTERNAL ERROR"
-    //   );
-    // });
+    it("throws on upward traversal when the base is a url", async () => {
+      expect.hasAssertions();
+      const storage = new WritableGithubStorage({
+        apiToken: `GithubToken`,
+        repo: `${mockOwner}/${mockName}`,
+        branch: mockBranch,
+      });
+
+      const path = "data/file.json";
+      const value = "hello";
+      const encodedValue = encode(value);
+      await storage.set(path, encodedValue, "update text");
+
+      const result = await storage.get(path);
+      await expect(result).toEqual(encode(value));
+    });
   });
 });

@@ -26,8 +26,6 @@ import {type WeightsT} from "../../core/weights";
 import {Web3ContextProvider} from "../utils/Web3Context";
 import {MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
-import {WritableGithubStorage} from "../../core/storage/github";
-import {decode, encode} from "../../core/storage/textEncoding";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -150,8 +148,6 @@ const customRoutes = (
 const AdminApp = (): ReactNode => {
   const [loadResult, setLoadResult] = useState<LoadResult | null>(null);
   useEffect(() => {
-
-
     load().then(setLoadResult);
   }, []);
 
