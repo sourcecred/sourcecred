@@ -183,10 +183,15 @@ contract MerkleRedeem is AccessControl {
     }
 
     /**
-     * Pause a Distribution indefinitely by resetting the merkle root to zero
+     * Pause a Distribution by resetting the merkle root to zero
      * The distribution can be re-seeded with a new merkle root.
+     * The caller must have the `PAUSER_ROLE` and the distribution cannot be
+     * "live", i.e. the `claimTime` cannot have passed.
+     *
+     * This effectively pauses the distribution indefinitely, since it can
+     * still be re-seeded with `seedDistribution`
      */
-    function pauseDistribution(uint _distribution) external {
+    function removeDistribution(uint _distribution) external {
         require(hasRole(PAUSER_ROLE, msg.sender), "MerkleRedeem: Must have PAUSER_ROLE to modify allocations");
         require(block.timestamp < claimTimes[_distribution], "MerkleRedeem: Can't modify a live distribution");
 
