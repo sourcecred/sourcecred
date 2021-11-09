@@ -84,6 +84,20 @@ const createMenu = (
               onClick={onMenuClick}
               sidebarIsOpen={open}
             />
+            <MenuItemLink
+              to="/config-mgr"
+              primaryText="Configuration Manager"
+              leftIcon={<ExplorerIcon />}
+              onClick={onMenuClick}
+              sidebarIsOpen={open}
+            />
+            <MenuItemLink
+              to="/test-form"
+              primaryText="Test Form"
+              leftIcon={<ExplorerIcon />}
+              onClick={onMenuClick}
+              sidebarIsOpen={open}
+            />
           </>
         )}
       </div>
