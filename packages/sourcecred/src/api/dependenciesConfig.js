@@ -162,8 +162,15 @@ export function ensureIdentityExists(
       return {...dep, id};
     }
   } else {
-    // Will throw if the id is not in the ledger.
-    const identity = ledger.account(depId).identity;
+    let identity;
+    try {
+      identity = ledger.account(depId).identity;
+    } catch {
+      throw new Error(
+        `The identity for the dependency ${dep.name} has been deleted from the ledger, or the ledger has been reset. ` +
+          `If this was intentional, go to your dependencies.json file and delete the 'id' attribute to reset.`
+      );
+    }
     if (identity.name !== dep.name) {
       throw new Error(
         `dependency name discrepancy: dep has name ${dep.name} in ` +
