@@ -114,7 +114,7 @@ describe("core/storage/github", () => {
       await storage.set(path, encodedValue, "update text");
 
       const result = await storage.get(path);
-      await expect(result).toEqual(encode(value));
+      await expect(decode(result)).toEqual(value);
     });
   });
 });
