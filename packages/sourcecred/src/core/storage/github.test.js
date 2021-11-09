@@ -1,7 +1,7 @@
 // @flow
 
 import {GithubStorage, WritableGithubStorage} from "./github";
-import {encode} from "./textEncoding";
+import {decode, encode} from "./textEncoding";
 import {encode as base64Encode} from "base-64";
 
 const mockContent = base64Encode("");
