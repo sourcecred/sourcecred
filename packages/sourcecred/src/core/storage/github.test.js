@@ -89,7 +89,7 @@ jest.mock("cross-fetch", () => {
 
 describe("core/storage/github", () => {
   describe("GithubStorage", () => {
-    it("make sure everything is working.", async () => {
+    it("works when using GitHubStorage to load content", async () => {
       expect.hasAssertions();
       const storage = new GithubStorage({
         apiToken: `GithubToken`,
@@ -100,7 +100,7 @@ describe("core/storage/github", () => {
       const result = await storage.get("data/ledger.json");
       await expect(result).toEqual(encode(""));
     });
-    it("throws on upward traversal when the base is a url", async () => {
+    it("works when using WritableGitHubStorage to post new content", async () => {
       expect.hasAssertions();
       const storage = new WritableGithubStorage({
         apiToken: `GithubToken`,

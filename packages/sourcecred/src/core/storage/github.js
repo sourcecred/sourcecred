@@ -122,6 +122,7 @@ export class WritableGithubStorage
     const targetBranchData = await targetBranchResult.json();
     const baseCommit = targetBranchData.object.sha;
 
+    // Create new blob from the new content.
     const createBlobResult = await fetch(
       `${this._getRepoEndpoint()}/git/blobs`,
       {
