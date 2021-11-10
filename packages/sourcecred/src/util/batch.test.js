@@ -20,6 +20,14 @@ describe("src/util/batch", () => {
     it("returns an empty array for an empty array", () => {
       expect(batchArray([], 3)).toEqual([]);
     });
+    it("works when batch size is 1", () => {
+      expect(batchArray([1, 2], 1)).toEqual([[1], [2]]);
+    });
+    it("throws when batch size is <1", () => {
+      expect(() => {
+        batchArray([0, 1], 0);
+      }).toThrowError("BatchSize must be 1 or more.");
+    });
   });
 
   describe("batchIterator", () => {
@@ -66,6 +74,24 @@ describe("src/util/batch", () => {
       );
       expect(getResult(iterator)).toEqual([[1, 2]]);
       expect(iterator.numBatchesCompleted()).toEqual(1);
+    });
+    it("works when batch size is 1", () => {
+      const iterator = batchIterator(
+        // $FlowFixMe[incompatible-use]
+        [1, 2][Symbol.iterator](),
+        1
+      );
+      expect(getResult(iterator)).toEqual([[1], [2]]);
+      expect(iterator.numBatchesCompleted()).toEqual(2);
+    });
+    it("throws when batch size is <1", () => {
+      expect(() => {
+        batchIterator(
+          // $FlowFixMe[incompatible-use]
+          [1, 2][Symbol.iterator](),
+          0
+        );
+      }).toThrowError("BatchSize must be 1 or more.");
     });
     it("batches an empty iterator", () => {
       const iterator = batchIterator(

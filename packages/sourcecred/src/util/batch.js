@@ -10,6 +10,7 @@ export function batchArray<T>(
   array: $ReadOnlyArray<T>,
   batchSize: number
 ): $ReadOnlyArray<$ReadOnlyArray<T>> {
+  if (batchSize < 1) throw new Error("BatchSize must be 1 or more.");
   const result = [];
   let backlog = array;
   while (backlog.length) {
@@ -41,6 +42,7 @@ export function batchIterator<T>(
   iterator: Iterator<T> | Generator<T, void, void>,
   batchSize: number
 ): BatchIterator<T> {
+  if (batchSize < 1) throw new Error("BatchSize must be 1 or more.");
   let itemsCompletedInCurrentBatch = 0;
   let queue = iterator.next();
   let hasNext = !queue.done;
