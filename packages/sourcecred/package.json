@@ -43,6 +43,7 @@
     "htmlparser2": "^6.0.0",
     "isomorphic-fetch": "^3.0.0",
     "json-stable-stringify": "^1.0.1",
+    "json2csv": "^5.0.6",
     "lodash.clonedeep": "^4.5.0",
     "lodash.differenceby": "^4.8.0",
     "lodash.findlast": "^4.6.0",

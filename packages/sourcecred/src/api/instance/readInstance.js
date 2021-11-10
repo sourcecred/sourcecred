@@ -170,6 +170,7 @@ export class ReadInstance implements ReadOnlyInstance {
     return {
       credGraph,
       ledger,
+      featureFlags: {},
     };
   }
 
