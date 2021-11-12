@@ -54,6 +54,14 @@ export const AccountOverview = ({
   );
 
   const accounts = useMemo(() => Array.from(ledger.accounts()), []);
+
+  const ACTIVE_SORT = useMemo(() =>
+    deepFreeze({
+      name: Symbol("Active?"),
+      fn: (n) => (n.active ? 5 : 0),
+    }), []
+  );
+
   const BALANCE_SORT = useMemo(() =>
     deepFreeze({
       name: Symbol("Current Balance"),
@@ -70,7 +78,7 @@ export const AccountOverview = ({
     []
   );
 
-  const sortingOptions = [BALANCE_SORT, EARNED_SORT];
+  const sortingOptions = [ACTIVE_SORT, BALANCE_SORT, EARNED_SORT];
 
   const tsAccounts = useTableState(
     {data: accounts},
@@ -90,7 +98,7 @@ export const AccountOverview = ({
           <TableHead>
             <TableRow>
               <TableCell>Username</TableCell>
-              <TableCell align="right">Active?</TableCell>
+              {/*<TableCell align="right">Active?</TableCell>*/}
 
               {sortingOptions.map((value) => (
                 <TableCell key={value.name.description} align="right">
