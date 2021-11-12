@@ -58,7 +58,7 @@ export const AccountOverview = ({
     deepFreeze({
       name: Symbol("Current Balance"),
       fn: (n) => bigInt(n.balance),
-    })
+    }), []
   );
 
   const EARNED_SORT = useMemo(
