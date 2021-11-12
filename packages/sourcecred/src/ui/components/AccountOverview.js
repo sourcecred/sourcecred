@@ -54,7 +54,7 @@ export const AccountOverview = ({
   );
 
   const accounts = useMemo(() => Array.from(ledger.accounts()), []);
-  
+
   const ACTIVE_SORT = useMemo(
     () =>
       deepFreeze({
@@ -63,7 +63,7 @@ export const AccountOverview = ({
       }),
     []
   );
-  
+
   const BALANCE_SORT = useMemo(
     () =>
       deepFreeze({
