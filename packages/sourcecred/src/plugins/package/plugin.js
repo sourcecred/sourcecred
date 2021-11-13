@@ -27,8 +27,7 @@ export class PackagePlugin implements Plugin {
 
     const pluginModule = this.id.startsWith("./") ? path.resolve(process.cwd(), this.id): this.id; 
     try {
-      // Must import a plugin object from 
-      this.plugin = (await import(pluginModule).default: Plugin);
+      this.plugin = (new (await import(pluginModule).default)(): Plugin);
     }catch(e){
       throw new Error("Could not load dynamically imported plugin")
     }
