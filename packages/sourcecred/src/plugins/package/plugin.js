@@ -67,7 +67,7 @@ export class PackagePlugin implements Plugin {
     ctx: PluginDirectoryContext,
     reporter: TaskReporter
   ): Promise<$ReadOnlyArray<IdentityProposal>> {
-    this.loadPlugin();
+    await this.loadPlugin();
     return this.plugin.identities(ctx, reporter);
   }
 
