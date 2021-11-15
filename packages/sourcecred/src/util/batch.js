@@ -12,10 +12,9 @@ export function batchArray<T>(
 ): $ReadOnlyArray<$ReadOnlyArray<T>> {
   if (batchSize < 1) throw new Error("BatchSize must be 1 or more.");
   const result = [];
-  let backlog = array;
+  const backlog = array.slice();
   while (backlog.length) {
-    result.push(backlog.slice(0, batchSize));
-    backlog = backlog.slice(batchSize);
+    result.push(backlog.splice(0, batchSize));
   }
   return result;
 }
