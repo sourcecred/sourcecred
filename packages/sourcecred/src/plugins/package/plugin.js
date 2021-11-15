@@ -6,30 +6,27 @@ import path from "path";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type TaskReporter} from "../../util/taskReporter";
 import type {ReferenceDetector} from "../../core/references";
-import {
-  type WeightedGraph,
-} from "../../core/weightedGraph";
+import {type WeightedGraph} from "../../core/weightedGraph";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
-
 
 export class PackagePlugin implements Plugin {
   id: PluginId;
   plugin: Plugin;
 
-  constructor(options: {|
-    +pluginId: PluginId,
-  |}) {
+  constructor(options: {|+pluginId: PluginId|}) {
     this.id = options.pluginId;
   }
 
   async loadPlugin(): Promise<void> {
-    if(this.plugin !== undefined ) return;
+    if (this.plugin !== undefined) return;
 
-    const pluginModule = this.id.startsWith("./") ? path.resolve(process.cwd(), this.id): this.id; 
+    const pluginModule = this.id.startsWith("./")
+      ? path.resolve(process.cwd(), this.id)
+      : this.id;
     try {
       this.plugin = (new (await import(pluginModule).default)(): Plugin);
-    }catch(e){
-      throw new Error("Could not load dynamically imported plugin")
+    } catch (e) {
+      throw new Error("Could not load dynamically imported plugin");
     }
   }
 
@@ -43,7 +40,7 @@ export class PackagePlugin implements Plugin {
     reporter: TaskReporter
   ): Promise<void> {
     await this.loadPlugin();
-    return this.plugin.load(ctx,reporter);
+    return this.plugin.load(ctx, reporter);
   }
 
   async graph(
@@ -52,7 +49,7 @@ export class PackagePlugin implements Plugin {
     reporter: TaskReporter
   ): Promise<WeightedGraph> {
     await this.loadPlugin();
-    return this.plugin.graph(ctx,rd, reporter);
+    return this.plugin.graph(ctx, rd, reporter);
   }
 
   async referenceDetector(
@@ -70,5 +67,4 @@ export class PackagePlugin implements Plugin {
     await this.loadPlugin();
     return this.plugin.identities(ctx, reporter);
   }
-
 }

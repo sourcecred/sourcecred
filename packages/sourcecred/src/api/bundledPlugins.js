@@ -41,5 +41,4 @@ export function getPlugin(pluginId: PluginId): ?Plugin {
       storage: new DiskStorage(process.cwd()),
     });
   return new PackagePlugin({pluginId});
-
 }
