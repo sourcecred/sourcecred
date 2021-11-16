@@ -14,11 +14,87 @@
  */
 
 declare module 'ethers' {
+declare class BaseContract {
+    address: string;
+    interface: Interface;
+    signer: Signer;
+    provider: Provider;
+    functions: {
+        [name: string]: ContractFunction;
+    };
+    callStatic: {
+        [name: string]: ContractFunction;
+    };
+    estimateGas: {
+        [name: string]: ContractFunction<BigNumber>;
+    };
+    populateTransaction: {
+        [name: string]: ContractFunction<PopulatedTransaction>;
+    };
+    filters: {
+        [name: string]: (...args: Array<any>) => EventFilter;
+    };
+    resolvedAddress: Promise<string>;
+    deployTransaction: TransactionResponse;
+    _deployedPromise: Promise<Contract>;
+    _runningEvents: {
+        [eventTag: string]: RunningEvent;
+    };
+    _wrappedEmits: {
+        [eventTag: string]: (...args: Array<any>) => void;
+    };
+  constructor(addressOrName: string, contractInterface: ContractInterface, signerOrProvider?: Signer | Provider): void;
+    static getContractAddress(transaction: {
+        from: string;
+        nonce: BigNumberish;
+    }): string;
+    static getInterface(contractInterface: ContractInterface): Interface;
+    deployed(): Promise<Contract>;
+    _deployed(blockTag?: BlockTag): Promise<Contract>;
+    fallback(overrides?: TransactionRequest): Promise<TransactionResponse>;
+    connect(signerOrProvider: Signer | Provider | string): Contract;
+    attach(addressOrName: string): Contract;
+    static isIndexed(value: any): value;
+    _checkRunningEvents(runningEvent: RunningEvent): void;
+    _wrapEvent(runningEvent: RunningEvent, log: Log, listener: Listener): Event;
+    queryFilter(event: EventFilter, fromBlockOrBlockhash?: BlockTag | string, toBlock?: BlockTag): Promise<Array<Event>>;
+    on(event: EventFilter | string, listener: Listener): this;
+    once(event: EventFilter | string, listener: Listener): this;
+    emit(eventName: EventFilter | string, ...args: Array<any>): boolean;
+    listenerCount(eventName?: EventFilter | string): number;
+    listeners(eventName?: EventFilter | string): Array<Listener>;
+    removeAllListeners(eventName?: EventFilter | string): this;
+    off(eventName: EventFilter | string, listener: Listener): this;
+    removeListener(eventName: EventFilter | string, listener: Listener): this;
+}
   declare class Signer {
     getAddress(): Promise<string>
   }
-  
-  declare class Web3Provider {
+
+  declare class Contract extends BaseContract {
+    [key: string]: ContractFunction | any;
+  }
+
+  declare class ContractFactory {
+    interface: Interface;
+    bytecode: string;
+    signer: Signer;
+    constructor(contractInterface: ContractInterface, bytecode: BytesLike | {
+        object: string;
+    }, signer?: Signer): void;
+    getDeployTransaction(...args: Array<any>): TransactionRequest;
+    deploy<Contract>(...args: Array<any>): Promise<Contract>;
+    attach(address: string): Contract;
+    connect(signer: Signer): ContractFactory;
+    static fromSolidity(compilerOutput: any, signer?: Signer): ContractFactory;
+    static getInterface(contractInterface: ContractInterface): Interface;
+    static getContractAddress(tx: {
+        from: string;
+        nonce: BytesLike | BigNumber | number;
+    }): string;
+    static getContract(address: string, contractInterface: ContractInterface, signer?: Signer): Contract;
+}
+  declare class Provider {
     constructor(provider: any): void;
     
     getSigner(): Signer;
@@ -27,7 +103,10 @@ declare module 'ethers' {
   
   declare module.exports: {
     providers: {
-      Web3Provider: typeof Web3Provider,
-    }
+      Web3Provider: typeof Provider,
+      JsonRpcProvider: typeof Provider,
+    },
+      ContractFactory: typeof ContractFactory,
+      Contract: typeof Contract,
   };
 }

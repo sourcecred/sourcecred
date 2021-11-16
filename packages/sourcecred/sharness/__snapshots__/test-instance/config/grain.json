@@ -1,6 +1,14 @@
 {
-  "immediatePerWeek": 0,
-  "balancedPerWeek": 1000,
+  "allocationPolicies": [
+    {
+      "budget": "5000",
+      "numIntervalsLookback": 0,
+      "policyType": "BALANCED"
+    }
+  ],
   "maxSimultaneousDistributions": 1,
-  "integration": "csv"
+  "accountingEnabled": false,
+  "integration":{
+    "type": "merkle"
+  }
 }

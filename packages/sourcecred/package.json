@@ -13,6 +13,7 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/pickers": "3.3.10",
     "@sourcecred/grain-integration-csv": "^0.0.1",
+    "@sourcecred/grain-integration-merkle": "^0.0.1",
     "@walletconnect/web3-provider": "^1.4.1",
     "aphrodite": "^2.4.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
