@@ -28,6 +28,9 @@ export type PayoutResult = {|
   // If Grain balances are tracked in the ledger, these will be recorded as
   // transfers in the ledger to the "sink" Identity.
   transferredGrain: TransferredGrain,
+  // integration-specific config changes that need to be persisted are
+  // returned in the configUpdate object.
+  configUpdate: Object,
   // output files and content
   outputFile?: GrainIntegrationOutput,
 |};
@@ -46,6 +49,7 @@ export type IntegrationConfig = {|
   // distributed funds via a configured integration
   processDistributions: boolean,
   currency: Currency,
+  integration: ?Object,
 |};
 
 /**
@@ -60,12 +64,19 @@ export type IntegrationConfig = {|
 export type GrainIntegrationFunction = (
   PayoutDistributions,
   IntegrationConfig
-) => PayoutResult;
+) => Promise<PayoutResult>;
+
+export type GrainIntegration = {|
+  name: string,
+  function: GrainIntegrationFunction,
+  config?: Object,
+|};
 
 export type GrainIntegrationResult = {|
   ledger: Ledger,
-  output?: GrainIntegrationOutput,
   distributionCredTimestamp: TimestampMs,
+  configUpdate: Object,
+  output?: GrainIntegrationOutput,
 |};
 
 ///////////////////
@@ -75,12 +86,12 @@ export type GrainIntegrationResult = {|
 // TODO @topocount: Refactor interface using instance/config properties
 // after grainConfig is updated to include The payout currency details and
 // sink identity
-export function executeGrainIntegration(
+export async function executeGrainIntegration(
   ledger: Ledger,
-  integration: GrainIntegrationFunction,
+  integration: GrainIntegration,
   distribution: Distribution,
   sink?: IdentityId
-): GrainIntegrationResult {
+): Promise<GrainIntegrationResult> {
   const currency = ledger.externalCurrency();
   const {
     enabled: accountingEnabled,
@@ -96,8 +107,9 @@ export function executeGrainIntegration(
   // the fixed-point amount for some reason.
   let result;
   try {
-    result = integration(payoutDistributions, {
+    result = await integration.function(payoutDistributions, {
       accounting: ledger.accounting(),
+      integration: integration.config,
       processDistributions,
       currency,
     });
@@ -122,6 +134,7 @@ export function executeGrainIntegration(
   return {
     ledger,
     output: result.outputFile,
+    configUpdate: result.configUpdate,
     distributionCredTimestamp: distribution.credTimestamp,
   };
 }

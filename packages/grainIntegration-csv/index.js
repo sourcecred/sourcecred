@@ -19,6 +19,7 @@ const csvIntegration /*: any */ = (payoutDistributions, _unused_config) => {
       fileName: `Payouts-${timestamp}.csv`,
       content: csvString,
     },
+    configUpdate: {},
   };
 };
 
