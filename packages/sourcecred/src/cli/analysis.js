@@ -62,7 +62,7 @@ function printNeo4jCommandHelp(neo4jOutput, std) {
     export NEO_CSV_FOLDER=${pathJoin(process.cwd(), "output", "neo4j")}
 
     # CAREFUL, this command wipes the Neo4j DB. This prepares it for a fresh import.
-    rm $NEO/data/databases/neo4j -r ; rm $NEO/data/transactions/neo4j -r
+    rm -r $NEO/data/databases/neo4j ; rm -r $NEO/data/transactions/neo4j
 
     $NEO/bin/neo4j-admin import --database=neo4j \\
     ${[...Array(neo4jOutput.nodes.iterationsCompleted()).keys()]
