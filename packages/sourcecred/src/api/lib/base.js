@@ -39,6 +39,7 @@ import * as storage from "../ledgerStorage";
 import * as credrank from "../main/credrank";
 import * as graphApi from "../main/graph";
 import * as grainApi from "../main/grain";
+import * as analysis from "../main/analysis";
 import * as readInstance from "../../api/instance/readInstance";
 
 const api = {
@@ -46,6 +47,7 @@ const api = {
     graph: graphApi,
     credrank,
     grain: grainApi,
+    analysis,
   },
   instance: {
     readInstance,

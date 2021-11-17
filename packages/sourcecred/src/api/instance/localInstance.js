@@ -2,9 +2,10 @@
 
 import {Instance} from "./instance";
 import {ReadInstance} from "./readInstance";
-import {type CredrankOutput} from "../main/credrank";
-import {type GraphInput, type GraphOutput} from "../main/graph";
-import {type AnalysisOutput} from "../main/analysis";
+import type {CredrankOutput} from "../main/credrank";
+import type {GraphInput, GraphOutput} from "../main/graph";
+import type {AnalysisOutput} from "../main/analysis";
+import type {Neo4jOutput} from "../main/analysisUtils/neo4j";
 import {join as pathJoin} from "path";
 import stringify from "json-stable-stringify";
 import {
@@ -43,12 +44,14 @@ const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
 const ACCOUNTS_PATH: $ReadOnlyArray<string> = ["output", "accounts.json"];
+const NEO4J_DIRECTORY: $ReadOnlyArray<string> = ["output", "neo4j"];
 const GRAIN_INTEGRATION_DIRECTORY: $ReadOnlyArray<string> = [
   "output",
   "grainIntegration",
 ];
 
 const JSON_SUFFIX: string = ".json";
+const CSV_SUFFIX: string = ".csv";
 const ZIP_SUFFIX: string = "";
 
 /**
@@ -119,7 +122,10 @@ export class LocalInstance extends ReadInstance implements Instance {
   }
 
   async writeAnalysisOutput(analysisOutput: AnalysisOutput): Promise<void> {
-    await Promise.all([this.writeCredAccounts(analysisOutput.accounts)]);
+    await Promise.all([
+      this.writeCredAccounts(analysisOutput.accounts),
+      this.writeNeo4jOutput(analysisOutput.neo4j),
+    ]);
   }
 
   async writeLedger(ledger: Ledger): Promise<void> {
@@ -253,5 +259,46 @@ export class LocalInstance extends ReadInstance implements Instance {
       accountsPath,
       encode(stringify(credAccounts))
     );
+  }
+
+  async writeNeo4jOutput(neo4jOutput: Neo4jOutput | void): Promise<void> {
+    if (!neo4jOutput) return;
+    mkdirx(pathJoin(...NEO4J_DIRECTORY));
+    await Promise.all([
+      this.writeFromIterator(
+        neo4jOutput.nodes,
+        NEO4J_DIRECTORY,
+        "nodes_",
+        CSV_SUFFIX,
+        false
+      ),
+      this.writeFromIterator(
+        neo4jOutput.edges,
+        NEO4J_DIRECTORY,
+        "edges_",
+        CSV_SUFFIX,
+        false
+      ),
+    ]);
+  }
+
+  async writeFromIterator(
+    iterator: Iterator<string>,
+    directory: $ReadOnlyArray<string>,
+    prefix: string,
+    suffix: string,
+    shouldZip: boolean
+  ): Promise<void> {
+    const promises = [];
+    const storage = shouldZip
+      ? this._writableZipStorage
+      : this._writableStorage;
+    let n = 1;
+    for (const str of iterator) {
+      const path = pathJoin(...directory, prefix + n + suffix);
+      promises.push(storage.set(path, encode(str)));
+      n++;
+    }
+    await Promise.all(promises);
   }
 }
