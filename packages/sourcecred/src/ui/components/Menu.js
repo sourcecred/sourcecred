@@ -8,8 +8,16 @@ import AccountIcon from "@material-ui/icons/AccountBalanceWallet";
 import HistoryIcon from "@material-ui/icons/History";
 import TransferIcon from "@material-ui/icons/SwapCalls";
 import {type CurrencyDetails} from "../../api/currencyConfig";
+import {makeStyles} from "@material-ui/core/styles";
 
 type menuProps = {|onMenuClick: Function|};
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    background: theme.palette.background.paper,
+    height: "100%",
+  },
+}));
 
 const createMenu = (
   hasBackend: boolean,
@@ -17,9 +25,10 @@ const createMenu = (
   isDev: boolean
 ): ((menuProps) => ReactNode) => {
   const Menu = ({onMenuClick}: menuProps) => {
+    const classes = useStyles();
     const open = useSelector((state) => state.admin.ui.sidebarOpen);
     return (
-      <>
+      <div className={classes.root}>
         {isDev && (
           <>
             <MenuItemLink
@@ -77,7 +86,7 @@ const createMenu = (
             />
           </>
         )}
-      </>
+      </div>
     );
   };
 
