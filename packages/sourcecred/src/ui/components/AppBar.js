@@ -11,10 +11,10 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import {makeStyles} from "@material-ui/core/styles";
-import MenuIcon from "@material-ui/icons/Menu";
+import makeStyles from '@mui/styles/makeStyles';
+import MenuIcon from "@mui/icons-material/Menu";
 import {toggleSidebar, useTranslate} from "ra-core";
 import {HideOnScroll} from "ra-ui-materialui";
 
@@ -104,7 +104,7 @@ const AppBar = (props: Props): React.Node => {
   } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
-  const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
+  const isXSmall = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const translate = useTranslate();
 
   return (
@@ -128,7 +128,7 @@ const AppBar = (props: Props): React.Node => {
               color="default"
               onClick={() => dispatch(toggleSidebar())}
               className={classNames(classes.menuButton)}
-            >
+              size="large">
               <MenuIcon
                 classes={{
                   root: open

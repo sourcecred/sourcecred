@@ -2,9 +2,10 @@
 
 import React, {type Node as ReactNode} from "react";
 import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import ClearIcon from "@material-ui/icons/Clear";
-import {KeyboardDatePicker} from "@material-ui/pickers";
+import DatePicker from '@mui/lab/DatePicker';
 import {makeStyles} from "@material-ui/core/styles";
 
 const MAX_FILTER_DATE = new Date();
@@ -48,10 +49,12 @@ export const LedgerDateFilter = (props: LedgerDateFilterProps): ReactNode => {
   } = props;
   return (
     <Grid container className={classes.pickersGrid} spacing={2}>
+    
+      {/* https://mui.com/guides/pickers-migration/
       <div className={classes.pickerContainer}>
-        <KeyboardDatePicker
-          format="MM/dd/yyyy"
-          label="Start Date"
+        <DatePicker
+          inputFormat="MM/dd/yyyy"
+          renderInput={props => <TextField label="Start Date" />}
           value={startDateFilter}
           onChange={handleChangeStartDate}
           KeyboardButtonProps={{
@@ -93,7 +96,7 @@ export const LedgerDateFilter = (props: LedgerDateFilterProps): ReactNode => {
             <ClearIcon color="primary" fontSize="small" />
           </IconButton>
         )}
-      </div>
+      </div> */}
     </Grid>
   );
 };

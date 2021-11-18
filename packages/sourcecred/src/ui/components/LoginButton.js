@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import {Button, CircularProgress} from "@material-ui/core";
+import {Button, CircularProgress} from "@mui/material";
 import {useWeb3} from "../utils/Web3Context";
 import {
   parseAddress,

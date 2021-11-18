@@ -6,7 +6,7 @@ import {
   type TransferGrain as TransferGrainType,
 } from "../../../core/ledger/ledger";
 import IdentityDetails from "./IdentityDetails";
-import Chip from "@material-ui/core/Chip";
+import Chip from "@mui/material/Chip";
 import * as G from "../../../core/ledger/grain";
 
 const TransferGrain = ({

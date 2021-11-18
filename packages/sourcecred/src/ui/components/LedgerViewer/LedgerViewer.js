@@ -8,22 +8,22 @@ import React, {
   useEffect,
 } from "react";
 import deepFreeze from "deep-freeze";
-import Table from "@material-ui/core/Table";
-import Typography from "@material-ui/core/Typography";
-import TablePagination from "@material-ui/core/TablePagination";
-import TableBody from "@material-ui/core/TableBody";
-import Dialog from "@material-ui/core/Dialog";
-import Toolbar from "@material-ui/core/Toolbar";
-import DialogContent from "@material-ui/core/DialogContent";
-import TableSortLabel from "@material-ui/core/TableSortLabel";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
+import Table from "@mui/material/Table";
+import Typography from "@mui/material/Typography";
+import TablePagination from "@mui/material/TablePagination";
+import TableBody from "@mui/material/TableBody";
+import Dialog from "@mui/material/Dialog";
+import Toolbar from "@mui/material/Toolbar";
+import DialogContent from "@mui/material/DialogContent";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 import {type LedgerEvent} from "../../../core/ledger/ledger";
 import {useLedger} from "../../utils/LedgerContext";
-import {makeStyles} from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 import type {Allocation} from "../../../core/ledger/grainAllocation";
 import type {CurrencyDetails} from "../../../api/currencyConfig";
 import {
@@ -201,8 +201,8 @@ export const LedgerViewer = ({
         labelRowsPerPage="Rows"
         rowsPerPage={ts.rowsPerPage}
         page={ts.pageIndex}
-        onChangePage={(event, newPage) => ts.setPageIndex(newPage)}
-        onChangeRowsPerPage={(event) => ts.setRowsPerPage(event.target.value)}
+        onPageChange={(event, newPage) => ts.setPageIndex(newPage)}
+        onRowsPerPageChange={(event) => ts.setRowsPerPage(event.target.value)}
       />
     </Paper>
   );

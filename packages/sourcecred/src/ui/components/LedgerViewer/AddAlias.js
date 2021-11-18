@@ -6,7 +6,7 @@ import {
   type AddAlias as AddAliasType,
 } from "../../../core/ledger/ledger";
 import IdentityDetails from "./IdentityDetails";
-import Chip from "@material-ui/core/Chip";
+import Chip from "@mui/material/Chip";
 
 const AddAlias = ({
   ledger,
