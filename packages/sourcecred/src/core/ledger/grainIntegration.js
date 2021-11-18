@@ -84,7 +84,7 @@ export function executeGrainIntegration(
   const currency = ledger.externalCurrency();
   const {
     enabled: accountingEnabled,
-    trackDistributions: processDistributions,
+    trackGrainIntegration: processDistributions,
   } = ledger.accounting();
   const {payoutDistributions, payoutAddressToId} = buildDistributionIndexes(
     ledger,

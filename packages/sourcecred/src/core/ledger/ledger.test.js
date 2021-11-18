@@ -46,11 +46,11 @@ const allocationId3: uuid.Uuid = uuid.random();
 function getAccountingStatus(
   enabled: boolean,
   chainId = "1",
-  trackDistributions = false
+  trackGrainIntegration = false
 ): AccountingStatus {
   return {
     enabled,
-    trackDistributions,
+    trackGrainIntegration,
     currency: buildCurrency(chainId, ETH_CURRENCY_ADDRESS),
   };
 }
@@ -1795,7 +1795,7 @@ describe("core/ledger/ledger", () => {
           ).removeExternalCurrency();
           expect(l.accounting()).toEqual({
             enabled: true,
-            trackDistributions: false,
+            trackGrainIntegration: false,
           });
         });
         it("cannot be unset if accounting is disabled", () => {

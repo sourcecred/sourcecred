@@ -7,7 +7,7 @@ import {type GrainConfig} from "../grainConfig";
 import {type Currency as IntegrationCurrency} from "../../core/ledger/currency";
 import type {Distribution} from "../../core/ledger/distribution";
 import {applyDistributions} from "../../core/ledger/applyDistributions";
-import {type TimestampMs} from "../../util/timestamp";
+import type {TimestampMs} from "../../util/timestamp";
 import {
   executeGrainIntegration,
   type GrainIntegrationOutput,
@@ -89,21 +89,22 @@ export function executeGrainIntegrationsFromGrainInput(
   return {ledger: ledgerResult, results};
 }
 
-function configureLedger(ledger: Ledger, input: GrainInput): Ledger {
-  const {grainConfig} = input;
+export function configureLedger(ledger: Ledger, input: GrainInput): Ledger {
+  const {grainConfig, currencyDetails} = input;
+  ledger = configureIntegrationCurrency(
+    ledger,
+    currencyDetails.integrationCurrency
+  );
   ledger = configureLedgerAccounting(ledger, grainConfig.accountingEnabled);
-  ledger = configureDistributionProcessing(
+  ledger = configureIntegrationTracking(
     ledger,
     grainConfig.processDistributions
   );
-  ledger = configureIntegrationCurrency(
-    ledger,
-    input.currencyDetails.integrationCurrency
-  );
+
   return ledger;
 }
 
-function configureLedgerAccounting(
+export function configureLedgerAccounting(
   ledger: Ledger,
   accountingEnabled: boolean
 ): Ledger {
@@ -111,29 +112,26 @@ function configureLedgerAccounting(
   return ledger;
 }
 
-function configureDistributionProcessing(
+export function configureIntegrationTracking(
   ledger: Ledger,
   processDistributions: ?boolean
 ): Ledger {
   processDistributions
-    ? ledger.enableIntegrationTracking
-    : ledger.disableIntegrationTracking;
+    ? ledger.enableIntegrationTracking()
+    : ledger.disableIntegrationTracking();
   return ledger;
 }
 
-function configureIntegrationCurrency(
+export function configureIntegrationCurrency(
   ledger: Ledger,
   integrationCurrency: ?IntegrationCurrency
 ): Ledger {
-  if (!ledger.accounting().enabled) {
-    integrationCurrency
-      ? ledger.setExternalCurrency(
-          integrationCurrency.chainId,
-          integrationCurrency.tokenAddress
-            ? integrationCurrency.tokenAddress
-            : undefined
-        )
-      : ledger.removeExternalCurrency();
-  }
+  integrationCurrency
+    ? ledger.setExternalCurrency(
+        integrationCurrency.chainId,
+        // this may seem unnnecessary, but it observes flow's type-safety
+        integrationCurrency.tokenAddress || undefined
+      )
+    : ledger.removeExternalCurrency();
   return ledger;
 }
