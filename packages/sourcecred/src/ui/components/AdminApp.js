@@ -3,8 +3,11 @@
 import React, {type Node as ReactNode, useEffect, useState} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
-import {createMuiTheme} from "@material-ui/core/styles";
-import {makeStyles} from "@material-ui/core/styles";
+import {
+  ThemeProvider,
+  createMuiTheme,
+  makeStyles,
+} from "@material-ui/core/styles";
 import fakeDataProvider from "ra-data-fakerest";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {ProfilePage} from "./Profile/ProfilePage";
@@ -169,7 +172,11 @@ const AdminApp = (): ReactNode => {
         </div>
       );
     case "SUCCESS":
-      return <AdminInner loadResult={loadResult} />;
+      return (
+        <ThemeProvider theme={theme}>
+          <AdminInner loadResult={loadResult} />
+        </ThemeProvider>
+      );
     default:
       throw new Error((loadResult.type: empty));
   }
