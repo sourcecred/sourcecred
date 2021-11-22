@@ -23,7 +23,7 @@ import {
 import deepFreeze from "deep-freeze";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import bigInt from "big-integer";
-import {TableFooter, TablePagination} from "@material-ui/core";
+import {TableFooter, TablePagination, TextField} from "@material-ui/core";
 
 type OverviewProps = {|+currency: CurrencyDetails|};
 
@@ -107,8 +107,36 @@ export const AccountOverview = ({
     tsAccounts.setRowsPerPage(Number(event.target.value));
   };
 
+  const filterAccounts = (event: SyntheticInputEvent<HTMLInputElement>) => {
+    // fuzzy match letters "in order, but not necessarily sequentially"
+    const filterString = event.target.value
+      .trim()
+      .toLowerCase()
+      .split("")
+      .join("+.*");
+    const regex = new RegExp(filterString);
+
+    tsAccounts.createOrUpdateFilterFn("filterIdentities", (participant) =>
+      regex.test(participant.identity.name.toLowerCase())
+    );
+  };
+
   return (
     <>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          padding: "12px",
+        }}
+      >
+        <TextField
+          label="Filter Accounts"
+          variant="outlined"
+          onChange={filterAccounts}
+        />
+      </div>
       <TableContainer component={Paper} className={classes.container}>
         <Table stickyHeader>
           <TableHead>
