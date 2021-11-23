@@ -1845,6 +1845,10 @@ describe("core/ledger/ledger", () => {
             .disableAccounting();
           expect(ledger.account(id1).balance).toBe(G.ZERO);
           expect(ledger.account(id1).active).toBe(false);
+
+          // ensure no timestamps are out of order
+          const serializedResult = ledger.eventLog();
+          expect(() => Ledger.fromEventLog(serializedResult)).not.toThrow();
         });
         it("accounts with relevant payout addresses can be active", () => {
           const ledger = ledgerWithActiveIdentities();

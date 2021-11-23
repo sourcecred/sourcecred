@@ -830,6 +830,7 @@ export class Ledger {
       this._createAndProcessEvent({
         type: "DISABLE_ACCOUNTING",
       });
+      this._deactivateAccountsWithoutPayoutAddress();
     }
     // no-op if already disabled
     return this;
@@ -841,7 +842,7 @@ export class Ledger {
 
     // Warning! Mutations below
     this._balanceAccountingEnabled = false;
-    this._deactivateAccountsWithoutPayoutAddress();
+    this._eraseLedgerBalances();
   }
 
   /**
@@ -941,6 +942,11 @@ export class Ledger {
         type: "SET_EXTERNAL_CURRENCY",
         currency,
       });
+      // Deactivate accounts if they don't have an address stored for
+      // the newly configured currency.
+      if (!this._balanceAccountingEnabled) {
+        this._deactivateAccountsWithoutPayoutAddress();
+      }
     }
 
     // no-op if already disabled
@@ -952,9 +958,7 @@ export class Ledger {
 
     // Warning: Account Mutations Below
     if (!this._balanceAccountingEnabled) {
-      // Deactivate accounts if they don't have an address stored for
-      // the newly configured currency.
-      this._deactivateAccountsWithoutPayoutAddress();
+      this._eraseLedgerBalances();
     }
   }
 
@@ -1168,22 +1172,23 @@ export class Ledger {
   /**
    * Helper method for deactivating accounts that don't have a payout address
    * set for the configured `currencyKey`
-   *
-   * Also resets all grain balances to zero
    */
   _deactivateAccountsWithoutPayoutAddress(): void {
     const currencyKey = getCurrencyKey(this.externalCurrency());
+    const accountsIterator = this._accounts.values();
+    for (const account of accountsIterator) {
+      const payoutAddress = account.payoutAddresses.get(currencyKey);
+      if (!payoutAddress) this.deactivate(account.identity.id);
+    }
+  }
+
+  _eraseLedgerBalances(): void {
     const accountsIterator = this._accounts.values();
     for (const account of accountsIterator) {
       // zero out all balances, so there is no confusion about them.
       // By zeroing them out, they cannot be compared to external balances
       // in any meaningful way.
       account.balance = G.ZERO;
-      // Deactivate accounts that don't have a payout address assigned.
-      // Recursive operations are occuring here. Be careful with
-      // these next `Action`s and watch for side effects
-      const payoutAddress = account.payoutAddresses.get(currencyKey);
-      if (!payoutAddress) this.deactivate(account.identity.id);
     }
   }
 }
