@@ -23,6 +23,7 @@ import {
 import deepFreeze from "deep-freeze";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import bigInt from "big-integer";
+import {TableFooter, TablePagination, TextField} from "@material-ui/core";
 
 type OverviewProps = {|+currency: CurrencyDetails|};
 
@@ -33,6 +34,8 @@ const useStyles = makeStyles(() => {
     },
   };
 });
+
+const PAGINATION_OPTIONS = deepFreeze([50, 100, 200]);
 
 export const AccountOverview = ({
   currency: {
@@ -87,6 +90,7 @@ export const AccountOverview = ({
   const tsAccounts = useTableState(
     {data: accounts},
     {
+      initialRowsPerPage: PAGINATION_OPTIONS[0],
       initialSort: {
         sortName: BALANCE_SORT.name,
         sortOrder: SortOrders.DESC,
@@ -95,8 +99,44 @@ export const AccountOverview = ({
     }
   );
 
+  const handleChangePage = (event, newIndex) => {
+    tsAccounts.setPageIndex(newIndex);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    tsAccounts.setRowsPerPage(Number(event.target.value));
+  };
+
+  const filterAccounts = (event: SyntheticInputEvent<HTMLInputElement>) => {
+    // fuzzy match letters "in order, but not necessarily sequentially"
+    const filterString = event.target.value
+      .trim()
+      .toLowerCase()
+      .split("")
+      .join("+.*");
+    const regex = new RegExp(filterString);
+
+    tsAccounts.createOrUpdateFilterFn("filterIdentities", (participant) =>
+      regex.test(participant.identity.name.toLowerCase())
+    );
+  };
+
   return (
     <>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          padding: "12px",
+        }}
+      >
+        <TextField
+          label="Filter Accounts"
+          variant="outlined"
+          onChange={filterAccounts}
+        />
+      </div>
       <TableContainer component={Paper} className={classes.container}>
         <Table stickyHeader>
           <TableHead>
@@ -126,6 +166,25 @@ export const AccountOverview = ({
               AccountRow(a, currencySuffix, decimalsToDisplay)
             )}
           </TableBody>
+
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={PAGINATION_OPTIONS}
+                className={classes.paginator}
+                colSpan={4}
+                count={tsAccounts.length}
+                rowsPerPage={tsAccounts.rowsPerPage}
+                page={tsAccounts.pageIndex}
+                SelectProps={{
+                  inputProps: {"aria-label": "rows per page"},
+                  native: true,
+                }}
+                onChangePage={handleChangePage}
+                onChangeRowsPerPage={handleChangeRowsPerPage}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
       <p align="right">{lastPayoutMessage}</p>
