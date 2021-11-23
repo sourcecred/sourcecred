@@ -68,7 +68,6 @@ export function executeGrainIntegrationsFromGrainInput(
   const integrationCurrency = grainInput.currencyDetails.integrationCurrency;
   const grainIntegration = grainInput.grainConfig.integration;
   const results = [];
-  ledger = configureLedger(ledger, grainInput);
   // track the latest ledger in the for-loop for the purposes of returning it
   // at the top level, observing that any function may deep-copy
   // the ledger (thus creating a new reference we'll need to track) and also
