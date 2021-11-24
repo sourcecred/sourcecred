@@ -71,8 +71,13 @@ declare class BaseContract {
     getAddress(): Promise<string>
   }
 
+  declare class Wallet extends Signer {
+    static fromMnemonic(mnemonic: string, path: ?string): Wallet;
+    connect(provider: Provider): Wallet;
+    
+  }
   declare class Contract extends BaseContract {
-    [key: string]: ContractFunction | any;
+    [key: string]: any | (...any) => any
   }
 
   declare class ContractFactory {
@@ -106,7 +111,9 @@ declare class BaseContract {
       Web3Provider: typeof Provider,
       JsonRpcProvider: typeof Provider,
     },
-      ContractFactory: typeof ContractFactory,
-      Contract: typeof Contract,
+    ContractFactory: typeof ContractFactory,
+    Contract: any,
+    getDefaultProvider(network: ?string, options: ?Object): Provider,
+    Wallet: typeof Wallet
   };
 }

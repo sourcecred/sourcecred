@@ -1,15 +1,7 @@
 // @flow
 
 const ethers = require("ethers");
-const promptRequire =
-  /* eslint-disable camelcase */
-  // $FlowIgnore[cannot-resolve-name]
-  typeof __non_webpack_require__ !== "undefined"
-    ? /* eslint-disable no-undef */
-      // $FlowIgnore[cannot-resolve-name]
-      __non_webpack_require__
-    : require;
-const prompt = promptRequire("prompt-sync")({ sigint: true });
+const prompt = require("prompt-sync")({ sigint: true });
 const { MerkleTree } = require("merkletreejs");
 const { soliditySha3 } = require("web3-utils");
 const keccak256 = require("keccak256");
@@ -39,8 +31,6 @@ const merkleIntegration /*: any*/ = async (
   config /*: Config */
 ) => {
   const { currency, integration: integrationConfig } = config;
-  //const provider = new ethers.providers.JsonRpcProvider();
-  //const signer = provider.getSigner();
   const signer = getWalletAndProvider();
   let address = integrationConfig
     ? integrationConfig.contractAddress
@@ -65,7 +55,9 @@ const merkleIntegration /*: any*/ = async (
     await merkleContract.seedDistribution(
       nextId,
       tree.getHexRoot(),
-      Math.ceil(defaultDelay + Date.now() / 1000)
+      // Add 5 minutes (300 seconds) to allow for a delay mining the
+      // transaction
+      Math.ceil(defaultDelay + Date.now() / 1000) + 300
     );
   } catch (e) {
     throw new Error(`merkle integration error: ${e}`);
@@ -106,7 +98,7 @@ async function deployMerkleContract(
 
 function getDelayTime() {
   const response = prompt(
-    "how long should the pause period be before funds can be claimed, in days? This can be modified later. (default: 0 days): ",
+    "How long should the pause period be before funds can be claimed, in days? This can be modified later. (default: 0 days): ",
     "0"
   );
   const possibleInt = Number.parseInt(response);
@@ -135,13 +127,14 @@ async function checkPermissions(contract, signer) {
   const signerIsSeeder = await contract.hasRole(SeederRole, signerAddress);
   if (signerIsAdmin && !signerIsSeeder) {
     console.warn(
-      "Your active account does not have permission to seed on chain grain distributions.Either grant the current account permissions or utilize an account that has the permissions"
+      "Your active account does not have permission to seed on chain grain distributions. Either grant the current account permissions or utilize an account that has the permissions"
     );
     await assignSeederToAccount(contract, signerAddress);
   } else if (!signerIsAdmin && !signerIsSeeder) {
     console.error(
       `Account ${signerAddress} cannot distribute grain. exiting...`
     );
+    process.exit(1);
   }
 }
 
