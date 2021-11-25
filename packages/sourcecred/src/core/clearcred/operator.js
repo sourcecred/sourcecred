@@ -13,29 +13,6 @@ export const OPERATORS: $ReadOnlyArray<Operator> = Array.from(
 export type Operator = $Keys<typeof OPERATORS_FUNCTION_MAP>;
 export const OPERATOR_KEY_PREFIX = "key:";
 
-export function operatorFromKey(
-  rawKey: string,
-  config: Config
-): Operator {
-  if (!rawKey.startsWith(OPERATOR_KEY_PREFIX))
-    throw new Error(
-      `Invalid expression operator [${rawKey}]. This is probably a bug in the plugin. Valid operators are ${OPERATORS.toString()} and operator keys should be prefixed with 'key:'`
-    );
-  const key = rawKey.slice(OPERATOR_KEY_PREFIX.length);
-  const operator = config.operators.find(
-    (operatorConfig) => key === operatorConfig.key
-  )?.operator;
-  if (!operator)
-    throw new Error(
-      `Operator for key [${key}] has not been set in the operators config.`
-    );
-  if (!OPERATORS.includes(operator))
-    throw new Error(
-      `Operator [${operator}] for Key [${key}] is an invalid configuration. Please choose from ${OPERATORS.toString()}.`
-    );
-  return operator;
-}
-
 export function applyOperator(
   operator: Operator,
   scoredWeightOperands: $ReadOnlyArray<ScoredWeightOperand>,

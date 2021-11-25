@@ -2,13 +2,17 @@
 import type {Contribution, Expression, WeightOperand} from "./contribution";
 import {
   type Operator,
-  operatorFromKey,
   applyOperator,
   OPERATOR_KEY_PREFIX,
   OPERATORS,
 } from "./operator";
-import type {Config} from "./config";
-import {getWeight, hasExplicitWeight, getShares} from "./config";
+import {
+  getWeight,
+  hasExplicitWeight,
+  getShares,
+  getOperator,
+  type Config,
+} from "./config";
 import type {TimestampMs} from "../../util/timestamp";
 import findLast from "lodash.findlast";
 
@@ -69,7 +73,7 @@ const scoreExpression: (Expression, Config) => ScoredExpression = (
     const operatorKey = expression.operator;
     const expressionWithParsedOperator = {
       ...expression,
-      operator: operatorFromKey(operatorKey, config),
+      operator: getOperator(operatorKey, config),
     };
     return {
       ...scoreExpression(expressionWithParsedOperator, config),
