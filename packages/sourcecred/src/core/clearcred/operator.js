@@ -36,11 +36,6 @@ export function operatorFromKey(
   return operator;
 }
 
-export function validateOperator(operator: string): Operator | void {
-  return OPERATORS.find(o => o === operator);
-
-}
-
 export function applyOperator(
   operator: Operator,
   scoredWeightOperands: $ReadOnlyArray<ScoredWeightOperand>,
@@ -102,9 +97,9 @@ function max(
   );
   const weightOperandResult = Math.max(
     ...scoredWeightOperands.map(
-      ({key, value}) =>
-        hasExplicitWeight({key, value}, config)
-          ? getWeight({key, value}, config)
+      ({key, subkey}) =>
+        hasExplicitWeight({key, subkey}, config)
+          ? getWeight({key, subkey}, config)
           : -Infinity,
       -Infinity
     )

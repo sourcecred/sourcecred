@@ -12,11 +12,11 @@ import {getWeight, hasExplicitWeight, getShares} from "./config";
 import type {TimestampMs} from "../../util/timestamp";
 import findLast from "lodash.findlast";
 
-// TODO docstrings
+// TODO finish docstrings
 
 export type ScoredWeightOperand = {|
   +key: string,
-  +value: string,
+  +subkey: string,
   +score: number,
 |};
 
@@ -124,7 +124,6 @@ export function scoreContributions(
     const orderedConfigs = configs
       .slice()
       .sort((a, b) => a.startTimeMs - b.startTimeMs);
-    const scoredContributions = [];
     for (const contribution of contributions) {
       const applicableConfig: Config | void = findLast(
         orderedConfigs,

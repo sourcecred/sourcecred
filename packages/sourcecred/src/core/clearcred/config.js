@@ -4,22 +4,65 @@ import type {TimestampMs} from "../../util/timestamp";
 import type {Contribution, Expression, WeightOperand} from "./contribution";
 import type {Operator} from "./operator";
 
+/**
+Semantically, allows weight configuration of different qualities/characteristics of
+contributions.
+
+Technically, a once-nested key-value store that maps key-subkey pairs to weights and
+specifies a default weight at the key-level that can be used when a queried subkey
+is not found.
+
+A Discord-based example might look like: 
+{
+  "key": "channel",
+  "default": 1,
+  "subkeys": [
+    { "subkey": "12345678", memo: "props", weight: 3 }
+  ]
+}
+ */
 export type WeightConfig = $ReadOnlyArray<{|
+  /** Arbitrary string enumerated by a plugin developer. */
   +key: string,
-  +default?: number,
-  +values: $ReadOnlyArray<{|
-    +value: string,
+  /** The weight used when a queried subkey is not found. */
+  +default: number,
+  /** A key-value store mapping platform-based identifiers to weights. */
+  +subkeys: $ReadOnlyArray<{|
+    /** Potentially arbitrary, but most likely a platform-specific identifier */
+    +subkey: string,
+    /** An optional human-readable description of the subkey */
+    +memo?: string,
+    /** An algebraic constant/coefficient that defines the semantic value of
+    the subkey */
     +weight: number,
   |}>,
 |}>;
+/**
+A key-value store of configured operators, allowing the configuration of
+operators within an expression. For example, one might be able to
+configure that emoji reactions be added or multiplied.
+ */
 export type OperatorConfig = $ReadOnlyArray<{|
+  /** Arbitrary string enumerated by a plugin developer. */
   +key: string,
   +operator: Operator,
 |}>;
+/**
+A key-value store of how many shares different types of participation are worth.
+Shares are arbitrary numbers that compete in a zero-sum divvying of a
+ScoredContribution's score.
+ */
 export type SharesConfig = $ReadOnlyArray<{|
+  /** Arbitrary string enumerated by a plugin developer. */
   +key: string,
   +amount: number,
 |}>;
+
+/**
+Wraps the other config types, and defines a time scope via a start timestamp.
+The end timestamp will be inferred as the next highest timestamp in an array
+of Configs.
+ */
 export type Config = {|
   +memo: string,
   +startTimeMs: TimestampMs,
@@ -28,47 +71,56 @@ export type Config = {|
   +shares: SharesConfig,
 |};
 
+/**
+Returns true if the subkey exists in the subkeys array of the key.
+Returns false if the subkey does not exist in the subkeys array.
+Throws if the key is not found.
+ */
 export function hasExplicitWeight(
-  weightOperand: WeightOperand,
+  {key, subkey}: WeightOperand,
   config: Config
 ): boolean {
   const keyConfig = config.weights.find(
-    (x) => x.key === weightOperand.key
+    (x) => x.key === key
   );
   if (keyConfig === undefined)
     throw new Error(
-      `Key [${weightOperand.key}] has not been set in the weights config.`
+      `Key [${key}] has not been set in the weights config.`
     );
-  const valueConfig = keyConfig.values.find(
-    (x) => x.value === weightOperand.value
+  const subkeyConfig = keyConfig.subkeys.find(
+    (x) => x.subkey === subkey
   );
-  return valueConfig !== undefined;
+  return subkeyConfig !== undefined;
 }
 
+/**
+If the subkey is found, returns the subkey's weight.
+If the subkey is not found, returns the key's default.
+Throws if the key is not found.
+ */
 export function getWeight(
-  weightOperand: WeightOperand,
+  {key, subkey}: WeightOperand,
   config: Config
 ): number {
   const keyConfig = config.weights.find(
-    (x) => x.key === weightOperand.key
+    (x) => x.key === key
   );
   if (keyConfig === undefined)
     throw new Error(
-      `Key [${weightOperand.key}] has not been set in the weights config.`
+      `Key [${key}] has not been set in the weights config.`
     );
-  const valueConfig = keyConfig.values.find(
-    (x) => x.value === weightOperand.value
+  const subkeyConfig = keyConfig.subkeys.find(
+    (x) => x.subkey === subkey
   );
-  if (!valueConfig) {
-    if (keyConfig.default === undefined)
-      throw new Error(
-        `Key [${weightOperand.key}] does not have the value [${weightOperand.value}] and does not have a default set.`
-      );
+  if (!subkeyConfig) {
     return keyConfig.default;
   }
-  return valueConfig.weight;
+  return subkeyConfig.weight;
 }
 
+/**
+Returns the amount set for the key, or 0 if the key is not found.
+ */
 export function getShares(
   key: string,
   config: Config
