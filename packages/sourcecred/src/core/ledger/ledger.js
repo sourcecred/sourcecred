@@ -846,14 +846,14 @@ export class Ledger {
   }
 
   /**
-   * Enabling Distribution Tracking has the following effects:
+   * Enabling Integration Tracking has the following effects:
    *  - Subsequent grain distributions are left as unexecuted until
    *    `markDistributionAsExecuted` is called on it.
    *  - The `trackedDistributions` getter will return an array of distributionIds
    *    created since tracking was enabled. Their statuses can be queried using
    *    `isGrainIntegrationExecuted`.
    *
-   * Distribution Tracking can be enabled and disabled at any time.
+   * Integration Tracking can be enabled and disabled at any time.
    * Some integrations might error if tracking is not enabled, to ensure
    * their status is tracked in the ledger. This allows for the decoupling of
    * (1) calculating a grain distribution and then (2) actually distributing
@@ -870,7 +870,7 @@ export class Ledger {
     return this;
   }
 
-  _enableGrainIntegrationTracking(_: EnableGrainIntegration) {
+  _enableIntegrationTracking(_: EnableGrainIntegration) {
     this._shouldTrackGrainIntegration = true;
   }
 
@@ -890,7 +890,7 @@ export class Ledger {
     return this;
   }
 
-  _disableGrainIntegrationTracking(_: DisableGrainIntegration) {
+  _disableIntegrationTracking(_: DisableGrainIntegration) {
     this._shouldTrackGrainIntegration = false;
     this._grainIntegrationStatuses.clear();
   }
@@ -942,28 +942,26 @@ export class Ledger {
         type: "SET_EXTERNAL_CURRENCY",
         currency,
       });
-      // Deactivate accounts if they don't have an address stored for
-      // the newly configured currency.
       if (!this._balanceAccountingEnabled) {
         this._deactivateAccountsWithoutPayoutAddress();
       }
     }
 
-    // no-op if already disabled
+    // no-op if the currency entered is already set
     return this;
   }
 
   _setExternalCurrency({currency}: SetExternalCurrency) {
+    // Warning: Account Mutations Below
     this._externalCurrency = currency;
 
-    // Warning: Account Mutations Below
     if (!this._balanceAccountingEnabled) {
       this._eraseLedgerBalances();
     }
   }
 
   /**
-   * Cannot be invoked if accounting is still disabled
+   * Will throw if accounting is disabled
    */
   removeExternalCurrency(): Ledger {
     if (this._externalCurrency) {
@@ -995,22 +993,25 @@ export class Ledger {
   }
 
   /**
-   *
-   *
-   * this._grainIntegrationStatuses Is cleared each time
-   * `disableIntegrationTracking` is called.
-   */
-  trackedDistributions(): Iterator<DistributionId> {
-    return this._grainIntegrationStatuses.keys();
-  }
-
-  /**
    * Expectably returns the currency from the
    * externalCurrency attribute. It throws if a currency is not set.
    */
   externalCurrency(): Currency {
     if (!this._externalCurrency) throw new Error("No External Currency Set");
     return this._externalCurrency;
+  }
+
+  /**
+   * When integration tracking is disabled, an empty iterator is returned.
+   *
+   * When integration tracking is enabled, the array of tracked
+   * `DistributionIds` is returned
+   *
+   * The iterator is cleared each time
+   * `disableIntegrationTracking` is called.
+   */
+  trackedDistributions(): Iterator<DistributionId> {
+    return this._grainIntegrationStatuses.keys();
   }
 
   /**
@@ -1103,10 +1104,10 @@ export class Ledger {
         this._setPayoutAddress(action);
         break;
       case "ENABLE_GRAIN_INTEGRATION":
-        this._enableGrainIntegrationTracking(action);
+        this._enableIntegrationTracking(action);
         break;
       case "DISABLE_GRAIN_INTEGRATION":
-        this._disableGrainIntegrationTracking(action);
+        this._disableIntegrationTracking(action);
         break;
       case "MARK_DISTRIBUTION_EXECUTED":
         this._markDistributionExecuted(action);
@@ -1182,12 +1183,16 @@ export class Ledger {
     }
   }
 
+  /**
+   * Helper method for disabling accounting.
+   *
+   * Zero out all balances, so there is no confusion about them.
+   * By zeroing them out, they cannot be compared to external balances
+   * in any meaningful way.
+   */
   _eraseLedgerBalances(): void {
     const accountsIterator = this._accounts.values();
     for (const account of accountsIterator) {
-      // zero out all balances, so there is no confusion about them.
-      // By zeroing them out, they cannot be compared to external balances
-      // in any meaningful way.
       account.balance = G.ZERO;
     }
   }

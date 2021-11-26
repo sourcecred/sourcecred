@@ -46,14 +46,16 @@ export type GrainIntegrationResults = {|
   May mutate the ledger that is passed in.
  */
 export async function grain(input: GrainInput): Promise<GrainOutput> {
+  const configuredLedger = configureLedger(input);
+
   const distributions = applyDistributions(
     input.grainConfig,
     input.credGraph,
-    input.ledger,
+    configuredLedger,
     +Date.now(),
     input.allowMultipleDistributionsPerInterval || false
   );
-  return {distributions, ledger: input.ledger};
+  return {distributions, ledger: configuredLedger};
 }
 
 /**
@@ -88,10 +90,10 @@ export function executeGrainIntegrationsFromGrainInput(
   return {ledger: ledgerResult, results};
 }
 
-export function configureLedger(ledger: Ledger, input: GrainInput): Ledger {
-  const {grainConfig, currencyDetails} = input;
-  ledger = configureIntegrationCurrency(
-    ledger,
+export function configureLedger(input: GrainInput): Ledger {
+  const {grainConfig, currencyDetails, ledger: ledgerInput} = input;
+  let ledger = configureIntegrationCurrency(
+    ledgerInput,
     currencyDetails.integrationCurrency
   );
   ledger = configureLedgerAccounting(ledger, grainConfig.accountingEnabled);
