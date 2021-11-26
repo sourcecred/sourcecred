@@ -7,6 +7,7 @@ import type {
 import * as C from "../util/combo";
 
 import {csvIntegration} from "@sourcecred/grain-integration-csv";
+import {merkleIntegration} from "@sourcecred/grain-integration-merkle";
 
 export type RawGrainIntegration = {|
   type: string,
@@ -17,6 +18,7 @@ type AllowedDeclarations = {[pluginKey: string]: GrainIntegrationFunction};
 
 const allowedDeclarations: AllowedDeclarations = {
   "csv": csvIntegration,
+  "merkle": merkleIntegration,
 };
 
 export function bundledGrainIntegrations(
@@ -32,7 +34,7 @@ export function bundledGrainIntegrations(
 
 export const rawParser: C.Parser<RawGrainIntegration> = C.object(
   {
-    type: C.exactly(["csv"]),
+    type: C.exactly(["csv", "merkle"]),
   },
   {config: C.raw}
 );
