@@ -35,7 +35,7 @@ import * as grain from "../../core/ledger/grain";
 import * as identity from "../../core/identity";
 
 import * as manager from "../ledgerManager";
-import * as storage from "../ledgerStorage";
+import * as storage from "../../core/storage/github";
 import * as credrank from "../main/credrank";
 import * as graphApi from "../main/graph";
 import * as grainApi from "../main/grain";
