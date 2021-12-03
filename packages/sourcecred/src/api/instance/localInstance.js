@@ -5,6 +5,10 @@ import {ReadInstance} from "./readInstance";
 import type {CredrankOutput} from "../main/credrank";
 import type {GraphInput, GraphOutput} from "../main/graph";
 import type {GrainInput} from "../main/grain";
+import type {
+  ContributionsInput,
+  ContributionsOutput,
+} from "../main/contributions";
 import type {AnalysisOutput} from "../main/analysis";
 import type {Neo4jOutput} from "../main/analysisUtils/neo4j";
 import {join as pathJoin} from "path";
@@ -19,7 +23,10 @@ import {mkdirx} from "../../util/disk";
 import {toISO} from "../../util/timestamp";
 import {parser as configParser, type InstanceConfig} from "../instanceConfig";
 import {Ledger} from "../../core/ledger/ledger";
-import {type DependenciesConfig} from "../dependenciesConfig";
+import type {
+  ContributionsByTarget,
+} from "../../core/credequate/contribution";
+import type {DependenciesConfig} from "../dependenciesConfig";
 import {CredGraph} from "../../core/credrank/credGraph";
 import {CredGrainView} from "../../core/credGrainView";
 import {DiskStorage} from "../../core/storage/disk";
@@ -46,6 +53,7 @@ const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
 const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph"];
 const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph"];
+const CONTRIBUTIONS_PATH: $ReadOnlyArray<string> = ["contributions"];
 const LEDGER_PATH: $ReadOnlyArray<string> = ["data", "ledger.json"];
 const ACCOUNTS_PATH: $ReadOnlyArray<string> = ["output", "accounts.json"];
 const NEO4J_DIRECTORY: $ReadOnlyArray<string> = ["output", "neo4j"];
@@ -100,6 +108,28 @@ export class LocalInstance extends ReadInstance implements Instance {
     };
   }
 
+  async readContributionsInput(): Promise<ContributionsInput> {
+    const instanceConfig = await this.readInstanceConfig();
+    const ledger = await this.readLedger();
+    const plugins = [];
+    for (const {
+      id: pluginId,
+      plugin,
+      configsByTarget,
+    } of instanceConfig.credEquatePlugins) {
+      plugins.push({
+        pluginId,
+        plugin,
+        directoryContext: this.pluginDirectoryContext(pluginId),
+        configsByTarget,
+      });
+    }
+    return {
+      plugins,
+      ledger,
+    };
+  }
+
   async writeGraphOutput(
     graphOutput: GraphOutput,
     shouldZip: boolean = true
@@ -108,6 +138,23 @@ export class LocalInstance extends ReadInstance implements Instance {
       this.writeLedger(graphOutput.ledger),
       ...graphOutput.pluginGraphs.map(({pluginId, weightedGraph}) =>
         this.writePluginGraph(pluginId, weightedGraph, shouldZip)
+      ),
+    ]);
+  }
+
+  async writeContributionsOutput(
+    contributionsOutput: ContributionsOutput,
+    shouldZip?: boolean
+  ): Promise<void> {
+    await Promise.all([
+      this.writeLedger(contributionsOutput.ledger),
+      ...contributionsOutput.pluginContributions.map(
+        ({pluginId, contributionsByTarget}) =>
+          this.writePluginContributions(
+            pluginId,
+            contributionsByTarget,
+            shouldZip
+          )
       ),
     ]);
   }
@@ -272,6 +319,30 @@ export class LocalInstance extends ReadInstance implements Instance {
       ? this._writableZipStorage
       : this._writableStorage;
     return storage.set(outputPath, serializedGraph);
+  }
+
+  async writePluginContributions(
+    pluginId: string,
+    contributionsByTarget: ContributionsByTarget,
+    shouldZip: boolean = true
+  ): Promise<void> {
+    const contributionsByTargetResolved = {};
+    // This removes a lot of the benefit of having an iterable, and should be
+    // made more efficient in the future.
+    for (const k of Object.keys(contributionsByTarget)) {
+      contributionsByTargetResolved[k] = Array.from(contributionsByTarget[k]);
+    }
+    const serializedContributions = encode(
+      stringify(contributionsByTargetResolved)
+    );
+    const outputDir = this.createPluginContributionsDirectory(pluginId);
+    const outputPath =
+      pathJoin(outputDir, ...CONTRIBUTIONS_PATH) +
+      (shouldZip ? ZIP_SUFFIX : JSON_SUFFIX);
+    const storage = shouldZip
+      ? this._writableZipStorage
+      : this._writableStorage;
+    return storage.set(outputPath, serializedContributions);
   }
 
   async writeDependenciesConfig(

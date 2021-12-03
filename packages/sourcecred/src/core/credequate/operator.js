@@ -1,6 +1,7 @@
 // @flow
 import type {ScoredExpression, ScoredWeightOperand} from "./scoredContribution";
 import {hasExplicitWeight, type Config} from "./config";
+import * as C from "../../util/combo";
 
 type OperatorFunction = (
   $ReadOnlyArray<ScoredWeightOperand>,
@@ -8,6 +9,13 @@ type OperatorFunction = (
   Config
 ) => number;
 export type Operator = $Keys<typeof OPERATORS_FUNCTION_MAP>;
+export const operatorParser: C.Parser<Operator> = C.string.fmap((s) => {
+  if (!OPERATORS.includes(s) && !s.startsWith(OPERATOR_KEY_PREFIX))
+    throw new Error(
+      `Invalid operator [${s}], must be one of [${OPERATORS.toString()}] or begin with key prefix "${OPERATOR_KEY_PREFIX}"`
+    );
+  return s;
+});
 
 const OPERATORS_FUNCTION_MAP: {[string]: OperatorFunction} = {
   "MULTIPLY": multiply,

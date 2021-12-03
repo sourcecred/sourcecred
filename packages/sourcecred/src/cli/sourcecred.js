@@ -5,6 +5,7 @@ import {VERSION_SHORT} from "../core/version";
 
 import load from "./load";
 import graph from "./graph";
+import contributions from "./contributions";
 import site from "./site";
 import go from "./go";
 import serve from "./serve";
@@ -30,6 +31,8 @@ const sourcecred: Command = async (args, std) => {
       return load(args.slice(1), std);
     case "graph":
       return graph(args.slice(1), std);
+    case "contributions":
+      return contributions(args.slice(1), std);
     case "site":
       return site(args.slice(1), std);
     case "go":

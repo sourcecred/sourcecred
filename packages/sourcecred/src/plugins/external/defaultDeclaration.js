@@ -71,5 +71,10 @@ export function declaration(id: PluginId): PluginDeclaration {
     nodeTypes: [participantNodeType(id), contributionNodeType(id)],
     edgeTypes: [participatedInEdgeType(id)],
     userTypes: [participantNodeType(id)],
+    keys: {
+      operatorKeys: [],
+      shareKeys: [],
+      weightKeys: [],
+    },
   });
 }

@@ -17,13 +17,15 @@ import {
 } from "../../core/weightedGraph";
 import {merge as mergeWeights} from "../../core/weights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
-import {createGraph} from "./createGraph";
+import {createGraph, createContributions} from "./createGraph";
 import * as Model from "./models";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
+import type {Contribution} from "../../core/credEquate/contribution";
+import type {ConfigsByTarget} from "../../core/credEquate/config";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -106,6 +108,22 @@ export class DiscordPlugin implements Plugin {
         })
       )
     ).flat(1);
+  }
+
+  async contributions(
+    ctx: PluginDirectoryContext,
+    configsByTarget: ConfigsByTarget
+  ): Promise<{[string]: Iterable<Contribution>}> {
+    const result = {};
+    (
+      await Promise.all(
+        Array.from(Object.keys(configsByTarget)).map(async (guildId) => {
+          const repo = await repository(ctx, guildId);
+          return {target: guildId, iterable: createContributions(repo, configsByTarget[guildId])};
+        })
+      )
+    ).forEach(({target, iterable}) => (result[target] = iterable));
+    return result;
   }
 }
 

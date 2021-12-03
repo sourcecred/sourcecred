@@ -8,6 +8,7 @@ import {
   fromJSON as weightedGraphFromJSON,
 } from "../../core/weightedGraph";
 import {type GraphInput} from "../main/graph";
+import {type ContributionsInput} from "../main/contributions";
 import {type GrainInput} from "../main/grain";
 import {type AnalysisInput} from "../main/analysis";
 import {
@@ -95,6 +96,10 @@ const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph"];
 const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_DIRECTORY: $ReadOnlyArray<string> = ["output", "graphs"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph"];
+const CONTRIBUTIONS_DIRECTORY: $ReadOnlyArray<string> = [
+  "output",
+  "contributions",
+];
 
 const JSON_SUFFIX: string = ".json";
 const ZIP_SUFFIX: string = "";
@@ -113,6 +118,10 @@ export class ReadInstance implements ReadOnlyInstance {
   }
 
   async readGraphInput(): Promise<GraphInput> {
+    throw "not yet implemented";
+  }
+
+  async readContributionsInput(): Promise<ContributionsInput> {
     throw "not yet implemented";
   }
 
@@ -317,5 +326,9 @@ export class ReadInstance implements ReadOnlyInstance {
 
   createPluginGraphDirectory(pluginId: string): string {
     return this.createPluginDirectory(GRAPHS_DIRECTORY, pluginId);
+  }
+
+  createPluginContributionsDirectory(pluginId: string): string {
+    return this.createPluginDirectory(CONTRIBUTIONS_DIRECTORY, pluginId);
   }
 }

@@ -16,6 +16,8 @@ import {
 } from "../../core/weightedGraph";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
+import type {Contribution} from "../../core/credEquate/contribution";
+import type {ConfigsByTarget} from "../../core/credEquate/config";
 
 async function loadEthJson(ctx: PluginDirectoryContext) {
   const storage = new DiskStorage(ctx.configDirectory());
@@ -51,5 +53,14 @@ export class EthereumPlugin implements Plugin {
   ): Promise<$ReadOnlyArray<IdentityProposal>> {
     const ethAddressJson = await loadEthJson(ctx);
     return createIdentities(ethAddressJson);
+  }
+
+  async contributions(
+    _unused_ctx: PluginDirectoryContext,
+    _unused_configsByTarget: ConfigsByTarget
+  ): Promise<{[string]: Iterable<Contribution>}> {
+    throw new Error(
+      "This plugin has not been updated to support the Contributions API."
+    );
   }
 }

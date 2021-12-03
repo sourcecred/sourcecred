@@ -23,7 +23,19 @@ export type PluginDeclaration = {|
   // Which node types represent user identities.
   // This is used to exclude user node types from the weight configuration UI
   +userTypes: $ReadOnlyArray<NodeType>,
+  +keys: KeysDeclaration,
 |};
+
+type KeysDeclaration = {|
+  operatorKeys: $ReadOnlyArray<string>,
+  weightKeys: $ReadOnlyArray<string>,
+  shareKeys: $ReadOnlyArray<string>,
+|};
+const keysParser = C.object({
+  operatorKeys: C.array(C.string),
+  weightKeys: C.array(C.string),
+  shareKeys: C.array(C.string),
+});
 
 export const declarationParser: C.Parser<PluginDeclaration> = C.object({
   name: C.string,
@@ -32,6 +44,7 @@ export const declarationParser: C.Parser<PluginDeclaration> = C.object({
   nodeTypes: C.array(nodeTypeParser),
   edgeTypes: C.array(edgeTypeParser),
   userTypes: C.array(nodeTypeParser),
+  keys: keysParser,
 });
 
 export function combineTypes(

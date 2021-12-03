@@ -17,8 +17,13 @@ export async function loadJson<T>(
   path: string,
   parser: P.Parser<T>
 ): Promise<T> {
-  const contents = await storage.get(path);
-  return parser.parseOrThrow(JSON.parse(decode(contents)));
+  try {
+    const contents = await storage.get(path);
+    return parser.parseOrThrow(JSON.parse(decode(contents)));
+  } catch (e) {
+    console.log(`Error occurred while loading ${path}`);
+    throw e;
+  }
 }
 
 /**
@@ -54,6 +59,7 @@ export async function loadJsonWithDefault<T>(
       console.log(`File not found at path: ${path}. Defaulting.`);
       return def();
     } else {
+      console.log(`Error occurred while loading ${path}`);
       throw e;
     }
   }
@@ -86,6 +92,7 @@ export async function loadFileWithDefault(
     if (notFound(e)) {
       return def();
     } else {
+      console.log(`Error occurred while loading ${path}`);
       throw e;
     }
   }

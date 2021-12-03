@@ -19,6 +19,8 @@ import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
+import type {Contribution} from "../../core/credEquate/contribution";
+import type {ConfigsByTarget} from "../../core/credEquate/config";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -77,5 +79,14 @@ export class DiscoursePlugin implements Plugin {
     const config = await loadConfig(ctx);
     const repo = await repository(ctx, config.serverUrl);
     return createIdentities(config.serverUrl, repo);
+  }
+
+  async contributions(
+    _unused_ctx: PluginDirectoryContext,
+    _unused_configsByTarget: ConfigsByTarget
+  ): Promise<{[string]: Iterable<Contribution>}> {
+    throw new Error(
+      "This plugin has not been updated to support the Contributions API."
+    );
   }
 }

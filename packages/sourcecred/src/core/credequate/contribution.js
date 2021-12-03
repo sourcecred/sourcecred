@@ -65,3 +65,5 @@ export type Contribution = {|
     +shares: $ReadOnlyArray<WeightOperand>,
   |}>,
 |};
+
+export type ContributionsByTarget = {[string]: Iterable<Contribution>};

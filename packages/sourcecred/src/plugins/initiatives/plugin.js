@@ -13,6 +13,8 @@ import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
 import * as Weights from "../../core/weights";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 import {DiskStorage} from "../../core/storage/disk";
+import type {Contribution} from "../../core/credEquate/contribution";
+import type {ConfigsByTarget} from "../../core/credEquate/config";
 
 async function loadConfig(
   ctx: PluginDirectoryContext
@@ -70,5 +72,14 @@ export class InitiativesPlugin implements Plugin {
   async identities(): Promise<$ReadOnlyArray<IdentityProposal>> {
     // Initiatives plugin is a consumer of identities, but not a producer.
     return [];
+  }
+
+  async contributions(
+    _unused_ctx: PluginDirectoryContext,
+    _unused_configsByTarget: ConfigsByTarget
+  ): Promise<{[string]: Iterable<Contribution>}> {
+    throw new Error(
+      "This plugin has not been updated to support the Contributions API."
+    );
   }
 }
