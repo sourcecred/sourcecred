@@ -49,10 +49,10 @@ export type ScoredContribution = {|
   |}>,
 |};
 
-const scoreExpression: (Expression, Config) => ScoredExpression = (
-  expression,
-  config
-) => {
+const scoreExpression = (
+  expression: Expression,
+  config: Config
+): ScoredExpression => {
   const scoredExpressionOperands = expression.expressionOperands.map(
     (operand) => scoreExpression(operand, config)
   );
@@ -120,21 +120,19 @@ export const scoreContribution = (
   };
 };
 
-export function scoreContributions(
+export function* scoreContributions(
   contributions: Iterable<Contribution>,
   configs: $ReadOnlyArray<Config>
 ): Iterable<ScoredContribution> {
-  return (function* () {
-    const orderedConfigs = configs
-      .slice()
-      .sort((a, b) => a.startTimeMs - b.startTimeMs);
-    for (const contribution of contributions) {
-      const applicableConfig: Config | void = findLast(
-        orderedConfigs,
-        (config) => config.timestampMs < contribution.timestampMs
-      );
-      if (!applicableConfig) continue;
-      yield scoreContribution(contribution, applicableConfig);
-    }
-  })();
+  const orderedConfigs = configs
+    .slice()
+    .sort((a, b) => a.startTimeMs - b.startTimeMs);
+  for (const contribution of contributions) {
+    const applicableConfig: Config | void = findLast(
+      orderedConfigs,
+      (config) => config.timestampMs < contribution.timestampMs
+    );
+    if (!applicableConfig) continue;
+    yield scoreContribution(contribution, applicableConfig);
+  }
 }

@@ -2,7 +2,14 @@
 import type {ScoredExpression, ScoredWeightOperand} from "./scoredContribution";
 import {getWeight, hasExplicitWeight, type Config} from "./config";
 
-const OPERATORS_FUNCTION_MAP = {
+type OperatorFunction = (
+  $ReadOnlyArray<ScoredWeightOperand>,
+  $ReadOnlyArray<ScoredExpression>,
+  Config
+) => number;
+export type Operator = $Keys<typeof OPERATORS_FUNCTION_MAP>;
+
+const OPERATORS_FUNCTION_MAP: {[string]: OperatorFunction} = {
   "MULTIPLY": multiply,
   "ADD": add,
   "MAX": max,
@@ -10,7 +17,6 @@ const OPERATORS_FUNCTION_MAP = {
 export const OPERATORS: $ReadOnlyArray<Operator> = Array.from(
   Object.keys(OPERATORS_FUNCTION_MAP)
 );
-export type Operator = $Keys<typeof OPERATORS_FUNCTION_MAP>;
 export const OPERATOR_KEY_PREFIX = "key:";
 
 export function applyOperator(
@@ -23,11 +29,7 @@ export function applyOperator(
   return f(scoredWeightOperands, scoredExpressionOperands, config);
 }
 
-function multiply(
-  scoredWeightOperands: $ReadOnlyArray<ScoredWeightOperand>,
-  scoredExpressionOperands: $ReadOnlyArray<ScoredExpression>,
-  _: Config
-): number {
+function multiply(scoredWeightOperands, scoredExpressionOperands, _) {
   const expressionOperandResult = scoredExpressionOperands.reduce(
     (accumulator, operand) => {
       return accumulator * operand.score;
@@ -43,11 +45,7 @@ function multiply(
   return weightOperandResult * expressionOperandResult;
 }
 
-function add(
-  scoredWeightOperands: $ReadOnlyArray<ScoredWeightOperand>,
-  scoredExpressionOperands: $ReadOnlyArray<ScoredExpression>,
-  _: Config
-): number {
+function add(scoredWeightOperands, scoredExpressionOperands, _) {
   const expressionOperandResult = scoredExpressionOperands.reduce(
     (accumulator, operand) => {
       return accumulator + operand.score;
@@ -63,11 +61,7 @@ function add(
   return weightOperandResult + expressionOperandResult;
 }
 
-function max(
-  scoredWeightOperands: $ReadOnlyArray<ScoredWeightOperand>,
-  scoredExpressionOperands: $ReadOnlyArray<ScoredExpression>,
-  config: Config
-): number {
+function max(scoredWeightOperands, scoredExpressionOperands, config) {
   const expressionOperandResult = Math.max(
     ...scoredExpressionOperands.map((o) => o.score),
     -Infinity
