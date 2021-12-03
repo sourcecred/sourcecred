@@ -13,6 +13,8 @@ const OPERATORS_FUNCTION_MAP: {[string]: OperatorFunction} = {
   "MULTIPLY": multiply,
   "ADD": add,
   "MAX": max,
+  "FIRST": first,
+  "AVERAGE": average,
 };
 export const OPERATORS: $ReadOnlyArray<Operator> = Array.from(
   Object.keys(OPERATORS_FUNCTION_MAP)
@@ -81,4 +83,39 @@ function max(scoredWeightOperands, scoredExpressionOperands, config) {
     return scoredWeightOperands[0].score;
   }
   return 0;
+}
+
+function first(scoredWeightOperands, scoredExpressionOperands, config) {
+  if (scoredExpressionOperands.length) return scoredExpressionOperands[0].score;
+  for (const weightOperand of scoredWeightOperands) {
+    const {key, subkey} = weightOperand;
+    if (hasExplicitWeight({key, subkey}, config)) {
+      return weightOperand.score;
+    }
+  }
+  if (scoredWeightOperands.length) {
+    return scoredWeightOperands[0].score;
+  }
+  return 0;
+}
+
+function average(scoredWeightOperands, scoredExpressionOperands, _) {
+  if (!scoredWeightOperands.length && !scoredExpressionOperands.length)
+    return 0;
+  const expressionOperandResult = scoredExpressionOperands.reduce(
+    (accumulator, operand) => {
+      return accumulator + operand.score;
+    },
+    1
+  );
+  const weightOperandResult = scoredWeightOperands.reduce(
+    (accumulator, operand) => {
+      return accumulator + operand.score;
+    },
+    1
+  );
+  return (
+    (weightOperandResult + expressionOperandResult) /
+    (scoredWeightOperands.length + scoredExpressionOperands.length)
+  );
 }
