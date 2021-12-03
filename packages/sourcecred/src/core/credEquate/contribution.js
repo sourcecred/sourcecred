@@ -2,6 +2,7 @@
 
 import type {TimestampMs} from "../../util/timestamp";
 import type {Operator} from "./operator";
+import type {NodeAddressT} from "../graph";
 
 /**
 A leaf node in the Expression tree structure. It represents a trait that can
@@ -60,7 +61,7 @@ export type Contribution = {|
   +timestampMs: TimestampMs,
   +expression: Expression,
   +participants: $ReadOnlyArray<{|
-    +id: string,
+    +id: NodeAddressT,
     +shares: $ReadOnlyArray<{|
       +key: string,
     |}>,

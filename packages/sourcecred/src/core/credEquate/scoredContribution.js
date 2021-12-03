@@ -15,6 +15,7 @@ import {
 } from "./config";
 import type {TimestampMs} from "../../util/timestamp";
 import findLast from "lodash.findlast";
+import type {NodeAddressT} from "../graph";
 
 // TODO finish docstrings
 
@@ -40,7 +41,7 @@ export type ScoredContribution = {|
   +timestampMs: TimestampMs,
   +expression: ScoredExpression,
   +participants: $ReadOnlyArray<{|
-    +id: string,
+    +id: NodeAddressT,
     +shares: $ReadOnlyArray<{|
       +amount: number,
       +key: string,
