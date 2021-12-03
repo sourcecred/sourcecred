@@ -45,6 +45,7 @@ configure that emoji reactions be added or multiplied.
 export type OperatorConfig = $ReadOnlyArray<{|
   /** Arbitrary string enumerated by a plugin developer. NOT prefixed. */
   +key: string,
+  /** The operator that should be applied wherever the key is found. */
   +operator: Operator,
 |}>;
 /**
@@ -55,6 +56,10 @@ ScoredContribution's score.
 export type SharesConfig = $ReadOnlyArray<{|
   /** Arbitrary string enumerated by a plugin developer. */
   +key: string,
+  /**
+  Number of shares allocated for the participation type indicated by the
+  key. Will be scored relative to the other share amounts within a contribution.
+  */
   +amount: number,
 |}>;
 
