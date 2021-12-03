@@ -10,7 +10,7 @@ be weighted atomically.
  */
 export type WeightOperand = {|
   +key: string,
-  +subkey: string,
+  +subkey?: string,
 |};
 
 /**
@@ -62,8 +62,6 @@ export type Contribution = {|
   +expression: Expression,
   +participants: $ReadOnlyArray<{|
     +id: NodeAddressT,
-    +shares: $ReadOnlyArray<{|
-      +key: string,
-    |}>,
+    +shares: $ReadOnlyArray<WeightOperand>,
   |}>,
 |};

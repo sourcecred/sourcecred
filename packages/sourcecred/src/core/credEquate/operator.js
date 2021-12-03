@@ -71,8 +71,8 @@ function max(scoredWeightOperands, scoredExpressionOperands, config) {
   const weightOperandResult = Math.max(
     ...scoredWeightOperands.map(
       ({key, subkey}) =>
-        hasExplicitWeight({key, subkey}, config)
-          ? getWeight({key, subkey}, config)
+        hasExplicitWeight({key, subkey}, config.weights)
+          ? getWeight({key, subkey}, config.weights)
           : -Infinity,
       -Infinity
     )
@@ -89,7 +89,7 @@ function first(scoredWeightOperands, scoredExpressionOperands, config) {
   if (scoredExpressionOperands.length) return scoredExpressionOperands[0].score;
   for (const weightOperand of scoredWeightOperands) {
     const {key, subkey} = weightOperand;
-    if (hasExplicitWeight({key, subkey}, config)) {
+    if (hasExplicitWeight({key, subkey}, config.weights)) {
       return weightOperand.score;
     }
   }

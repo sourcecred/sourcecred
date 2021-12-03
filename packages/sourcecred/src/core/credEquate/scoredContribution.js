@@ -9,7 +9,6 @@ import {
 import {
   getWeight,
   hasExplicitWeight,
-  getShares,
   getOperator,
   type Config,
 } from "./config";
@@ -21,7 +20,7 @@ import type {NodeAddressT} from "../graph";
 
 export type ScoredWeightOperand = {|
   +key: string,
-  +subkey: string,
+  +subkey?: string,
   +score: number,
 |};
 
@@ -45,6 +44,7 @@ export type ScoredContribution = {|
     +shares: $ReadOnlyArray<{|
       +amount: number,
       +key: string,
+      +subkey?: string,
     |}>,
     +score: number,
   |}>,
@@ -59,7 +59,7 @@ const scoreExpression = (
   );
   const scoredWeightOperands = expression.weightOperands.map((operand) => ({
     ...operand,
-    score: getWeight(operand, config),
+    score: getWeight(operand, config.weights),
   }));
   let score;
   const operatorOptional = OPERATORS.find((o) => o === expression.operator);
@@ -102,7 +102,7 @@ export const scoreContribution = (
   const participants = contribution.participants.map((participant) => {
     const participantShares = participant.shares.map((share) => ({
       ...share,
-      amount: getShares(share.key, config),
+      amount: getWeight(share, config.shares),
     }));
     const sumParticipantShares = participantShares
       .map((s) => s.amount)

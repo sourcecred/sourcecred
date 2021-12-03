@@ -73,7 +73,7 @@ export type Config = {|
   +startTimeMs: TimestampMs,
   +weights: WeightConfig,
   +operators: OperatorConfig,
-  +shares: SharesConfig,
+  +shares: WeightConfig,
 |};
 
 /**
@@ -83,9 +83,9 @@ Throws if the key has not been set in the configuration.
  */
 export function hasExplicitWeight(
   {key, subkey}: WeightOperand,
-  config: Config
+  config: WeightConfig
 ): boolean {
-  const keyConfig = config.weights.find((x) => x.key === key);
+  const keyConfig = config.find((x) => x.key === key);
   if (keyConfig === undefined)
     throw new Error(`Key [${key}] has not been set in the weights config.`);
   const subkeyConfig = keyConfig.subkeys.find((x) => x.subkey === subkey);
@@ -99,15 +99,14 @@ Throws if the key has not been set in the configuration.
  */
 export function getWeight(
   {key, subkey}: WeightOperand,
-  config: Config
+  config: WeightConfig
 ): number {
-  const keyConfig = config.weights.find((x) => x.key === key);
+  const keyConfig = config.find((x) => x.key === key);
   if (keyConfig === undefined)
     throw new Error(`Key [${key}] has not been set in the weights config.`);
+  if (!subkey) return keyConfig.default;
   const subkeyConfig = keyConfig.subkeys.find((x) => x.subkey === subkey);
-  if (!subkeyConfig) {
-    return keyConfig.default;
-  }
+  if (!subkeyConfig) return keyConfig.default;
   return subkeyConfig.weight;
 }
 
@@ -136,18 +135,4 @@ export function getOperator(rawKey: string, config: Config): Operator {
       `Operator [${operator}] for Key [${key}] is an invalid configuration. Please choose from ${OPERATORS.toString()}.`
     );
   return operator;
-}
-
-/**
-Returns the amount set for the key.
-Throws if the key has not been set in the configuration.
- */
-export function getShares(key: string, config: Config): number {
-  const amount = config.shares.find((shareConfig) => shareConfig.key === key)
-    ?.amount;
-  if (!amount)
-    throw new Error(
-      `Shares for key [${key}] has not been set in the operators config.`
-    );
-  return amount;
 }
