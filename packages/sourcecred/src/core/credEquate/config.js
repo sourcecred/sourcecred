@@ -69,12 +69,21 @@ The end timestamp will be inferred as the next highest timestamp in an array
 of Configs.
  */
 export type Config = {|
+  /** A note or a human-readable description to make it easier to recognize this config. **/
   +memo: string,
   +startTimeMs: TimestampMs,
   +weights: WeightConfig,
   +operators: OperatorConfig,
   +shares: WeightConfig,
 |};
+
+function getWeightConfigs(config, key, subkey) {
+  const keyConfig = config.find((x) => x.key === key);
+  if (keyConfig === undefined)
+    throw new Error(`Key [${key}] has not been set in the weights config.`);
+  const subkeyConfig = keyConfig.subkeys.find((x) => x.subkey === subkey);
+  return {keyConfig, subkeyConfig};
+}
 
 /**
 Returns true if the subkey exists in the subkeys array of the key.
@@ -85,10 +94,7 @@ export function hasExplicitWeight(
   {key, subkey}: WeightOperand,
   config: WeightConfig
 ): boolean {
-  const keyConfig = config.find((x) => x.key === key);
-  if (keyConfig === undefined)
-    throw new Error(`Key [${key}] has not been set in the weights config.`);
-  const subkeyConfig = keyConfig.subkeys.find((x) => x.subkey === subkey);
+  const {subkeyConfig} = getWeightConfigs(config, key, subkey);
   return subkeyConfig !== undefined;
 }
 
@@ -101,12 +107,8 @@ export function getWeight(
   {key, subkey}: WeightOperand,
   config: WeightConfig
 ): number {
-  const keyConfig = config.find((x) => x.key === key);
-  if (keyConfig === undefined)
-    throw new Error(`Key [${key}] has not been set in the weights config.`);
-  if (!subkey) return keyConfig.default;
-  const subkeyConfig = keyConfig.subkeys.find((x) => x.subkey === subkey);
-  if (!subkeyConfig) return keyConfig.default;
+  const {keyConfig, subkeyConfig} = getWeightConfigs(config, key, subkey);
+  if (!subkey || !subkeyConfig) return keyConfig.default;
   return subkeyConfig.weight;
 }
 
