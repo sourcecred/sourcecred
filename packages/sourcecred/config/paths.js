@@ -7,7 +7,9 @@ const fs = require("fs");
 const appDirectory /*: string */ = fs.realpathSync(process.cwd());
 const resolveApp = (relativePath /*: string */) /*: string */ =>
   path.resolve(appDirectory, relativePath);
-
+const pluginFixtureDirectory /*: string */ = (resolveApp(
+  "src/plugins/package/fixtures"
+) /*: string */);
 // config after eject: we're in ./config/
 module.exports = {
   root: appDirectory,
@@ -21,12 +23,15 @@ module.exports = {
   appSrc: (resolveApp("src") /*: string */),
   yarnLockFile: (resolveApp("yarn.lock") /*: string */),
   appNodeModules: (resolveApp("node_modules") /*: string */),
-
   apiBaseJs: (resolveApp("src/api/lib/base.js") /*: string */),
   apiNodeJs: (resolveApp("src/api/lib/node.js") /*: string */),
   apiBuild: (resolveApp("dist") /*: string */),
-
   backendBuild: (resolveApp("bin") /*: string */),
+
+  pluginFixtureDirectory,
+  testOutputPaths: {
+    packagePlugin: (resolveApp("dist/fixtures/packagePlugin") /*: string */),
+  },
   // This object should have one key-value pair per entry point. For
   // each key, the value should be the path to the entry point for the
   // source file, and the key will be the filename of the bundled entry
@@ -45,6 +50,14 @@ module.exports = {
     ) /*: string */),
     createExampleRepo: (resolveApp(
       "src/plugins/git/bin/createExampleRepo.js"
+    ) /*: string */),
+  },
+  testEntryPoints: {
+    packagePlugin: (resolveApp(
+      `${pluginFixtureDirectory}/index.js`
+    ) /*: string*/),
+    packagePluginJSON: (resolveApp(
+      `${pluginFixtureDirectory}/_package.json`
     ) /*: string */),
   },
 };

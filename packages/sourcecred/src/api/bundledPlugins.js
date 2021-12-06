@@ -11,11 +11,19 @@ import {
   ExternalPlugin,
   ExternalPluginIdOwner,
 } from "../plugins/external/plugin";
+import {PackagePlugin} from "../plugins/package/plugin";
 import {DiskStorage} from "../core/storage/disk";
 
 /**
  * Returns an object mapping owner-name pairs to CLI plugin
  * declarations; keys are like `sourcecred/github`.
+ *
+ * External plugins use the `external/xxxx` prefix.
+ *
+ * Packaged plugins maybe specified directly as the
+ * node module name or js file. It assumes that the
+ * package is installed in the execution environment.
+ * ex. `@npmorg/my-sourcecred-plugin` or `/path/to/my/plugin.js`
  */
 // TODO(@decentralion): Fix the type signature here.
 export function getPlugin(pluginId: PluginId): ?Plugin {
@@ -32,4 +40,5 @@ export function getPlugin(pluginId: PluginId): ?Plugin {
       pluginId,
       storage: new DiskStorage(process.cwd()),
     });
+  return new PackagePlugin({pluginId});
 }

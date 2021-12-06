@@ -5,6 +5,7 @@
 const tmp = require("tmp");
 
 const execDependencyGraph = require("../src/tools/execDependencyGraph");
+const paths = require("./paths");
 
 main();
 
@@ -78,6 +79,12 @@ function makeTasks(
     prefix: "sourcecred-test-",
   }).name;
   console.log("tmpdir for backend output: " + backendOutput);
+
+  const pluginOutput = tmp.dirSync({
+    unsafeCleanup: true,
+    prefix: "sourcecred-test-",
+  }).name;
+  console.log("tmpdir for plugin output: " + pluginOutput);
 
   const frontendOutput = tmp.dirSync({
     unsafeCleanup: true,
@@ -178,6 +185,39 @@ function makeTasks(
         {BASIC: "sharness", FULL: "sharness-full"}[mode],
       ]),
       deps: ["backend", "check-gnu-coreutils"],
+    },
+    {
+      id: "buildTestPluginPackage",
+      cmd: [
+        "yarn",
+        "run",
+        "--silent",
+        "build:test-plugin",
+        "--output-path",
+        pluginOutput,
+      ],
+      deps: [],
+    },
+    {
+      id: "migrateTestPluginPackageJson",
+      cmd: [
+        "cp",
+        `${paths.pluginFixtureDirectory}/_package.json`,
+        `${pluginOutput}/package.json`,
+      ],
+      deps: ["buildTestPluginPackage"],
+    },
+    {
+      id: "installTestPluginPackage",
+      cmd: [
+        "yarn",
+        "run",
+        "--silent",
+        "install:test-plugin",
+        "--output-path",
+        pluginOutput,
+      ],
+      deps: ["migrateTestPluginPackageJson"],
     },
   ];
   const extraTasks = [

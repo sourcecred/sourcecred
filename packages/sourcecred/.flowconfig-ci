@@ -13,5 +13,6 @@ flow-typed
 include_warnings=true
 server.max_workers=1
 types_first=false
+module.ignore_non_literal_requires=true
 
 [strict]

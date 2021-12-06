@@ -14,6 +14,10 @@ export opaque type PluginId: string = string;
 
 const regex = /^[a-z0-9-]+$/;
 
+export function fromStringRaw(s: string): PluginId {
+  return s;
+}
+
 export function fromString(s: string): PluginId {
   s = s.toLowerCase();
   const pieces = s.split("/");
