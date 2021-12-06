@@ -24,9 +24,11 @@ export class PackagePlugin implements Plugin {
       ? path.resolve(process.cwd(), this.id)
       : this.id;
     try {
-      this.plugin = (new (await import(pluginModule).default)(): Plugin);
+      this.plugin = (new (await import(pluginModule)).default(): Plugin);
     } catch (e) {
-      throw new Error("Could not load dynamically imported plugin");
+      throw new Error(
+        `Could not load dynamically imported plugin: ${e.message}`
+      );
     }
   }
 
