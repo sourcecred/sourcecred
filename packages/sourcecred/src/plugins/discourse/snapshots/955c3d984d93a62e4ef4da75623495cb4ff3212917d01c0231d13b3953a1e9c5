@@ -4,28 +4,38 @@
       "id": 5,
       "username": "beanow.sc-test",
       "name": "Beanow",
-      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png",
+      "flair_name": null,
+      "admin": true,
+      "trust_level": 1
     },
     {
       "id": 2,
       "username": "d11",
       "name": "D",
-      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png",
+      "flair_name": null,
+      "admin": true,
+      "trust_level": 4
     },
     {
       "id": 3,
       "username": "dl-proto",
       "name": "dandelion protocol acct",
-      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
+      "flair_name": null,
+      "trust_level": 1
     }
   ],
   "primary_groups": [],
+  "flair_groups": [],
   "topic_list": {
     "can_create_topic": false,
-    "draft": null,
-    "draft_key": "new_topic",
-    "draft_sequence": null,
     "per_page": 30,
+    "top_tags": [
+      "a-special-topic",
+      "filler-topic"
+    ],
     "topics": [
       {
         "id": 29,
@@ -50,7 +60,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3976,
+        "tags_descriptions": {},
+        "views": 5612,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -63,7 +74,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -90,7 +102,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3964,
+        "tags_descriptions": {},
+        "views": 5600,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -103,7 +116,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -130,7 +144,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3969,
+        "tags_descriptions": {},
+        "views": 5603,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -143,7 +158,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -170,7 +186,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 4029,
+        "tags_descriptions": {},
+        "views": 5748,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -183,7 +200,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -210,7 +228,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3988,
+        "tags_descriptions": {},
+        "views": 5670,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "d11",
@@ -223,7 +242,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 2,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -250,7 +270,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3986,
+        "tags_descriptions": {},
+        "views": 5625,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "d11",
@@ -263,7 +284,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 2,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -290,7 +312,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3974,
+        "tags_descriptions": {},
+        "views": 5612,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "d11",
@@ -303,7 +326,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 2,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -330,7 +354,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3972,
+        "tags_descriptions": {},
+        "views": 5606,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "d11",
@@ -343,7 +368,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 2,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -370,7 +396,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 4033,
+        "tags_descriptions": {},
+        "views": 5728,
         "like_count": 1,
         "has_summary": false,
         "last_poster_username": "d11",
@@ -383,13 +410,15 @@
             "extras": "latest",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 2,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           },
           {
             "extras": null,
             "description": "Frequent Poster",
             "user_id": 3,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -416,7 +445,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3982,
+        "tags_descriptions": {},
+        "views": 5621,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "dl-proto",
@@ -429,13 +459,15 @@
             "extras": "latest",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 3,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           },
           {
             "extras": null,
             "description": "Frequent Poster",
             "user_id": 2,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       }

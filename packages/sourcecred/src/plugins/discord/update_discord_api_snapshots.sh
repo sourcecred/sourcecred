@@ -24,7 +24,7 @@ cd "${CORE_PATH}"
 
 fetch() {
   url="${test_instance_url}$1"
-  filename="$(printf '%s' "${url}" | base64 -w 0 | tr -d '=' | tr '/+' '_-')"
+  filename="$(printf '%s' "${url}" | shasum -a 256 -U | cut -d' ' -f1)"
   path="${snapshots_dir}/${filename}"
   curl -sfL "$url" \
     -H "Accept: application/json" \

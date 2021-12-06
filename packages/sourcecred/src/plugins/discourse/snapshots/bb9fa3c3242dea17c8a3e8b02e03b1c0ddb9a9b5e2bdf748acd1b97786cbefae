@@ -2,9 +2,6 @@
   "category_list": {
     "can_create_category": false,
     "can_create_topic": false,
-    "draft": null,
-    "draft_key": "new_topic",
-    "draft_sequence": null,
     "categories": [
       {
         "id": 6,
@@ -40,6 +37,7 @@
         "topics_month": 0,
         "topics_year": 0,
         "topics_all_time": 1,
+        "subcategory_ids": null,
         "uploaded_logo": null,
         "uploaded_background": null,
         "topics": [

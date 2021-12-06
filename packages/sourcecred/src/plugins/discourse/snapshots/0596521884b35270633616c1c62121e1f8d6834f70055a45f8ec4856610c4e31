@@ -4,29 +4,40 @@
       "id": -1,
       "username": "system",
       "name": "system",
-      "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png"
+      "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png",
+      "flair_name": null,
+      "admin": true,
+      "moderator": true,
+      "trust_level": 4
     },
     {
       "id": 5,
       "username": "beanow.sc-test",
       "name": "Beanow",
-      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png",
+      "flair_name": null,
+      "admin": true,
+      "trust_level": 1
     },
     {
       "id": 3,
       "username": "dl-proto",
       "name": "dandelion protocol acct",
-      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
+      "flair_name": null,
+      "trust_level": 1
     }
   ],
   "primary_groups": [],
+  "flair_groups": [],
   "topic_list": {
     "can_create_topic": false,
     "more_topics_url": "/latest?ascending=false&no_definitions=true&order=activity&page=1",
-    "draft": null,
-    "draft_key": "new_topic",
-    "draft_sequence": null,
     "per_page": 30,
+    "top_tags": [
+      "a-special-topic",
+      "filler-topic"
+    ],
     "topics": [
       {
         "id": 7,
@@ -52,7 +63,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3978,
+        "tags_descriptions": {},
+        "views": 5617,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "system",
@@ -65,7 +77,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": -1,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -95,7 +108,8 @@
           "a-special-topic",
           "filler-topic"
         ],
-        "views": 3977,
+        "tags_descriptions": {},
+        "views": 5614,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -108,7 +122,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -135,7 +150,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 2,
+        "tags_descriptions": {},
+        "views": 1636,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "dl-proto",
@@ -148,7 +164,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 3,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -175,7 +192,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3976,
+        "tags_descriptions": {},
+        "views": 5612,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -188,7 +206,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -215,7 +234,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3967,
+        "tags_descriptions": {},
+        "views": 5598,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -228,7 +248,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -255,7 +276,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3975,
+        "tags_descriptions": {},
+        "views": 5609,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -268,7 +290,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -295,7 +318,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3971,
+        "tags_descriptions": {},
+        "views": 5607,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -308,7 +332,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -335,7 +360,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3972,
+        "tags_descriptions": {},
+        "views": 5607,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -348,7 +374,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -375,7 +402,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3967,
+        "tags_descriptions": {},
+        "views": 5602,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -388,7 +416,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -415,7 +444,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3968,
+        "tags_descriptions": {},
+        "views": 5608,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -428,7 +458,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -455,7 +486,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3966,
+        "tags_descriptions": {},
+        "views": 5602,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -468,7 +500,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -495,7 +528,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3973,
+        "tags_descriptions": {},
+        "views": 5610,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -508,7 +542,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -535,7 +570,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3970,
+        "tags_descriptions": {},
+        "views": 5610,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -548,7 +584,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -575,7 +612,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3969,
+        "tags_descriptions": {},
+        "views": 5607,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -588,7 +626,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -615,7 +654,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3969,
+        "tags_descriptions": {},
+        "views": 5607,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -628,7 +668,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -655,7 +696,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3974,
+        "tags_descriptions": {},
+        "views": 5610,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -668,7 +710,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -695,7 +738,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3969,
+        "tags_descriptions": {},
+        "views": 5604,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -708,7 +752,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -735,7 +780,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3970,
+        "tags_descriptions": {},
+        "views": 5611,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -748,7 +794,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -775,7 +822,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3969,
+        "tags_descriptions": {},
+        "views": 5606,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -788,7 +836,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -815,7 +864,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3975,
+        "tags_descriptions": {},
+        "views": 5614,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -828,7 +878,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -855,7 +906,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3975,
+        "tags_descriptions": {},
+        "views": 5611,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -868,7 +920,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -895,7 +948,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3973,
+        "tags_descriptions": {},
+        "views": 5613,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -908,7 +962,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -935,7 +990,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3969,
+        "tags_descriptions": {},
+        "views": 5610,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -948,7 +1004,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -975,7 +1032,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3975,
+        "tags_descriptions": {},
+        "views": 5618,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -988,7 +1046,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -1015,7 +1074,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3975,
+        "tags_descriptions": {},
+        "views": 5608,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -1028,7 +1088,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -1055,7 +1116,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3974,
+        "tags_descriptions": {},
+        "views": 5616,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -1068,7 +1130,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -1095,7 +1158,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3976,
+        "tags_descriptions": {},
+        "views": 5615,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -1108,7 +1172,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -1135,7 +1200,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 4066,
+        "tags_descriptions": {},
+        "views": 5705,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -1148,7 +1214,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -1175,7 +1242,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3976,
+        "tags_descriptions": {},
+        "views": 5612,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -1188,7 +1256,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       },
@@ -1215,7 +1284,8 @@
         "bookmarked": null,
         "liked": null,
         "tags": [],
-        "views": 3978,
+        "tags_descriptions": {},
+        "views": 5623,
         "like_count": 0,
         "has_summary": false,
         "last_poster_username": "beanow.sc-test",
@@ -1228,7 +1298,8 @@
             "extras": "latest single",
             "description": "Original Poster, Most Recent Poster",
             "user_id": 5,
-            "primary_group_id": null
+            "primary_group_id": null,
+            "flair_group_id": null
           }
         ]
       }

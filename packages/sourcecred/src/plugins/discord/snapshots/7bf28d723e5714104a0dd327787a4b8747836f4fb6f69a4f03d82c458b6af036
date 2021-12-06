@@ -6,8 +6,8 @@
     "owner": false,
     "permissions": 33620992,
     "features": [
-      "NEWS",
-      "COMMUNITY"
+      "COMMUNITY",
+      "NEWS"
     ],
     "permissions_new": "1071627961344"
   }

@@ -20,7 +20,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:45:23.650000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678370372390748199",
@@ -46,9 +47,9 @@
       },
       {
         "id": "420341518948237331",
-        "username": "decentralion",
-        "avatar": "a70b70bc0471e6a1efe5124c39c76020",
-        "discriminator": "1337",
+        "username": "dandelion",
+        "avatar": "03a1489e7895e88e0555a7c19c3ecee7",
+        "discriminator": "3370",
         "public_flags": 0
       }
     ],
@@ -59,6 +60,7 @@
     "timestamp": "2020-02-15T22:41:40.290000+00:00",
     "edited_timestamp": "2020-02-16T00:06:41.114000+00:00",
     "flags": 0,
+    "components": [],
     "reactions": [
       {
         "emoji": {
@@ -85,9 +87,9 @@
     "channel_id": "678348980849213472",
     "author": {
       "id": "420341518948237331",
-      "username": "decentralion",
-      "avatar": "a70b70bc0471e6a1efe5124c39c76020",
-      "discriminator": "1337",
+      "username": "dandelion",
+      "avatar": "03a1489e7895e88e0555a7c19c3ecee7",
+      "discriminator": "3370",
       "public_flags": 0
     },
     "attachments": [],
@@ -99,7 +101,8 @@
     "tts": false,
     "timestamp": "2020-02-15T22:31:31.279000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678365403600257034",
@@ -122,7 +125,8 @@
     "tts": false,
     "timestamp": "2020-02-15T22:21:55.638000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678359229685563412",
@@ -146,6 +150,7 @@
     "tts": false,
     "timestamp": "2020-02-15T21:57:23.662000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   }
 ]

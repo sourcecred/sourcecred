@@ -10,6 +10,15 @@
       "granted_by_id": -1
     },
     {
+      "id": 25,
+      "granted_at": "2021-01-06T23:21:47.435Z",
+      "created_at": "2021-01-06T23:21:47.450Z",
+      "count": 1,
+      "badge_id": 24,
+      "user_id": 3,
+      "granted_by_id": -1
+    },
+    {
       "id": 10,
       "granted_at": "2019-08-02T11:14:58.189Z",
       "created_at": "2019-08-02T11:14:58.189Z",
@@ -20,15 +29,6 @@
       "user_id": 3,
       "granted_by_id": -1,
       "topic_id": 11
-    },
-    {
-      "id": 17,
-      "granted_at": "2019-10-02T20:52:28.209Z",
-      "created_at": "2019-10-02T20:52:28.209Z",
-      "count": 1,
-      "badge_id": 48,
-      "user_id": 3,
-      "granted_by_id": -1
     }
   ],
   "badges": [
@@ -40,7 +40,7 @@
       "allow_title": false,
       "multiple_grant": false,
       "icon": "fa-user",
-      "image": null,
+      "image_url": null,
       "listable": true,
       "enabled": true,
       "badge_grouping_id": 4,
@@ -50,6 +50,23 @@
       "badge_type_id": 3
     },
     {
+      "id": 24,
+      "name": "Anniversary",
+      "description": "Active member for a year, posted at least once",
+      "grant_count": 2,
+      "allow_title": false,
+      "multiple_grant": true,
+      "icon": "far-clock",
+      "image_url": null,
+      "listable": true,
+      "enabled": true,
+      "badge_grouping_id": 2,
+      "system": true,
+      "slug": "anniversary",
+      "manually_grantable": false,
+      "badge_type_id": 2
+    },
+    {
       "id": 11,
       "name": "First Like",
       "description": "Liked a post",
@@ -57,29 +74,12 @@
       "allow_title": false,
       "multiple_grant": false,
       "icon": "fa-certificate",
-      "image": null,
+      "image_url": null,
       "listable": true,
       "enabled": true,
       "badge_grouping_id": 1,
       "system": true,
       "slug": "first-like",
-      "manually_grantable": false,
-      "badge_type_id": 3
-    },
-    {
-      "id": 48,
-      "name": "Wiki Editor",
-      "description": "First wiki edit",
-      "grant_count": 2,
-      "allow_title": false,
-      "multiple_grant": false,
-      "icon": "fa-certificate",
-      "image": null,
-      "listable": true,
-      "enabled": true,
-      "badge_grouping_id": 1,
-      "system": true,
-      "slug": "wiki-editor",
       "manually_grantable": false,
       "badge_type_id": 3
     }
@@ -89,6 +89,11 @@
       "id": 3,
       "name": "Bronze",
       "sort_order": 7
+    },
+    {
+      "id": 2,
+      "name": "Silver",
+      "sort_order": 8
     }
   ],
   "users": [
@@ -97,16 +102,18 @@
       "username": "dl-proto",
       "name": "dandelion protocol acct",
       "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
-      "moderator": false,
-      "admin": false
+      "flair_name": null,
+      "trust_level": 1
     },
     {
       "id": -1,
       "username": "system",
       "name": "system",
       "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png",
+      "flair_name": null,
+      "admin": true,
       "moderator": true,
-      "admin": true
+      "trust_level": 4
     }
   ],
   "topics": [
@@ -136,15 +143,17 @@
     "moderator": false,
     "admin": false,
     "title": null,
-    "badge_count": 3,
+    "badge_count": 4,
     "custom_fields": {},
     "time_read": 261,
     "recent_time_read": 0,
     "primary_group_id": null,
     "primary_group_name": null,
-    "primary_group_flair_url": null,
-    "primary_group_flair_bg_color": null,
-    "primary_group_flair_color": null,
+    "flair_group_id": null,
+    "flair_name": null,
+    "flair_url": null,
+    "flair_bg_color": null,
+    "flair_color": null,
     "featured_topic": null,
     "bio_excerpt": null,
     "bio_cooked": null,
@@ -154,14 +163,31 @@
     "can_edit_name": false,
     "uploaded_avatar_id": null,
     "pending_count": 0,
-    "profile_view_count": 14,
+    "profile_view_count": 64,
     "can_upload_profile_header": false,
     "can_upload_user_card_background": false,
-    "mailing_list_posts_per_day": 0,
+    "user_notification_schedule": {
+      "enabled": false,
+      "day_0_start_time": 480,
+      "day_0_end_time": 1020,
+      "day_1_start_time": 480,
+      "day_1_end_time": 1020,
+      "day_2_start_time": 480,
+      "day_2_end_time": 1020,
+      "day_3_start_time": 480,
+      "day_3_end_time": 1020,
+      "day_4_start_time": 480,
+      "day_4_end_time": 1020,
+      "day_5_start_time": 480,
+      "day_5_end_time": 1020,
+      "day_6_start_time": 480,
+      "day_6_end_time": 1020
+    },
+    "accepted_answers": 0,
     "featured_user_badge_ids": [
       12,
-      10,
-      17
+      25,
+      10
     ],
     "invited_by": {
       "id": 2,

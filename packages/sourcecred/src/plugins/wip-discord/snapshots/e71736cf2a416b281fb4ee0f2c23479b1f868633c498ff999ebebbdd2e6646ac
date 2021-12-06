@@ -1,0 +1,161 @@
+[
+  {
+    "id": "678348980756938813",
+    "type": 4,
+    "name": "Text Channels",
+    "position": 0,
+    "parent_id": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [],
+    "nsfw": false
+  },
+  {
+    "id": "678348980798881844",
+    "type": 4,
+    "name": "Voice Channels",
+    "position": 0,
+    "parent_id": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [],
+    "nsfw": false
+  },
+  {
+    "id": "678348980849213472",
+    "last_message_id": "916000597478629466",
+    "type": 0,
+    "name": "general",
+    "position": 0,
+    "parent_id": "678348980756938813",
+    "topic": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [],
+    "nsfw": false,
+    "rate_limit_per_user": 0,
+    "banner": null
+  },
+  {
+    "id": "678348980878573661",
+    "last_message_id": null,
+    "type": 2,
+    "name": "General",
+    "position": 0,
+    "parent_id": "678348980798881844",
+    "bitrate": 64000,
+    "user_limit": 0,
+    "rtc_region": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [],
+    "nsfw": false
+  },
+  {
+    "id": "678394406507905129",
+    "last_message_id": "696003686320832643",
+    "type": 0,
+    "name": "pagination",
+    "position": 1,
+    "parent_id": "678348980756938813",
+    "topic": "A known length of messages to test pagination.",
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [],
+    "nsfw": false,
+    "rate_limit_per_user": 0,
+    "banner": null
+  },
+  {
+    "id": "678696874869522446",
+    "last_message_id": "761650961419993198",
+    "type": 0,
+    "name": "notmymessage",
+    "position": 2,
+    "parent_id": "678348980756938813",
+    "topic": "Reactions to messages which aren't our own.",
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [],
+    "nsfw": false,
+    "rate_limit_per_user": 0,
+    "banner": null
+  },
+  {
+    "id": "830088231538130964",
+    "last_message_id": null,
+    "type": 0,
+    "name": "rules",
+    "position": 0,
+    "parent_id": null,
+    "topic": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [
+      {
+        "id": "678348980639498428",
+        "type": "role",
+        "allow": 0,
+        "deny": 2048,
+        "allow_new": "0",
+        "deny_new": "2048"
+      }
+    ],
+    "nsfw": false,
+    "rate_limit_per_user": 0,
+    "banner": null
+  },
+  {
+    "id": "830088231538130965",
+    "last_message_id": "909355881186066502",
+    "type": 0,
+    "name": "moderator-only",
+    "position": 0,
+    "parent_id": null,
+    "topic": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [
+      {
+        "id": "678348980639498428",
+        "type": "role",
+        "allow": 0,
+        "deny": 1024,
+        "allow_new": "0",
+        "deny_new": "1024"
+      }
+    ],
+    "nsfw": false,
+    "rate_limit_per_user": 0,
+    "banner": null
+  },
+  {
+    "id": "830089044695187586",
+    "type": 13,
+    "name": "test stage",
+    "position": 0,
+    "parent_id": "678348980798881844",
+    "topic": null,
+    "bitrate": 40000,
+    "user_limit": 10000,
+    "rtc_region": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [
+      {
+        "id": "678349848684003359",
+        "type": "role",
+        "allow": 20971536,
+        "deny": 0,
+        "allow_new": "20971536",
+        "deny_new": "0"
+      }
+    ],
+    "nsfw": false
+  },
+  {
+    "id": "837851969795129344",
+    "last_message_id": "838027593575825420",
+    "type": 0,
+    "name": "test-nsfw",
+    "position": 3,
+    "parent_id": "678348980756938813",
+    "topic": null,
+    "guild_id": "678348980639498428",
+    "permission_overwrites": [],
+    "nsfw": true,
+    "rate_limit_per_user": 0,
+    "banner": null
+  }
+]

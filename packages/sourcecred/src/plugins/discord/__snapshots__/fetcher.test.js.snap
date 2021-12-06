@@ -112,6 +112,7 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
+      "678350026946117694",
       "678349848684003359",
     ],
     "user": Object {
@@ -265,6 +266,18 @@ Array [
       "discriminator": "3070",
       "id": "772886503830323210",
       "username": "sourcecred-test-thena",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
+      "678349848684003359",
+    ],
+    "user": Object {
+      "bot": false,
+      "discriminator": "4121",
+      "id": "773595284894253136",
+      "username": "amrro",
     },
   },
 ]

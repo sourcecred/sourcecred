@@ -23,9 +23,10 @@
         "topic_slug": "my-first-test-post",
         "display_username": "D",
         "primary_group_name": null,
-        "primary_group_flair_url": null,
-        "primary_group_flair_bg_color": null,
-        "primary_group_flair_color": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
         "version": 2,
         "can_edit": false,
         "can_delete": false,
@@ -68,18 +69,19 @@
         "reply_count": 0,
         "reply_to_post_number": null,
         "quote_count": 0,
-        "incoming_link_count": 0,
+        "incoming_link_count": 1,
         "reads": 2,
         "readers_count": 1,
-        "score": 0.4,
+        "score": 5.4,
         "yours": false,
         "topic_id": 11,
         "topic_slug": "my-first-test-post",
         "display_username": "dandelion protocol acct",
         "primary_group_name": null,
-        "primary_group_flair_url": null,
-        "primary_group_flair_bg_color": null,
-        "primary_group_flair_color": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
         "version": 1,
         "can_edit": false,
         "can_delete": false,
@@ -126,9 +128,10 @@
         "topic_slug": "my-first-test-post",
         "display_username": "D",
         "primary_group_name": null,
-        "primary_group_flair_url": null,
-        "primary_group_flair_bg_color": null,
-        "primary_group_flair_color": null,
+        "flair_name": null,
+        "flair_url": null,
+        "flair_bg_color": null,
+        "flair_color": null,
         "version": 1,
         "can_edit": false,
         "can_delete": false,
@@ -163,11 +166,11 @@
   "timeline_lookup": [
     [
       1,
-      522
+      857
     ],
     [
       3,
-      520
+      855
     ]
   ],
   "suggested_topics": [
@@ -194,8 +197,9 @@
       "bookmarked": null,
       "liked": null,
       "tags": [],
+      "tags_descriptions": {},
       "like_count": 0,
-      "views": 2,
+      "views": 1636,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -214,12 +218,13 @@
     }
   ],
   "tags": [],
+  "tags_descriptions": {},
   "id": 11,
   "title": "My First Test Post",
   "fancy_title": "My First Test Post",
   "posts_count": 3,
   "created_at": "2019-08-02T11:12:29.408Z",
-  "views": 4033,
+  "views": 5728,
   "reply_count": 0,
   "like_count": 1,
   "last_posted_at": "2019-08-04T20:50:39.667Z",
@@ -269,11 +274,13 @@
   ],
   "chunk_size": 20,
   "bookmarked": false,
+  "bookmarks": [],
   "topic_timer": null,
   "message_bus_last_id": 0,
   "participant_count": 2,
   "show_read_indicator": false,
   "thumbnails": null,
+  "slow_mode_enabled_until": null,
   "tags_disable_ads": false,
   "details": {
     "can_edit": false,
@@ -286,9 +293,12 @@
         "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png",
         "post_count": 2,
         "primary_group_name": null,
-        "primary_group_flair_url": null,
-        "primary_group_flair_color": null,
-        "primary_group_flair_bg_color": null
+        "flair_name": null,
+        "flair_url": null,
+        "flair_color": null,
+        "flair_bg_color": null,
+        "admin": true,
+        "trust_level": 4
       },
       {
         "id": 3,
@@ -297,9 +307,11 @@
         "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
         "post_count": 1,
         "primary_group_name": null,
-        "primary_group_flair_url": null,
-        "primary_group_flair_color": null,
-        "primary_group_flair_bg_color": null
+        "flair_name": null,
+        "flair_url": null,
+        "flair_color": null,
+        "flair_bg_color": null,
+        "trust_level": 1
       }
     ],
     "created_by": {

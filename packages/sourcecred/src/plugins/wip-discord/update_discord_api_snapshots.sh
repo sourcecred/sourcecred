@@ -2,35 +2,33 @@
 
 set -eu
 
-snapshots_dir=src/plugins/discord/snapshots
+snapshots_dir=src/plugins/wip-discord/snapshots
 test_instance_url="https://discordapp.com/api"
 
 toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 
 . $toplevel/scripts/monorepo_vars.sh
 
-
 if [ ! "$(jq --version)" ]; then
   printf >&2 'This script depends on jq. Please install it.\n'
   exit 1
 fi
 
-if [ -z "${SOURCECRED_DISCORD_BOT_TOKEN:-}" ]; then
-  printf >&2 "Please set the SOURCECRED_DISCORD_TOKEN environment variable.\n"
+if [ -z "${SOURCECRED_TEST_SERVER_TOKEN:-}" ]; then
+  printf >&2 "Please set the SOURCECRED_TEST_SERVER_TOKEN environment variable.\n"
   exit 1
 fi
-
 
 
 cd "${CORE_PATH}"
 
 fetch() {
   url="${test_instance_url}$1"
-  filename="$(printf '%s' "${url}" | base64 -w 0 | tr -d '=' | tr '/+' '_-')"
+  filename="$(printf '%s' "${url}" | shasum -a 256 -U | cut -d' ' -f1)"
   path="${snapshots_dir}/${filename}"
   curl -sfL "$url" \
     -H "Accept: application/json" \
-    -H "Authorization: Bot ${SOURCECRED_DISCORD_BOT_TOKEN}" \
+    -H "Authorization: Bot ${SOURCECRED_TEST_SERVER_TOKEN}" \
     | jq '.' > "${path}"
 }
 

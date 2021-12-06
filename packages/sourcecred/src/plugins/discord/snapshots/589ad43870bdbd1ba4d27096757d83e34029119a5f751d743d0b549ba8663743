@@ -166,6 +166,7 @@
   "rules_channel_id": "830088231538130964",
   "public_updates_channel_id": "830088231538130965",
   "hub_type": null,
+  "premium_progress_bar_enabled": false,
   "nsfw": false,
   "nsfw_level": 0,
   "embed_enabled": false,

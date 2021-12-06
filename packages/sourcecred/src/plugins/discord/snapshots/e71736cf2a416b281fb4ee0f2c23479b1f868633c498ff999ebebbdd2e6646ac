@@ -21,7 +21,7 @@
   },
   {
     "id": "678348980849213472",
-    "last_message_id": "841261006906327070",
+    "last_message_id": "916000597478629466",
     "type": 0,
     "name": "general",
     "position": 0,
@@ -30,7 +30,8 @@
     "guild_id": "678348980639498428",
     "permission_overwrites": [],
     "nsfw": false,
-    "rate_limit_per_user": 0
+    "rate_limit_per_user": 0,
+    "banner": null
   },
   {
     "id": "678348980878573661",
@@ -57,7 +58,8 @@
     "guild_id": "678348980639498428",
     "permission_overwrites": [],
     "nsfw": false,
-    "rate_limit_per_user": 0
+    "rate_limit_per_user": 0,
+    "banner": null
   },
   {
     "id": "678696874869522446",
@@ -70,7 +72,8 @@
     "guild_id": "678348980639498428",
     "permission_overwrites": [],
     "nsfw": false,
-    "rate_limit_per_user": 0
+    "rate_limit_per_user": 0,
+    "banner": null
   },
   {
     "id": "830088231538130964",
@@ -92,11 +95,12 @@
       }
     ],
     "nsfw": false,
-    "rate_limit_per_user": 0
+    "rate_limit_per_user": 0,
+    "banner": null
   },
   {
     "id": "830088231538130965",
-    "last_message_id": "870202554259214396",
+    "last_message_id": "909355881186066502",
     "type": 0,
     "name": "moderator-only",
     "position": 0,
@@ -114,7 +118,8 @@
       }
     ],
     "nsfw": false,
-    "rate_limit_per_user": 0
+    "rate_limit_per_user": 0,
+    "banner": null
   },
   {
     "id": "830089044695187586",
@@ -150,6 +155,7 @@
     "guild_id": "678348980639498428",
     "permission_overwrites": [],
     "nsfw": true,
-    "rate_limit_per_user": 0
+    "rate_limit_per_user": 0,
+    "banner": null
   }
 ]

@@ -1,13 +1,16 @@
 // @flow
 
-import base64url from "base64url";
 import path from "path";
 import fs from "fs-extra";
 import {Fetcher} from "./fetcher";
+import {createHash} from "crypto";
 
 async function snapshotFetch(url: string | Request | URL): Promise<Response> {
   const snapshotDir = "src/plugins/discord/snapshots";
-  const filename = base64url(url);
+  const shasum = createHash("sha256");
+  shasum.update(Buffer.from(((url: any): string), "utf8"));
+  const filename = shasum.digest("hex");
+  //console.log({filename});
   const file = path.join(snapshotDir, filename);
   if (await fs.exists(file)) {
     const contents = await fs.readFile(file);
