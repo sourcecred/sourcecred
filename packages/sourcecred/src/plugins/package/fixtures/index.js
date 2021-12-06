@@ -35,7 +35,7 @@ function createIdentity(address: CustomAddress): IdentityProposal {
   };
 }
 
-class MyTestIdentityPlugin extends Plugin {
+export default class MyTestIdentityPlugin implements Plugin {
   async declaration(): Promise<PluginDeclaration> {
     return declaration;
   }
@@ -57,4 +57,3 @@ class MyTestIdentityPlugin extends Plugin {
     return emptyWeightedGraph();
   }
 }
-exports.modules = MyTestIdentityPlugin;

@@ -111,7 +111,8 @@
     "webpack-cli": "^4.4.0",
     "webpack-dev-server": "^3.10.3",
     "webpack-manifest-plugin": "^3.0.0",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-node-externals": "^3.0.0",
+    "zcstarr-sourcecred-test-package-plugin": "0.0.0-development"
   },
   "greenkeeper": {
     "ignore": [
@@ -129,6 +130,8 @@
     "build:frontend": "NODE_ENV=production webpack --config config/webpack.config.web.js",
     "build:backend": "NODE_ENV=development webpack --config config/webpack.config.backend.js",
     "build:api": "NODE_ENV=production webpack --config config/webpack.config.api.js",
+    "build:test-plugin": "NODE_ENV=development webpack --config config/webpack.config.testplugin.js",
+    "install:test-plugin": "cd ./dist/fixtures/packagePlugin",
     "test": "node ./config/test.js",
     "createLedger": "babel-node ./scripts/createLedgerFromLegacyProject.js",
     "unit": "BABEL_ENV=test NODE_ENV=test jest",

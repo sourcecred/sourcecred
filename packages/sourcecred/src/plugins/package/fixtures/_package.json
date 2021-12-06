@@ -1,3 +1,16 @@
 {
+  "name": "@sourcecred-test-fixtures/package-plugin",
+  "description": "test fixture for packagePlugin",
+  "homepage": "https://sourcecred.io",
+  "repository": "github:sourcecred/sourcecred",
+  "version": "0.0.0-development",
+  "private": false,
+  "dependencies": {
 
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "license": "(MIT OR Apache-2.0)",
+  "main": "api.js"
 }
