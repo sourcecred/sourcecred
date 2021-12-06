@@ -10,7 +10,6 @@ async function snapshotFetch(url: string | Request | URL): Promise<Response> {
   const shasum = createHash("sha256");
   shasum.update(Buffer.from(((url: any): string), "utf8"));
   const filename = shasum.digest("hex");
-  //console.log({filename});
   const file = path.join(snapshotDir, filename);
   if (await fs.exists(file)) {
     const contents = await fs.readFile(file);
