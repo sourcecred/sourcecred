@@ -17285,6 +17285,11 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
+zcstarr-sourcecred-test-package-plugin@0.0.0-development:
+  version "0.0.0-development"
+  resolved "https://registry.yarnpkg.com/zcstarr-sourcecred-test-package-plugin/-/zcstarr-sourcecred-test-package-plugin-0.0.0-development.tgz#ba89cf823fb08de4a8fc02dddadb5bc94d0840ac"
+  integrity sha512-Cg/geFXzq0lm2n/xRbnO/Jul8RLQjq1N4xo3XATA3hgQLi01EWWu9v9Cpu5MF7FqUg0qBOsrH0bAKPc+W8qBOg==
+
 zwitch@^1.0.0:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/zwitch/-/zwitch-1.0.5.tgz#d11d7381ffed16b742f6af7b3f223d5cd9fe9920"
