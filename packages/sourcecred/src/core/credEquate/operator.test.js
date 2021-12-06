@@ -1,9 +1,6 @@
 // @flow
 
-import {getOperator, getWeight, hasExplicitWeight} from "./config";
 import {buildConfig} from "./testUtils.test";
-import type {Contribution} from "./contribution";
-import {scoreContribution} from "./scoredContribution";
 import {applyOperator} from "./operator";
 
 describe("core/credEquate/config", () => {

@@ -1,6 +1,6 @@
 // @flow
 import type {ScoredExpression, ScoredWeightOperand} from "./scoredContribution";
-import {getWeight, hasExplicitWeight, type Config} from "./config";
+import {hasExplicitWeight, type Config} from "./config";
 
 type OperatorFunction = (
   $ReadOnlyArray<ScoredWeightOperand>,
@@ -70,10 +70,8 @@ function max(scoredWeightOperands, scoredExpressionOperands, config) {
   );
   const weightOperandResult = Math.max(
     ...scoredWeightOperands.map(
-      ({key, subkey}) =>
-        hasExplicitWeight({key, subkey}, config.weights)
-          ? getWeight({key, subkey}, config.weights)
-          : -Infinity,
+      ({key, subkey, score}) =>
+        hasExplicitWeight({key, subkey}, config.weights) ? score : -Infinity,
       -Infinity
     )
   );
@@ -106,13 +104,13 @@ function average(scoredWeightOperands, scoredExpressionOperands, _) {
     (accumulator, operand) => {
       return accumulator + operand.score;
     },
-    1
+    0
   );
   const weightOperandResult = scoredWeightOperands.reduce(
     (accumulator, operand) => {
       return accumulator + operand.score;
     },
-    1
+    0
   );
   return (
     (weightOperandResult + expressionOperandResult) /

@@ -1,17 +1,11 @@
 // @flow
-import type {Contribution, Expression, WeightOperand} from "./contribution";
+import type {Contribution, Expression} from "./contribution";
 import {
   type Operator,
   applyOperator,
-  OPERATOR_KEY_PREFIX,
   OPERATORS,
 } from "./operator";
-import {
-  getWeight,
-  hasExplicitWeight,
-  getOperator,
-  type Config,
-} from "./config";
+import {getWeight, getOperator, type Config} from "./config";
 import type {TimestampMs} from "../../util/timestamp";
 import findLast from "lodash.findlast";
 import type {NodeAddressT} from "../graph";

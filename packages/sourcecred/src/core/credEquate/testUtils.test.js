@@ -1,7 +1,6 @@
 // @flow
 
 import type {Config} from "./config";
-import type {WeightOperand} from "./contribution";
 
 export const weightOperands = [
   {memo: "key1", subkey: "2", weight: 3},
