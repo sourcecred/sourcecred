@@ -186,7 +186,8 @@
     "/dist",
     "/src",
     "!src/**/*.test.js?(.snap)",
-    "!src/ui"
+    "!src/ui",
+    "!src/**/snapshots"
   ],
   "main": "dist/server/api.js",
   "browser": "dist/client/api.js",

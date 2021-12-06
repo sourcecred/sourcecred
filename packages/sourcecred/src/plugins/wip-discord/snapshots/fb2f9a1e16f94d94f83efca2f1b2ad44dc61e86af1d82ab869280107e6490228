@@ -21,6 +21,7 @@
     "timestamp": "2020-02-16T00:17:17.682000+00:00",
     "edited_timestamp": null,
     "flags": 0,
+    "components": [],
     "reactions": [
       {
         "emoji": {
@@ -53,7 +54,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:16.842000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394431149178940",
@@ -76,7 +78,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:16.345000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394428569813013",
@@ -99,7 +102,8 @@
     "tts": false,
     "timestamp": "2020-02-16T00:17:15.730000+00:00",
     "edited_timestamp": null,
-    "flags": 0
+    "flags": 0,
+    "components": []
   },
   {
     "id": "678394426153893948",
@@ -123,6 +127,7 @@
     "timestamp": "2020-02-16T00:17:15.154000+00:00",
     "edited_timestamp": null,
     "flags": 0,
+    "components": [],
     "reactions": [
       {
         "emoji": {

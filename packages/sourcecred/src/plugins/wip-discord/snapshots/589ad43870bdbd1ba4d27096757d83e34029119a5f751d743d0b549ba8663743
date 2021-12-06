@@ -1,0 +1,174 @@
+{
+  "id": "678348980639498428",
+  "name": "SourceCred Test Server",
+  "icon": null,
+  "description": null,
+  "splash": null,
+  "discovery_splash": null,
+  "features": [
+    "NEWS",
+    "COMMUNITY"
+  ],
+  "emojis": [
+    {
+      "name": "sourcecred",
+      "roles": [],
+      "id": "678399364418502669",
+      "require_colons": true,
+      "managed": false,
+      "animated": false,
+      "available": true
+    }
+  ],
+  "stickers": [],
+  "banner": null,
+  "owner_id": "420341518948237331",
+  "application_id": null,
+  "region": "us-south",
+  "afk_channel_id": null,
+  "afk_timeout": 300,
+  "system_channel_id": "678348980849213472",
+  "widget_enabled": false,
+  "widget_channel_id": null,
+  "verification_level": 1,
+  "roles": [
+    {
+      "id": "678348980639498428",
+      "name": "@everyone",
+      "permissions": 33620992,
+      "position": 0,
+      "color": 0,
+      "hoist": false,
+      "managed": false,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "permissions_new": "1071627961344"
+    },
+    {
+      "id": "678349848684003359",
+      "name": "allow-adding-data",
+      "permissions": 104324673,
+      "position": 1,
+      "color": 2123412,
+      "hoist": false,
+      "managed": false,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "permissions_new": "6546775617"
+    },
+    {
+      "id": "678350026946117694",
+      "name": "admins",
+      "permissions": 104324681,
+      "position": 2,
+      "color": 15105570,
+      "hoist": false,
+      "managed": false,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "permissions_new": "6546775625"
+    },
+    {
+      "id": "678359229433905152",
+      "name": "CredBot-Beanow",
+      "permissions": 66560,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "tags": {
+        "bot_id": "678351352770068560"
+      },
+      "permissions_new": "6442517504"
+    },
+    {
+      "id": "728740243926286386",
+      "name": "sts-credbot",
+      "permissions": 66560,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "tags": {
+        "bot_id": "728738433199112280"
+      },
+      "permissions_new": "6442517504"
+    },
+    {
+      "id": "761706197606334535",
+      "name": "SourceCred Test",
+      "permissions": 8,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "tags": {
+        "bot_id": "761705425870782516"
+      },
+      "permissions_new": "6442450952"
+    },
+    {
+      "id": "767909888226492448",
+      "name": "SC server bot",
+      "permissions": 66560,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "tags": {
+        "bot_id": "758370311774404618"
+      },
+      "permissions_new": "6442517504"
+    },
+    {
+      "id": "772890579632652339",
+      "name": "sourcecred-test",
+      "permissions": 66560,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false,
+      "icon": null,
+      "unicode_emoji": null,
+      "tags": {
+        "bot_id": "772886503830323210"
+      },
+      "permissions_new": "6442517504"
+    }
+  ],
+  "default_message_notifications": 1,
+  "mfa_level": 0,
+  "explicit_content_filter": 2,
+  "max_presences": null,
+  "max_members": 250000,
+  "max_video_channel_users": 25,
+  "vanity_url_code": null,
+  "premium_tier": 0,
+  "premium_subscription_count": 0,
+  "system_channel_flags": 0,
+  "preferred_locale": "en-US",
+  "rules_channel_id": "830088231538130964",
+  "public_updates_channel_id": "830088231538130965",
+  "hub_type": null,
+  "premium_progress_bar_enabled": false,
+  "nsfw": false,
+  "nsfw_level": 0,
+  "embed_enabled": false,
+  "embed_channel_id": null
+}

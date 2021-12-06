@@ -10,6 +10,7 @@
     "joined_at": "2020-02-15T21:16:40.215000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "143776454050709505",
       "username": "Beanow",
@@ -22,6 +23,7 @@
   },
   {
     "roles": [
+      "678350026946117694",
       "678349848684003359"
     ],
     "nick": null,
@@ -30,6 +32,7 @@
     "joined_at": "2020-11-02T18:02:40.116000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "258786206387666944",
       "username": "Thena",
@@ -50,10 +53,11 @@
     "joined_at": "2021-04-27T01:08:45.585000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "318552163649454081",
       "username": "hz",
-      "avatar": "4dd1aa262e7e332bf2680428f03793bf",
+      "avatar": "a7495c44681943eaea928c5e0194b1cb",
       "discriminator": "8826",
       "public_flags": 0
     },
@@ -71,10 +75,11 @@
     "joined_at": "2020-02-15T22:31:31.243000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "420341518948237331",
       "username": "dandelion",
-      "avatar": "43653169c81b2fdbb9b93cc39d1f0e2a",
+      "avatar": "03a1489e7895e88e0555a7c19c3ecee7",
       "discriminator": "3370",
       "public_flags": 0
     },
@@ -92,6 +97,7 @@
     "joined_at": "2020-02-15T22:21:55.613000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "432981598858903585",
       "username": "wchargin",
@@ -113,6 +119,7 @@
     "joined_at": "2020-02-16T00:45:23.478000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "439050857921904640",
       "username": "Brian Litwin",
@@ -134,6 +141,7 @@
     "joined_at": "2020-10-02T18:07:37.732000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "489154203714060300",
       "username": "topocount",
@@ -154,6 +162,7 @@
     "joined_at": "2020-10-02T18:07:44.893000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "579830927287386126",
       "username": "sandpiper",
@@ -172,6 +181,7 @@
     "joined_at": "2021-05-10T10:30:53.883000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "664562775770791966",
       "username": "BrianBelhumeur",
@@ -192,6 +202,7 @@
     "joined_at": "2020-02-15T21:57:23.609000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "678351352770068560",
       "username": "CredBot-Beanow",
@@ -213,6 +224,7 @@
     "joined_at": "2020-07-03T22:33:33.496000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "728738433199112280",
       "username": "sts-credbot",
@@ -234,6 +246,7 @@
     "joined_at": "2020-10-20T00:39:44.545000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "758370311774404618",
       "username": "topocount's server bot",
@@ -255,6 +268,7 @@
     "joined_at": "2020-10-02T21:48:29.344000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "761705425870782516",
       "username": "SourceCred Test",
@@ -276,6 +290,7 @@
     "joined_at": "2020-11-02T18:31:13.848000+00:00",
     "is_pending": false,
     "pending": false,
+    "communication_disabled_until": null,
     "user": {
       "id": "772886503830323210",
       "username": "sourcecred-test-thena",
@@ -283,6 +298,27 @@
       "discriminator": "3070",
       "public_flags": 0,
       "bot": true
+    },
+    "mute": false,
+    "deaf": false
+  },
+  {
+    "roles": [
+      "678349848684003359"
+    ],
+    "nick": null,
+    "avatar": null,
+    "premium_since": null,
+    "joined_at": "2021-12-02T16:16:58.266000+00:00",
+    "is_pending": false,
+    "pending": false,
+    "communication_disabled_until": null,
+    "user": {
+      "id": "773595284894253136",
+      "username": "amrro",
+      "avatar": "8a698ef8a269f95d184b7cc4d50368bf",
+      "discriminator": "4121",
+      "public_flags": 0
     },
     "mute": false,
     "deaf": false
