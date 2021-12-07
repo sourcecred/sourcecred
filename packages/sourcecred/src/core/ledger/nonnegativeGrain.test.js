@@ -8,6 +8,7 @@ import {
 } from "./nonnegativeGrain";
 import {ONE, type Grain} from "./grain";
 import {g} from "./testUtils";
+import dedent from "../../util/dedent";
 
 describe("core/ledger/nonnegativeGrain", () => {
   describe("fromGrain", () => {
@@ -87,8 +88,11 @@ describe("core/ledger/nonnegativeGrain", () => {
     it("fails on 3.5 (number)", () => {
       expect(numberOrFloatStringParser.parse(3.5)).toEqual({
         ok: false,
-        err:
-          'no parse matched: ["expected integer, got number","expected string, got number"]',
+        err: dedent`\
+              orElse Parser: no parse matched: [
+                  "expected integer, got number",
+                  "expected string, got number"
+              ]`,
       });
     });
   });

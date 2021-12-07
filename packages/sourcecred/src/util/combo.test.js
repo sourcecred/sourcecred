@@ -1,6 +1,7 @@
 // @flow
 
 import * as C from "./combo";
+import dedent from "./dedent";
 
 describe("src/util/combo", () => {
   describe("type JsonObject", () => {
@@ -255,7 +256,9 @@ describe("src/util/combo", () => {
     });
     it("permits an empty set of parsers, always rejecting", () => {
       const p: C.Parser<empty> = C.orElse([]);
-      expect(() => p.parseOrThrow("anything")).toThrow("no parse matched: []");
+      expect(() => p.parseOrThrow("anything")).toThrow(
+        "orElse Parser: no parsers entered"
+      );
     });
 
     function extractError(result: C.ParseResult<mixed>): string {
@@ -285,7 +288,12 @@ describe("src/util/combo", () => {
         C.fmap(C.number, checkZero),
       ]);
       expect(() => p.parseOrThrow(NaN)).toThrow(
-        'no parse matched: ["not positive","not negative","not zero"]'
+        dedent`\
+          no parse matched: [
+              "not positive",
+              "not negative",
+              "not zero"
+          ]`
       );
     });
     it("applies a user-specified error combination function", () => {
