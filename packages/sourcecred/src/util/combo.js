@@ -205,19 +205,6 @@ export function fmap<T, U>(p: Parser<T>, f: (T) => U): Parser<U> {
   });
 }
 
-// replacer for stringify.JSON, in order to replace empty array with just `[]`.
-//
-// this replacer function can be extended and universally be used with other
-// aspect like empty objects.
-function emptyArrayReplacer(key: string, value: any) {
-  // check if the array is empty.
-  if (Array.isArray(value) && value.length === 0) {
-    return [];
-  }
-
-  return value;
-}
-
 // Create a parser that tries each of the given parsers on the same
 // input, taking the first successful parse or failing if all parsers
 // fail. In the failure case, the provided `errorFn` will be called with
@@ -248,10 +235,11 @@ function emptyArrayReplacer(key: string, value: any) {
 export function orElse<T: $ReadOnlyArray<Parser<mixed>>>(
   parsers: T,
   errorFn?: (string[]) => string = (errors) =>
-    `no parse matched: ${stringify(errors, {
-      replacer: emptyArrayReplacer,
-      spacer: 4,
-    })}`
+    errors.length === 0
+      ? "orElse Parser: no parsers entered"
+      : `orElse Parser: no parse matched: ${stringify(errors, {
+          space: 4,
+        })}`
 ): Parser<$ElementType<$TupleMap<T, ExtractParserOutput>, number>> {
   return new Parser((x) => {
     const errors = [];
