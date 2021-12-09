@@ -23,6 +23,7 @@ export function botSet(): Set<string> {
     "vercel",
     "codecov-commenter",
     "transifex-integration",
-    "dependabot",
+    "huxbot",
+    "dependabot"
   ]);
 }
