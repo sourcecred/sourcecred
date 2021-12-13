@@ -49,6 +49,9 @@ export type IntegrationConfig = {|
   // distributed funds via a configured integration
   processDistributions: boolean,
   currency: Currency,
+  // This optional object contains the self-configuration set by the grain
+  // integration on previous runs. It allows the grain integration to
+  // read its own configuration from disk.
   integration: ?Object,
 |};
 
