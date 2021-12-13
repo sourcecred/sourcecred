@@ -11,6 +11,8 @@
     "test": "./scripts/test.sh"
   },
   "devDependencies": {
+    "eslint-plugin-flowtype": "^5.2.0",
+    "eslint-plugin-react": "7.23.2",
     "flow-bin": "^0.135.0",
     "jest": "^26.0.1",
     "tmp": "^0.2.1"

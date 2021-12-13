@@ -8,7 +8,7 @@
     "lerna": "^4.0.0"
   },
   "scripts": {
-    "test": "lerna run test --stream --",
+    "test": "lerna run test --stream --concurrency 1 --",
     "build": "lerna run build --stream",
     "postinstall": "./scripts/flow-mono.sh",
     "start": "lerna run start --stream",

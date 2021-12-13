@@ -1,0 +1,16 @@
+# If modifying this file, please modify .flowconfig-ci too!
+[ignore]
+<PROJECT_ROOT>/node_modules/webpack-cli/lib/utils/__tests__/.*
+
+[include]
+../../grainIntegrations/
+
+[libs]
+flow-typed
+
+[lints]
+
+[options]
+include_warnings=true
+
+[strict]
