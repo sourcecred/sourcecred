@@ -13,10 +13,8 @@ import {
   allocationConfigParser,
 } from "../../core/ledger/policies";
 import {type Name, parser as nameParser} from "../../core/identity/name";
-import {
-  type GrainIntegration,
-  parser as bundledGrainIntegrationParser,
-} from "../../api/bundledGrainIntegrations";
+import type {GrainIntegration} from "../../core/ledger/grainIntegration";
+import {parser as bundledGrainIntegrationParser} from "../../api/bundledGrainIntegrations";
 import {toDiscount} from "../../core/ledger/policies/recent";
 import stringify from "json-stable-stringify";
 import {DiskStorage} from "../../core/storage/disk";

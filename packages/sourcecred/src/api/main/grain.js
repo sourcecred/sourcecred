@@ -2,11 +2,11 @@
 
 import {CredGraph} from "../../core/credrank/credGraph";
 import {Ledger} from "../../core/ledger/ledger";
-import type {CurrencyDetails} from "../currencyConfig";
-import {type GrainConfig} from "../grainConfig";
-import {type Currency as IntegrationCurrency} from "../../core/ledger/currency";
-import type {Distribution} from "../../core/ledger/distribution";
 import {applyDistributions} from "../../core/ledger/applyDistributions";
+import type {CurrencyDetails} from "../currencyConfig";
+import type {GrainConfig} from "../grainConfig";
+import type {Currency as IntegrationCurrency} from "../../core/ledger/currency";
+import type {Distribution} from "../../core/ledger/distribution";
 import type {TimestampMs} from "../../util/timestamp";
 import {
   executeGrainIntegration,
@@ -30,6 +30,7 @@ export type GrainOutput = {|
 // since only the most recent ledger is relevant
 export type GrainIntegrationMultiResult = {|
   output?: GrainIntegrationOutput,
+  configUpdate: Object,
   distributionCredTimestamp: TimestampMs,
 |};
 
@@ -62,11 +63,11 @@ export async function grain(input: GrainInput): Promise<GrainOutput> {
  * Marshall grainInput from a Grain Configuration file for use with
  * executeGrainIntegration function
  */
-export function executeGrainIntegrationsFromGrainInput(
+export async function executeGrainIntegrationsFromGrainInput(
   grainInput: GrainInput,
   ledger: Ledger,
   distributions: $ReadOnlyArray<Distribution>
-): GrainIntegrationResults {
+): Promise<GrainIntegrationResults> {
   const integrationCurrency = grainInput.currencyDetails.integrationCurrency;
   const grainIntegration = grainInput.grainConfig.integration;
   const results = [];
@@ -76,16 +77,21 @@ export function executeGrainIntegrationsFromGrainInput(
   // supporting the case where the distributions parameter is an empty array
   let ledgerResult = ledger;
   if (integrationCurrency && grainIntegration) {
-    distributions.forEach((distribution) => {
-      const result = executeGrainIntegration(
+    for (const distribution of distributions) {
+      const result = await executeGrainIntegration(
         ledgerResult,
-        grainIntegration.function,
+        grainIntegration,
         distribution
       );
-      const {output, distributionCredTimestamp, ledger: nextLedger} = result;
+      const {
+        output,
+        distributionCredTimestamp,
+        ledger: nextLedger,
+        configUpdate,
+      } = result;
       ledgerResult = nextLedger;
-      results.push({output, distributionCredTimestamp});
-    });
+      results.push({output, distributionCredTimestamp, configUpdate});
+    }
   }
   return {ledger: ledgerResult, results};
 }

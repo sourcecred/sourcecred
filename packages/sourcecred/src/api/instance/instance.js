@@ -56,4 +56,10 @@ export interface Instance extends ReadOnlyInstance {
   writeGrainIntegrationOutput(
     result: $Shape<GrainIntegrationMultiResult>
   ): Promise<void>;
+
+  /** Write grain config updates back into the instance */
+  updateGrainIntegrationConfig(
+    result: $Shape<GrainIntegrationMultiResult>,
+    config: GrainInput
+  ): Promise<void>;
 }
