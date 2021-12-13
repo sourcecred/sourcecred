@@ -24,6 +24,6 @@ export function botSet(): Set<string> {
     "codecov-commenter",
     "transifex-integration",
     "huxbot",
-    "dependabot"
+    "dependabot",
   ]);
 }
