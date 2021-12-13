@@ -51,6 +51,8 @@ import {
   type GrainReceipt,
 } from "./grainAllocation";
 
+import deepEqual from "lodash.isequal";
+
 /**
  * Timestamped record of a grain payment
  * made to an Identity from a specific Allocation.
@@ -62,11 +64,22 @@ type AllocationReceipt = {|
 |};
 
 /**
+ * The state of the Ledger's accounting configuration.
+ */
+export type AccountingStatus = {|
+  +enabled: boolean,
+  +trackGrainIntegration: boolean,
+  +currency: ?Currency,
+|};
+/**
  * Every Identity in the ledger has an Account.
  */
 type MutableAccount = {|
   identity: Identity,
-  // The current Grain balance of this account
+  /**
+   * The current Grain balance of this account. All balances are zero when
+   * accounting is disabled.
+   */
   balance: G.Grain,
   // The amount of Grain this account has received in past Distributions
   paid: G.Grain,
@@ -140,6 +153,8 @@ export class Ledger {
   _lastDistributionTimestamp: TimestampMs | null = null;
   _shouldTrackGrainIntegration: boolean = false;
   _grainIntegrationStatuses: Map<DistributionId, boolean>;
+  _balanceAccountingEnabled: boolean = true;
+  _externalCurrency: ?Currency;
 
   constructor() {
     this._ledgerEventLog = new JsonLog();
@@ -557,6 +572,14 @@ export class Ledger {
   }
   _toggleActivation({identityId}: ToggleActivation) {
     const account = this._mutableAccount(identityId);
+
+    // check that payout address exists when an external currency is set
+    if (this._externalCurrency && !account.active) {
+      const currencyKey = getCurrencyKey(this._externalCurrency);
+      if (!account.payoutAddresses.get(currencyKey)) {
+        throw new Error("Cannot activate user: No payout address set");
+      }
+    }
     // Cannot fail below this line.
     account.active = !account.active;
   }
@@ -646,6 +669,9 @@ export class Ledger {
     return this;
   }
   _transferGrain({from, to, amount}: TransferGrain) {
+    if (!this._balanceAccountingEnabled) {
+      throw new Error("Transfers are disabled when Accounting is disabled");
+    }
     if (!this._accounts.has(from)) {
       throw new Error(`invalid sender: ${from}`);
     }
@@ -718,7 +744,7 @@ export class Ledger {
    * setPayoutAddress allows participants to set a payable address to collect
    * grain. These addresses are keyed on a specific currency, which ensures that
    * users don't erroneously receive a grain distribution to an address that
-   * cannot handle it (such as a custodial wallet, or rigidly-designed
+   * cannot handle it (such as a custodial wallet, or rigidly-designed smart
    * contract) and effectively lose that reward.
    *
    * An address may be deleted by passing in `null` for the
@@ -770,7 +796,70 @@ export class Ledger {
   }
 
   /**
-   * no-ops if integration tracking is already enabled
+   * Enabling accounting has the following effects on the ledger:
+   * - enables grain transfers
+   * - all accounts will start with a zero balance again, which will accumulate
+   *   normally from distributions.
+   *
+   * This is the default behavior of the ledger for compatibility reasons.
+   */
+  enableAccounting(): Ledger {
+    if (!this._balanceAccountingEnabled) {
+      this._createAndProcessEvent({
+        type: "ENABLE_ACCOUNTING",
+      });
+    }
+    // no-op if already enabled
+    return this;
+  }
+
+  _enableAccounting(_: EnableAccounting) {
+    this._balanceAccountingEnabled = true;
+  }
+
+  /**
+   * Disabling accounting has the following effects on the ledger:
+   * - disables grain transfers
+   * - zeroes out all balances
+   * - deactivates accounts that don't have a PayoutAddress set for the
+   *   current instance configuration, and prevents them from activating until
+   *   they do.
+   */
+  disableAccounting(): Ledger {
+    if (this._balanceAccountingEnabled) {
+      this._createAndProcessEvent({
+        type: "DISABLE_ACCOUNTING",
+      });
+      this._deactivateAccountsWithoutPayoutAddress();
+    }
+    // no-op if already disabled
+    return this;
+  }
+
+  _disableAccounting(_: DisableAccounting) {
+    // ensure an external currency is set
+    this.externalCurrency();
+
+    // Warning! Mutations below
+    this._balanceAccountingEnabled = false;
+    this._eraseLedgerBalances();
+  }
+
+  /**
+   * Enabling Integration Tracking has the following effects:
+   *  - Subsequent grain distributions are left as unexecuted until
+   *    `markDistributionAsExecuted` is called on it.
+   *  - The `trackedDistributions` getter will return an array of distributionIds
+   *    created since tracking was enabled. Their statuses can be queried using
+   *    `isGrainIntegrationExecuted`.
+   *
+   * Integration Tracking can be enabled and disabled at any time.
+   * Some integrations might error if tracking is not enabled, to ensure
+   * their status is tracked in the ledger. This allows for the decoupling of
+   * (1) calculating a grain distribution and then (2) actually distributing
+   * it via the grain integration.
+   *
+   * No-ops if integration tracking is already enabled
    */
   enableIntegrationTracking(): Ledger {
     if (!this._shouldTrackGrainIntegration) {
@@ -781,8 +870,16 @@ export class Ledger {
     return this;
   }
 
+  _enableIntegrationTracking(_: EnableGrainIntegration) {
+    this._shouldTrackGrainIntegration = true;
+  }
+
   /**
-   * no-ops if integration tracking is already disabled
+   * Disabling Grain Integration Tracking has the following effects:
+   *  - `trackedDistributions` getter will always return an empty iterator
+   *  - `markDistributionAsExecuted` will always error when called
+   *
+   * No-ops if integration tracking is already disabled
    */
   disableIntegrationTracking(): Ledger {
     if (this._shouldTrackGrainIntegration) {
@@ -793,11 +890,7 @@ export class Ledger {
     return this;
   }
 
-  _enableGrainIntegrationTracking(_: EnableGrainIntegration) {
-    this._shouldTrackGrainIntegration = true;
-  }
-
-  _disableGrainIntegrationTracking(_: DisableGrainIntegration) {
+  _disableIntegrationTracking(_: DisableGrainIntegration) {
     this._shouldTrackGrainIntegration = false;
     this._grainIntegrationStatuses.clear();
   }
@@ -810,6 +903,14 @@ export class Ledger {
    * c) distribution tracking is enabled
    */
   markDistributionExecuted(id: DistributionId): Ledger {
+    this._createAndProcessEvent({
+      type: "MARK_DISTRIBUTION_EXECUTED",
+      id,
+    });
+    return this;
+  }
+
+  _markDistributionExecuted({id}: MarkDistributionExecuted) {
     if (!this._shouldTrackGrainIntegration) {
       throw new Error("integration tracking not enabled");
     }
@@ -819,18 +920,95 @@ export class Ledger {
     if (this._grainIntegrationStatuses.get(id) === true) {
       throw new Error("Integration has already executed this distribution");
     }
-    this._createAndProcessEvent({
-      type: "MARK_DISTRIBUTION_EXECUTED",
-      id,
-    });
-    return this;
-  }
-  _markDistributionExecuted({id}: MarkDistributionExecuted) {
     this._grainIntegrationStatuses.set(id, true);
   }
 
   /**
-   * Is cleared each time `disableIntegrationTracking` is called
+   *   Setting a currency is a prerequisite to executing a grain integration.
+   *
+   *   When accounting is enabled, this function will set an external currency
+   *   in the ledger, but will not modify any accounts.
+   *
+   *   When accounting is disabled, this function can be called to update
+   *   the ledger's external currency configuration. Note that this will also
+   *   deactivate identities missing a payout address that matches the new
+   *   configuration when accounting is disabled.
+   */
+  setExternalCurrency(chainId: ChainId, tokenAddress?: EthAddress): Ledger {
+    const currency = buildCurrency(chainId, tokenAddress);
+
+    if (!deepEqual(currency, this._externalCurrency)) {
+      this._createAndProcessEvent({
+        type: "SET_EXTERNAL_CURRENCY",
+        currency,
+      });
+      if (!this._balanceAccountingEnabled) {
+        this._deactivateAccountsWithoutPayoutAddress();
+      }
+    }
+
+    // no-op if the currency entered is already set
+    return this;
+  }
+
+  _setExternalCurrency({currency}: SetExternalCurrency) {
+    // Warning: Account Mutations Below
+    this._externalCurrency = currency;
+
+    if (!this._balanceAccountingEnabled) {
+      this._eraseLedgerBalances();
+    }
+  }
+
+  /**
+   * Will throw if accounting is disabled
+   */
+  removeExternalCurrency(): Ledger {
+    if (this._externalCurrency) {
+      this._createAndProcessEvent({
+        type: "REMOVE_EXTERNAL_CURRENCY",
+      });
+    }
+    return this;
+  }
+
+  _removeExternalCurrency(_: RemoveExternalCurrency) {
+    if (!this._balanceAccountingEnabled) {
+      throw new Error(
+        "Cannot remove the external currency while Accounting is Disabled"
+      );
+    }
+    delete this._externalCurrency;
+  }
+
+  /**
+   * Returns the state of the ledger's accounting configuration.
+   */
+  accounting(): AccountingStatus {
+    return {
+      enabled: this._balanceAccountingEnabled,
+      trackGrainIntegration: this._shouldTrackGrainIntegration,
+      currency: this._externalCurrency,
+    };
+  }
+
+  /**
+   * Expectably returns the currency from the
+   * externalCurrency attribute. It throws if a currency is not set.
+   */
+  externalCurrency(): Currency {
+    if (!this._externalCurrency) throw new Error("No External Currency Set");
+    return this._externalCurrency;
+  }
+
+  /**
+   * When integration tracking is disabled, an empty iterator is returned.
+   *
+   * When integration tracking is enabled, the array of tracked
+   * `DistributionIds` is returned
+   *
+   * The iterator is cleared each time
+   * `disableIntegrationTracking` is called.
    */
   trackedDistributions(): Iterator<DistributionId> {
     return this._grainIntegrationStatuses.keys();
@@ -926,13 +1104,25 @@ export class Ledger {
         this._setPayoutAddress(action);
         break;
       case "ENABLE_GRAIN_INTEGRATION":
-        this._enableGrainIntegrationTracking(action);
+        this._enableIntegrationTracking(action);
         break;
       case "DISABLE_GRAIN_INTEGRATION":
-        this._disableGrainIntegrationTracking(action);
+        this._disableIntegrationTracking(action);
         break;
       case "MARK_DISTRIBUTION_EXECUTED":
         this._markDistributionExecuted(action);
+        break;
+      case "ENABLE_ACCOUNTING":
+        this._enableAccounting(action);
+        break;
+      case "DISABLE_ACCOUNTING":
+        this._disableAccounting(action);
+        break;
+      case "SET_EXTERNAL_CURRENCY":
+        this._setExternalCurrency(action);
+        break;
+      case "REMOVE_EXTERNAL_CURRENCY":
+        this._removeExternalCurrency(action);
         break;
       // istanbul ignore next: unreachable per Flow
       default:
@@ -976,7 +1166,35 @@ export class Ledger {
     const account = this._mutableAccount(params.grainReceipt.id);
     account.paid = G.add(params.grainReceipt.amount, account.paid);
     account.allocationHistory.push(params);
-    account.balance = G.add(params.grainReceipt.amount, account.balance);
+    if (this._balanceAccountingEnabled)
+      account.balance = G.add(params.grainReceipt.amount, account.balance);
+  }
+
+  /**
+   * Helper method for deactivating accounts that don't have a payout address
+   * set for the configured `currencyKey`
+   */
+  _deactivateAccountsWithoutPayoutAddress(): void {
+    const currencyKey = getCurrencyKey(this.externalCurrency());
+    const accountsIterator = this._accounts.values();
+    for (const account of accountsIterator) {
+      const payoutAddress = account.payoutAddresses.get(currencyKey);
+      if (!payoutAddress) this.deactivate(account.identity.id);
+    }
+  }
+
+  /**
+   * Helper method for disabling accounting.
+   *
+   * Zero out all balances, so there is no confusion about them.
+   * By zeroing them out, they cannot be compared to external balances
+   * in any meaningful way.
+   */
+  _eraseLedgerBalances(): void {
+    const accountsIterator = this._accounts.values();
+    for (const account of accountsIterator) {
+      account.balance = G.ZERO;
+    }
   }
 }
 
@@ -1004,7 +1222,11 @@ type Action =
   | SetPayoutAddress
   | EnableGrainIntegration
   | DisableGrainIntegration
-  | MarkDistributionExecuted;
+  | MarkDistributionExecuted
+  | EnableAccounting
+  | DisableAccounting
+  | SetExternalCurrency
+  | RemoveExternalCurrency;
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
@@ -1137,6 +1359,42 @@ const executeDistributionParser: C.Parser<MarkDistributionExecuted> = C.object({
   id: uuid.parser,
 });
 
+type EnableAccounting = {|
+  +type: "ENABLE_ACCOUNTING",
+|};
+
+const enableAccountingParser: C.Parser<EnableAccounting> = C.object({
+  type: C.exactly(["ENABLE_ACCOUNTING"]),
+});
+
+type DisableAccounting = {|
+  +type: "DISABLE_ACCOUNTING",
+|};
+
+const disableAccountingParser: C.Parser<DisableAccounting> = C.object({
+  type: C.exactly(["DISABLE_ACCOUNTING"]),
+});
+
+type SetExternalCurrency = {|
+  +type: "SET_EXTERNAL_CURRENCY",
+  +currency: Currency,
+|};
+
+const setExternalCurrencyParser: C.Parser<SetExternalCurrency> = C.object({
+  type: C.exactly(["SET_EXTERNAL_CURRENCY"]),
+  currency: currencyParser,
+});
+
+type RemoveExternalCurrency = {|
+  +type: "REMOVE_EXTERNAL_CURRENCY",
+|};
+
+const removeExternalCurrencyParser: C.Parser<RemoveExternalCurrency> = C.object(
+  {
+    type: C.exactly(["REMOVE_EXTERNAL_CURRENCY"]),
+  }
+);
+
 const actionParser: C.Parser<Action> = C.orElse([
   createIdentityParser,
   renameIdentityParser,
@@ -1150,6 +1408,10 @@ const actionParser: C.Parser<Action> = C.orElse([
   enableGrainIntegrationParser,
   disableGrainIntegrationParser,
   executeDistributionParser,
+  enableAccountingParser,
+  disableAccountingParser,
+  setExternalCurrencyParser,
+  removeExternalCurrencyParser,
 ]);
 
 const ledgerEventParser: C.Parser<LedgerEvent> = C.object({

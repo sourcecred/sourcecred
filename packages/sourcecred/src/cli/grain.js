@@ -47,14 +47,15 @@ const grainCommand: Command = async (args, std) => {
     grainInput
   );
 
-  const {results, ledger} = executeGrainIntegrationsFromGrainInput(
+  const {results, ledger} = await executeGrainIntegrationsFromGrainInput(
     grainInput,
     ledgerBeforeIntegrations,
     distributions
   );
 
   for (const result of results) {
-    instance.writeGrainIntegrationOutput(result);
+    await instance.writeGrainIntegrationOutput(result);
+    await instance.updateGrainIntegrationConfig(result, grainInput);
   }
 
   let totalDistributed = G.ZERO;

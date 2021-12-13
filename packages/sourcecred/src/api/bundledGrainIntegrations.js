@@ -1,13 +1,16 @@
 // @flow
 
-import type {GrainIntegrationFunction} from "../core/ledger/grainIntegration";
+import type {
+  GrainIntegration,
+  GrainIntegrationFunction,
+} from "../core/ledger/grainIntegration";
 import * as C from "../util/combo";
 
 import {csvIntegration} from "@sourcecred/grain-integration-csv";
 
-export type GrainIntegration = {|
-  name: string,
-  function: GrainIntegrationFunction,
+export type RawGrainIntegration = {|
+  type: string,
+  config?: Object,
 |};
 
 type AllowedDeclarations = {[pluginKey: string]: GrainIntegrationFunction};
@@ -27,10 +30,19 @@ export function bundledGrainIntegrations(
   return integration;
 }
 
-export const parser: C.Parser<GrainIntegration> = C.fmap(
-  C.exactly(["csv"]),
-  (integrationKey) => ({
-    name: integrationKey,
-    function: bundledGrainIntegrations(integrationKey),
-  })
+export const rawParser: C.Parser<RawGrainIntegration> = C.object(
+  {
+    type: C.exactly(["csv"]),
+  },
+  {config: C.raw}
 );
+
+function upgrade(c: RawGrainIntegration): GrainIntegration {
+  const {type, config} = c;
+  return {
+    name: type,
+    function: bundledGrainIntegrations(type),
+    config,
+  };
+}
+export const parser: C.Parser<GrainIntegration> = C.fmap(rawParser, upgrade);

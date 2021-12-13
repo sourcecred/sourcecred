@@ -1,7 +1,8 @@
 // @flow
 
 import {
-  type GrainIntegrationFunction,
+  type GrainIntegration,
+  type IntegrationConfig,
   executeGrainIntegration,
 } from "./grainIntegration";
 import {
@@ -27,6 +28,10 @@ const {ledgerWithActiveIdentities} = createTestLedgerFixture(
   dateMock
 );
 
+const mockOutputJSON = {
+  fileName: "testName.csv",
+  content: "this is a result from a grain integration.",
+};
 describe("src/core/ledger/grainIntegration", () => {
   describe("executeGrainIntegration", () => {
     let ledger;
@@ -77,170 +82,215 @@ describe("src/core/ledger/grainIntegration", () => {
         parseAddress("0x0000000000000000000000000000000000000002"),
         currency.chainId
       );
+      ledger.setExternalCurrency(buildCurrency("BTC").chainId);
     });
-    const getmockIntegration: (?boolean) => GrainIntegrationFunction = (
+    const getmockIntegration: (
+      ?boolean,
+      ?boolean,
+      ?Object
+    ) => GrainIntegration = (
       returnTransfers = false,
-      returnOutput = false
-    ) => (distributions = [], _unused_config) => {
-      const _ = currency;
-      const transferResult = distributions.map(([payoutAddress, amount]) => ({
-        payoutAddress,
-        amount,
-        memo: "hello transfer",
-      }));
-      const result = returnTransfers
-        ? {transferredGrain: transferResult, outputFile: undefined}
-        : {transferredGrain: [], outputFile: undefined};
-      if (returnOutput)
-        result.outputFile = {
-          fileName: "testName.csv",
-          content: "this is a result from a grain integration.",
-        };
-      return result;
-    };
+      returnOutput = false,
+      integrationConfig = {}
+    ) => ({
+      config: integrationConfig,
+      name: "mockIntegration",
+      function: async (distributions = [], config: IntegrationConfig) => {
+        const transferResult = distributions.map(([payoutAddress, amount]) => ({
+          payoutAddress,
+          amount,
+          memo: "hello transfer",
+        }));
+        const result = returnTransfers
+          ? {
+              transferredGrain: transferResult,
+              outputFile: undefined,
+              configUpdate: config.integration || {},
+            }
+          : {
+              transferredGrain: [],
+              outputFile: undefined,
+              configUpdate: config.integration || {},
+            };
+        if (returnOutput) result.outputFile = mockOutputJSON;
+        return result;
+      },
+    });
     const currency = buildCurrency("BTC");
-    it("can execute GrainIntegration that doesn't update the ledger", () => {
-      const ledgerSnapshot = ledger.serialize();
-      const {ledger: newLedger} = executeGrainIntegration(
-        ledger,
-        getmockIntegration(),
-        distribution,
-        currency,
-        true,
-        sink
-      );
-      const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
-      expect(result).toEqual([
-        {
-          "action": {
-            "id": "000000000000000000000A",
-            "type": "MARK_DISTRIBUTION_EXECUTED",
-          },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
-          "version": "1",
-        },
-      ]);
+    describe("integration return handling", () => {
+      it("handles return data from the integration purely", async () => {
+        const configUpdateInput = {test: "me", pan: "cake"};
+        const {
+          distributionCredTimestamp,
+          configUpdate,
+          output,
+        } = await executeGrainIntegration(
+          ledger,
+          getmockIntegration(false, true, configUpdateInput),
+          distribution,
+          sink
+        );
+        expect(distributionCredTimestamp).toBe(1);
+        expect(output).toBe(mockOutputJSON);
+        expect(configUpdate).toEqual(configUpdateInput);
+      });
+      it("handles the base cases correctly", async () => {
+        const configUpdateInput = {};
+        const {
+          distributionCredTimestamp,
+          configUpdate,
+          output,
+        } = await executeGrainIntegration(
+          ledger,
+          getmockIntegration(false, false, configUpdateInput),
+          distribution,
+          sink
+        );
+        expect(distributionCredTimestamp).toBe(1);
+        expect(output).toBe(undefined);
+        expect(configUpdate).toEqual(configUpdateInput);
+      });
     });
-    it("doesn't transfer grain if processDistributions isn't set", () => {
-      const ledgerSnapshot = ledger.serialize();
-      const {ledger: newLedger} = executeGrainIntegration(
-        ledger,
-        getmockIntegration(true),
-        distribution,
-        currency,
-        false,
-        sink
-      );
-      const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
-      expect(result).toEqual([]);
-    });
-    it("doesn't transfer grain if a accounting isn't enabled", () => {
-      const ledgerSnapshot = ledger.serialize();
-      const {ledger: newLedger} = executeGrainIntegration(
-        ledger,
-        getmockIntegration(true),
-        distribution,
-        currency,
-        true,
-        sink,
-        false
-      );
-      const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
-      expect(result).toEqual([
-        {
-          "action": {
-            "id": "000000000000000000000A",
-            "type": "MARK_DISTRIBUTION_EXECUTED",
-          },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
-          "version": "1",
-        },
-      ]);
-    });
-    it("doesn't transfer grain if a sink isn't set", () => {
-      const ledgerSnapshot = ledger.serialize();
-      const {ledger: newLedger} = executeGrainIntegration(
-        ledger,
-        getmockIntegration(true),
-        distribution,
-        currency,
-        true
-      );
-      const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
-      expect(result).toEqual([
-        {
-          "action": {
-            "id": "000000000000000000000A",
-            "type": "MARK_DISTRIBUTION_EXECUTED",
-          },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
-          "version": "1",
-        },
-      ]);
-    });
-    it("Throws if the ledger does not have integrations enabled when it's expected to", () => {
-      ledger.disableIntegrationTracking();
-      const thunk = () =>
-        executeGrainIntegration(
+    describe("ledger updates and transfer processing", () => {
+      it("can execute GrainIntegration that doesn't update the ledger", async () => {
+        const ledgerSnapshot = ledger.serialize();
+        const {ledger: newLedger} = await executeGrainIntegration(
           ledger,
           getmockIntegration(),
           distribution,
-          currency,
-          true,
           sink
         );
-      expect(thunk).toThrow("integration tracking not enabled");
-    });
-    it("updates the ledger when balances are returned by the integration", () => {
-      const ledgerSnapshot = ledger.serialize();
-      const {ledger: newLedger} = executeGrainIntegration(
-        ledger,
-        getmockIntegration(true),
-        distribution,
-        currency,
-        true,
-        sink,
-        true
-      );
-      const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
-      expect(result).toEqual([
-        {
+        const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
+        expect(result).toEqual([
+          {
+            "action": {
+              "id": "000000000000000000000A",
+              "type": "MARK_DISTRIBUTION_EXECUTED",
+            },
+            "ledgerTimestamp": 11,
+            "uuid": "000000000000000000012A",
+            "version": "1",
+          },
+        ]);
+      });
+      it("doesn't transfer grain if processDistributions isn't set", async () => {
+        ledger.disableIntegrationTracking();
+        const ledgerSnapshot = ledger.serialize();
+        const {ledger: newLedger} = await executeGrainIntegration(
+          ledger,
+          getmockIntegration(true),
+          distribution,
+          sink
+        );
+        const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
+        expect(result).toEqual([]);
+      });
+      it("doesn't transfer grain if a accounting isn't enabled", async () => {
+        const ledgerSnapshot = ledger.serialize();
+        ledger.disableAccounting();
+        const {ledger: newLedger} = await executeGrainIntegration(
+          ledger,
+          getmockIntegration(true),
+          distribution,
+          sink
+        );
+        const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
+        expect(result).toContainEqual({
           "action": {
             "id": "000000000000000000000A",
             "type": "MARK_DISTRIBUTION_EXECUTED",
           },
-          "ledgerTimestamp": 10,
-          "uuid": "000000000000000000011A",
+          "ledgerTimestamp": 13,
+          "uuid": "000000000000000000014A",
           "version": "1",
-        },
-        {
-          ledgerTimestamp: 11,
-          action: {
-            from: "YVZhbGlkVXVpZEF0TGFzdA",
-            to: "000000000000000000006A",
-            amount: "13",
-            memo: "Integrated Distribution: hello transfer",
-            type: "TRANSFER_GRAIN",
+        });
+      });
+      it("doesn't transfer grain if a sink isn't set", async () => {
+        const ledgerSnapshot = ledger.serialize();
+        const {ledger: newLedger} = await executeGrainIntegration(
+          ledger,
+          getmockIntegration(true),
+          distribution
+        );
+        const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
+        expect(result).toEqual([
+          {
+            "action": {
+              "id": "000000000000000000000A",
+              "type": "MARK_DISTRIBUTION_EXECUTED",
+            },
+            "ledgerTimestamp": 11,
+            "uuid": "000000000000000000012A",
+            "version": "1",
           },
-          version: "1",
-          uuid: "000000000000000000012A",
-        },
-        {
-          ledgerTimestamp: 12,
-          action: {
-            from: "URgLrCxgvjHxtGJ9PgmckQ",
-            to: "000000000000000000006A",
-            amount: "17",
-            memo: "Integrated Distribution: hello transfer",
-            type: "TRANSFER_GRAIN",
+        ]);
+      });
+      it("does not mark a distribution as executed if Integration tracking is disabled", async () => {
+        const ledgerSnapshot = ledger.serialize();
+        ledger.disableIntegrationTracking();
+        const {ledger: newLedger} = await executeGrainIntegration(
+          ledger,
+          getmockIntegration(),
+          distribution,
+          sink
+        );
+        const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
+        expect(result).toEqual([
+          {
+            "action": {
+              "type": "DISABLE_GRAIN_INTEGRATION",
+            },
+            "ledgerTimestamp": 11,
+            "uuid": "000000000000000000012A",
+            "version": "1",
           },
-          version: "1",
-          uuid: "000000000000000000013A",
-        },
-      ]);
+        ]);
+      });
+      it("updates the ledger when balances are returned by the integration", async () => {
+        const ledgerSnapshot = ledger.serialize();
+        const {ledger: newLedger} = await executeGrainIntegration(
+          ledger,
+          getmockIntegration(true),
+          distribution,
+          sink
+        );
+        const result = diffLedger(newLedger, Ledger.parse(ledgerSnapshot));
+        expect(result).toEqual([
+          {
+            "action": {
+              "id": "000000000000000000000A",
+              "type": "MARK_DISTRIBUTION_EXECUTED",
+            },
+            "ledgerTimestamp": 11,
+            "uuid": "000000000000000000012A",
+            "version": "1",
+          },
+          {
+            action: {
+              from: "YVZhbGlkVXVpZEF0TGFzdA",
+              to: "000000000000000000006A",
+              amount: "13",
+              memo: "Integrated Distribution: hello transfer",
+              type: "TRANSFER_GRAIN",
+            },
+            version: "1",
+            "ledgerTimestamp": 12,
+            uuid: "000000000000000000013A",
+          },
+          {
+            action: {
+              from: "URgLrCxgvjHxtGJ9PgmckQ",
+              to: "000000000000000000006A",
+              amount: "17",
+              memo: "Integrated Distribution: hello transfer",
+              type: "TRANSFER_GRAIN",
+            },
+            version: "1",
+            ledgerTimestamp: 13,
+            uuid: "000000000000000000014A",
+          },
+        ]);
+      });
     });
   });
 });

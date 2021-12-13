@@ -1,9 +1,9 @@
 // @flow
 
-import {Ledger, type PayoutAddress} from "./ledger";
+import {Ledger, type PayoutAddress, type AccountingStatus} from "./ledger";
 import {type Distribution} from "./distribution";
-import {getDistributionBalances} from "./distributionSummary/distributionSummary.js";
-import {type Currency, type CurrencyKey, getCurrencyKey} from "./currency.js";
+import {getDistributionBalances} from "./distributionSummary/distributionSummary";
+import {type Currency, type CurrencyKey, getCurrencyKey} from "./currency";
 import {type IdentityId} from "../identity";
 import * as NullUtil from "../../util/null";
 import {type TimestampMs} from "../../util/timestamp";
@@ -28,6 +28,9 @@ export type PayoutResult = {|
   // If Grain balances are tracked in the ledger, these will be recorded as
   // transfers in the ledger to the "sink" Identity.
   transferredGrain: TransferredGrain,
+  // integration-specific config changes that need to be persisted are
+  // returned in the configUpdate object.
+  configUpdate: Object,
   // output files and content
   outputFile?: GrainIntegrationOutput,
 |};
@@ -39,13 +42,17 @@ export type IntegrationConfig = {|
   // is utilized to enforce the existence of token balances outside of the
   // ledger. Importantly, Grain Receipts from allocations are still tracked,
   // because some grain distribution strategies rely on this information.
-  accountingEnabled: boolean,
+  accounting: AccountingStatus,
   // This enables a new ledger event where all distributions after this
   // config is enabled should have a matching "Integration" event. If not,
   // an interface should prompt admin interface users that they haven't
   // distributed funds via a configured integration
   processDistributions: boolean,
   currency: Currency,
+  // This optional object contains the self-configuration set by the grain
+  // integration on previous runs. It allows the grain integration to
+  // read its own configuration from disk.
+  integration: ?Object,
 |};
 
 /**
@@ -60,12 +67,19 @@ export type IntegrationConfig = {|
 export type GrainIntegrationFunction = (
   PayoutDistributions,
   IntegrationConfig
-) => PayoutResult;
+) => Promise<PayoutResult>;
+
+export type GrainIntegration = {|
+  name: string,
+  function: GrainIntegrationFunction,
+  config?: Object,
+|};
 
 export type GrainIntegrationResult = {|
   ledger: Ledger,
-  output?: GrainIntegrationOutput,
   distributionCredTimestamp: TimestampMs,
+  configUpdate: Object,
+  output?: GrainIntegrationOutput,
 |};
 
 ///////////////////
@@ -75,17 +89,17 @@ export type GrainIntegrationResult = {|
 // TODO @topocount: Refactor interface using instance/config properties
 // after grainConfig is updated to include The payout currency details and
 // sink identity
-export function executeGrainIntegration(
+export async function executeGrainIntegration(
   ledger: Ledger,
-  integration: GrainIntegrationFunction,
+  integration: GrainIntegration,
   distribution: Distribution,
-  currency: Currency,
-  processDistributions: boolean,
-  sink?: IdentityId,
-  // TODO (@topocount) setup accounting config in ledger and remove this config
-  // which is just for proof-of-concept
-  accountingEnabled?: boolean = false
-): GrainIntegrationResult {
+  sink?: IdentityId
+): Promise<GrainIntegrationResult> {
+  const currency = ledger.externalCurrency();
+  const {
+    enabled: accountingEnabled,
+    trackGrainIntegration: processDistributions,
+  } = ledger.accounting();
   const {payoutDistributions, payoutAddressToId} = buildDistributionIndexes(
     ledger,
     distribution,
@@ -96,10 +110,11 @@ export function executeGrainIntegration(
   // the fixed-point amount for some reason.
   let result;
   try {
-    result = integration(payoutDistributions, {
-      currency,
-      accountingEnabled,
+    result = await integration.function(payoutDistributions, {
+      accounting: ledger.accounting(),
+      integration: integration.config,
       processDistributions,
+      currency,
     });
     if (processDistributions) ledger.markDistributionExecuted(distribution.id);
   } catch (e) {
@@ -122,6 +137,7 @@ export function executeGrainIntegration(
   return {
     ledger,
     output: result.outputFile,
+    configUpdate: result.configUpdate,
     distributionCredTimestamp: distribution.credTimestamp,
   };
 }
@@ -129,7 +145,7 @@ export function executeGrainIntegration(
 export function buildDistributionIndexes(
   ledger: Ledger,
   distribution: Distribution,
-  currencyId: CurrencyKey
+  currencyKey: CurrencyKey
 ): {
   payoutDistributions: PayoutDistributions,
   payoutAddressToId: PayoutAddressToId,
@@ -139,7 +155,7 @@ export function buildDistributionIndexes(
   const balances = getDistributionBalances(distribution);
   for (const [id, amount] of balances.entries()) {
     const {payoutAddresses, identity} = ledger.account(id);
-    const address = payoutAddresses.get(currencyId);
+    const address = payoutAddresses.get(currencyKey);
     if (!address) continue;
     // need to allow for identities that have since been merged to still claim
     // funds if accounts are merged between a grain distribution and a

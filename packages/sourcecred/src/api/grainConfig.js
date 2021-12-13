@@ -9,13 +9,12 @@ import {
   allocationConfigParser,
 } from "../core/ledger/policies";
 import {type Name, parser as nameParser} from "../core/identity/name";
-import {
-  type GrainIntegration,
-  parser as bundledGrainIntegrationParser,
-} from "./bundledGrainIntegrations";
+import type {GrainIntegration} from "../core/ledger/grainIntegration";
+import {parser as bundledGrainIntegrationParser} from "./bundledGrainIntegrations";
 
 export type RawGrainConfig = {|
   +allocationPolicies: $ReadOnlyArray<AllocationConfig>,
+  +accountingEnabled?: boolean,
   +maxSimultaneousDistributions?: number,
   +sinkIdentity?: Name,
   +processDistributions?: boolean,
@@ -25,6 +24,7 @@ export type RawGrainConfig = {|
 export type GrainConfig = {|
   +allocationPolicies: $ReadOnlyArray<AllocationPolicy>,
   +maxSimultaneousDistributions: number,
+  +accountingEnabled: boolean,
   +sinkIdentity?: Name,
   +processDistributions?: boolean,
   +integration?: GrainIntegration,
@@ -38,6 +38,7 @@ export const rawParser: C.Parser<RawGrainConfig> = C.object(
     maxSimultaneousDistributions: C.number,
     sinkIdentity: nameParser,
     processDistributions: C.boolean,
+    accountingEnabled: C.boolean,
     integration: bundledGrainIntegrationParser,
   }
 );
@@ -51,6 +52,7 @@ export const parser: C.Parser<GrainConfig> = C.fmap(
       maxSimultaneousDistributions: C.number,
       sinkIdentity: nameParser,
       processDistributions: C.boolean,
+      accountingEnabled: C.boolean,
       integration: bundledGrainIntegrationParser,
     }
   ),
@@ -60,5 +62,8 @@ export const parser: C.Parser<GrainConfig> = C.fmap(
       config.maxSimultaneousDistributions,
       Infinity
     ),
+    accountingEnabled: NullUtil.orElse(config.accountingEnabled, true),
   })
 );
+
+// const allocationToPolicyParser<Allocation

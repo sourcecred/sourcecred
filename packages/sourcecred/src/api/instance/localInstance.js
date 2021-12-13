@@ -4,9 +4,11 @@ import {Instance} from "./instance";
 import {ReadInstance} from "./readInstance";
 import type {CredrankOutput} from "../main/credrank";
 import type {GraphInput, GraphOutput} from "../main/graph";
+import type {GrainInput} from "../main/grain";
 import type {AnalysisOutput} from "../main/analysis";
 import type {Neo4jOutput} from "../main/analysisUtils/neo4j";
 import {join as pathJoin} from "path";
+import {raw as rawParser} from "../../util/combo";
 import stringify from "json-stable-stringify";
 import {
   type WeightedGraph,
@@ -38,6 +40,8 @@ const PERSONAL_ATTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
   "config",
   "personalAttributions.json",
 ];
+
+const GRAIN_PATH: $ReadOnlyArray<string> = ["config", "grain.json"];
 const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
 const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph"];
 const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
@@ -147,6 +151,40 @@ export class LocalInstance extends ReadInstance implements Instance {
       credDateString + "_" + fileName
     );
     this._writableStorage.set(grainIntegrationPath, encode(content));
+  }
+
+  /**
+   *
+   */
+  async updateGrainIntegrationConfig(
+    result: $Shape<GrainIntegrationMultiResult>,
+    config: GrainInput
+  ): Promise<void> {
+    const configName = config.grainConfig.integration?.name;
+    if (!configName) return;
+    const configUpdate = result.configUpdate;
+    if (Object.keys(configUpdate).length > 0) {
+      const grainConfigPath = pathJoin(...GRAIN_PATH);
+      const currentConfig = await loadJson<any>(
+        this._storage,
+        grainConfigPath,
+        rawParser
+      );
+      const newConfig = {
+        ...currentConfig,
+        integration: {
+          ...currentConfig.integration,
+          config: {
+            ...currentConfig.integration.config,
+            ...configUpdate,
+          },
+        },
+      };
+      await this._writableStorage.set(
+        grainConfigPath,
+        stringify(newConfig, {space: 2})
+      );
+    }
   }
 
   //////////////////////////////
