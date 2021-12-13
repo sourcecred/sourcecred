@@ -52,15 +52,11 @@
   "scripts": {
     "test": "./scripts/test.sh",
     "compile-contracts": "truffle compile",
-    "migrate-contracts": "truffle migrate",
     "deploy-contracts": "truffle deploy",
-    "deploy-contracts-from-docker": "truffle deploy --network dockerGanache",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "lint:sol": "solium -d ./contracts",
     "console": "truffle console",
-    "networks": "truffle networks",
-    "disburse": "truffle exec scripts/disburse.js",
-    "calculateProof": "truffle exec scripts/calculateProof.js"
+    "networks": "truffle networks"
   }
 }
