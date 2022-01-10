@@ -359,16 +359,14 @@ describe("plugins/github/relationalView", () => {
     }
 
     it("without regularly spaced pull requests", () => {
-      const rv = new R.RelationalView();
+      const rv = new R.RelationalView(exampleResponse({includePullRequests: false}));
       // Next line expected to stack overflow on a naive implementation.
-      rv.addRepository(exampleResponse({includePullRequests: false}));
       expect(Array.from(rv.commits())).toHaveLength(COMMIT_CHAIN_LENGTH);
       expect(Array.from(rv.pulls())).toHaveLength(1);
     });
 
     it("with regularly spaced pull requests", () => {
-      const rv = new R.RelationalView();
-      rv.addRepository(exampleResponse({includePullRequests: true}));
+      const rv = new R.RelationalView(exampleResponse({includePullRequests: true}));
       expect(Array.from(rv.commits())).toHaveLength(COMMIT_CHAIN_LENGTH);
       expect(Array.from(rv.pulls())).toHaveLength(
         Math.ceil((COMMIT_CHAIN_LENGTH - 1) / PULL_REQUEST_SPACING) + 1
@@ -442,16 +440,6 @@ describe("plugins/github/relationalView", () => {
       }
       expect(MapUtil.toObject(urlToReactions)).toMatchSnapshot();
     });
-  });
-
-  it("addRepository is idempotent", () => {
-    const rv1 = new R.RelationalView();
-    rv1.addRepository(exampleRepository());
-    const rv2 = new R.RelationalView();
-    rv2.addRepository(exampleRepository());
-    rv2.addRepository(exampleRepository());
-    // may be fragile
-    expect(rv1).toEqual(rv2);
   });
 
   describe("compressByRemovingBody", () => {
