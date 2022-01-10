@@ -43,6 +43,7 @@ const merkleIntegration /*: any*/ = async (
     };
   }
   const tree = createMerkleTree(payoutDistributions);
+  console.log({ payoutDistributions });
   const merkleContract = new ethers.Contract(
     address,
     redeemContract.abi,
@@ -52,6 +53,7 @@ const merkleIntegration /*: any*/ = async (
     const nextId = await getNextDistributionId(merkleContract);
     await checkPermissions(merkleContract, signer);
     const defaultDelay = await merkleContract.minDelay();
+    console.log({ root: tree.getHexRoot() });
     await merkleContract.seedDistribution(
       nextId,
       tree.getHexRoot(),
@@ -64,7 +66,11 @@ const merkleIntegration /*: any*/ = async (
   }
   return {
     transferredGrain: [],
-    configUpdate: configReturn
+    configUpdate: configReturn,
+    outputFile: {
+      fileName: tree.getHexRoot() + ".json",
+      content: JSON.stringify(payoutDistributions)
+    }
   };
 };
 
@@ -73,6 +79,7 @@ function createMerkleTree(elements) {
     const hash = soliditySha3(address, amount);
     return hash;
   });
+  console.log({ elements, hashedElements });
   return new MerkleTree(hashedElements, keccak256, {
     hashLeaves: false,
     sortPairs: true
@@ -122,6 +129,7 @@ async function checkPermissions(contract, signer) {
   // These _could_ be hardcoded
   const AdminRole = await contract.DEFAULT_ADMIN_ROLE();
   const SeederRole = await contract.SEEDER_ROLE();
+
   const signerAddress = await signer.getAddress();
   const signerIsAdmin = await contract.hasRole(AdminRole, signerAddress);
   const signerIsSeeder = await contract.hasRole(SeederRole, signerAddress);

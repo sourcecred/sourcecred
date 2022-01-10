@@ -20,6 +20,7 @@ import {HideOnScroll} from "ra-ui-materialui";
 
 import LoadingIndicator from "./LoadingIndicator";
 import {LoginButton} from "./LoginButton";
+import {OpenClaimButton} from "@sourcecred/grain-integration-merkle";
 
 const useStyles = makeStyles(
   (theme) => ({
@@ -89,7 +90,7 @@ type Props = {
  *           />
  *        </AppBar>
  *    );
- *};
+ * };
  */
 const AppBar = (props: Props): React.Node => {
   const {

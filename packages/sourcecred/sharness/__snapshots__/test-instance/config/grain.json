@@ -1,4 +1,5 @@
 {
+  "accountingEnabled": false,
   "allocationPolicies": [
     {
       "budget": "5000",
@@ -6,9 +7,8 @@
       "policyType": "BALANCED"
     }
   ],
-  "maxSimultaneousDistributions": 1,
-  "accountingEnabled": false,
-  "integration":{
+  "integration": {
     "type": "merkle"
-  }
+  },
+  "maxSimultaneousDistributions": 1
 }

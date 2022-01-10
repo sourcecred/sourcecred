@@ -1,5 +1,4 @@
 // @flow
-
 module.exports = {
   parser: "babel-eslint",
   plugins: ["flowtype", "react"],
@@ -18,8 +17,9 @@ module.exports = {
   },
   extends: [
     "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:flowtype/recommended"
+    "plugin:flowtype/recommended",
+    "react-app",
+    "react-app/jest"
   ],
   rules: {
     "prefer-const": ["warn"],
