@@ -47,7 +47,7 @@ export class RelationalView {
   _mapReferences: Map<N.RawAddress, N.ReferentAddress[]>;
   _mapReferencedBy: Map<N.RawAddress, N.TextContentAddress[]>;
 
-  constructor(): void {
+  constructor(repository?: T.Repository): void {
     this._repos = new Map();
     this._issues = new Map();
     this._pulls = new Map();
@@ -57,18 +57,13 @@ export class RelationalView {
     this._userlikes = new Map();
     this._mapReferences = new Map();
     this._mapReferencedBy = new Map();
-  }
 
-  addRepository(repository: T.Repository): void {
-    // Warning: calling `addRepository` can put the RelationalView in an
-    // inconsistent state. for example, if called with a repo with
-    // issues [#1, #2, #3] and then with a repo with issues [#4, #5],
-    // then calls to `repo.issues()` will only give back issues 4 and 5
-    // (although issues 1, 2, and 3 will still be in the view).
-    this._addRepo(repository);
-    this._addReferences();
+    if (repository !== undefined) {
+      this._addRepo(repository)
+      this._addReferences();
+    }
   }
-
+  
   /**
    * Mutate the RelationalView, by replacing all of the post bodies with
    * empty strings. Usage of this method is a convenient hack to save space,
@@ -273,6 +268,7 @@ export class RelationalView {
 
   static fromJSON(compatJson: RelationalViewJSON): RelationalView {
     const json = fromCompat(COMPAT_INFO, compatJson);
+    
     const rv = new RelationalView();
     rv._repos = MapUtil.fromObject(json.repos);
     rv._issues = MapUtil.fromObject(json.issues);
