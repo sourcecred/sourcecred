@@ -9,17 +9,18 @@ const presets = [
         firefox: "60",
         chrome: "67",
         safari: "11.1",
-        node: true,
+        node: true
       },
-    },
+      loose: true
+    }
   ],
   "@babel/preset-react",
-  "@babel/preset-flow",
+  "@babel/preset-flow"
 ];
 
 const plugins = [
   "@babel/plugin-proposal-class-properties",
-  "@babel/plugin-syntax-bigint",
+  "@babel/plugin-syntax-bigint"
 ];
 
-module.exports = {presets, plugins};
+module.exports = { presets, plugins };

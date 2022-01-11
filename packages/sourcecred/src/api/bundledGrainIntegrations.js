@@ -9,6 +9,7 @@ import * as C from "../util/combo";
 import {csvIntegration} from "@sourcecred/grain-integration-csv";
 import {merkleIntegration} from "@sourcecred/grain-integration-merkle";
 
+console.log({merkleIntegration});
 export type RawGrainIntegration = {|
   type: string,
   config?: Object,
