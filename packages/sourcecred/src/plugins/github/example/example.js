@@ -20,8 +20,7 @@ export function exampleRepository(): Repository {
 }
 
 export function exampleRelationalView(): RelationalView {
-  const rv = new RelationalView();
-  rv.addRepository(exampleRepository());
+  const rv = new RelationalView(exampleRepository());
   return rv;
 }
 
