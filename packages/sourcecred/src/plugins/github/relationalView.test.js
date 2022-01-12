@@ -359,14 +359,18 @@ describe("plugins/github/relationalView", () => {
     }
 
     it("without regularly spaced pull requests", () => {
-      const rv = new R.RelationalView(exampleResponse({includePullRequests: false}));
+      const rv = new R.RelationalView(
+        exampleResponse({includePullRequests: false})
+      );
       // Next line expected to stack overflow on a naive implementation.
       expect(Array.from(rv.commits())).toHaveLength(COMMIT_CHAIN_LENGTH);
       expect(Array.from(rv.pulls())).toHaveLength(1);
     });
 
     it("with regularly spaced pull requests", () => {
-      const rv = new R.RelationalView(exampleResponse({includePullRequests: true}));
+      const rv = new R.RelationalView(
+        exampleResponse({includePullRequests: true})
+      );
       expect(Array.from(rv.commits())).toHaveLength(COMMIT_CHAIN_LENGTH);
       expect(Array.from(rv.pulls())).toHaveLength(
         Math.ceil((COMMIT_CHAIN_LENGTH - 1) / PULL_REQUEST_SPACING) + 1

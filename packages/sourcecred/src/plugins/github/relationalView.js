@@ -59,11 +59,11 @@ export class RelationalView {
     this._mapReferencedBy = new Map();
 
     if (repository !== undefined) {
-      this._addRepo(repository)
+      this._addRepo(repository);
       this._addReferences();
     }
   }
-  
+
   /**
    * Mutate the RelationalView, by replacing all of the post bodies with
    * empty strings. Usage of this method is a convenient hack to save space,
@@ -268,7 +268,7 @@ export class RelationalView {
 
   static fromJSON(compatJson: RelationalViewJSON): RelationalView {
     const json = fromCompat(COMPAT_INFO, compatJson);
-    
+
     const rv = new RelationalView();
     rv._repos = MapUtil.fromObject(json.repos);
     rv._issues = MapUtil.fromObject(json.issues);
