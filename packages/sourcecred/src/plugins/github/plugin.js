@@ -93,7 +93,7 @@ export class GithubPlugin implements Plugin {
     }
     const wg = mergeWeightedGraph(
       repositories.map((r) => {
-        const rv = new RelationalView(r1);
+        const rv = new RelationalView(r);
         return createGraph(rv);
       })
     );
