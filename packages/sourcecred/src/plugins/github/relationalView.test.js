@@ -4,7 +4,7 @@ import {NodeAddress} from "../../core/graph";
 import * as R from "./relationalView";
 import * as N from "./nodes";
 import * as T from "./graphqlTypes";
-import {exampleRepository, exampleRelationalView} from "./example/example";
+import {exampleRelationalView} from "./example/example";
 import * as MapUtil from "../../util/map";
 
 describe("plugins/github/relationalView", () => {
