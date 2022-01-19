@@ -3,7 +3,7 @@
 import {buildConfig} from "./testUtils";
 import {applyOperator} from "./operator";
 
-describe("core/credEquate/config", () => {
+describe("core/credEquate/operator", () => {
   const config = buildConfig();
   const scoredWeightOperands = [
     {key: "emoji", subkey: "0", score: 0},
