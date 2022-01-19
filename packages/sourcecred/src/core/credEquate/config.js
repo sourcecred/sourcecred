@@ -1,7 +1,7 @@
 // @flow
 
 import type {TimestampMs} from "../../util/timestamp";
-import type {Contribution, Expression, WeightOperand} from "./contribution";
+import type {WeightOperand} from "./contribution";
 import {type Operator, OPERATOR_KEY_PREFIX, OPERATORS} from "./operator";
 
 /**
@@ -77,7 +77,7 @@ export type Config = {|
   +shares: WeightConfig,
 |};
 
-function getWeightConfigs(config, key, subkey) {
+function getWeightConfigs(config, key: string, subkey) {
   const keyConfig = config.find((x) => x.key === key);
   if (keyConfig === undefined)
     throw new Error(`Key [${key}] has not been set in the weights config.`);

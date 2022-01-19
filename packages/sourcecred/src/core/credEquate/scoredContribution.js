@@ -1,10 +1,6 @@
 // @flow
 import type {Contribution, Expression} from "./contribution";
-import {
-  type Operator,
-  applyOperator,
-  OPERATORS,
-} from "./operator";
+import {type Operator, applyOperator, OPERATORS} from "./operator";
 import {getWeight, getOperator, type Config} from "./config";
 import type {TimestampMs} from "../../util/timestamp";
 import findLast from "lodash.findlast";
@@ -92,13 +88,13 @@ export const scoreContribution = (
   config: Config
 ): ScoredContribution => {
   const scoredExpression = scoreExpression(contribution.expression, config);
-  let totalShares = 0;
+  let totalShares: number = 0;
   const participants = contribution.participants.map((participant) => {
     const participantShares = participant.shares.map((share) => ({
       ...share,
       amount: getWeight(share, config.shares),
     }));
-    const sumParticipantShares = participantShares
+    const sumParticipantShares: number = participantShares
       .map((s) => s.amount)
       .reduce((a, b) => a + b, 0);
     totalShares += sumParticipantShares;

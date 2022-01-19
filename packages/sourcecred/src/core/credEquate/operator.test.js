@@ -1,6 +1,6 @@
 // @flow
 
-import {buildConfig} from "./testUtils.test";
+import {buildConfig} from "./testUtils";
 import {applyOperator} from "./operator";
 
 describe("core/credEquate/config", () => {
@@ -22,7 +22,7 @@ describe("core/credEquate/config", () => {
   describe("MULTIPLY", () => {
     const OPERATOR = "MULTIPLY";
     it("scores as 0 when there are no operands", () => {
-      expect(applyOperator(OPERATOR, [], [], config)).toEqual(0);
+      expect(applyOperator(OPERATOR, [], [], config)).toEqual(1);
     });
 
     it("scores as 0 when weightOperands = 0", () => {
@@ -375,7 +375,7 @@ describe("core/credEquate/config", () => {
           ],
           config
         )
-      ).toEqual(scoredWeightOperands[2].score);
+      ).toEqual(2.5);
     });
     it("returns the first in expressionOperands even if there is 1 weightOperands", () => {
       const expectedAverage =

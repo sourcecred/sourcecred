@@ -1,7 +1,9 @@
 // @flow
 import type {Config} from "./config";
-import type {Contribution} from "./contribution";
+import type {WeightOperand, Contribution} from "./contribution";
+import type {ScoredWeightOperand} from "./scoredContribution";
 import {scoreContribution} from "./scoredContribution";
+import {NodeAddress} from "../graph";
 
 describe("core/credEquate/scoredContribution", () => {
   const config: Config = {
@@ -21,21 +23,30 @@ describe("core/credEquate/scoredContribution", () => {
       },
     ],
     operators: [],
-    shares: [{key: "author", amount: 1}],
+    shares: [
+      {
+        key: "author",
+        default: 1,
+        subkeys: [
+          {subkey: "2", weight: 2},
+          {subkey: "0", weight: 0},
+        ],
+      },
+    ],
     memo: "test",
-    startTimeMs: -Infinity
+    startTimeMs: -Infinity,
   };
-  const weightOperands = [
-    {key: "1", value: "0"},
-    {key: "1", value: "1"},
-    {key: "1", value: "2"},
-    {key: "3", value: "3"},
+  const weightOperands: $ReadOnlyArray<WeightOperand> = [
+    {key: "1", subkey: "0"},
+    {key: "1", subkey: "1"},
+    {key: "1", subkey: "2"},
+    {key: "3", subkey: "3"},
   ];
-  const scoredWeightOperands = [
-    {key: "1", value: "0", score: 0},
-    {key: "1", value: "1", score: 1},
-    {key: "1", value: "2", score: 2},
-    {key: "3", value: "3", score: 3},
+  const scoredWeightOperands: $ReadOnlyArray<ScoredWeightOperand> = [
+    {key: "1", subkey: "0", score: 0},
+    {key: "1", subkey: "1", score: 1},
+    {key: "1", subkey: "2", score: 2},
+    {key: "3", subkey: "3", score: 3},
   ];
   const buildExpressionOperand = (i) => ({
     operator: "ADD",
@@ -55,14 +66,22 @@ describe("core/credEquate/scoredContribution", () => {
     plugin: "myPlugin",
     type: "message",
     timestampMs: 1,
-    participants: [{id: "123", shares: [{key: "author"}]}],
+    participants: [
+      {id: NodeAddress.fromParts(["123"]), shares: [{key: "author"}]},
+    ],
   };
   const scoredContributionStarter = (score) => ({
     id: "123",
     plugin: "myPlugin",
     type: "message",
     timestampMs: 1,
-    participants: [{id: "123", score, shares: [{key: "author", amount: 1}]}],
+    participants: [
+      {
+        id: NodeAddress.fromParts(["123"]),
+        score,
+        shares: [{key: "author", amount: 1}],
+      },
+    ],
   });
 
   describe("MULTIPLY", () => {

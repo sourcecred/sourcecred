@@ -1,7 +1,7 @@
 // @flow
 
 import {getOperator, getWeight, hasExplicitWeight} from "./config";
-import {buildConfig} from "./testUtils.test";
+import {buildConfig} from "./testUtils";
 
 describe("core/credEquate/config", () => {
   const config = buildConfig();
