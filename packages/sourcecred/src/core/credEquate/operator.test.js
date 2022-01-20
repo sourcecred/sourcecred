@@ -21,7 +21,7 @@ describe("core/credEquate/operator", () => {
 
   describe("MULTIPLY", () => {
     const OPERATOR = "MULTIPLY";
-    it("scores as 0 when there are no operands", () => {
+    it("scores as 1 when there are no operands", () => {
       expect(applyOperator(OPERATOR, [], [], config)).toEqual(1);
     });
 
@@ -106,7 +106,7 @@ describe("core/credEquate/operator", () => {
         applyOperator(OPERATOR, [scoredWeightOperands[1]], [], config)
       ).toEqual(1);
     });
-    it("scores as 6 when weightOperands = 2 + 3", () => {
+    it("scores as 5 when weightOperands = 2 + 3", () => {
       expect(
         applyOperator(
           OPERATOR,
@@ -136,7 +136,7 @@ describe("core/credEquate/operator", () => {
         )
       ).toEqual(1);
     });
-    it("scores as 6 when expressionOperands = 2 + 3", () => {
+    it("scores as 5 when expressionOperands = 2 + 3", () => {
       expect(
         applyOperator(
           OPERATOR,
