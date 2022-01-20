@@ -245,7 +245,7 @@ describe("core/credEquate/operator", () => {
       ).toEqual(scoredWeightOperands[3].score);
     });
 
-    it("returns 0 as first weightOperand = 0 when weightOperands array with length = 2", () => {
+    it("returns 3 as first weightOperand = 3 when weightOperands array with length = 2", () => {
       expect(
         applyOperator(
           OPERATOR,
