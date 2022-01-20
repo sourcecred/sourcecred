@@ -8,6 +8,7 @@ import {
 import type {WeightOperand} from "./contribution";
 import {
   type Operator,
+  type OperatorOrKey,
   OPERATOR_KEY_PREFIX,
   OPERATORS,
   operatorParser,
@@ -163,7 +164,7 @@ Throws if the input is not properly prefixed.
 Throws if the key has not been set in the configuration.
 Throws if the configured operator is not a valid operator.
  */
-export function getOperator(rawKey: string, config: Config): Operator {
+export function getOperator(rawKey: OperatorOrKey, config: Config): Operator {
   if (!rawKey.startsWith(OPERATOR_KEY_PREFIX))
     throw new Error(
       `Invalid expression operator [${rawKey}]. This is probably a bug in the plugin. Valid operators are ${OPERATORS.toString()} and operator keys should be prefixed with '${OPERATOR_KEY_PREFIX}'`
@@ -181,4 +182,28 @@ export function getOperator(rawKey: string, config: Config): Operator {
       `Operator [${operator}] for Key [${key}] is an invalid configuration. Please choose from ${OPERATORS.toString()}.`
     );
   return operator;
+}
+
+/**
+Utility function for getting the earliest start time of all configs in an array
+of ConfigsByTarget.
+ */
+export function getEarliestStartForConfigs(
+  configsByTargetArray: $ReadOnlyArray<ConfigsByTarget>
+): TimestampMs {
+  let startTimeMs = Infinity;
+  configsByTargetArray.forEach((configsByTarget) => {
+    const arr = [];
+    for (const key of Object.keys(configsByTarget)) {
+      configsByTarget[key].map((config) => {
+        if (config.startTimeMs < startTimeMs) startTimeMs = config.startTimeMs;
+      });
+    }
+    return arr;
+  });
+  if (startTimeMs == Infinity)
+    throw new Error(
+      "Could not find earliest start time because there are no configs."
+    );
+  return startTimeMs;
 }

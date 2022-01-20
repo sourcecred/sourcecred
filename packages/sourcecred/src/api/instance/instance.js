@@ -1,5 +1,6 @@
 // @flow
 import {type CredrankInput, type CredrankOutput} from "../main/credrank";
+import {type CredequateInput, type CredequateOutput} from "../main/credequate";
 import {type GraphInput, type GraphOutput} from "../main/graph";
 import {
   type ContributionsInput,
@@ -23,6 +24,8 @@ export interface ReadOnlyInstance {
   readContributionsInput(): Promise<ContributionsInput>;
   /** Reads inputs required to run CredRank. */
   readCredrankInput(): Promise<CredrankInput>;
+  /** Reads inputs required to run CredEquate. */
+  readCredequateInput(): Promise<CredequateInput>;
   /** Reads inputs required to run Grain. */
   readGrainInput(): Promise<GrainInput>;
   /** Reads inputs required to run Analysis. */
@@ -55,6 +58,11 @@ export interface Instance extends ReadOnlyInstance {
   /** Writes output after running CredRank. */
   writeCredrankOutput(
     credrankOutput: CredrankOutput,
+    shouldZip?: boolean
+  ): Promise<void>;
+  /** Writes output after running CredEquate. */
+  writeCredequateOutput(
+    credequateOutput: CredequateOutput,
     shouldZip?: boolean
   ): Promise<void>;
   /** Writes output after running Analysis. */

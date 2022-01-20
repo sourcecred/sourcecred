@@ -10,6 +10,7 @@ import {loadHelp} from "./load";
 import {serveHelp} from "./serve";
 import {siteHelp} from "./site";
 import {credRankHelp} from "./credrank";
+import {credequateHelp} from "./credequate";
 import {analysisHelp} from "./analysis";
 import {updateHelp} from "./update";
 import dedent from "../util/dedent";
@@ -29,6 +30,7 @@ const help: Command = async (args, std) => {
     grain: grainHelp,
     site: siteHelp,
     credrank: credRankHelp,
+    credequate: credequateHelp,
     serve: serveHelp,
     analysis: analysisHelp,
     update: updateHelp,

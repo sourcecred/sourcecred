@@ -14,9 +14,11 @@ import {
   type Participant as GraphParticipant,
 } from "./credrank/credGraph";
 import {type Identity, type IdentityId, identityParser} from "./identity";
+import {weekIntervals} from "./interval";
 import * as G from "./ledger/grain";
 import {type Grain, add, ZERO} from "./ledger/grain";
 import {Ledger, type Account} from "./ledger/ledger";
+import type {ScoredContribution} from "./credequate/scoredContribution";
 import {type TimestampMs} from "../util/timestamp";
 import findLastIndex from "lodash.findlastindex";
 import {
@@ -277,6 +279,55 @@ export class CredGrainView {
         };
       })
     );
+    return new CredGrainView(participants, intervals);
+  }
+
+  static fromScoredContributionsAndLedger(
+    scoredContributions: Iterable<ScoredContribution>,
+    ledger: Ledger,
+    startTimeMs: TimestampMs
+  ): CredGrainView {
+    const intervals = weekIntervals(startTimeMs, Date.now());
+    const participantsMap = new Map();
+    ledger.accounts().forEach((account) => {
+      const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
+        account,
+        intervals
+      );
+      const participant = {
+        active: account.active,
+        identity: account.identity,
+        credPerInterval: Array.from(Array(intervals.length)),
+        grainEarned: account.paid,
+        grainEarnedPerInterval,
+      };
+      for (const alias of account.identity.aliases) {
+        participantsMap.set(alias.address, participant);
+      }
+    });
+
+    for (const scoredContribution of scoredContributions) {
+      for (const participant of scoredContribution.participants) {
+        const p = participantsMap.get(participant.id);
+        if (!p) continue;
+        const index = intervals.findIndex(
+          (interval) => interval.endTimeMs > scoredContribution.timestampMs
+        );
+        p.credPerInterval[index] =
+          (p.credPerInterval[index] ?? 0) + participant.score;
+      }
+    }
+
+    const participants = Array.from(new Set(participantsMap.values())).map(
+      (p) => ({
+        ...p,
+        cred: p.credPerInterval.reduce((a, b, index) => {
+          if (!b) p.credPerInterval[index] = 0;
+          return a + (b ?? 0);
+        }, 0),
+      })
+    );
+
     return new CredGrainView(participants, intervals);
   }
 }

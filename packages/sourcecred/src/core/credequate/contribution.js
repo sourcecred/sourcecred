@@ -1,8 +1,9 @@
 // @flow
 
-import type {TimestampMs} from "../../util/timestamp";
-import type {Operator} from "./operator";
-import type {NodeAddressT} from "../graph";
+import {type TimestampMs} from "../../util/timestamp";
+import {type OperatorOrKey, operatorKeyParser} from "./operator";
+import {type NodeAddressT, NodeAddress} from "../graph";
+import * as C from "../../util/combo";
 
 /**
 A leaf node in the Expression tree structure. It represents a trait that can
@@ -12,6 +13,12 @@ export type WeightOperand = {|
   +key: string,
   +subkey?: string,
 |};
+export const weightOperandParser: C.Parser<WeightOperand> = C.object(
+  {
+    key: C.string,
+  },
+  {subkey: C.string}
+);
 
 /**
 A recursive type that forms a tree-like structure of algebraic expressions. Can
@@ -28,7 +35,7 @@ export type Expression = {|
   A string from the Operator enum type (ADD, MUPTIPLY, MAX, ...)
   OR an OperatorConfig key that is an arbitrary string prefixed by "key:"
    */
-  +operator: Operator | string,
+  +operator: OperatorOrKey,
   /**
   An arbitrary string describing the level of abstraction / semantic
   significance / granularity of this expression.
@@ -46,6 +53,22 @@ export type Expression = {|
    */
   +expressionOperands: $ReadOnlyArray<Expression>,
 |};
+const rawExpressionParser = C.object({
+  operator: operatorKeyParser,
+  description: C.string,
+  weightOperands: C.array(weightOperandParser),
+  expressionOperands: C.array(C.raw),
+});
+const expressionParserBuilder: (Object) => Expression = (expression) => {
+  rawExpressionParser.parseOrThrow(expression);
+  expression.expressionOperands.forEach((expressionOperand) => {
+    expressionParserBuilder(expressionOperand);
+  });
+  return expression;
+};
+export const expressionParser: C.Parser<Expression> = C.raw.fmap(
+  expressionParserBuilder
+);
 
 /**
 A granular contribution that contains the root node of an Expression tree
@@ -65,5 +88,21 @@ export type Contribution = {|
     +shares: $ReadOnlyArray<WeightOperand>,
   |}>,
 |};
+export const contributionParser: C.Parser<Contribution> = C.object({
+  id: C.string,
+  plugin: C.string,
+  type: C.string,
+  timestampMs: C.number,
+  expression: expressionParser,
+  participants: C.array(
+    C.object({
+      id: NodeAddress.parser,
+      shares: C.array(weightOperandParser),
+    })
+  ),
+});
 
 export type ContributionsByTarget = {[string]: Iterable<Contribution>};
+export const contributionsByTargetParser: C.Parser<ContributionsByTarget> = C.dict(
+  C.array(contributionParser)
+);

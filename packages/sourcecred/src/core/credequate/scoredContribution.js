@@ -121,7 +121,9 @@ export function* scoreContributions(
   for (const contribution of contributions) {
     const applicableConfig: Config | void = findLast(
       orderedConfigs,
-      (config) => config.timestampMs < contribution.timestampMs
+      (config) => {
+        return (config: Config).startTimeMs < contribution.timestampMs;
+      }
     );
     if (!applicableConfig) continue;
     yield scoreContribution(contribution, applicableConfig);
