@@ -149,7 +149,7 @@ describe("core/credEquate/operator", () => {
         )
       ).toEqual(5);
     });
-    it("scores as 6 when expressionOperands = 2 and weightOperands = 3", () => {
+    it("scores as 5 when expressionOperands = 2 and weightOperands = 3", () => {
       expect(
         applyOperator(
           OPERATOR,
