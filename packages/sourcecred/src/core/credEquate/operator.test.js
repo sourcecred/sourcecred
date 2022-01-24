@@ -322,18 +322,6 @@ describe("core/credEquate/operator", () => {
       ).toEqual(scoredWeightOperands[3].score);
     });
 
-    // it("returns 0 as first weightOperand = 0 when weightOperands array with length = 2", () => {
-    //   const expectedAverage =
-    //     (scoredWeightOperands[3].score + scoredWeightOperands[1].score) / 2;
-    //   expect(
-    //     applyOperator(
-    //       OPERATOR,
-    //       [scoredWeightOperands[3], scoredWeightOperands[1]],
-    //       [],
-    //       config
-    //     )
-    //   ).toEqual(expectedAverage);
-    // });
 
     it("returns average of a list of weightsOperands", () => {
       const expectedAverage =
