@@ -110,13 +110,13 @@ export class CredGrainView {
     intervals: IntervalSequence
   ): $ReadOnlyArray<Grain> {
     let allocationIndex = 0;
-    return intervals.map((interval) => {
+    const result = intervals.map((interval) => {
       let grain = G.ZERO;
       while (
         account.allocationHistory.length - 1 >= allocationIndex &&
-        interval.startTimeMs <
+        interval.startTimeMs <=
           account.allocationHistory[allocationIndex].credTimestampMs &&
-        account.allocationHistory[allocationIndex].credTimestampMs <=
+        account.allocationHistory[allocationIndex].credTimestampMs <
           interval.endTimeMs
       ) {
         grain = G.add(
@@ -127,6 +127,7 @@ export class CredGrainView {
       }
       return grain;
     });
+    return result;
   }
 
   validateForGrainAllocation() {
@@ -164,7 +165,11 @@ export class CredGrainView {
 
       if (!G.eq(G.sum(p.grainEarnedPerInterval), p.grainEarned)) {
         throw new Error(
-          `participant grain per interval mismatched with participant grain total:`
+          `participant grain per interval [${G.sum(
+            p.grainEarnedPerInterval
+          )}] mismatched with participant grain total [${
+            p.grainEarned
+          }] for participant [${p.identity.name}]`
         );
       }
 
@@ -250,7 +255,22 @@ export class CredGrainView {
     credGraph: CredGraph,
     ledger: Ledger
   ): CredGrainView {
-    const intervals = deepFreeze(credGraph.intervals());
+    const ledgerCredTimestamps = ledger
+      .eventLog()
+      .map((e) => {
+        if (e.action.type === "DISTRIBUTE_GRAIN")
+          return e.action.distribution.credTimestamp;
+        return -Infinity;
+      })
+      .filter((t) => t > -Infinity);
+
+    const intervals = weekIntervals(
+      Math.min(...ledgerCredTimestamps, credGraph.intervals()[0].startTimeMs),
+      Math.max(
+        ...ledgerCredTimestamps,
+        credGraph.intervals()[credGraph.intervals().length - 1].endTimeMs
+      )
+    );
 
     const graphParticipants = new Map<IdentityId, GraphParticipant>();
     for (const participant of credGraph.participants()) {
@@ -287,7 +307,19 @@ export class CredGrainView {
     ledger: Ledger,
     startTimeMs: TimestampMs
   ): CredGrainView {
-    const intervals = weekIntervals(startTimeMs, Date.now());
+    const ledgerCredTimestamps = ledger
+      .eventLog()
+      .map((e) => {
+        if (e.action.type === "DISTRIBUTE_GRAIN")
+          return e.action.distribution.credTimestamp;
+        return -Infinity;
+      })
+      .filter((t) => t > -Infinity);
+
+    const intervals = weekIntervals(
+      Math.min(...ledgerCredTimestamps, ledger.eventLog()[0].ledgerTimestamp),
+      Math.max(...ledgerCredTimestamps, Date.now())
+    );
     const participantsMap = new Map();
     ledger.accounts().forEach((account) => {
       const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
@@ -319,13 +351,15 @@ export class CredGrainView {
     }
 
     const participants = Array.from(new Set(participantsMap.values())).map(
-      (p) => ({
-        ...p,
-        cred: p.credPerInterval.reduce((a, b, index) => {
-          if (!b) p.credPerInterval[index] = 0;
-          return a + (b ?? 0);
-        }, 0),
-      })
+      (p) => {
+        return {
+          ...p,
+          cred: p.credPerInterval.reduce((a, b, index) => {
+            if (!b) p.credPerInterval[index] = 0;
+            return a + (b ?? 0);
+          }, 0),
+        };
+      }
     );
 
     return new CredGrainView(participants, intervals);
