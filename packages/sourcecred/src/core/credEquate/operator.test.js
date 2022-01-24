@@ -322,7 +322,6 @@ describe("core/credEquate/operator", () => {
       ).toEqual(scoredWeightOperands[3].score);
     });
 
-
     it("returns average of a list of weightsOperands", () => {
       const expectedAverage =
         (scoredWeightOperands[1].score +
