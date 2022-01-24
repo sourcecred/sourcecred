@@ -24,8 +24,8 @@ import {loadJson} from "../../util/storage";
 import {DiskStorage} from "../../core/storage/disk";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
-import type {Contribution} from "../../core/credEquate/contribution";
-import type {ConfigsByTarget} from "../../core/credEquate/config";
+import type {Contribution} from "../../core/credequate/contribution";
+import type {ConfigsByTarget} from "../../core/credequate/config";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext

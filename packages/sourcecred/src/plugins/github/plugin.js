@@ -25,8 +25,8 @@ import {loadJson} from "../../util/storage";
 import {createIdentities} from "./createIdentities";
 import {DiskStorage} from "../../core/storage/disk";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
-import type {Contribution} from "../../core/credEquate/contribution";
-import type {ConfigsByTarget} from "../../core/credEquate/config";
+import type {Contribution} from "../../core/credequate/contribution";
+import type {ConfigsByTarget} from "../../core/credequate/config";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 

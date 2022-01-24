@@ -5,7 +5,7 @@ import {Plugin} from "./plugin";
 import {getPlugin} from "./bundledPlugins";
 import {rawParser, type RawInstanceConfig} from "./rawInstanceConfig";
 import * as pluginId from "./pluginId";
-import type {ConfigsByTarget} from "../core/credEquate/config";
+import type {ConfigsByTarget} from "../core/credequate/config";
 
 export type InstanceConfig = {|
   +bundledPlugins: Map<pluginId.PluginId, Plugin>,

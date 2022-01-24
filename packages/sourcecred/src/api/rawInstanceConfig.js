@@ -4,7 +4,7 @@ import * as P from "../util/combo";
 import {
   type ConfigsByTarget,
   configsByTargetParser,
-} from "../core/credEquate/config";
+} from "../core/credequate/config";
 
 export type RawInstanceConfig = {|
   // Plugin identifier, like `sourcecred/identity`. Version number is

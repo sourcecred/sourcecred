@@ -31,8 +31,8 @@ import {reactionWeight} from "./reactionWeights";
 import type {
   Contribution,
   Expression,
-} from "../../core/credEquate/contribution";
-import type {Config} from "../../core/credEquate/config";
+} from "../../core/credequate/contribution";
+import type {Config} from "../../core/credequate/config";
 
 // Display this many characters in description.
 const MESSAGE_LENGTH = 30;

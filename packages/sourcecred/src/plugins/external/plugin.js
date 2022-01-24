@@ -28,8 +28,8 @@ import type {DataStorage} from "../../core/storage";
 import {NetworkStorage} from "../../core/storage/networkStorage";
 import {declaration as defaultDeclaration} from "./defaultDeclaration";
 import * as C from "../../util/combo";
-import type {Contribution} from "../../core/credEquate/contribution";
-import type {ConfigsByTarget} from "../../core/credEquate/config";
+import type {Contribution} from "../../core/credequate/contribution";
+import type {ConfigsByTarget} from "../../core/credequate/config";
 
 export const ExternalPluginIdOwner = "external";
 
