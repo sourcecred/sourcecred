@@ -377,7 +377,7 @@ describe("core/credEquate/operator", () => {
         )
       ).toEqual(2.5);
     });
-    it("returns the first in expressionOperands even if there is 1 weightOperands", () => {
+    it("returns the average when there are multiple weightOperands and expressionOperands", () => {
       const expectedAverage =
         (scoredWeightOperands[1].score +
           2 * scoredWeightOperands[2].score +
