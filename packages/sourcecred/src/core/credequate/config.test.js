@@ -3,7 +3,7 @@
 import {getOperator, getWeight, hasExplicitWeight} from "./config";
 import {buildConfig} from "./testUtils";
 
-describe("core/credEquate/config", () => {
+describe("core/credequate/config", () => {
   const config = buildConfig();
 
   const weightOperand = {
