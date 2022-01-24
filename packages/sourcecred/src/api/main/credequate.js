@@ -35,7 +35,9 @@ function* credequateGenerator(
       (p) => p.id === plugin.pluginId
     )?.configsByTarget;
     if (!configs)
-      throw new Error(`CredEquate configurations not found for plugin ${plugin.pluginId}`);
+      throw new Error(
+        `CredEquate configurations not found for plugin ${plugin.pluginId}`
+      );
     for (const target of Object.keys(plugin.contributionsByTarget)) {
       if (!configs[target])
         throw new Error(
