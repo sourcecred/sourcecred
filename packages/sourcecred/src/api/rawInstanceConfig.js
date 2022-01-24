@@ -18,12 +18,16 @@ export type RawInstanceConfig = {|
   |}>,
 |};
 
-export const rawParser: P.Parser<RawInstanceConfig> = P.object({
-  bundledPlugins: P.array(pluginId.parser),
-  credEquatePlugins: P.array(
-    P.object({
-      id: pluginId.parser,
-      configsByTarget: configsByTargetParser,
-    })
-  ),
-});
+export const rawParser: P.Parser<RawInstanceConfig> = P.object(
+  {
+    bundledPlugins: P.array(pluginId.parser),
+  },
+  {
+    credEquatePlugins: P.array(
+      P.object({
+        id: pluginId.parser,
+        configsByTarget: configsByTargetParser,
+      })
+    ),
+  }
+).fmap((config) => ({credEquatePlugins: [], ...config}));
