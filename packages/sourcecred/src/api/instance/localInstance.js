@@ -23,9 +23,7 @@ import {mkdirx} from "../../util/disk";
 import {toISO} from "../../util/timestamp";
 import {parser as configParser, type InstanceConfig} from "../instanceConfig";
 import {Ledger} from "../../core/ledger/ledger";
-import type {
-  ContributionsByTarget,
-} from "../../core/credequate/contribution";
+import type {ContributionsByTarget} from "../../core/credequate/contribution";
 import type {DependenciesConfig} from "../dependenciesConfig";
 import {CredGraph} from "../../core/credrank/credGraph";
 import {CredGrainView} from "../../core/credGrainView";

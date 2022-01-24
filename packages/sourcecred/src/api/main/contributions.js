@@ -1,8 +1,6 @@
 // @flow
 
-import type {
-  ContributionsByTarget,
-} from "../../core/credequate/contribution";
+import type {ContributionsByTarget} from "../../core/credequate/contribution";
 import type {ConfigsByTarget} from "../../core/credequate/config";
 import {Ledger} from "../../core/ledger/ledger";
 import type {PluginDirectoryContext} from "../plugin";

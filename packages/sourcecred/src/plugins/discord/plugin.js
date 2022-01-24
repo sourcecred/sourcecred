@@ -119,7 +119,10 @@ export class DiscordPlugin implements Plugin {
       await Promise.all(
         Array.from(Object.keys(configsByTarget)).map(async (guildId) => {
           const repo = await repository(ctx, guildId);
-          return {target: guildId, iterable: createContributions(repo, configsByTarget[guildId])};
+          return {
+            target: guildId,
+            iterable: createContributions(repo, configsByTarget[guildId]),
+          };
         })
       )
     ).forEach(({target, iterable}) => (result[target] = iterable));
