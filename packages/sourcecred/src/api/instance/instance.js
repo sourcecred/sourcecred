@@ -1,6 +1,10 @@
 // @flow
 import {type CredrankInput, type CredrankOutput} from "../main/credrank";
 import {type GraphInput, type GraphOutput} from "../main/graph";
+import {
+  type ContributionsInput,
+  type ContributionsOutput,
+} from "../main/contributions";
 import {type GrainInput} from "../main/grain";
 import {type AnalysisInput, type AnalysisOutput} from "../main/analysis";
 import {CredGraph} from "../../core/credrank/credGraph";
@@ -15,6 +19,8 @@ import type {GrainIntegrationMultiResult} from "../main/grain";
 export interface ReadOnlyInstance {
   /** Reads inputs required to run Graph. */
   readGraphInput(): Promise<GraphInput>;
+  /** Reads inputs required to run Contributions. */
+  readContributionsInput(): Promise<ContributionsInput>;
   /** Reads inputs required to run CredRank. */
   readCredrankInput(): Promise<CredrankInput>;
   /** Reads inputs required to run Grain. */
@@ -39,6 +45,11 @@ export interface Instance extends ReadOnlyInstance {
   /** Writes output after running Graph. */
   writeGraphOutput(
     graphOutput: GraphOutput,
+    shouldZip?: boolean
+  ): Promise<void>;
+  /** Writes output after running Contributions. */
+  writeContributionsOutput(
+    contributionsOutput: ContributionsOutput,
     shouldZip?: boolean
   ): Promise<void>;
   /** Writes output after running CredRank. */

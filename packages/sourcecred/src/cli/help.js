@@ -5,6 +5,7 @@ import type {Command} from "./command";
 import {goHelp} from "./go";
 import {grainHelp} from "./grain";
 import {graphHelp} from "./graph";
+import {contributionsHelp} from "./contributions";
 import {loadHelp} from "./load";
 import {serveHelp} from "./serve";
 import {siteHelp} from "./site";
@@ -24,6 +25,7 @@ const help: Command = async (args, std) => {
     go: goHelp,
     load: loadHelp,
     graph: graphHelp,
+    contributionsHelp: contributionsHelp,
     grain: grainHelp,
     site: siteHelp,
     credrank: credRankHelp,

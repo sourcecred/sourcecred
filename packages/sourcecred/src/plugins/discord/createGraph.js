@@ -22,11 +22,17 @@ import {
   reactsToEdgeType,
   mentionsEdgeType,
   propsEdgeType,
+  keys,
 } from "./declaration";
 import * as Model from "./models";
 
 import {type DiscordConfig} from "./config";
 import {reactionWeight} from "./reactionWeights";
+import type {
+  Contribution,
+  Expression,
+} from "../../core/credequate/contribution";
+import type {Config} from "../../core/credequate/config";
 
 // Display this many characters in description.
 const MESSAGE_LENGTH = 30;
@@ -291,12 +297,11 @@ export function* findGraphMessages(
   }
 }
 
-export function createGraph(
+export async function createGraph(
   config: DiscordConfig,
   repo: SqliteMirrorRepository
-): WeightedGraphT {
-  const graphMessages = findGraphMessages(repo);
-  return _createGraphFromMessages(config, graphMessages);
+): Promise<WeightedGraphT> {
+  return _createGraphFromMessages(config, findGraphMessages(repo));
 }
 
 export function _createGraphFromMessages(
@@ -372,4 +377,102 @@ export function _createGraphFromMessages(
   }
 
   return wg;
+}
+
+export function* createContributions(
+  repo: SqliteMirrorRepository,
+  configsByTarget: $ReadOnlyArray<Config>
+): Iterable<Contribution> {
+  const earliestStartTimeMs = configsByTarget.reduce(
+    (result, next) => (next.startTimeMs < result ? next.startTimeMs : result),
+    Infinity
+  );
+  for (const msg of findGraphMessages(repo)) {
+    if (msg.message.timestampMs < earliestStartTimeMs) continue;
+    const reactionsGroupedByReacter: Map<
+      Model.GuildMember,
+      Array<GraphReaction>
+    > = msg.reactions.reduce((accumulator, reaction) => {
+      if (reaction.reactingMember.user.id === msg.author?.user.id)
+        return accumulator;
+      const reactions = accumulator.get(reaction.reactingMember);
+      if (!reactions) accumulator.set(reaction.reactingMember, [reaction]);
+      else reactions.push(reaction);
+      return accumulator;
+    }, new Map());
+    const reactingMemberExpressions: Array<Expression> = [];
+    for (const [reacter, reactions] of reactionsGroupedByReacter.entries()) {
+      const roleExpression = {
+        operator: "MAX",
+        description: "reacting member roles",
+        weightOperands: reacter.roles.map((role) => ({
+          key: keys.ROLE,
+          subkey: role,
+        })),
+        expressionOperands: [],
+      };
+      const emojiExpression = {
+        operator: "key:" + keys.REACTIONS_OF_SINGLE_PARTICIPANT,
+        description: "emojis from a single participant",
+        weightOperands: reactions.map((r) => ({
+          key: keys.EMOJI,
+          subkey: Model.emojiToRef(r.reaction.emoji),
+        })),
+        expressionOperands: [],
+      };
+      reactingMemberExpressions.push({
+        operator: "MULTIPLY",
+        description: "reactions from a single participant",
+        weightOperands: [],
+        expressionOperands: [roleExpression, emojiExpression],
+      });
+    }
+    const expression: Expression = {
+      operator: "MULTIPLY",
+      description: "message attributes",
+      weightOperands: [],
+      expressionOperands: [
+        {
+          operator: "key:" + keys.REACTIONS_ACROSS_PARTICIPANTS,
+          description: "reacting members",
+          weightOperands: [],
+          expressionOperands: reactingMemberExpressions,
+        },
+        {
+          operator: "FIRST",
+          description: "channel or category",
+          weightOperands: [
+            {key: keys.CHANNEL, subkey: msg.channelId},
+            {key: keys.CATEGORY, subkey: msg.channelParentId ?? ""},
+          ],
+          expressionOperands: [],
+        },
+      ],
+    };
+    const participants = msg.mentions
+      .filter((m) => m.count)
+      .flatMap((m) => {
+        const shares = [];
+        for (let i = 0; i < m.count; i++) {
+          shares.push({key: keys.MENTION, subkey: msg.channelId});
+        }
+        return {
+          id: NodeAddress.fromRaw(memberAddress(m.member)),
+          shares,
+        };
+      });
+    if (msg.author)
+      participants.push({
+        id: NodeAddress.fromRaw(memberAddress(msg.author)),
+        shares: [{key: keys.AUTHOR}],
+      });
+    yield {
+      id: msg.channelId + "/" + msg.message.id,
+      plugin: "discord",
+      type: "message",
+      timestampMs: msg.message.timestampMs,
+      participants,
+      expression,
+    };
+  }
 }

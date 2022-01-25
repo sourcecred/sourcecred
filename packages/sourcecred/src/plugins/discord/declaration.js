@@ -87,6 +87,17 @@ export const propsEdgeType: EdgeType = deepFreeze({
   description: "Connects a props message to the person getting props",
 });
 
+export const keys = {
+  REACTIONS_ACROSS_PARTICIPANTS: "reactionsAcrossParticipants",
+  REACTIONS_OF_SINGLE_PARTICIPANT: "reactionsOfSingleParticipant",
+  EMOJI: "emoji",
+  ROLE: "role",
+  CHANNEL: "channel",
+  CATEGORY: "category",
+  AUTHOR: "author",
+  MENTION: "mention",
+};
+
 export const declaration: PluginDeclaration = deepFreeze({
   name: "Discord",
   nodePrefix,
@@ -100,4 +111,12 @@ export const declaration: PluginDeclaration = deepFreeze({
     propsEdgeType,
   ],
   userTypes: [memberNodeType],
+  keys: {
+    operatorKeys: [
+      keys.REACTIONS_ACROSS_PARTICIPANTS,
+      keys.REACTIONS_OF_SINGLE_PARTICIPANT,
+    ],
+    weightKeys: [keys.EMOJI, keys.ROLE, keys.CHANNEL, keys.CATEGORY],
+    shareKeys: [keys.AUTHOR, keys.MENTION],
+  },
 });

@@ -45,4 +45,9 @@ export const declaration: PluginDeclaration = deepFreeze({
   edgePrefix: EdgeAddress.fromParts(["factorio"]),
   edgeTypes: [assemblesEdgeType, transportsEdgeType],
   userTypes: [],
+  keys: {
+    operatorKeys: [],
+    shareKeys: [],
+    weightKeys: [],
+  },
 });

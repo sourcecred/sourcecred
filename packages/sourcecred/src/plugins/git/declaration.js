@@ -32,4 +32,9 @@ export const declaration: PluginDeclaration = deepFreeze({
   nodeTypes,
   edgeTypes,
   userTypes: [],
+  keys: {
+    operatorKeys: [],
+    shareKeys: [],
+    weightKeys: [],
+  },
 });

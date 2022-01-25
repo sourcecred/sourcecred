@@ -33,6 +33,11 @@ describe("analysis/pluginDeclaration", () => {
     nodeTypes: [],
     edgeTypes: [],
     userTypes: [],
+    keys: {
+      operatorKeys: [],
+      weightKeys: [],
+      shareKeys: [],
+    },
   });
   const nonEmptyDeclaration: PluginDeclaration = deepFreeze({
     name: "non-empty",
@@ -41,6 +46,11 @@ describe("analysis/pluginDeclaration", () => {
     nodeTypes: [nodeType],
     edgeTypes: [edgeType],
     userTypes: [],
+    keys: {
+      operatorKeys: [],
+      weightKeys: [],
+      shareKeys: [],
+    },
   });
   describe("weightsForDeclaration", () => {
     it("works for an empty declaration", () => {

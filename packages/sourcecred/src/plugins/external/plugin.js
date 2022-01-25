@@ -28,6 +28,8 @@ import type {DataStorage} from "../../core/storage";
 import {NetworkStorage} from "../../core/storage/networkStorage";
 import {declaration as defaultDeclaration} from "./defaultDeclaration";
 import * as C from "../../util/combo";
+import type {Contribution} from "../../core/credequate/contribution";
+import type {ConfigsByTarget} from "../../core/credequate/config";
 
 export const ExternalPluginIdOwner = "external";
 
@@ -228,6 +230,15 @@ export class ExternalPlugin implements Plugin {
         )
       : [];
   }
+
+  async contributions(
+    _unused_ctx: PluginDirectoryContext,
+    _unused_configsByTarget: ConfigsByTarget
+  ): Promise<{[string]: Iterable<Contribution>}> {
+    throw new Error(
+      "This plugin has not been updated to support the Contributions API."
+    );
+  }
 }
 
 /**
@@ -284,5 +295,14 @@ export class ConstructorPlugin {
     _unused_ctx: PluginDirectoryContext
   ): Promise<$ReadOnlyArray<IdentityProposal>> {
     return this._identityProposals;
+  }
+
+  async contributions(
+    _unused_ctx: PluginDirectoryContext,
+    _unused_configsByTarget: ConfigsByTarget
+  ): Promise<{[string]: Iterable<Contribution>}> {
+    throw new Error(
+      "This plugin has not been updated to support the Contributions API."
+    );
   }
 }

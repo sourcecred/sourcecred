@@ -1,8 +1,18 @@
 // @flow
 
-import type {TimestampMs} from "../../util/timestamp";
+import {
+  type TimestampMs,
+  timestampISOParser,
+  fromISO,
+} from "../../util/timestamp";
 import type {WeightOperand} from "./contribution";
-import {type Operator, OPERATOR_KEY_PREFIX, OPERATORS} from "./operator";
+import {
+  type Operator,
+  OPERATOR_KEY_PREFIX,
+  OPERATORS,
+  operatorParser,
+} from "./operator";
+import * as C from "../../util/combo";
 
 /**
 Semantically, allows weight configuration of different qualities/characteristics of
@@ -37,6 +47,23 @@ export type WeightConfig = $ReadOnlyArray<{|
     +weight: number,
   |}>,
 |}>;
+const weightConfigParser = C.array(
+  C.object({
+    key: C.string,
+    default: C.number,
+    subkeys: C.array(
+      C.object(
+        {
+          subkey: C.string,
+          weight: C.number,
+        },
+        {
+          memo: C.string,
+        }
+      )
+    ),
+  })
+);
 /**
 A key-value store of configured operators, allowing the configuration of
 operators within an expression. For example, one might be able to
@@ -48,20 +75,12 @@ export type OperatorConfig = $ReadOnlyArray<{|
   /** The operator that should be applied wherever the key is found. */
   +operator: Operator,
 |}>;
-/**
-A key-value store of how many shares different types of participation are worth.
-Shares are arbitrary numbers that compete in a zero-sum divvying of a
-ScoredContribution's score.
- */
-export type SharesConfig = $ReadOnlyArray<{|
-  /** Arbitrary string enumerated by a plugin developer. */
-  +key: string,
-  /**
-  Number of shares allocated for the participation type indicated by the
-  key. Will be scored relative to the other share amounts within a contribution.
-  */
-  +amount: number,
-|}>;
+const operatorConfigParser = C.array(
+  C.object({
+    key: C.string,
+    operator: operatorParser,
+  })
+);
 
 /**
 Wraps the other config types, and defines a time scope via a start timestamp.
@@ -84,6 +103,31 @@ function getWeightConfigs(config, key: string, subkey) {
   const subkeyConfig = keyConfig.subkeys.find((x) => x.subkey === subkey);
   return {keyConfig, subkeyConfig};
 }
+
+/**
+Groups Configs together by target strings that may represent
+a server ID/endpoint, a repository name, etc.
+ */
+export type ConfigsByTarget = {[string]: $ReadOnlyArray<Config>};
+
+export const configsByTargetParser: C.Parser<ConfigsByTarget> = C.dict(
+  C.array(
+    C.object({
+      memo: C.string,
+      startDate: timestampISOParser.fmap((t) => fromISO(t)),
+      weights: weightConfigParser,
+      operators: operatorConfigParser,
+      shares: weightConfigParser,
+    }).fmap(({memo, startDate, weights, operators, shares}) => ({
+      memo,
+      weights,
+      operators,
+      shares,
+      startTimeMs: startDate,
+    }))
+  ),
+  C.string
+);
 
 /**
 Returns true if the subkey exists in the subkeys array of the key.

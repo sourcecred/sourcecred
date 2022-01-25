@@ -5,6 +5,8 @@ import type {WeightedGraph} from "../core/weightedGraph";
 import type {ReferenceDetector} from "../core/references/referenceDetector";
 import type {TaskReporter} from "../util/taskReporter";
 import type {IdentityProposal} from "../core/ledger/identityProposal";
+import type {ContributionsByTarget} from "../core/credequate/contribution";
+import type {ConfigsByTarget} from "../core/credequate/config";
 
 export interface Plugin {
   declaration(): Promise<PluginDeclaration>;
@@ -22,6 +24,10 @@ export interface Plugin {
     PluginDirectoryContext,
     TaskReporter
   ): Promise<$ReadOnlyArray<IdentityProposal>>;
+  contributions(
+    PluginDirectoryContext,
+    ConfigsByTarget
+  ): Promise<ContributionsByTarget>;
 }
 
 export interface PluginDirectoryContext {
