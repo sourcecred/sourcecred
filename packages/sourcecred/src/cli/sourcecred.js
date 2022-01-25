@@ -11,6 +11,7 @@ import go from "./go";
 import serve from "./serve";
 import grain from "./grain";
 import credrank from "./credrank";
+import credequate from "./credequate";
 import analysis from "./analysis";
 import update from "./update";
 import help from "./help";
@@ -43,6 +44,8 @@ const sourcecred: Command = async (args, std) => {
       return grain(args.slice(1), std);
     case "credrank":
       return credrank(args.slice(1), std);
+    case "credequate":
+      return credequate(args.slice(1), std);
     case "analysis":
       return analysis(args.slice(1), std);
     case "update":

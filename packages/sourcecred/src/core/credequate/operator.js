@@ -10,6 +10,14 @@ type OperatorFunction = (
 ) => number;
 export type Operator = $Keys<typeof OPERATORS_FUNCTION_MAP>;
 export const operatorParser: C.Parser<Operator> = C.string.fmap((s) => {
+  if (!OPERATORS.includes(s))
+    throw new Error(
+      `Invalid operator [${s}], must be one of [${OPERATORS.toString()}]"`
+    );
+  return s;
+});
+export type OperatorOrKey = Operator | string;
+export const operatorKeyParser: C.Parser<OperatorOrKey> = C.string.fmap((s) => {
   if (!OPERATORS.includes(s) && !s.startsWith(OPERATOR_KEY_PREFIX))
     throw new Error(
       `Invalid operator [${s}], must be one of [${OPERATORS.toString()}] or begin with key prefix "${OPERATOR_KEY_PREFIX}"`

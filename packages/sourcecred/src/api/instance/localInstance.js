@@ -3,6 +3,7 @@
 import {Instance} from "./instance";
 import {ReadInstance} from "./readInstance";
 import type {CredrankOutput} from "../main/credrank";
+import type {CredequateOutput} from "../main/credequate";
 import type {GraphInput, GraphOutput} from "../main/graph";
 import type {GrainInput} from "../main/grain";
 import type {
@@ -49,6 +50,10 @@ const PERSONAL_ATTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
 const GRAIN_PATH: $ReadOnlyArray<string> = ["config", "grain.json"];
 const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
 const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph"];
+const SCORED_CONTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
+  "output",
+  "scoredContributions",
+];
 const CREDGRAINVIEW_PATH: $ReadOnlyArray<string> = ["output", "credGrainView"];
 const GRAPHS_PATH: $ReadOnlyArray<string> = ["graph"];
 const CONTRIBUTIONS_PATH: $ReadOnlyArray<string> = ["contributions"];
@@ -168,6 +173,20 @@ export class LocalInstance extends ReadInstance implements Instance {
       this.writeDependenciesConfig(credrankOutput.dependencies),
       this.writePersonalAttributionsConfig(credrankOutput.personalAttributions),
     ]);
+  }
+
+  async writeCredequateOutput(
+    credequateOutput: CredequateOutput,
+    shouldZip: boolean = true
+  ): Promise<void> {
+    const json = stringify(Array.from(credequateOutput.scoredContributions));
+    const outputPath =
+      pathJoin(...SCORED_CONTRIBUTIONS_PATH) +
+      (shouldZip ? ZIP_SUFFIX : JSON_SUFFIX);
+    const storage = shouldZip
+      ? this._writableZipStorage
+      : this._writableStorage;
+    return storage.set(outputPath, encode(json));
   }
 
   async writeAnalysisOutput(analysisOutput: AnalysisOutput): Promise<void> {

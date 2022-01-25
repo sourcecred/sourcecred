@@ -7,10 +7,12 @@ import {
   type WeightedGraphJSON,
   fromJSON as weightedGraphFromJSON,
 } from "../../core/weightedGraph";
-import {type GraphInput} from "../main/graph";
-import {type ContributionsInput} from "../main/contributions";
-import {type GrainInput} from "../main/grain";
-import {type AnalysisInput} from "../main/analysis";
+import type {GraphInput} from "../main/graph";
+import type {ContributionsInput} from "../main/contributions";
+import type {CredequateInput} from "../main/credequate";
+import type {ContributionsByTarget} from "../../core/credequate/contribution";
+import type {GrainInput} from "../main/grain";
+import type {AnalysisInput} from "../main/analysis";
 import {
   type WeightsT,
   parser as weightsParser,
@@ -28,6 +30,7 @@ import {
 } from "../../core/credrank/credGraph";
 import {CredGrainView, credGrainViewParser} from "../../core/credGrainView";
 import {Ledger} from "../../core/ledger/ledger";
+import {contributionsByTargetParser} from "../../core/credequate/contribution";
 import {
   parser as dependenciesParser,
   type DependenciesConfig,
@@ -100,6 +103,7 @@ const CONTRIBUTIONS_DIRECTORY: $ReadOnlyArray<string> = [
   "output",
   "contributions",
 ];
+const CONTRIBUTIONS_PATH: $ReadOnlyArray<string> = ["contributions"];
 
 const JSON_SUFFIX: string = ".json";
 const ZIP_SUFFIX: string = "";
@@ -123,6 +127,16 @@ export class ReadInstance implements ReadOnlyInstance {
 
   async readContributionsInput(): Promise<ContributionsInput> {
     throw "not yet implemented";
+  }
+
+  async readCredequateInput(): Promise<CredequateInput> {
+    const rawInstanceConfig = await this.readRawInstanceConfig();
+    const pluginContributions = await Promise.all(
+      rawInstanceConfig.credEquatePlugins.map(
+        async ({id}) => await this.readPluginContributions(id)
+      )
+    );
+    return {pluginContributions, rawInstanceConfig};
   }
 
   async readCredrankInput(): Promise<CredrankInput> {
@@ -194,6 +208,24 @@ export class ReadInstance implements ReadOnlyInstance {
       ((Combo.raw: any): Combo.Parser<WeightedGraphJSON>)
     );
     return weightedGraphFromJSON(graphJSON);
+  }
+
+  async readPluginContributions(
+    pluginId: string
+  ): Promise<{|
+    contributionsByTarget: ContributionsByTarget,
+    pluginId: string,
+  |}> {
+    const outputPath = pathJoin(
+      this.createPluginContributionsDirectory(pluginId),
+      ...CONTRIBUTIONS_PATH
+    );
+    const contributionsByTarget = await loadJson(
+      this._zipStorage,
+      outputPath,
+      contributionsByTargetParser
+    );
+    return {contributionsByTarget, pluginId};
   }
 
   async readCredGraph(): Promise<CredGraph> {

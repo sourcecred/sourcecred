@@ -56,7 +56,10 @@ export async function load(): Promise<LoadResult> {
       currencyParser,
       defaultCurrencyConfig
     ),
-    instance.readCredGrainView().catch(() => null),
+    instance.readCredGrainView().catch((e) => {
+      console.log(e);
+      return null;
+    }),
     loadJsonWithDefault(
       originStorage,
       "config/weights.json",
