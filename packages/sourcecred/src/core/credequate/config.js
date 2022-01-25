@@ -201,7 +201,7 @@ export function getEarliestStartForConfigs(
     }
     return arr;
   });
-  if (startTimeMs == Infinity)
+  if (startTimeMs === Infinity)
     throw new Error(
       "Could not find earliest start time because there are no configs."
     );
