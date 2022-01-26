@@ -1,6 +1,6 @@
 // @flow
 
-import {exampleRelationalView} from "./example/example";
+import {exampleRelationalView, exampleRepository} from "./example/example";
 import {RelationalView} from "./relationalView";
 import {
   GithubReferenceDetector,
@@ -27,7 +27,7 @@ describe("plugins/github/referenceDetector", () => {
   describe("fromRelationalViews", () => {
     it("should use urlReferenceMap to create the instance", () => {
       // Given
-      const rv = new RelationalView();
+      const rv = RelationalView.FromGraphQL(new exampleRepository());
       const urlReferenceMap = jest.spyOn(rv, "urlReferenceMap");
 
       // When
@@ -54,8 +54,8 @@ describe("plugins/github/referenceDetector", () => {
       const url = "http://foo.bar";
       const nodeA = NodeAddress.fromParts(["test", "A"]);
       const nodeB = NodeAddress.fromParts(["test", "B"]);
-      const rv1 = new RelationalView();
-      const rv2 = new RelationalView();
+      const rv1 = RelationalView.FromGraphQL(new exampleRepository());
+      const rv2 = RelationalView.FromGraphQL(new exampleRepository());
       const rv1Spy = jest.spyOn(rv1, "urlReferenceMap");
       const rv2Spy = jest.spyOn(rv2, "urlReferenceMap");
       rv1Spy.mockReturnValue(new Map([[url, nodeA]]));
