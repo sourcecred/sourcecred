@@ -93,7 +93,7 @@ export class GithubPlugin implements Plugin {
     }
     const wg = mergeWeightedGraph(
       repositories.map((r) => {
-        const rv = new RelationalView(r);
+        const rv = RelationalView.FromGraphQL(r);
         return createGraph(rv);
       })
     );
@@ -112,7 +112,7 @@ export class GithubPlugin implements Plugin {
     const rvs = [];
     for (const repoId of config.repoIds) {
       const repo = await fetchGithubRepoFromCache(repoId, {token, cache});
-      const rv = new RelationalView(repo);
+      const rv = RelationalView.FromGraphQL(repo);
       rvs.push(rv);
     }
     return referenceDetectorFromRelationalViews(rvs);
@@ -128,7 +128,7 @@ export class GithubPlugin implements Plugin {
     let identities = [];
     for (const repoId of config.repoIds) {
       const repo = await fetchGithubRepoFromCache(repoId, {token, cache});
-      const rv = new RelationalView(repo);
+      const rv = RelationalView.FromGraphQL(repo);
       identities = [...identities, ...createIdentities(rv)];
     }
     return identities;
