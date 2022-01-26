@@ -100,14 +100,6 @@ export class RelationalView {
     }
   }
 
-  /**
-   * This method is deprecated, please use singuar version.
-   * @deprecated
-   */
-  // repos(): Iterator<Repo> {
-  //   return [new Repo(this, this._repo)].values();
-  // }
-
   repo(): Repo {
     return new Repo(this, this._repo);
   }
@@ -256,7 +248,7 @@ export class RelationalView {
   }
 
   toJSON(): RelationalViewJSON {
-    // TODO: migrate to singullar 'RepoEntry' value in the serialized representation as well
+    // TODO: migrate to singular 'RepoEntry' value in the serialized representation as well
     var compatRepoMap = new Map();
     compatRepoMap.set(N.toRaw(this._repo.address), this._repo);
     const rawJSON = {

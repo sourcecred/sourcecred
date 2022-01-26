@@ -58,11 +58,6 @@ describe("plugins/github/relationalView", () => {
         });
       });
     }
-    // hasEntityMethods(
-    //   "repos",
-    //   () => view.repos(),
-    //   (x) => view.repo()
-    // );
     hasEntityMethods(
       "issues",
       () => view.issues(),
@@ -208,11 +203,6 @@ describe("plugins/github/relationalView", () => {
     it("works for userlike", () => {
       expect(view.entity(userlike.address())).toEqual(userlike);
     });
-    // it("returns undefined on nonexistent address", () => {
-    //   expect(
-    //     view.entity({type: "REPO", owner: "foo", name: "bar"})
-    //   ).not.toEqual(expect.anything());
-    // });
     it("errors for bad address type", () => {
       // $FlowExpectedError[incompatible-call]
       expect(() => view.entity({type: "BAD"})).toThrow("address type");
