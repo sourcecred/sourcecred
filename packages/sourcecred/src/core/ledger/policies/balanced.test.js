@@ -34,7 +34,7 @@ describe("core/ledger/policies/balanced", () => {
   };
 
   const distribution1 = {
-    credTimestamp: 3,
+    credTimestamp: GraphUtil.week2 + 1,
     allocations: [allocation1],
     id: uuid.random(),
   };
@@ -96,8 +96,16 @@ describe("core/ledger/policies/balanced", () => {
         budget: nng(100),
         numIntervalsLookback: 50, // 50 > number of intervals (2)
       };
-      const expected = balancedReceipts(policy1, credGrainViewUnbalanced, 4);
-      const actual = balancedReceipts(policy2, credGrainViewUnbalanced, 4);
+      const expected = balancedReceipts(
+        policy1,
+        credGrainViewUnbalanced,
+        GraphUtil.week3
+      );
+      const actual = balancedReceipts(
+        policy2,
+        credGrainViewUnbalanced,
+        GraphUtil.week3
+      );
       expect(actual).toEqual(expected);
     });
 
@@ -112,8 +120,16 @@ describe("core/ledger/policies/balanced", () => {
         budget: nng(100),
         numIntervalsLookback: 2,
       };
-      const expected = balancedReceipts(policy1, credGrainViewUnbalanced, 4);
-      const actual = balancedReceipts(policy2, credGrainViewUnbalanced, 4);
+      const expected = balancedReceipts(
+        policy1,
+        credGrainViewUnbalanced,
+        GraphUtil.week3
+      );
+      const actual = balancedReceipts(
+        policy2,
+        credGrainViewUnbalanced,
+        GraphUtil.week3
+      );
       expect(actual).toEqual(expected);
     });
 
@@ -130,7 +146,7 @@ describe("core/ledger/policies/balanced", () => {
       const actualReceipts = balancedReceipts(
         policy1,
         credGrainViewUnbalanced,
-        4
+        GraphUtil.week3 + 1
       );
       expect(actualReceipts).toEqual(expectedReceipts);
     });

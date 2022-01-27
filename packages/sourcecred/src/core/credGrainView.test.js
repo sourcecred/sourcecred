@@ -2,7 +2,11 @@
 
 import {CredGrainView} from "./credGrainView";
 import * as GraphUtil from "./credrank/testUtils";
-import {createTestLedgerFixture, createUuidMock, createDateMock} from "./ledger/testUtils";
+import {
+  createTestLedgerFixture,
+  createUuidMock,
+  createDateMock,
+} from "./ledger/testUtils";
 import {g, nng} from "./ledger/testUtils";
 import {Ledger} from "./ledger/ledger";
 import * as uuid from "../util/uuid";

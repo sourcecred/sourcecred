@@ -2,6 +2,7 @@
 
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
+import * as GraphUtil from "./testUtils";
 import {
   MarkovProcessGraph,
   parser as markovProcessGraphParser,
@@ -251,7 +252,7 @@ describe("core/credrank/markovProcessGraph", () => {
             // interval, so everything that isn't synthetically accounted for
             // (via the webbing, or payout edge) goes back to seed.
             .set(
-              0,
+              GraphUtil.week1,
               1 -
                 parameters.gammaForward -
                 parameters.gammaBackward -
@@ -259,7 +260,7 @@ describe("core/credrank/markovProcessGraph", () => {
             )
             // This is a regular interval, (has organic edges),
             // so it sends only `alpha` probability back to seed.
-            .set(2, parameters.alpha)
+            .set(GraphUtil.week2, parameters.alpha)
             .get(boundary)
         );
         const radiationEdgeExpected = radiationGadget.markovEdge(
@@ -371,11 +372,11 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       const epoch0 = epochGadget.toRaw({
         owner: participant1.id,
-        epochStart: 0,
+        epochStart: GraphUtil.week1,
       });
       const epoch2 = epochGadget.toRaw({
         owner: participant1.id,
-        epochStart: 2,
+        epochStart: GraphUtil.week2,
       });
       const e0F = {
         address: e0.address,
