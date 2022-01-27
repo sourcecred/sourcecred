@@ -103,6 +103,7 @@ export class CredGrainView {
         );
       }
     });
+    this.validate();
   }
 
   static _calculateGrainEarnedPerInterval(
@@ -134,8 +135,15 @@ export class CredGrainView {
     if (this.activeParticipants().length === 0) {
       throw new Error(`must have at least one identity to allocate grain to`);
     }
+    this.validate();
+    if (sum(this.totalCredPerInterval()) < 1)
+      throw new Error(
+        "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
+      );
+  }
 
-    this.activeParticipants().forEach((p) => {
+  validate() {
+    this.participants().forEach((p) => {
       p.credPerInterval.forEach((c) => {
         if (typeof c !== "number") {
           throw new Error(`Non numeric cred value found`);
@@ -150,7 +158,11 @@ export class CredGrainView {
       }
 
       if (p.credPerInterval.length !== this.intervals().length) {
-        throw new Error(`participant cred per interval length mismatch`);
+        throw new Error(
+          `participant cred per interval length mismatch: ${
+            p.credPerInterval.length
+          } and ${this.intervals().length}`
+        );
       }
 
       if (p.grainEarnedPerInterval.length !== this.intervals().length) {
@@ -159,7 +171,9 @@ export class CredGrainView {
 
       if (sum(p.credPerInterval) !== p.cred) {
         throw new Error(
-          `participant cred per interval mismatched with participant cred total`
+          `participant cred per interval sum [${sum(
+            p.credPerInterval
+          )}] mismatched with participant cred total [${p.cred}]`
         );
       }
 
@@ -179,11 +193,6 @@ export class CredGrainView {
         }
       });
     });
-
-    if (sum(this.totalCredPerInterval()) < 1)
-      throw new Error(
-        "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
-      );
   }
 
   withTimeScope(
@@ -263,14 +272,20 @@ export class CredGrainView {
         return -Infinity;
       })
       .filter((t) => t > -Infinity);
-
     const intervals = weekIntervals(
       Math.min(...ledgerCredTimestamps, credGraph.intervals()[0].startTimeMs),
       Math.max(
         ...ledgerCredTimestamps,
-        credGraph.intervals()[credGraph.intervals().length - 1].endTimeMs
+        credGraph.intervals()[credGraph.intervals().length - 1].endTimeMs - 1
       )
     );
+    const intervalMap = new Map();
+    intervals.forEach((interval, index) => {
+      const graphIndex = credGraph
+        .intervals()
+        .findIndex((i) => i.startTimeMs === interval.startTimeMs);
+      intervalMap.set(index, graphIndex);
+    });
 
     const graphParticipants = new Map<IdentityId, GraphParticipant>();
     for (const participant of credGraph.participants()) {
@@ -289,11 +304,16 @@ export class CredGrainView {
           account,
           intervals
         );
+        const credPerInterval = intervals.map((interval, index) => {
+          const graphIndex = intervalMap.get(index);
+          if (graphIndex === undefined || graphIndex === -1) return 0;
+          return graphParticipant.credPerInterval[graphIndex];
+        });
         return {
           active: account.active,
           identity: account.identity,
           cred: graphParticipant.cred,
-          credPerInterval: graphParticipant.credPerInterval,
+          credPerInterval: credPerInterval,
           grainEarned: account.paid,
           grainEarnedPerInterval,
         };
@@ -317,7 +337,7 @@ export class CredGrainView {
       .filter((t) => t > -Infinity);
 
     const intervals = weekIntervals(
-      Math.min(...ledgerCredTimestamps, ledger.eventLog()[0].ledgerTimestamp),
+      Math.min(...ledgerCredTimestamps, startTimeMs),
       Math.max(...ledgerCredTimestamps, Date.now())
     );
     const participantsMap = new Map();

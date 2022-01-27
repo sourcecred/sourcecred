@@ -4,7 +4,6 @@ import {type TimestampMs} from "../../util/timestamp";
 import * as NullUtil from "../../util/null";
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {Ledger} from "./ledger";
-import {CredGraph} from "../credrank/credGraph";
 import {computeDistribution} from "./computeDistribution";
 import {type Distribution} from "./distribution";
 import {CredGrainView} from "../credGrainView";

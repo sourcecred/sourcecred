@@ -35,6 +35,11 @@ import {type PersonalAttributions} from "./personalAttribution";
 const na = (name) => NA.fromParts([name]);
 const ea = (name) => EA.fromParts([name]);
 
+export const week: number = 604800000;
+export const week1: number = 1642896000000;
+export const week2: number = week1 + week;
+export const week3: number = week1 + 2 * week;
+
 export const participantNode1: GraphNode = {
   description: "participant1",
   address: na("participant1"),
@@ -119,13 +124,13 @@ export const participants: $ReadOnlyArray<MarkovProcessParticipant> = deepFreeze
 
 export const intervals: IntervalSequence = deepFreeze(
   intervalSequence([
-    {startTimeMs: 0, endTimeMs: 2},
-    {startTimeMs: 2, endTimeMs: 4},
+    {startTimeMs: week1, endTimeMs: week2},
+    {startTimeMs: week2, endTimeMs: week3},
   ])
 );
 
-const c0 = {description: "c0", address: na("c0"), timestampMs: 0};
-const c1 = {description: "c1", address: na("c1"), timestampMs: 2};
+const c0 = {description: "c0", address: na("c0"), timestampMs: week1};
+const c1 = {description: "c1", address: na("c1"), timestampMs: week2};
 export const contributions: $ReadOnlyArray<GraphNode> = deepFreeze([c0, c1]);
 
 // Connects contribution 0 to participant 1
@@ -133,7 +138,7 @@ export const e0: GraphEdge = {
   address: ea("e0"),
   src: c0.address,
   dst: participantNode1.address,
-  timestampMs: 1,
+  timestampMs: week1 + 1,
 };
 
 // Connects contribution 1 to participant 1
@@ -141,7 +146,7 @@ export const e1: GraphEdge = {
   address: ea("e1"),
   src: c1.address,
   dst: participantNode1.address,
-  timestampMs: 3,
+  timestampMs: week2 + 1,
 };
 
 // Connects c0 to c1.
@@ -149,7 +154,7 @@ export const e2: GraphEdge = {
   address: ea("e2"),
   src: c0.address,
   dst: c1.address,
-  timestampMs: 4,
+  timestampMs: week3,
 };
 
 // Connects c0 to c1, but will be given an explicit weight of 0 in both
@@ -158,7 +163,7 @@ export const e3: GraphEdge = {
   address: ea("e3"),
   src: c0.address,
   dst: c1.address,
-  timestampMs: 4,
+  timestampMs: week3,
 };
 
 export const edges: $ReadOnlyArray<GraphEdge> = deepFreeze([e0, e1, e2, e3]);
@@ -213,9 +218,9 @@ const attribution1 = {
     {
       toParticipantId: participant2.id,
       proportions: [
-        {timestampMs: -2, proportionValue: 0.2},
-        {timestampMs: -1, proportionValue: 0.1},
-        {timestampMs: 0, proportionValue: 0.5},
+        {timestampMs: week1 - 2, proportionValue: 0.2},
+        {timestampMs: week1 - 1, proportionValue: 0.1},
+        {timestampMs: week1, proportionValue: 0.5},
       ],
     },
   ],
@@ -226,7 +231,7 @@ const attribution2 = {
   recipients: [
     {
       toParticipantId: participant1.id,
-      proportions: [{timestampMs: 2, proportionValue: 0.3}],
+      proportions: [{timestampMs: week2, proportionValue: 0.3}],
     },
   ],
 };
@@ -241,8 +246,8 @@ export const credGraph: () => Promise<CredGraph> = async () =>
 
 //Create a more balanced cred allocation:
 
-const c3 = {description: "c3", address: na("c3"), timestampMs: 0};
-const c4 = {description: "c4", address: na("c4"), timestampMs: 2};
+const c3 = {description: "c3", address: na("c3"), timestampMs: week1};
+const c4 = {description: "c4", address: na("c4"), timestampMs: week2};
 export const contributions2: $ReadOnlyArray<GraphNode> = deepFreeze([c3, c4]);
 
 // Connects contribution 3 to participant 3
@@ -250,7 +255,7 @@ export const e4: GraphEdge = {
   address: ea("e4"),
   src: c3.address,
   dst: participantNode3.address,
-  timestampMs: 1,
+  timestampMs: week1 + 1,
 };
 
 // Connects contribution 4 to participant 4
@@ -258,7 +263,7 @@ export const e5: GraphEdge = {
   address: ea("e5"),
   src: c4.address,
   dst: participantNode4.address,
-  timestampMs: 3,
+  timestampMs: week2 + 1,
 };
 
 // Connects c3 to c4.
@@ -266,14 +271,14 @@ export const e6: GraphEdge = {
   address: ea("e6"),
   src: c3.address,
   dst: c4.address,
-  timestampMs: 4,
+  timestampMs: week3,
 };
 
 export const e7: GraphEdge = {
   address: ea("e3"),
   src: c3.address,
   dst: c4.address,
-  timestampMs: 4,
+  timestampMs: week3,
 };
 
 export const edges2: $ReadOnlyArray<GraphEdge> = deepFreeze([e4, e5, e6, e7]);
@@ -327,9 +332,9 @@ const attribution3 = {
     {
       toParticipantId: participant4.id,
       proportions: [
-        {timestampMs: -2, proportionValue: 0.2},
-        {timestampMs: -1, proportionValue: 0.1},
-        {timestampMs: 0, proportionValue: 0.5},
+        {timestampMs: week1 - 2, proportionValue: 0.2},
+        {timestampMs: week1 - 1, proportionValue: 0.1},
+        {timestampMs: week1, proportionValue: 0.5},
       ],
     },
   ],
@@ -340,7 +345,7 @@ const attribution4 = {
   recipients: [
     {
       toParticipantId: participant3.id,
-      proportions: [{timestampMs: 2, proportionValue: 0.3}],
+      proportions: [{timestampMs: week2, proportionValue: 0.3}],
     },
   ],
 };
