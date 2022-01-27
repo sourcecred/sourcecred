@@ -59,6 +59,8 @@ test_expect_success LOADED,UPDATE_SNAPSHOT \
 '
 
 test_expect_success LOADED "should be identical to the snapshot" '
+    # if this fails after a legitimate code change to a SourceCred output,
+    # try running ./scripts/update_snapshots.sh
     diff -qr . "$snapshot_directory"
 '
 
