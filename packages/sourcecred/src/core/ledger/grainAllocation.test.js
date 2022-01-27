@@ -102,7 +102,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const participants = credGrainViewUnbalanced.participants();
         const expectedAmounts = G.splitBudget(policy.budget, [
@@ -126,7 +126,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(0)},
@@ -173,7 +173,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalancedUnpaid,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(27)},
@@ -192,7 +192,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalancedUnpaid,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [{id: id4, amount: nng(100)}];
         const expectedAllocation = {
@@ -208,7 +208,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(27)},
@@ -227,7 +227,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(6)},
@@ -246,7 +246,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(0)},
@@ -282,7 +282,7 @@ describe("core/ledger/grainAllocation", () => {
       };
 
       const distribution1 = {
-        credTimestamp: 3,
+        credTimestamp: GraphUtil.week2 + 1,
         allocations: [allocation1],
         id: uuid.random(),
       };
@@ -308,7 +308,11 @@ describe("core/ledger/grainAllocation", () => {
 
       it("splits based on past Cred when there's no paid amounts", () => {
         const policy = balanced(100);
-        const allocation = computeAllocation(policy, credGrainViewEmpty, 4);
+        const allocation = computeAllocation(
+          policy,
+          credGrainViewEmpty,
+          GraphUtil.week3
+        );
         const expectedReceipts = [
           {id: id3, amount: nng(28)},
           {id: id4, amount: nng(72)},
@@ -327,7 +331,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(802)},
@@ -346,7 +350,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(34)},
@@ -365,7 +369,7 @@ describe("core/ledger/grainAllocation", () => {
         const allocation = computeAllocation(
           policy,
           credGrainViewUnbalanced,
-          4
+          GraphUtil.week3
         );
         const expectedReceipts = [
           {id: id3, amount: nng(0)},
@@ -404,7 +408,11 @@ describe("core/ledger/grainAllocation", () => {
           memo: "something",
           recipient: id2,
         };
-        const allocation = computeAllocation(policy, credGrainView, 0);
+        const allocation = computeAllocation(
+          policy,
+          credGrainView,
+          GraphUtil.week1
+        );
         const expectedReceipts = [{id: id2, amount: nng(100)}];
         const expectedAllocation = {
           receipts: expectedReceipts,
@@ -420,7 +428,8 @@ describe("core/ledger/grainAllocation", () => {
           memo: "something",
           recipient: id3,
         };
-        const thunk = () => computeAllocation(policy, credGrainView, 0);
+        const thunk = () =>
+          computeAllocation(policy, credGrainView, GraphUtil.week1);
         expect(thunk).toThrowError("no active grain account for identity");
       });
 

@@ -2,17 +2,22 @@
 
 import {CredGrainView} from "./credGrainView";
 import * as GraphUtil from "./credrank/testUtils";
-import {createTestLedgerFixture} from "./ledger/testUtils";
+import {
+  createTestLedgerFixture,
+  createUuidMock,
+  createDateMock,
+} from "./ledger/testUtils";
 import {g, nng} from "./ledger/testUtils";
 import {Ledger} from "./ledger/ledger";
 import * as uuid from "../util/uuid";
 
 describe("core/credGrainView", () => {
+  const dateMock = createDateMock();
   const {
     identity1,
     identity2,
     ledgerWithActiveIdentities,
-  } = createTestLedgerFixture();
+  } = createTestLedgerFixture(createUuidMock(), dateMock);
   const allocationId1 = uuid.random();
   const allocationId2 = uuid.random();
 
@@ -47,12 +52,12 @@ describe("core/credGrainView", () => {
       ],
     };
     const distribution1 = {
-      credTimestamp: 1,
+      credTimestamp: GraphUtil.week1 + 1,
       allocations: [allocation1, allocation2],
       id: uuid.random(),
     };
     const distribution2 = {
-      credTimestamp: 3,
+      credTimestamp: GraphUtil.week2 + 1,
       allocations: [allocation2],
       id: uuid.random(),
     };
@@ -341,7 +346,7 @@ describe("core/credGrainView", () => {
       ],
     };
     const distribution1 = {
-      credTimestamp: 1,
+      credTimestamp: GraphUtil.week1 + 1,
       allocations: [allocation1],
       id: uuid.random(),
     };
@@ -501,49 +506,49 @@ describe("core/credGrainView", () => {
   });
 
   describe("validation tests", () => {
-    const credGrainViewNoCred = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA", "subtype":"USER",\
+    it("no cred", () => {
+      const credGrainViewNoCred = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA", "subtype":"USER",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
       "name":"steven","aliases":[]},"cred":0,"credPerInterval":[0,0],"grainEarned":"23",\
       "grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
       "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
       "name":"crystal-gems","aliases":[]},"cred":0,"credPerInterval":[0,0],"grainEarned":"27",\
       "grainEarnedPerInterval":["17","10"]}],"intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("no cred", () => {
-      expect(() => credGrainViewNoCred.validateForGrainAllocation()).toThrow(
+          )
+        ).validateForGrainAllocation();
+      expect(credGrainViewNoCred).toThrow(
         "cred is zero. Make sure your plugins are configured correctly and remember to run 'yarn go' to calculate the cred scores."
       );
     });
 
-    const credGrainViewCredTotalMismatchedIntervals = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+    it("cred total mismatch", () => {
+      const credGrainViewCredTotalMismatchedIntervals = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
-      "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471486739683,\
+      "name":"steven","aliases":[]},"cred":3,"credPerInterval":[0.9479471486739683,\
       2.0520521567464285],"grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,\
       "identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ","subtype":"ORGANIZATION",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
       "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
       [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
       "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("cred total mismatch", () => {
-      expect(() =>
-        credGrainViewCredTotalMismatchedIntervals.validateForGrainAllocation()
-      ).toThrow(
-        "participant cred per interval mismatched with participant cred total"
+          )
+        );
+      expect(credGrainViewCredTotalMismatchedIntervals).toThrow(
+        "participant cred per interval sum [2.999999305420397] mismatched with participant cred total [3]"
       );
     });
 
-    const credGrainViewNonNumericCred = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+    it("non numeric cred", () => {
+      const credGrainViewNonNumericCred = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
       "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,\
       2.0520521567464285],"grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,\
@@ -552,18 +557,18 @@ describe("core/credGrainView", () => {
       "aliases":[]},"cred":"foo","credPerInterval":[5.146462196976468e-20,7.719693295464702e-20],\
       "grainEarned":"27","grainEarnedPerInterval":["17","10"]}],"intervals":[{"startTimeMs":0,"endTimeMs":2},\
       {"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("non numeric cred", () => {
-      expect(() =>
-        credGrainViewNonNumericCred.validateForGrainAllocation()
-      ).toThrow("Non numeric cred value found");
+          )
+        );
+      expect(credGrainViewNonNumericCred).toThrow(
+        "Non numeric cred value found"
+      );
     });
 
-    const credGrainViewNonNumericCredInterval = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+    it("non numeric cred interval", () => {
+      const credGrainViewNonNumericCredInterval = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
       "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,\
       2.0520521567464285],"grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,\
@@ -572,38 +577,38 @@ describe("core/credGrainView", () => {
       "aliases":[]},"cred":"20","credPerInterval":["20","bar"],\
       "grainEarned":"27","grainEarnedPerInterval":["17","10"]}],"intervals":[{"startTimeMs":0,"endTimeMs":2},\
       {"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("non numeric cred interval", () => {
-      expect(() =>
-        credGrainViewNonNumericCredInterval.validateForGrainAllocation()
-      ).toThrow("Non numeric cred value found");
+          )
+        );
+      expect(credGrainViewNonNumericCredInterval).toThrow(
+        "Non numeric cred value found"
+      );
     });
 
-    const credGrainViewCredIntervalsLengthMismatch = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+    it("cred interval length mismatch", () => {
+      const credGrainViewCredIntervalsLengthMismatch = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
-      "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605],\
+      "name":"steven","aliases":[]},"cred":2.999999305420397,"credPerInterval":[0.9479471812187605],\
       "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":\
       {"id":"URgLrCxgvjHxtGJ9PgmckQ","subtype":"ORGANIZATION","address":\
       "N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000","name":\
       "crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
       [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
       "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("cred interval length mismatch", () => {
-      expect(() =>
-        credGrainViewCredIntervalsLengthMismatch.validateForGrainAllocation()
-      ).toThrow("participant cred per interval length mismatch");
+          )
+        );
+      expect(credGrainViewCredIntervalsLengthMismatch).toThrow(
+        "participant cred per interval length mismatch"
+      );
     });
 
-    const credGrainViewGrainIntervalsLengthMismatch = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER","address"\
+    it("grain interval length mismatch", () => {
+      const credGrainViewGrainIntervalsLengthMismatch = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER","address"\
       :"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000","name":"steven","aliases":[]}\
       ,"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],"grainEarned":"23",\
       "grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
@@ -611,18 +616,18 @@ describe("core/credGrainView", () => {
       ,"name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
       [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["10"]}],\
       "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("grain interval length mismatch", () => {
-      expect(() =>
-        credGrainViewGrainIntervalsLengthMismatch.validateForGrainAllocation()
-      ).toThrow("participant grain per interval length mismatch");
+          )
+        );
+      expect(credGrainViewGrainIntervalsLengthMismatch).toThrow(
+        "participant grain per interval length mismatch"
+      );
     });
 
-    const credGrainViewGrainTotalMismatchWithIntervals = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER","address"\
+    it("grain total mismatch with grain intervals", () => {
+      const credGrainViewGrainTotalMismatchWithIntervals = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER","address"\
       :"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000","name":"steven","aliases":[]},\
       "cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],"grainEarned":"23",\
       "grainEarnedPerInterval":["12","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
@@ -630,14 +635,10 @@ describe("core/credGrainView", () => {
       "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
       [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
       "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("grain total mismatch with grain intervals", () => {
-      expect(() =>
-        credGrainViewGrainTotalMismatchWithIntervals.validateForGrainAllocation()
-      ).toThrow(
-        "participant grain per interval mismatched with participant grain total"
+          )
+        );
+      expect(credGrainViewGrainTotalMismatchWithIntervals).toThrow(
+        "participant grain per interval [22] mismatched with participant grain total [23] for participant [steven]"
       );
     });
 
@@ -647,7 +648,7 @@ describe("core/credGrainView", () => {
           JSON.parse(
             '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
           "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
-          "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],\
+          "name":"steven","aliases":[]},"cred":2.999999305420397,"credPerInterval":[0.9479471812187605,2.0520521567464285],\
           "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
           "subtype":"ORGANIZATION","address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
           "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
@@ -658,9 +659,11 @@ describe("core/credGrainView", () => {
       ).toThrow("Invalid integer: bar");
     });
 
-    const credGrainViewNegativeGrain = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+    it("negative grain", () => {
+      const credGrainViewNegativeGrain = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
       "name":"steven","aliases":[]},"cred":2.999999337965189,"credPerInterval":[0.9479471812187605,2.0520521567464285],\
       "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
@@ -668,18 +671,18 @@ describe("core/credGrainView", () => {
       "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
       [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"15","grainEarnedPerInterval":["17","-2"]}],\
       "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("negative grain", () => {
-      expect(() =>
-        credGrainViewNegativeGrain.validateForGrainAllocation()
-      ).toThrow("negative grain paid in interval data");
+          )
+        );
+      expect(credGrainViewNegativeGrain).toThrow(
+        "negative grain paid in interval data"
+      );
     });
 
-    const credGrainViewNegativeCred = CredGrainView.fromJSON(
-      JSON.parse(
-        '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
+    it("negative cred", () => {
+      const credGrainViewNegativeCred = () =>
+        CredGrainView.fromJSON(
+          JSON.parse(
+            '{"participants":[{"active":true,"identity":{"id":"YVZhbGlkVXVpZEF0TGFzdA","subtype":"USER",\
       "address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
       "name":"steven","aliases":[]},"cred":1.104104975527668,"credPerInterval":[-0.9479471812187605,2.0520521567464285],\
       "grainEarned":"23","grainEarnedPerInterval":["13","10"]},{"active":true,"identity":{"id":"URgLrCxgvjHxtGJ9PgmckQ",\
@@ -687,13 +690,11 @@ describe("core/credGrainView", () => {
       "name":"crystal-gems","aliases":[]},"cred":1.286615549244117e-19,"credPerInterval":\
       [5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"27","grainEarnedPerInterval":["17","10"]}],\
       "intervals":[{"startTimeMs":0,"endTimeMs":2},{"startTimeMs":2,"endTimeMs":4}]}'
-      )
-    );
-
-    it("negative cred", () => {
-      expect(() =>
-        credGrainViewNegativeCred.validateForGrainAllocation()
-      ).toThrow("negative cred in interval data");
+          )
+        );
+      expect(credGrainViewNegativeCred).toThrow(
+        "negative cred in interval data"
+      );
     });
   });
 });

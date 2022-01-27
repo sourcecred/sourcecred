@@ -8,7 +8,7 @@ import {CredGrainView} from "../../credGrainView";
 import {createTestLedgerFixture} from "../../ledger/testUtils";
 
 describe("core/ledger/policies/immediate", () => {
-  describe("immediateReceipts", () => {
+  describe.only("immediateReceipts", () => {
     const {ledgerWithActiveIdentities} = createTestLedgerFixture();
 
     let credGraph;
@@ -61,7 +61,7 @@ describe("core/ledger/policies/immediate", () => {
       );
     });
 
-    it("defaults lookback period > history to max history", () => {
+    it.only("defaults lookback period > history to max history", () => {
       const policy1 = {
         policyType: "IMMEDIATE",
         budget: fromGrain(G.ONE),
@@ -72,8 +72,16 @@ describe("core/ledger/policies/immediate", () => {
         budget: fromGrain(G.ONE),
         numIntervalsLookback: 50, // 50 > number of intervals (4)
       };
-      const expected = immediateReceipts(policy1, credGrainViewUnbalanced, 4);
-      const actual = immediateReceipts(policy2, credGrainViewUnbalanced, 4);
+      const expected = immediateReceipts(
+        policy1,
+        credGrainViewUnbalanced,
+        GraphUtil.week3 + 1
+      );
+      const actual = immediateReceipts(
+        policy2,
+        credGrainViewUnbalanced,
+        GraphUtil.week3 + 1
+      );
       expect(actual).toEqual(expected);
     });
 

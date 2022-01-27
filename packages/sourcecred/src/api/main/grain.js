@@ -1,6 +1,6 @@
 // @flow
 
-import {CredGraph} from "../../core/credrank/credGraph";
+import {CredGrainView} from "../../core/credGrainView";
 import {Ledger} from "../../core/ledger/ledger";
 import {applyDistributions} from "../../core/ledger/applyDistributions";
 import type {CurrencyDetails} from "../currencyConfig";
@@ -14,7 +14,7 @@ import {
 } from "../../core/ledger/grainIntegration";
 
 export type GrainInput = {|
-  +credGraph: CredGraph,
+  +credGrainView: CredGrainView,
   +ledger: Ledger,
   +grainConfig: GrainConfig,
   +currencyDetails: CurrencyDetails,
@@ -51,7 +51,7 @@ export async function grain(input: GrainInput): Promise<GrainOutput> {
 
   const distributions = applyDistributions(
     input.grainConfig,
-    input.credGraph,
+    input.credGrainView,
     configuredLedger,
     +Date.now(),
     input.allowMultipleDistributionsPerInterval || false

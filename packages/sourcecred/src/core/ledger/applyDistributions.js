@@ -4,7 +4,6 @@ import {type TimestampMs} from "../../util/timestamp";
 import * as NullUtil from "../../util/null";
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {Ledger} from "./ledger";
-import {CredGraph} from "../credrank/credGraph";
 import {computeDistribution} from "./computeDistribution";
 import {type Distribution} from "./distribution";
 import {CredGrainView} from "../credGrainView";
@@ -32,12 +31,12 @@ import type {GrainConfig} from "../../api/grainConfig";
  */
 export function applyDistributions(
   config: GrainConfig,
-  credGraph: CredGraph,
+  credGrainView: CredGrainView,
   ledger: Ledger,
   currentTimestamp: TimestampMs,
   allowMultipleDistributionsPerInterval: boolean
 ): $ReadOnlyArray<Distribution> {
-  const credIntervals = credGraph.intervals();
+  const credIntervals = credGrainView.intervals();
   const distributionIntervals = _chooseDistributionIntervals(
     credIntervals,
     NullUtil.orElse(ledger.lastDistributionTimestamp(), -Infinity),
@@ -49,10 +48,6 @@ export function applyDistributions(
     // Recompute for every endpoint because the Ledger will be in a different state
     // (wrt paid balances)
 
-    const credGrainView = CredGrainView.fromCredGraphAndLedger(
-      credGraph,
-      ledger
-    );
     const distribution = computeDistribution(
       config.allocationPolicies,
       credGrainView,

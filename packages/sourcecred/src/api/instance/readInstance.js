@@ -167,18 +167,18 @@ export class ReadInstance implements ReadOnlyInstance {
 
   async readGrainInput(): Promise<GrainInput> {
     const [
-      credGraph,
+      credGrainView,
       ledger,
       grainConfig,
       currencyDetails,
     ] = await Promise.all([
-      this.readCredGraph(),
+      this.readCredGrainView(),
       this.readLedger(),
       this.readGrainConfig(),
       this.readCurrencyDetails(),
     ]);
     return {
-      credGraph,
+      credGrainView,
       ledger,
       grainConfig,
       currencyDetails,
