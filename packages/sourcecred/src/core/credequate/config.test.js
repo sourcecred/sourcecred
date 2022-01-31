@@ -1,6 +1,7 @@
 // @flow
 
-import {getOperator, getWeight, hasExplicitWeight} from "./config";
+import {getWeight, hasExplicitWeight} from "./utils";
+import {getOperator} from "./config";
 import {buildConfig} from "./testUtils";
 
 describe("core/credequate/config", () => {
