@@ -33,10 +33,16 @@ import * as ledger from "../../core/ledger/ledger";
 import * as ledgerUtils from "../../core/ledger/utils";
 import * as grain from "../../core/ledger/grain";
 import * as identity from "../../core/identity";
+import * as contribution from "../../core/credequate/contribution";
+import * as scoredContribution from "../../core/credequate/scoredContribution";
+import * as operator from "../../core/credequate/operator";
+import * as config from "../../core/credequate/config";
 
 import * as manager from "../ledgerManager";
 import * as storage from "../../core/storage/github";
 import * as credrank from "../main/credrank";
+import * as contributions from "../main/contributions";
+import * as credequate from "../main/credequate";
 import * as graphApi from "../main/graph";
 import * as grainApi from "../main/grain";
 import * as analysis from "../main/analysis";
@@ -46,6 +52,8 @@ const api = {
   api: {
     graph: graphApi,
     credrank,
+    contributions,
+    credequate,
     grain: grainApi,
     analysis,
   },
@@ -63,6 +71,12 @@ const api = {
     weights,
     credGraph,
     CredGrainView,
+  },
+  credequate: {
+    scoredContribution,
+    contribution,
+    config,
+    operator,
   },
   ledger: {
     ledger,
