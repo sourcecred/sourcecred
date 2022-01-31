@@ -1,7 +1,8 @@
 // @flow
 import type {Contribution, Expression} from "./contribution";
 import {type Operator, applyOperator, OPERATORS} from "./operator";
-import {getWeight, getOperator, type Config} from "./config";
+import {getOperator, type Config} from "./config";
+import {getWeight} from "./utils";
 import type {TimestampMs} from "../../util/timestamp";
 import findLast from "lodash.findlast";
 import type {NodeAddressT} from "../graph";

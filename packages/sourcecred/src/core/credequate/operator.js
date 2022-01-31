@@ -1,6 +1,7 @@
 // @flow
 import type {ScoredExpression, ScoredWeightOperand} from "./scoredContribution";
-import {hasExplicitWeight, type Config} from "./config";
+import {hasExplicitWeight} from "./utils";
+import type {Config} from "./config";
 import * as C from "../../util/combo";
 
 type OperatorFunction = (
