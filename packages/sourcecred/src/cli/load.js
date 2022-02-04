@@ -29,8 +29,12 @@ const loadCommand: Command = async (args, std) => {
   let pluginsToLoad: PluginId[] = [];
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
+  const combinedPlugins = new Map(config.bundledPlugins);
+  config.credEquatePlugins.forEach((plugin) => {
+    combinedPlugins.set(plugin.id, plugin.plugin);
+  });
   if (args.length === 0) {
-    pluginsToLoad = Array.from(config.bundledPlugins.keys());
+    pluginsToLoad = Array.from(combinedPlugins.keys());
     if (pluginsToLoad.length === 0) {
       std.err(
         "No plugins configured; Please set up at least one plugin: " +
@@ -40,7 +44,7 @@ const loadCommand: Command = async (args, std) => {
   } else {
     for (const arg of args) {
       const id = pluginIdParser.parseOrThrow(arg);
-      if (config.bundledPlugins.has(id)) {
+      if (combinedPlugins.has(id)) {
         pluginsToLoad.push(id);
       } else {
         return die(
@@ -56,7 +60,7 @@ const loadCommand: Command = async (args, std) => {
   const loadPromises = [];
   const cacheEmpty = new Map<PluginId, boolean>();
   for (const name of pluginsToLoad) {
-    const plugin = NullUtil.get(config.bundledPlugins.get(name));
+    const plugin = NullUtil.get(combinedPlugins.get(name));
     const task = `loading ${name}`;
     taskReporter.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);
