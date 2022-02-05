@@ -51,7 +51,7 @@ export async function grain(input: GrainInput): Promise<GrainOutput> {
 
   const distributions = applyDistributions(
     input.grainConfig,
-    input.credGrainView,
+    input.credGrainView.withNewLedger(configuredLedger),
     configuredLedger,
     +Date.now(),
     input.allowMultipleDistributionsPerInterval || false
