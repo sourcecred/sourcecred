@@ -16,7 +16,6 @@ import {
 import {makeStyles} from "@material-ui/core/styles";
 import MenuIcon from "@material-ui/icons/Menu";
 import {toggleSidebar, useTranslate} from "ra-core";
-import {HideOnScroll} from "ra-ui-materialui";
 
 import LoadingIndicator from "./LoadingIndicator";
 import {LoginButton} from "./LoginButton";
@@ -108,51 +107,49 @@ const AppBar = (props: Props): React.Node => {
   const translate = useTranslate();
 
   return (
-    <HideOnScroll>
-      <MuiAppBar className={className} color={color}>
-        <Toolbar
-          disableGutters
-          variant={isXSmall ? "regular" : "dense"}
-          className={classes.toolbar}
-        >
-          <Tooltip
-            title={translate(
-              open ? "ra.action.close_menu" : "ra.action.open_menu",
-              {
-                _: "Open/Close menu",
-              }
-            )}
-            enterDelay={500}
-          >
-            <IconButton
-              color="default"
-              onClick={() => dispatch(toggleSidebar())}
-              className={classNames(classes.menuButton)}
-            >
-              <MenuIcon
-                classes={{
-                  root: open
-                    ? classes.menuButtonIconOpen
-                    : classes.menuButtonIconClosed,
-                }}
-              />
-            </IconButton>
-          </Tooltip>
-          {Children.count(children) === 0 ? (
-            <Typography
-              variant="h6"
-              color="inherit"
-              className={classes.title}
-              id="react-admin-title"
-            />
-          ) : (
-            children
+    <MuiAppBar className={className} color={color} position="fixed">
+      <Toolbar
+        disableGutters
+        variant={isXSmall ? "regular" : "dense"}
+        className={classes.toolbar}
+      >
+        <Tooltip
+          title={translate(
+            open ? "ra.action.close_menu" : "ra.action.open_menu",
+            {
+              _: "Open/Close menu",
+            }
           )}
-          <LoadingIndicator />
-          {isDev ? <LoginButton /> : null}
-        </Toolbar>
-      </MuiAppBar>
-    </HideOnScroll>
+          enterDelay={500}
+        >
+          <IconButton
+            color="default"
+            onClick={() => dispatch(toggleSidebar())}
+            className={classNames(classes.menuButton)}
+          >
+            <MenuIcon
+              classes={{
+                root: open
+                  ? classes.menuButtonIconOpen
+                  : classes.menuButtonIconClosed,
+              }}
+            />
+          </IconButton>
+        </Tooltip>
+        {Children.count(children) === 0 ? (
+          <Typography
+            variant="h6"
+            color="inherit"
+            className={classes.title}
+            id="react-admin-title"
+          />
+        ) : (
+          children
+        )}
+        <LoadingIndicator />
+        {isDev ? <LoginButton /> : null}
+      </Toolbar>
+    </MuiAppBar>
   );
 };
 

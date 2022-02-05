@@ -6,6 +6,7 @@ import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 import {type WeightsT} from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
+import Paper from "@material-ui/core/Paper";
 
 export type WeightConfigSectionProps = {|
   show: boolean,
@@ -17,6 +18,11 @@ export type WeightConfigSectionProps = {|
 const useStyles = makeStyles(() => ({
   weightConfig: {
     marginTop: 10,
+  },
+  container: {
+    padding: "20px 20px 20px 28px",
+    marginLeft: "3px",
+    marginRight: "-15px",
   },
 }));
 
@@ -31,10 +37,10 @@ const WeightsConfigSection = ({
   const classes = useStyles();
 
   return (
-    <Grid container>
-      <Grid container className={classes.weightConfig} spacing={2}>
-        <Grid container item xs={12} direction="column">
-          <Grid>
+    <Paper className={classes.container}>
+      <Grid container>
+        <Grid container className={classes.weightConfig} spacing={2}>
+          <Grid container item xs={12} direction="column">
             <Grid>
               This page loads your current config/weights.json file, if one
               exists. Once you are done configuring weights, download the file
@@ -51,25 +57,25 @@ const WeightsConfigSection = ({
               />
             </Grid>
           </Grid>
-        </Grid>
-        <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
-          <WeightConfig
-            declarations={pluginDeclarations}
-            nodeWeights={weights.nodeWeights}
-            edgeWeights={weights.edgeWeights}
-            onNodeWeightChange={(prefix, weight) => {
-              weights.nodeWeights.set(prefix, weight);
+          <Grid spacing={2} container item xs={12}>
+            <WeightConfig
+              declarations={pluginDeclarations}
+              nodeWeights={weights.nodeWeights}
+              edgeWeights={weights.edgeWeights}
+              onNodeWeightChange={(prefix, weight) => {
+                weights.nodeWeights.set(prefix, weight);
 
-              setWeightsState({weights});
-            }}
-            onEdgeWeightChange={(prefix, weight) => {
-              weights.edgeWeights.set(prefix, weight);
-              setWeightsState({weights});
-            }}
-          />
+                setWeightsState({weights});
+              }}
+              onEdgeWeightChange={(prefix, weight) => {
+                weights.edgeWeights.set(prefix, weight);
+                setWeightsState({weights});
+              }}
+            />
+          </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </Paper>
   );
 };
 
