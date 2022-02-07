@@ -619,7 +619,7 @@ export const ExplorerHome = ({
                         }
                       >
                         <b>
-                          {value.name.description === "Grain"
+                          {value === GRAIN_SORT
                             ? currencyName
                             : value.name.description}
                         </b>
