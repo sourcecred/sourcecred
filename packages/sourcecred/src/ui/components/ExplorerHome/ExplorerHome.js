@@ -618,7 +618,11 @@ export const ExplorerHome = ({
                           tsParticipants.setSortFn(value.name, value.fn)
                         }
                       >
-                        <b>{value.name.description}</b>
+                        <b>
+                          {value === GRAIN_SORT
+                            ? currencyName
+                            : value.name.description}
+                        </b>
                       </TableSortLabel>
                     </TableCell>
                   ))}
