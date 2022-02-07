@@ -6,8 +6,8 @@ const payoutDistributionToCsv = require("./distributionToCsv");
 // packages/sourcecred though, since that'll create a circular depedency.
 // Code we want to import from core needs to be split out into it's own
 // package first.
-const csvIntegration /*: any */ = (payoutDistributions, _unused_config) => {
-  const csvString = payoutDistributionToCsv(payoutDistributions);
+const csvIntegration /*: any */ = (payoutDistributions, config) => {
+  const csvString = payoutDistributionToCsv(payoutDistributions, config);
 
   const timestamp = Date.now();
 
