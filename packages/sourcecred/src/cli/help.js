@@ -11,6 +11,7 @@ import {serveHelp} from "./serve";
 import {siteHelp} from "./site";
 import {credRankHelp} from "./credrank";
 import {credequateHelp} from "./credequate";
+import {hybridHelp} from "./hybrid";
 import {analysisHelp} from "./analysis";
 import {updateHelp} from "./update";
 import dedent from "../util/dedent";
@@ -31,6 +32,7 @@ const help: Command = async (args, std) => {
     site: siteHelp,
     credrank: credRankHelp,
     credequate: credequateHelp,
+    hybrid: hybridHelp,
     serve: serveHelp,
     analysis: analysisHelp,
     update: updateHelp,
@@ -61,8 +63,11 @@ function usage(print: (string) => void): void {
       AUXILIARY
       load          load plugin data into cache
       graph         build Cred graph from cached plugin data
+      contributions build Contributions from cached plugin data
       site          update your cred site with the latest changes
       credrank      calculate cred scores from existing graph
+      credequate    calculate cred scores from existing contributions
+      hybrid        run both credrank and credequate and sum the results
       analysis      generates useful data analysis structures
       help          show this help message
 
