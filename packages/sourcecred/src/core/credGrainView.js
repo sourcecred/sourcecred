@@ -273,6 +273,29 @@ export class CredGrainView {
     return new CredGrainView(json.participants, json.intervals);
   }
 
+  withNewLedger(ledger: Ledger): CredGrainView {
+    const participants = ledger.accounts().map((account) => {
+      const grainEarnedPerInterval = CredGrainView._calculateGrainEarnedPerInterval(
+        account,
+        this._intervals
+      );
+      const participant = this._participants.find(
+        (p) => p.identity.id === account.identity.id
+      );
+      if (!participant)
+        throw new Error(
+          `CredGrainView.withNewLedger: new ledger has identity ID [${account.identity.id}] that is not in already in the CredGrainView.`
+        );
+      return {
+        ...participant,
+        active: account.active,
+        grainEarned: account.paid,
+        grainEarnedPerInterval,
+      };
+    });
+    return new CredGrainView(participants, this._intervals);
+  }
+
   /**
 Creates a CredGrainView using the output of the CredRank API.
  */
@@ -360,7 +383,7 @@ Creates a CredGrainView using the output of the CredEquate API.
       Math.max(...ledgerCredTimestamps, Date.now())
     );
     const participantsMap = new Map();
-    ledger.accounts().forEach((account) => {
+    const participantPrototypes = ledger.accounts().map((account) => {
       const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
         account,
         intervals
@@ -375,6 +398,7 @@ Creates a CredGrainView using the output of the CredEquate API.
       for (const alias of account.identity.aliases) {
         participantsMap.set(alias.address, participant);
       }
+      return participant;
     });
 
     for (const scoredContribution of scoredContributions) {
@@ -389,17 +413,15 @@ Creates a CredGrainView using the output of the CredEquate API.
       }
     }
 
-    const participants = Array.from(new Set(participantsMap.values())).map(
-      (p) => {
-        return {
-          ...p,
-          cred: p.credPerInterval.reduce((a, b, index) => {
-            if (!b) p.credPerInterval[index] = 0;
-            return a + (b ?? 0);
-          }, 0),
-        };
-      }
-    );
+    const participants = participantPrototypes.map((p) => {
+      return {
+        ...p,
+        cred: p.credPerInterval.reduce((a, b, index) => {
+          if (!b) p.credPerInterval[index] = 0;
+          return a + (b ?? 0);
+        }, 0),
+      };
+    });
 
     return new CredGrainView(participants, intervals);
   }

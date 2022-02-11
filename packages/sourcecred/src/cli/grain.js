@@ -53,9 +53,11 @@ const grainCommand: Command = async (args, std) => {
     distributions
   );
 
-  for (const result of results) {
-    await instance.writeGrainIntegrationOutput(result);
-    await instance.updateGrainIntegrationConfig(result, grainInput);
+  if (!simulation) {
+    for (const result of results) {
+      await instance.writeGrainIntegrationOutput(result);
+      await instance.updateGrainIntegrationConfig(result, grainInput);
+    }
   }
 
   let totalDistributed = G.ZERO;
