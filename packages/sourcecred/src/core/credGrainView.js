@@ -413,7 +413,6 @@ that participant in the params.
   static fromCredGrainViews(
     ...views: $ReadOnlyArray<CredGrainView>
   ): CredGrainView {
-    const seen = new Set();
     const allIntervals = views.flatMap((view) => view.intervals());
     const intervals = weekIntervals(
       Math.min(...allIntervals.map((i) => i.startTimeMs)),
@@ -427,8 +426,8 @@ that participant in the params.
       for (const participant of view.participants()) {
         let existing = participants.get(participant.identity.id);
         if (!existing) {
-          const credPerInterval = intervals.map((x) => 0);
-          const grainEarnedPerInterval = intervals.map((x) => G.ZERO);
+          const credPerInterval = intervals.map(() => 0);
+          const grainEarnedPerInterval = intervals.map(() => G.ZERO);
           existing = {
             credPerInterval,
             grainEarnedPerInterval,
