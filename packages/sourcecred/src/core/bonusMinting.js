@@ -86,12 +86,27 @@ export function computeBonusMinting(
     }
     return {
       recipient,
-      bonusIntervals: _bonusIntervals(mintIntervals, policy.periods),
+      bonusIntervals: bonusIntervals(mintIntervals, policy.periods),
     };
   });
 }
 
-export function _bonusIntervals(
+export function computeBonusMintingByIntervals(
+  mintIntervals: $ReadOnlyArray<MintInterval>,
+  policies: $ReadOnlyArray<BonusPolicy>
+): $ReadOnlyArray<{|
+  +recipient: NodeAddressT,
+  +bonusIntervals: $ReadOnlyArray<BonusInterval>,
+|}> {
+  return policies.map((policy) => {
+    return {
+      recipient: policy.address,
+      bonusIntervals: bonusIntervals(mintIntervals, policy.periods),
+    };
+  });
+}
+
+export function bonusIntervals(
   mintIntervals: $ReadOnlyArray<MintInterval>,
   periods: $ReadOnlyArray<BonusPeriod>
 ): $ReadOnlyArray<BonusInterval> {

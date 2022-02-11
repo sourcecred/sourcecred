@@ -4,7 +4,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import dedent from "../util/dedent";
 import {LocalInstance} from "../api/instance/localInstance";
-import {credequate} from "../api/main/credequate";
+import {credequate, dependencies} from "../api/main/credequate";
 import {credrank} from "../api/main/credrank";
 import {CredGrainView} from "../core/credGrainView";
 import {getEarliestStartForConfigs} from "../core/credequate/config";
@@ -57,6 +57,15 @@ const hybridCommand: Command = async (args, std) => {
       )
     )
   );
+  const dependenciesInput = {
+    credGrainView: credGrainViewCE,
+    ledger: credrankOutput?.ledger || credrankInput.ledger,
+    dependencies: credrankOutput?.dependencies || credrankInput.dependencies,
+  };
+  const dependenciesOutput = dependencies(dependenciesInput);
+  credequateOutput.scoredContributions = credequateOutput.scoredContributions.concat(
+    dependenciesOutput.scoredDependencyContributions
+  );
   const credGrainViewCR = credrankOutput
     ? CredGrainView.fromCredGraphAndLedger(
         credrankOutput.credGraph,
@@ -64,13 +73,13 @@ const hybridCommand: Command = async (args, std) => {
       )
     : new CredGrainView();
   const credGrainView = CredGrainView.fromCredGrainViews(
-    credGrainViewCE,
+    dependenciesOutput.credGrainView,
     credGrainViewCR
   );
   taskReporter.finish("hybrid: generating CredGrainView");
 
   std.out("\n\n# CredEquate Scores");
-  printCredSummaryTable(credGrainViewCE, std);
+  printCredSummaryTable(dependenciesOutput.credGrainView, std);
   std.out("\n\n# CredRank Scores");
   printCredSummaryTable(credGrainViewCR, std);
   std.out("\n\n# Hybrid Scores");

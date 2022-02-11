@@ -398,6 +398,7 @@ Creates a CredGrainView using the output of the CredEquate API.
       for (const alias of account.identity.aliases) {
         participantsMap.set(alias.address, participant);
       }
+      participantsMap.set(account.identity.address, participant);
       return participant;
     });
 
