@@ -77,6 +77,59 @@ describe("core/credGrainView", () => {
       );
     });
 
+    it("should combines 2 CredGrainViews with same intervals", async () => {
+      const credGraph2 = await GraphUtil.credGraph();
+      const ledger2 = ledgerWithActiveIdentities(id1, id2);
+      ledger2.distributeGrain(distribution1);
+      ledger2.distributeGrain(distribution2);
+      const credGrainView2 = CredGrainView.fromCredGraphAndLedger(
+        credGraph2,
+        ledger2
+      );
+
+      const combinedCredGrainViews = CredGrainView.fromCredGrainViews(
+        credGrainView,
+        credGrainView2
+      );
+
+      const expectedCredGrainView = CredGrainView.fromJSON(
+        JSON.parse(
+          '{"intervals":[{"endTimeMs":1643500800000,"startTimeMs":1642896000000},{"endTimeMs":1644105600000,\
+          "startTimeMs":1643500800000}],"participants":[{"active":true,"cred":5.999998675930378,\
+          "credPerInterval":[1.895894362437521,4.104104313492857],"grainEarned":"46","grainEarnedPerInterval":["26","20"],\
+          "identity":{"address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000",\
+          "aliases":[],"id":"YVZhbGlkVXVpZEF0TGFzdA","name":"steven","subtype":"USER"}},{"active":true,"cred":2.573231098488234e-19,\
+          "credPerInterval":[1.0292924393952936e-19,1.5439386590929404e-19],"grainEarned":"54","grainEarnedPerInterval":["34","20"],\
+          "identity":{"address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000",\
+          "aliases":[],"id":"URgLrCxgvjHxtGJ9PgmckQ","name":"crystal-gems","subtype":"ORGANIZATION"}}]}'
+        )
+      );
+      expect(combinedCredGrainViews).toEqual(expectedCredGrainView);
+    });
+
+    it("should combines 2 CredGrainViews with zero-overlapped intervals", async () => {
+      const credGraph2 = await GraphUtil.credGraph3();
+      const ledger2 = ledgerWithActiveIdentities(id1, id2);
+      ledger2.distributeGrain(distribution1);
+      ledger2.distributeGrain(distribution2);
+      const credGrainView2 = CredGrainView.fromCredGraphAndLedger(
+        credGraph2,
+        ledger2
+      );
+
+      const combinedCredGrainViews = CredGrainView.fromCredGrainViews(
+        credGrainView,
+        credGrainView2
+      );
+
+      const expectedCredGrainView = CredGrainView.fromJSON(
+        JSON.parse(
+          '{"intervals":[{"endTimeMs":1641686400000,"startTimeMs":1641081600000},{"endTimeMs":1642291200000,"startTimeMs":1641686400000},{"endTimeMs":1642896000000,"startTimeMs":1642291200000},{"endTimeMs":1643500800000,"startTimeMs":1642896000000},{"endTimeMs":1644105600000,"startTimeMs":1643500800000}],"participants":[{"active":true,"cred":3.624999337965189,"credPerInterval":[0.25,0.375,0,0.9479471812187605,2.0520521567464285],"grainEarned":"46","grainEarnedPerInterval":["0","0","0","26","20"],"identity":{"address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000YVZhbGlkVXVpZEF0TGFzdA\\u0000","aliases":[],"id":"YVZhbGlkVXVpZEF0TGFzdA","name":"steven","subtype":"USER"}},{"active":true,"cred":0.625,"credPerInterval":[0.25,0.375,0,5.146462196976468e-20,7.719693295464702e-20],"grainEarned":"54","grainEarnedPerInterval":["0","0","0","34","20"],"identity":{"address":"N\\u0000sourcecred\\u0000core\\u0000IDENTITY\\u0000URgLrCxgvjHxtGJ9PgmckQ\\u0000","aliases":[],"id":"URgLrCxgvjHxtGJ9PgmckQ","name":"crystal-gems","subtype":"ORGANIZATION"}}]}'
+        )
+      );
+      expect(combinedCredGrainViews).toEqual(expectedCredGrainView);
+    });
+
     it("should have participant data for all intervals", () => {
       const expectedIntervals = GraphUtil.intervals;
       const expectedParticipants = [

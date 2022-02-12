@@ -36,9 +36,15 @@ const na = (name) => NA.fromParts([name]);
 const ea = (name) => EA.fromParts([name]);
 
 export const week: number = 604800000;
+/** Date: Sunday, January 23, 2022 12:00:00 AM */
 export const week1: number = 1642896000000;
 export const week2: number = week1 + week;
 export const week3: number = week1 + 2 * week;
+
+/** Date: Sunday, January 2, 2022 12:00:00 AM */
+export const week4: number = week1 - 3 * week;
+export const week5: number = week1 - 2 * week;
+export const week6: number = week1 - week;
 
 export const participantNode1: GraphNode = {
   description: "participant1",
@@ -126,6 +132,13 @@ export const intervals: IntervalSequence = deepFreeze(
   intervalSequence([
     {startTimeMs: week1, endTimeMs: week2},
     {startTimeMs: week2, endTimeMs: week3},
+  ])
+);
+
+export const intervals2: IntervalSequence = deepFreeze(
+  intervalSequence([
+    {startTimeMs: week4, endTimeMs: week5},
+    {startTimeMs: week5, endTimeMs: week6},
   ])
 );
 
@@ -326,8 +339,18 @@ export const args2 = (
   participants: [participant3, participant4],
   personalAttributions,
 });
+
+export const args3 = (
+  personalAttributions?: PersonalAttributions = []
+): MarkovProcessGraphArguments => ({
+  weightedGraph: weightedGraph2(),
+  parameters,
+  intervals: intervals2,
+  participants: [participant1, participant2],
+  personalAttributions,
+});
 const attribution3 = {
-  fromParticipantId: participant3.id,
+  fromParticipantId: participant1.id,
   recipients: [
     {
       toParticipantId: participant4.id,
@@ -357,3 +380,10 @@ export const markovProcessGraph2 = (
 
 export const credGraph2: () => Promise<CredGraph> = async () =>
   markovProcessGraphPagerank(markovProcessGraph2());
+
+export const markovProcessGraph3 = (
+  attributions3?: PersonalAttributions = []
+): MarkovProcessGraph => MarkovProcessGraph.new(args3(attributions3));
+
+export const credGraph3: () => Promise<CredGraph> = async () =>
+  markovProcessGraphPagerank(markovProcessGraph3());

@@ -12,6 +12,7 @@ import serve from "./serve";
 import grain from "./grain";
 import credrank from "./credrank";
 import credequate from "./credequate";
+import hybrid from "./hybrid";
 import analysis from "./analysis";
 import update from "./update";
 import help from "./help";
@@ -46,6 +47,8 @@ const sourcecred: Command = async (args, std) => {
       return credrank(args.slice(1), std);
     case "credequate":
       return credequate(args.slice(1), std);
+    case "hybrid":
+      return hybrid(args.slice(1), std);
     case "analysis":
       return analysis(args.slice(1), std);
     case "update":

@@ -81,19 +81,22 @@ export const credGrainViewParser: C.Parser<CredGrainView> = C.object({
  */
 export class CredGrainView {
   _participants: $ReadOnlyArray<ParticipantCredGrain>;
+  _participantsMap: Map<IdentityId, ParticipantCredGrain>;
   _intervals: IntervalSequence;
   _credTotals: Array<number>;
   _grainTotals: Array<Grain>;
 
   constructor(
-    participants: $ReadOnlyArray<ParticipantCredGrain>,
-    intervals: IntervalSequence
+    participants: $ReadOnlyArray<ParticipantCredGrain> = [],
+    intervals: IntervalSequence = intervalSequence([])
   ) {
     this._participants = participants;
     this._intervals = intervals;
     this._credTotals = [];
     this._grainTotals = [];
+    this._participantsMap = new Map();
     participants.forEach((participant) => {
+      this._participantsMap.set(participant.identity.id, participant);
       for (let i = 0; i < this._intervals.length; i++) {
         this._credTotals[i] =
           participant.credPerInterval[i] + (this._credTotals[i] || 0);
@@ -169,7 +172,7 @@ export class CredGrainView {
         throw new Error(`participant grain per interval length mismatch`);
       }
 
-      if (sum(p.credPerInterval) !== p.cred) {
+      if (sum(p.credPerInterval).toFixed(6) !== p.cred.toFixed(6)) {
         throw new Error(
           `participant cred per interval sum [${sum(
             p.credPerInterval
@@ -236,6 +239,16 @@ export class CredGrainView {
     return this._participants;
   }
 
+  /** Returns the data for the participant with the given ID */
+  participant(id: IdentityId): ParticipantCredGrain {
+    const result = this._participantsMap.get(id);
+    if (!result)
+      throw new Error(
+        `Participant [${id}] does not exist in the CredGrainView.`
+      );
+    return result;
+  }
+
   activeParticipants(): $ReadOnlyArray<ParticipantCredGrain> {
     return this._participants.filter((participant) => participant.active);
   }
@@ -260,6 +273,32 @@ export class CredGrainView {
     return new CredGrainView(json.participants, json.intervals);
   }
 
+  withNewLedger(ledger: Ledger): CredGrainView {
+    const participants = ledger.accounts().map((account) => {
+      const grainEarnedPerInterval = CredGrainView._calculateGrainEarnedPerInterval(
+        account,
+        this._intervals
+      );
+      const participant = this._participants.find(
+        (p) => p.identity.id === account.identity.id
+      );
+      if (!participant)
+        throw new Error(
+          `CredGrainView.withNewLedger: new ledger has identity ID [${account.identity.id}] that is not in already in the CredGrainView.`
+        );
+      return {
+        ...participant,
+        active: account.active,
+        grainEarned: account.paid,
+        grainEarnedPerInterval,
+      };
+    });
+    return new CredGrainView(participants, this._intervals);
+  }
+
+  /**
+Creates a CredGrainView using the output of the CredRank API.
+ */
   static fromCredGraphAndLedger(
     credGraph: CredGraph,
     ledger: Ledger
@@ -322,6 +361,9 @@ export class CredGrainView {
     return new CredGrainView(participants, intervals);
   }
 
+  /**
+Creates a CredGrainView using the output of the CredEquate API.
+ */
   static fromScoredContributionsAndLedger(
     scoredContributions: Iterable<ScoredContribution>,
     ledger: Ledger,
@@ -341,7 +383,7 @@ export class CredGrainView {
       Math.max(...ledgerCredTimestamps, Date.now())
     );
     const participantsMap = new Map();
-    ledger.accounts().forEach((account) => {
+    const participantPrototypes = ledger.accounts().map((account) => {
       const grainEarnedPerInterval = this._calculateGrainEarnedPerInterval(
         account,
         intervals
@@ -356,6 +398,7 @@ export class CredGrainView {
       for (const alias of account.identity.aliases) {
         participantsMap.set(alias.address, participant);
       }
+      return participant;
     });
 
     for (const scoredContribution of scoredContributions) {
@@ -370,19 +413,76 @@ export class CredGrainView {
       }
     }
 
-    const participants = Array.from(new Set(participantsMap.values())).map(
-      (p) => {
-        return {
-          ...p,
-          cred: p.credPerInterval.reduce((a, b, index) => {
-            if (!b) p.credPerInterval[index] = 0;
-            return a + (b ?? 0);
-          }, 0),
-        };
-      }
-    );
+    const participants = participantPrototypes.map((p) => {
+      return {
+        ...p,
+        cred: p.credPerInterval.reduce((a, b, index) => {
+          if (!b) p.credPerInterval[index] = 0;
+          return a + (b ?? 0);
+        }, 0),
+      };
+    });
 
     return new CredGrainView(participants, intervals);
+  }
+
+  /**
+Combines multiple CredGrainViews into a single one. The intervals will span the
+earliest to the latest of all intervals in all the CredGrainViews.
+Participant identity/active data will match that of the first occurrence of
+that participant in the params.
+ */
+  static fromCredGrainViews(
+    ...views: $ReadOnlyArray<CredGrainView>
+  ): CredGrainView {
+    const allIntervals = views.flatMap((view) => view.intervals());
+    const intervals = weekIntervals(
+      Math.min(...allIntervals.map((i) => i.startTimeMs)),
+      Math.max(...allIntervals.map((i) => i.endTimeMs - 1))
+    );
+    const participants = new Map();
+    for (const view of views) {
+      const indexOffset = intervals.findIndex(
+        (i) => i.startTimeMs === view.intervals()[0].startTimeMs
+      );
+      for (const participant of view.participants()) {
+        let existing = participants.get(participant.identity.id);
+        if (!existing) {
+          const credPerInterval = intervals.map(() => 0);
+          const grainEarnedPerInterval = intervals.map(() => G.ZERO);
+          existing = {
+            credPerInterval,
+            grainEarnedPerInterval,
+            grainEarned: G.ZERO,
+            cred: 0,
+            identity: participant.identity,
+            active: participant.active,
+          };
+          participants.set(existing.identity.id, existing);
+        }
+        participant.credPerInterval.forEach((cred, index) => {
+          if (!existing)
+            // Makes flow happy
+            throw "CredGrainView.fromCredGrainViews: this should not happen";
+          existing.cred += cred;
+          existing.credPerInterval[index + indexOffset] += cred;
+        });
+        participant.grainEarnedPerInterval.forEach((grain, index) => {
+          if (!existing)
+            // Makes flow happy
+            throw "CredGrainView.fromCredGrainViews: this should not happen";
+          existing.grainEarned = G.add(existing.grainEarned, grain);
+          existing.grainEarnedPerInterval[index + indexOffset] = G.add(
+            existing.grainEarnedPerInterval[index + indexOffset],
+            grain
+          );
+        });
+      }
+    }
+    return new CredGrainView(
+      Array.from(participants.values()),
+      intervalSequence(intervals)
+    );
   }
 }
 
@@ -394,6 +494,7 @@ export class CredGrainView {
  */
 export class TimeScopedCredGrainView {
   _participants: $ReadOnlyArray<ParticipantCredGrain>;
+  _participantsMap: Map<IdentityId, ParticipantCredGrain>;
   _intervals: IntervalSequence;
   _credTotals: $ReadOnlyArray<number>;
   _grainTotals: $ReadOnlyArray<Grain>;
@@ -421,6 +522,7 @@ export class TimeScopedCredGrainView {
         originalIntervals.slice(inclusiveStartIndex, exclusiveEndIndex)
       )
     );
+    this._participantsMap = new Map();
     this._participants = deepFreeze(
       credGrainView.participants().map((participant) => {
         const credPerInterval = participant.credPerInterval.slice(
@@ -431,7 +533,7 @@ export class TimeScopedCredGrainView {
           inclusiveStartIndex,
           exclusiveEndIndex
         );
-        return {
+        const result = {
           active: participant.active,
           identity: participant.identity,
           cred: credPerInterval.reduce((a, b) => a + b, 0),
@@ -442,6 +544,8 @@ export class TimeScopedCredGrainView {
           ),
           grainEarnedPerInterval,
         };
+        this._participantsMap.set(result.identity.id, result);
+        return result;
       })
     );
     this._credTotals = credGrainView
@@ -458,6 +562,15 @@ export class TimeScopedCredGrainView {
 
   participants(): $ReadOnlyArray<ParticipantCredGrain> {
     return this._participants;
+  }
+
+  participant(id: IdentityId): ParticipantCredGrain {
+    const result = this._participantsMap.get(id);
+    if (!result)
+      throw new Error(
+        `Participant [${id}] does not exist in the CredGrainView.`
+      );
+    return result;
   }
 
   activeParticipants(): $ReadOnlyArray<ParticipantCredGrain> {

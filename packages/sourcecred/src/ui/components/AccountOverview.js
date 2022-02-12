@@ -85,16 +85,26 @@ export const AccountOverview = ({
     []
   );
 
-  const sortingOptions = [ACTIVE_SORT, BALANCE_SORT, EARNED_SORT];
+  const sortingOptions = useMemo(
+    () =>
+      ledger.accounting().enabled
+        ? [ACTIVE_SORT, BALANCE_SORT, EARNED_SORT]
+        : [ACTIVE_SORT, EARNED_SORT],
+    [ledger]
+  );
+  const initialSort = useMemo(
+    () => (ledger.accounting().enabled ? BALANCE_SORT : EARNED_SORT),
+    [ledger]
+  );
 
   const tsAccounts = useTableState(
     {data: accounts},
     {
       initialRowsPerPage: PAGINATION_OPTIONS[0],
       initialSort: {
-        sortName: BALANCE_SORT.name,
+        sortName: initialSort.name,
         sortOrder: SortOrders.DESC,
-        sortFn: BALANCE_SORT.fn,
+        sortFn: initialSort.fn,
       },
     }
   );
@@ -163,7 +173,12 @@ export const AccountOverview = ({
           </TableHead>
           <TableBody>
             {tsAccounts.currentPage.map((a) =>
-              AccountRow(a, currencySuffix, decimalsToDisplay)
+              AccountRow(
+                a,
+                currencySuffix,
+                decimalsToDisplay,
+                ledger.accounting().enabled
+              )
             )}
           </TableBody>
 
@@ -192,15 +207,22 @@ export const AccountOverview = ({
   );
 };
 
-const AccountRow = (account: Account, suffix: string, decimals: number) => (
+const AccountRow = (
+  account: Account,
+  suffix: string,
+  decimals: number,
+  accountingEnabled: boolean
+) => (
   <TableRow key={account.identity.id}>
     <TableCell component="th" scope="row">
       <IdentityDetails id={account.identity.id} name={account.identity.name} />
     </TableCell>
     <TableCell align="right">{account.active ? "✅" : "🛑"}</TableCell>
-    <TableCell align="right">
-      {G.format(account.balance, decimals, suffix)}
-    </TableCell>
+    {accountingEnabled && (
+      <TableCell align="right">
+        {G.format(account.balance, decimals, suffix)}
+      </TableCell>
+    )}
     <TableCell align="right">
       {G.format(account.paid, decimals, suffix)}
     </TableCell>

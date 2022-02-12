@@ -222,7 +222,7 @@ export class WriteInstance extends ReadInstance implements Instance {
     const configName = config.grainConfig.integration?.name;
     if (!configName) return;
     const configUpdate = result.configUpdate;
-    if (Object.keys(configUpdate).length > 0) {
+    if (configUpdate && Object.keys(configUpdate).length > 0) {
       const grainConfigPath = pathJoin(...GRAIN_PATH);
       const currentConfig = await loadJson<any>(
         this._storage,
