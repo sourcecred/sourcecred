@@ -16,7 +16,6 @@ export class LocalInstance extends WriteInstance {
     this._baseDirectory = baseDirectory;
   }
 
-
   //////////////////////////////
   //  Private Functions
   //////////////////////////////
