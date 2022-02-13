@@ -33,8 +33,29 @@ import {encode} from "../../core/storage/textEncoding";
 import type {PluginDirectoryContext} from "../plugin";
 import {type CredAccountData} from "../../core/ledger/credAccounts";
 import {WritableDataStorage} from "../../core/storage";
+import {PostableOriginStorage} from "../../core/storage/originStorage";
+import {WritableGithubStorage} from "../../core/storage/github";
+import {type GithubToken} from "../../plugins/github/token";
 import {type PersonalAttributionsConfig} from "../config/personalAttributionsConfig";
 import type {GrainIntegrationMultiResult} from "../main/grain";
+
+export const getOriginWriteInstance = (
+  base: string,
+  headers: {[string]: string | number}
+): WriteInstance => new WriteInstance(new PostableOriginStorage(base, headers));
+
+export const getGithuibWriteInstance = (
+  apiToken: GithubToken,
+  repo: string,
+  branch: string
+): WriteInstance =>
+  new WriteInstance(
+    new WritableGithubStorage({
+      apiToken: apiToken,
+      repo: repo,
+      branch: branch,
+    })
+  );
 
 const DEPENDENCIES_PATH: $ReadOnlyArray<string> = [
   "config",
@@ -72,13 +93,11 @@ const ZIP_SUFFIX: string = "";
 This is an writable Instance implementation that reads and writes using relative paths.
  */
 export class WriteInstance extends ReadInstance implements Instance {
-  _baseDirectory: string;
   _writableStorage: WritableDataStorage;
   _writableZipStorage: WritableZipStorage;
 
-  constructor(writableDataStorage: WritableDataStorage, baseDirectory: string) {
+  constructor(writableDataStorage: WritableDataStorage) {
     super(writableDataStorage);
-    this._baseDirectory = baseDirectory;
     this._writableStorage = writableDataStorage;
     this._writableZipStorage = new WritableZipStorage(writableDataStorage);
   }
@@ -255,24 +274,6 @@ export class WriteInstance extends ReadInstance implements Instance {
     return loadJson(this._storage, pluginsConfigPath, configParser);
   }
 
-  createPluginDriectory(
-    components: $ReadOnlyArray<string>,
-    pluginId: string
-  ): string {
-    const idParts = pluginId.split("/");
-    if (idParts.length !== 2) {
-      throw new Error(`Bad plugin name: ${pluginId}`);
-    }
-    const [pluginOwner, pluginName] = idParts;
-    const pathComponents = [...components, pluginOwner, pluginName];
-    let path = this._baseDirectory;
-    for (const pc of pathComponents) {
-      path = pathJoin(path, pc);
-      this.mkdir(path);
-    }
-    return pathJoin(...pathComponents);
-  }
-
   pluginDirectoryContext(pluginName: string): PluginDirectoryContext {
     const cacheDir = this.createPluginDirectory(["cache"], pluginName);
     const configDir = this.createPluginDirectory(
@@ -426,7 +427,6 @@ export class WriteInstance extends ReadInstance implements Instance {
   // eslint-disable-next-line no-unused-vars
   mkdir(path: string) {
     // Override in subclasses
-    throw new Error("Unimplemented, override in subclasses");
   }
 
   _initInstance() {

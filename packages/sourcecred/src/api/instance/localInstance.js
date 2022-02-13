@@ -9,11 +9,8 @@ This is an Instance implementation that reads and writes using relative paths
 on the local disk.
  */
 export class LocalInstance extends WriteInstance {
-  _baseDirectory: string;
-
   constructor(baseDirectory: string) {
-    super(new DiskStorage(baseDirectory), baseDirectory);
-    this._baseDirectory = baseDirectory;
+    super(new DiskStorage(baseDirectory));
   }
 
   //////////////////////////////
