@@ -428,8 +428,4 @@ export class WriteInstance extends ReadInstance implements Instance {
   mkdir(path: string) {
     // Override in subclasses
   }
-
-  _initInstance() {
-    // Override in subclasses
-  }
 }
