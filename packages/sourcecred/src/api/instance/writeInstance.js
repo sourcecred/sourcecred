@@ -44,7 +44,7 @@ export const getOriginWriteInstance = (
   headers: {[string]: string | number}
 ): WriteInstance => new WriteInstance(new PostableOriginStorage(base, headers));
 
-export const getGithuibWriteInstance = (
+export const getGithubWriteInstance = (
   apiToken: GithubToken,
   repo: string,
   branch: string
