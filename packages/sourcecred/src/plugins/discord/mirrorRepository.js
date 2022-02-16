@@ -224,8 +224,8 @@ export class SqliteMirrorRepository {
       )
       .get({channel_id: channel}).count;
 
-    if (count < n) return null;
-    const offset = count - n;
+    if (count === 0) return null;
+    const offset = count < n ? 0 : count - n;
     const m = this._db
       .prepare(
         dedent`\

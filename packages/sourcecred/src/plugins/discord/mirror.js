@@ -9,6 +9,8 @@ import {channelWeight} from "./reactionWeights";
 
 // How many messages for each channel to reload.
 const RELOAD_DEPTH = 50;
+// How many messages to fetch at a time.
+const MESSAGE_FETCH_LIMIT = 100;
 
 export class Mirror {
   +_repo: SqliteMirrorRepository;
@@ -33,7 +35,7 @@ export class Mirror {
     for (const channel of channels) {
       reporter.start(`discord/${guild.name}/#${channel.name}`);
       try {
-        await this.addMessages(channel.id, channel.parentId);
+        await this.addMessages(channel.id);
       } catch (e) {
         const warn = e?.message?.includes("403")
           ? "Skipping private channel."
@@ -88,33 +90,55 @@ export class Mirror {
   }
 
   async addMessages(
-    channel: Model.Snowflake,
-    category?: Model.Snowflake,
-    messageLimit?: number
+    channel: Model.Snowflake
   ): Promise<$ReadOnlyArray<Model.Message>> {
-    const loadStart = this._repo.nthMessageFromTail(channel, RELOAD_DEPTH);
-    // console.log(channel, (loadStart || {}).id);
-
-    const limit = messageLimit || 100;
-    let page: $ReadOnlyArray<Model.Message> = [];
-    let after: Model.Snowflake = loadStart ? loadStart.id : "0";
-    do {
-      page = await this._api.messages(channel, after, limit);
-      for (const message of page) {
-        after = after < message.id ? message.id : after;
-        this._repo.addMessage(message);
-        for (const emoji of message.reactionEmoji) {
-          const reactions = await this._api.reactions(
-            channel,
-            message.id,
-            emoji
-          );
-          for (const reaction of reactions) {
-            this._repo.addReaction(reaction);
+    let beginningTimestampMs =
+      this._repo.nthMessageFromTail(channel, RELOAD_DEPTH)?.timestampMs ??
+      this.config.beginningTimestampMs;
+    let beforeId: Model.Snowflake = "";
+    const run = async (_this) => {
+      let page: $ReadOnlyArray<Model.Message> = [];
+      let hasReachedBeginning = false;
+      do {
+        page = await _this._api.messages(
+          channel,
+          beforeId,
+          MESSAGE_FETCH_LIMIT
+        );
+        for (const message of page) {
+          if (message.timestampMs < beginningTimestampMs) {
+            hasReachedBeginning = true;
+            continue;
+          }
+          if (!beforeId || beforeId > message.id) {
+            beforeId = message.id;
+          }
+          _this._repo.addMessage(message);
+          for (const emoji of message.reactionEmoji) {
+            const reactions = await _this._api.reactions(
+              channel,
+              message.id,
+              emoji
+            );
+            for (const reaction of reactions) {
+              _this._repo.addReaction(reaction);
+            }
           }
         }
-      }
-    } while (page.length >= limit);
+      } while (page.length >= MESSAGE_FETCH_LIMIT && !hasReachedBeginning);
+    };
+    await run(this);
+
+    // If a previous load was interrupted, leaving an incomplete cache,
+    // or the beginningDate config was changed to be earlier, this ensures
+    // that the gap between the earliest message and the beginningDate is
+    // filled.
+    const firstMessage = this._repo.nthMessageFromTail(channel, Infinity);
+    if (firstMessage) {
+      beforeId = firstMessage.id;
+      beginningTimestampMs = this.config.beginningTimestampMs;
+      await run(this);
+    }
     return this._repo.messages(channel);
   }
 }

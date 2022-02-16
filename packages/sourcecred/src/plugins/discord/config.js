@@ -9,6 +9,12 @@ import {
   type ChannelWeightConfig,
   type WeightConfig,
 } from "./reactionWeights";
+import {
+  fromISO,
+  timestampISOParser,
+  type TimestampISO,
+  type TimestampMs,
+} from "../../util/timestamp";
 
 export type {BotToken as DiscordToken} from "./models";
 
@@ -71,6 +77,8 @@ export type DiscordConfigJson = $ReadOnlyArray<{|
   +includeNsfwChannels?: boolean,
   // This reduces graph size by replacing reaction nodes with message node weights.
   +simplifyGraph?: boolean,
+  // This tells the fetcher not to fetch any messages before this date.
+  +beginningDate?: TimestampISO,
 |}>;
 
 const parserJson: C.Parser<DiscordConfigJson> = C.array(
@@ -100,6 +108,7 @@ const parserJson: C.Parser<DiscordConfigJson> = C.array(
       propsChannels: C.array(C.string),
       includeNsfwChannels: C.boolean,
       simplifyGraph: C.boolean,
+      beginningDate: timestampISOParser,
     }
   )
 );
@@ -110,6 +119,7 @@ export type DiscordConfig = {|
   +propsChannels: $ReadOnlyArray<Model.Snowflake>,
   +includeNsfwChannels: boolean,
   +simplifyGraph: boolean,
+  +beginningTimestampMs: TimestampMs,
 |};
 export type DiscordConfigs = $ReadOnlyArray<DiscordConfig>;
 
@@ -144,6 +154,9 @@ export function _upgrade(json: DiscordConfigJson): DiscordConfigs {
     propsChannels: config.propsChannels || [],
     includeNsfwChannels: config.includeNsfwChannels || false,
     simplifyGraph: config.simplifyGraph || false,
+    beginningTimestampMs: config.beginningDate
+      ? fromISO(config.beginningDate)
+      : -Infinity,
   }));
 }
 

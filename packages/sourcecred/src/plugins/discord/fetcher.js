@@ -11,7 +11,7 @@ export interface DiscordApi {
   members(guild: Model.Snowflake): Promise<$ReadOnlyArray<Model.GuildMember>>;
   messages(
     channel: Model.Snowflake,
-    after: Model.Snowflake,
+    before: Model.Snowflake,
     limit: number
   ): Promise<$ReadOnlyArray<Model.Message>>;
   reactions(
@@ -72,7 +72,7 @@ export class Fetcher implements DiscordApi {
           waitTime / 1000
         } seconds (until ${restartDate.toLocaleString()})`
       );
-      await new Promise((resolve) => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime + 1));
     }
   }
 
@@ -170,12 +170,14 @@ export class Fetcher implements DiscordApi {
 
   async messages(
     channel: Model.Snowflake,
-    after: Model.Snowflake,
+    beforeId: Model.Snowflake,
     limit: number
   ): Promise<$ReadOnlyArray<Model.Message>> {
     const messages = await this._fetchJson(
-      `/channels/${channel}/messages?after=${after}&limit=${limit}`
+      `/channels/${channel}/messages?limit=${limit}` +
+        (beforeId ? `&before=${beforeId}` : "")
     );
+
     return messages.map((x) => ({
       id: x.id,
       channelId: channel,
