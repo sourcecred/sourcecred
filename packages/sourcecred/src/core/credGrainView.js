@@ -444,7 +444,7 @@ that participant in the params.
     const participants = new Map();
     for (const view of views) {
       const indexOffset = intervals.findIndex(
-        (i) => i.startTimeMs === view.intervals()[0].startTimeMs
+        (i) => i.startTimeMs === view.intervals()[0]?.startTimeMs
       );
       for (const participant of view.participants()) {
         let existing = participants.get(participant.identity.id);
