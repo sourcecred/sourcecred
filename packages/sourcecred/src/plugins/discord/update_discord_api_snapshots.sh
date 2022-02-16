@@ -24,7 +24,7 @@ cd "${CORE_PATH}"
 
 fetch() {
   url="${test_instance_url}$1"
-  filename="$(printf '%s' "${url}" | shasum -a 256 -U | cut -d' ' -f1)"
+  filename="$(printf '%s' "${url}" | shasum -a 256 | cut -d' ' -f1)"
   path="${snapshots_dir}/${filename}"
   curl -sfL "$url" \
     -H "Accept: application/json" \
@@ -45,6 +45,6 @@ fetch "/guilds/$GUILD_ID/channels"
 fetch "/guilds/$GUILD_ID/roles"
 fetch "/guilds/$GUILD_ID/emojis"
 fetch "/guilds/$GUILD_ID/members?after=0&limit=1000"
-fetch "/channels/$CHANNEL_ID/messages?after=0&limit=10"
-fetch "/channels/$CHANNEL_ID/messages?after=678394455849566208&limit=10"
+fetch "/channels/$CHANNEL_ID/messages?limit=10"
+fetch "/channels/$CHANNEL_ID/messages?before=678394455849566208&limit=10"
 fetch "/channels/$CHANNEL_ID/messages/$MESSAGE_ID/reactions/$EMOJI_NAME:$EMOJI_ID?after=0&limit=100"

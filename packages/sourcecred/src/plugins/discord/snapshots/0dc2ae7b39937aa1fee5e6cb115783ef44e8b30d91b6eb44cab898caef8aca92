@@ -166,7 +166,7 @@
     "user": {
       "id": "579830927287386126",
       "username": "sandpiper",
-      "avatar": "8e387caf00d84b7fec05385da5a8cfef",
+      "avatar": "1381798c3bb36e75de39d60378efca63",
       "discriminator": "3969",
       "public_flags": 0
     },
@@ -184,8 +184,8 @@
     "communication_disabled_until": null,
     "user": {
       "id": "664562775770791966",
-      "username": "BrianBelhumeur",
-      "avatar": "02425177ceec3724217793f7e26b2b7b",
+      "username": "Beez",
+      "avatar": null,
       "discriminator": "7902",
       "public_flags": 0
     },

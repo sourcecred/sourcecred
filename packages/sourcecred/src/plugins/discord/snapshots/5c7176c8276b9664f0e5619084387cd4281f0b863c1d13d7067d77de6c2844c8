@@ -1,29 +1,5 @@
 [
   {
-    "id": "678394455849566208",
-    "type": 0,
-    "content": "10",
-    "channel_id": "678394406507905129",
-    "author": {
-      "id": "143776454050709505",
-      "username": "Beanow",
-      "avatar": "6496446fe1455f31f9536b132dcc4ac8",
-      "discriminator": "5887",
-      "public_flags": 0
-    },
-    "attachments": [],
-    "embeds": [],
-    "mentions": [],
-    "mention_roles": [],
-    "pinned": false,
-    "mention_everyone": false,
-    "tts": false,
-    "timestamp": "2020-02-16T00:17:22.234000+00:00",
-    "edited_timestamp": "2020-02-16T00:17:38.520000+00:00",
-    "flags": 0,
-    "components": []
-  },
-  {
     "id": "678394451462193154",
     "type": 0,
     "content": "9",
