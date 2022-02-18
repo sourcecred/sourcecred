@@ -398,6 +398,7 @@ Creates a CredGrainView using the output of the CredEquate API.
       for (const alias of account.identity.aliases) {
         participantsMap.set(alias.address, participant);
       }
+      participantsMap.set(account.identity.address, participant);
       return participant;
     });
 
@@ -443,7 +444,7 @@ that participant in the params.
     const participants = new Map();
     for (const view of views) {
       const indexOffset = intervals.findIndex(
-        (i) => i.startTimeMs === view.intervals()[0].startTimeMs
+        (i) => i.startTimeMs === view.intervals()[0]?.startTimeMs
       );
       for (const participant of view.participants()) {
         let existing = participants.get(participant.identity.id);

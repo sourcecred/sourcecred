@@ -13,7 +13,7 @@ import {
   computeBonusMinting,
   createBonusGraph,
   _computeMintIntervals,
-  _bonusIntervals,
+  bonusIntervals,
   BONUS_EDGE_PREFIX,
   BONUS_EDGE_WEIGHT,
   bonusNode,
@@ -208,7 +208,7 @@ describe("core/bonusMinting", () => {
       });
     });
 
-    describe("_bonusIntervals", () => {
+    describe("bonusIntervals", () => {
       it("yields 0 weight if there are no periods", () => {
         const mintIntervals = [
           {interval: {startTimeMs: w1, endTimeMs: w2}, totalMint: 1},
@@ -219,7 +219,7 @@ describe("core/bonusMinting", () => {
           interval: mintInterval.interval,
           amount: 0,
         }));
-        expect(Array.from(_bonusIntervals(mintIntervals, periods))).toEqual(
+        expect(Array.from(bonusIntervals(mintIntervals, periods))).toEqual(
           expected
         );
       });
@@ -236,7 +236,7 @@ describe("core/bonusMinting", () => {
           {interval: {startTimeMs: w1, endTimeMs: w2}, amount: 0.5},
           {interval: {startTimeMs: w2, endTimeMs: w3}, amount: 1.6},
         ];
-        expect(Array.from(_bonusIntervals(mintIntervals, periods))).toEqual(
+        expect(Array.from(bonusIntervals(mintIntervals, periods))).toEqual(
           expected
         );
       });
@@ -250,7 +250,7 @@ describe("core/bonusMinting", () => {
           {interval: {startTimeMs: w1, endTimeMs: w2}, amount: 0.5},
           {interval: {startTimeMs: w2, endTimeMs: w3}, amount: 1},
         ];
-        expect(Array.from(_bonusIntervals(mintIntervals, periods))).toEqual(
+        expect(Array.from(bonusIntervals(mintIntervals, periods))).toEqual(
           expected
         );
       });
@@ -264,7 +264,7 @@ describe("core/bonusMinting", () => {
           {interval: {startTimeMs: w1, endTimeMs: w2}, amount: 0},
           {interval: {startTimeMs: w2, endTimeMs: w3}, amount: 1},
         ];
-        expect(Array.from(_bonusIntervals(mintIntervals, periods))).toEqual(
+        expect(Array.from(bonusIntervals(mintIntervals, periods))).toEqual(
           expected
         );
       });
@@ -281,7 +281,7 @@ describe("core/bonusMinting", () => {
           {interval: {startTimeMs: w1, endTimeMs: w2}, amount: 0},
           {interval: {startTimeMs: w2, endTimeMs: w3}, amount: 1.8},
         ];
-        expect(Array.from(_bonusIntervals(mintIntervals, periods))).toEqual(
+        expect(Array.from(bonusIntervals(mintIntervals, periods))).toEqual(
           expected
         );
       });

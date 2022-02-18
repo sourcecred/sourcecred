@@ -4,7 +4,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import dedent from "../util/dedent";
 import {LocalInstance} from "../api/instance/localInstance";
-import {credequate} from "../api/main/credequate";
+import {credequate, dependencies} from "../api/main/credequate";
 import {credrank} from "../api/main/credrank";
 import {CredGrainView} from "../core/credGrainView";
 import {getEarliestStartForConfigs} from "../core/credequate/config";
@@ -40,6 +40,8 @@ const hybridCommand: Command = async (args, std) => {
 
   taskReporter.start("hybrid: running credequate");
   const credequateInput = await instance.readCredequateInput();
+  const hasCredequatePlugins =
+    credequateInput.rawInstanceConfig.credEquatePlugins.length;
   const credequateOutput = {
     scoredContributions: Array.from(
       credequate(credequateInput).scoredContributions
@@ -48,41 +50,62 @@ const hybridCommand: Command = async (args, std) => {
   taskReporter.finish("hybrid: running credequate");
 
   taskReporter.start("hybrid: generating CredGrainView");
-  const credGrainViewCE = CredGrainView.fromScoredContributionsAndLedger(
-    credequateOutput.scoredContributions,
-    credrankOutput?.ledger || credrankInput.ledger,
-    getEarliestStartForConfigs(
-      credequateInput.rawInstanceConfig.credEquatePlugins.map(
-        (p) => p.configsByTarget
+  let credGrainViewCE = new CredGrainView();
+  if (hasCredequatePlugins) {
+    credGrainViewCE = CredGrainView.fromScoredContributionsAndLedger(
+      credequateOutput.scoredContributions,
+      credrankOutput?.ledger || credrankInput.ledger,
+      getEarliestStartForConfigs(
+        credequateInput.rawInstanceConfig.credEquatePlugins.map(
+          (p) => p.configsByTarget
+        )
       )
-    )
-  );
+    );
+    const dependenciesInput = {
+      credGrainView: credGrainViewCE,
+      ledger: credrankOutput?.ledger || credrankInput.ledger,
+      dependencies: credrankOutput?.dependencies || credrankInput.dependencies,
+    };
+    const dependenciesOutput = dependencies(dependenciesInput);
+    credequateOutput.scoredContributions = credequateOutput.scoredContributions.concat(
+      dependenciesOutput.scoredDependencyContributions
+    );
+    credGrainViewCE = dependenciesOutput.credGrainView;
+  }
+
   const credGrainViewCR = credrankOutput
     ? CredGrainView.fromCredGraphAndLedger(
         credrankOutput.credGraph,
         credrankOutput.ledger
       )
     : new CredGrainView();
+
   const credGrainView = CredGrainView.fromCredGrainViews(
     credGrainViewCE,
     credGrainViewCR
   );
   taskReporter.finish("hybrid: generating CredGrainView");
 
-  std.out("\n\n# CredEquate Scores");
-  printCredSummaryTable(credGrainViewCE, std);
-  std.out("\n\n# CredRank Scores");
-  printCredSummaryTable(credGrainViewCR, std);
-  std.out("\n\n# Hybrid Scores");
-  printCredSummaryTable(credGrainView, std);
+  if (hasCredequatePlugins) {
+    std.out("\n\n# CredEquate Scores");
+    printCredSummaryTable(credGrainViewCE, std);
+  }
+  if (credrankOutput) {
+    std.out("\n\n# CredRank Scores");
+    printCredSummaryTable(credGrainViewCR, std);
+  }
+  if (credrankOutput && hasCredequatePlugins) {
+    std.out("\n\n# Hybrid Scores");
+    printCredSummaryTable(credGrainView, std);
+  }
 
   if (!isSimulation) {
-    taskReporter.start("writing changes");
-    await instance.writeCredequateOutput(credequateOutput, shouldZipOutput);
+    taskReporter.start("hybrid: writing changes");
     if (credrankOutput)
       await instance.writeCredrankOutput(credrankOutput, shouldZipOutput);
+    await instance.writeCredequateOutput(credequateOutput, shouldZipOutput);
     await instance.writeCredGrainView(credGrainView, shouldZipOutput);
-    taskReporter.finish("writing changes");
+    taskReporter.finish("hybrid: writing changes");
   }
 
   taskReporter.finish("hybrid");
