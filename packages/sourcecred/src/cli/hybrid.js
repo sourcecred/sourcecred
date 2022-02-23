@@ -103,7 +103,8 @@ const hybridCommand: Command = async (args, std) => {
     taskReporter.start("hybrid: writing changes");
     if (credrankOutput)
       await instance.writeCredrankOutput(credrankOutput, shouldZipOutput);
-    await instance.writeCredequateOutput(credequateOutput, shouldZipOutput);
+    if (hasCredequatePlugins)
+      await instance.writeCredequateOutput(credequateOutput, shouldZipOutput);
     await instance.writeCredGrainView(credGrainView, shouldZipOutput);
     taskReporter.finish("hybrid: writing changes");
   }
