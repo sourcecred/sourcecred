@@ -6,7 +6,7 @@ import {Fetcher} from "./fetcher";
 describe("plugins/discord/fetcher", () => {
   describe("snapshot testing", () => {
     const guildId = "678348980639498428";
-    const channelId = "678394406507905129";
+    const channelId = "678394498098659349";
     const messageId = "678394436757094410";
     const emoji = {id: "678399364418502669", name: "sourcecred"};
 
@@ -58,5 +58,5 @@ describe("plugins/discord/fetcher", () => {
       expect(spy.mock.calls[0][1]).toBeGreaterThan(0);
       spy.mockRestore();
     });
-  });
+  }); 
 });
