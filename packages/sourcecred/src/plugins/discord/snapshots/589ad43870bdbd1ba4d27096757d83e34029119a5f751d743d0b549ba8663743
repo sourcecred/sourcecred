@@ -6,8 +6,8 @@
   "splash": null,
   "discovery_splash": null,
   "features": [
-    "NEWS",
-    "COMMUNITY"
+    "COMMUNITY",
+    "NEWS"
   ],
   "emojis": [
     {

@@ -31,7 +31,7 @@ describe("plugins/discord/config", () => {
         },
         includeNsfwChannels: true,
         simplifyGraph: true,
-        beginningDate: 123,
+        beginningDate: "1/1/2021",
       },
     ];
     const expected = [
@@ -64,7 +64,7 @@ describe("plugins/discord/config", () => {
         },
         includeNsfwChannels: true,
         simplifyGraph: true,
-        beginningTimestampMs: 123,
+        beginningTimestampMs: 1609488000000,
       },
     ];
     const parsed: DiscordConfigs = parser.parseOrThrow(raw);
