@@ -38,7 +38,7 @@ type Author = {
   email: string,
 };
 
-export class GithubStorage implements DataStorage {
+class ReadableGithubStorage implements DataStorage {
   static ENDPOINT: string = "https://api.github.com";
 
   constructor(opts: Opts) {
@@ -99,8 +99,8 @@ export class GithubStorage implements DataStorage {
   }
 }
 
-export class WritableGithubStorage
-  extends GithubStorage
+class GithubStorage
+  extends ReadableGithubStorage
   implements WritableDataStorage {
   async set(
     path: string,
@@ -199,3 +199,5 @@ export class WritableGithubStorage
     });
   }
 }
+
+export {GithubStorage, GithubStorage as WritableGithubStorage};
