@@ -58,5 +58,5 @@ describe("plugins/discord/fetcher", () => {
       expect(spy.mock.calls[0][1]).toBeGreaterThan(0);
       spy.mockRestore();
     });
-  }); 
+  });
 });
