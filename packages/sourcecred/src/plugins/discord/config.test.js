@@ -64,7 +64,7 @@ describe("plugins/discord/config", () => {
         },
         includeNsfwChannels: true,
         simplifyGraph: true,
-        beginningTimestampMs: 1609452000000,
+        beginningTimestampMs: 1609488000000,
       },
     ];
     const parsed: DiscordConfigs = parser.parseOrThrow(raw);
