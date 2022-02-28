@@ -20,13 +20,14 @@ import {parser, type GithubConfig} from "./config";
 import {validateToken, type GithubToken} from "./token";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type TaskReporter} from "../../util/taskReporter";
-import {repoIdToString} from "./repoId";
+import {repoIdToString, stringToRepoId} from "./repoId";
 import {loadJson} from "../../util/storage";
 import {createIdentities} from "./createIdentities";
 import {DiskStorage} from "../../core/storage/disk";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 import type {Contribution} from "../../core/credequate/contribution";
 import type {ConfigsByTarget} from "../../core/credequate/config";
+import {createContributions} from "./createContributions";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 
@@ -140,11 +141,26 @@ export class GithubPlugin implements Plugin {
   }
 
   async contributions(
-    _unused_ctx: PluginDirectoryContext,
-    _unused_configsByTarget: ConfigsByTarget
+    ctx: PluginDirectoryContext,
+    configsByTarget: ConfigsByTarget
   ): Promise<{[string]: Iterable<Contribution>}> {
-    throw new Error(
-      "This plugin has not been updated to support the Contributions API."
-    );
+    const cache = new CacheProviderImpl(ctx);
+    const token = getTokenFromEnv();
+
+    const repositories = {};
+    for (const repoId of Object.keys(configsByTarget)) {
+      repositories[repoId] = await fetchGithubRepoFromCache(
+        stringToRepoId(repoId),
+        {token, cache}
+      );
+    }
+
+    const contributionsByTarget = {};
+    for (const repoId of Object.keys(repositories)) {
+      const rv = new RelationalView();
+      rv.addRepository(repositories[repoId]);
+      contributionsByTarget[repoId] = createContributions(repoId, rv);
+    }
+    return contributionsByTarget;
   }
 }
