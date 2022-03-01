@@ -112,6 +112,37 @@ export const scoreContribution = (
   };
 };
 
+export function expressionHasSubkey(
+  expression: Expression | ScoredExpression,
+  key: string,
+  subkey: string
+): boolean {
+  for (const weightOperand of expression.weightOperands) {
+    if (weightOperand.key === key && weightOperand.subkey === subkey)
+      return true;
+  }
+  for (const expressionOperand of expression.expressionOperands) {
+    if (expressionHasSubkey(expressionOperand, key, subkey)) return true;
+  }
+  return false;
+}
+
+export function* findContributionsBySubkey<
+  T: Contribution | ScoredContribution
+>(contributions: Iterable<T>, key: string, subkey: string): Iterable<T> {
+  for (const contribution of contributions) {
+    if (expressionHasSubkey(contribution.expression, key, subkey))
+      yield contribution;
+    else {
+      for (const participant of contribution.participants) {
+        for (const share of participant.shares) {
+          if (share.key === key && share.subkey === subkey) yield contribution;
+        }
+      }
+    }
+  }
+}
+
 export function* scoreContributions(
   contributions: Iterable<Contribution>,
   configs: $ReadOnlyArray<Config>

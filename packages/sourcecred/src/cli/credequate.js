@@ -4,7 +4,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import dedent from "../util/dedent";
 import {LocalInstance} from "../api/instance/localInstance";
-import {credequate} from "../api/main/credequate";
+import {credequate, dependencies} from "../api/main/credequate";
 import {CredGrainView} from "../core/credGrainView";
 import {getEarliestStartForConfigs} from "../core/credequate/config";
 import sortBy from "../util/sortBy";
@@ -36,21 +36,37 @@ const credequateCommand: Command = async (args, std) => {
     ),
   };
 
+  const earliestStart = getEarliestStartForConfigs(
+    credequateInput.rawInstanceConfig.credEquatePlugins.map(
+      (p) => p.configsByTarget
+    )
+  );
   const credGrainView = CredGrainView.fromScoredContributionsAndLedger(
     credequateOutput.scoredContributions,
     await instance.readLedger(),
-    getEarliestStartForConfigs(
-      credequateInput.rawInstanceConfig.credEquatePlugins.map(
-        (p) => p.configsByTarget
-      )
-    )
+    earliestStart
   );
-  printCredSummaryTable(credGrainView, std);
+  const dependenciesInput = {
+    credGrainView,
+    ledger: await instance.readLedger(),
+    dependencies: await instance.readDependencies(),
+  };
+  const dependenciesOutput = dependencies(dependenciesInput);
+  credequateOutput.scoredContributions = credequateOutput.scoredContributions.concat(
+    dependenciesOutput.scoredDependencyContributions
+  );
+
+  printCredSummaryTable(dependenciesOutput.credGrainView, std);
 
   if (!isSimulation) {
     taskReporter.start("writing changes");
     instance.writeCredequateOutput(credequateOutput, shouldZipOutput);
-    instance.writeCredGrainView(credGrainView, shouldZipOutput);
+    instance.writeCredGrainView(
+      dependenciesOutput.credGrainView,
+      shouldZipOutput
+    );
+    instance.writeDependenciesConfig(dependenciesOutput.dependencies);
+    instance.writeLedger(dependenciesOutput.ledger);
     taskReporter.finish("writing changes");
   }
 

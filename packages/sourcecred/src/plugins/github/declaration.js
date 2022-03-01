@@ -206,6 +206,16 @@ const edgeTypes = deepFreeze([
   correspondsToCommitEdgeType,
 ]);
 
+export const KEYS = {
+  REACTIONS_OPERATOR: "reactionsOperator",
+  PULL_AUTHOR: "pull author",
+  COMMIT_AUTHOR: "commit author",
+  REVIEW_AUTHOR: "review author",
+  PULL: "pull request",
+  REVIEW: "review",
+  REACTION: "reaction",
+};
+
 export const declaration: PluginDeclaration = deepFreeze({
   name: "GitHub",
   nodePrefix: N.Prefix.base,
@@ -214,8 +224,8 @@ export const declaration: PluginDeclaration = deepFreeze({
   edgeTypes: edgeTypes,
   userTypes: [userNodeType],
   keys: {
-    operatorKeys: [],
-    shareKeys: [],
-    weightKeys: [],
+    operatorKeys: [KEYS.REACTIONS_OPERATOR],
+    shareKeys: [KEYS.PULL_AUTHOR, KEYS.COMMIT_AUTHOR, KEYS.REVIEW_AUTHOR],
+    weightKeys: [KEYS.PULL, KEYS.REACTION, KEYS.REACTION],
   },
 });
