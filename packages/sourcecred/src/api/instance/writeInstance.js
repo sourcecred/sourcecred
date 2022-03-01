@@ -22,7 +22,6 @@ import {
 import {loadJson} from "../../util/storage";
 
 import {toISO} from "../../util/timestamp";
-import {parser as configParser, type InstanceConfig} from "../instanceConfig";
 import {Ledger} from "../../core/ledger/ledger";
 import type {ContributionsByTarget} from "../../core/credequate/contribution";
 import type {DependenciesConfig} from "../dependenciesConfig";
@@ -68,7 +67,6 @@ const PERSONAL_ATTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
 ];
 
 const GRAIN_PATH: $ReadOnlyArray<string> = ["config", "grain.json"];
-const INSTANCE_CONFIG_PATH: $ReadOnlyArray<string> = ["sourcecred.json"];
 const CREDGRAPH_PATH: $ReadOnlyArray<string> = ["output", "credGraph"];
 const SCORED_CONTRIBUTIONS_PATH: $ReadOnlyArray<string> = [
   "output",
@@ -107,44 +105,11 @@ export class WriteInstance extends ReadInstance implements Instance {
   //////////////////////////////
 
   async readGraphInput(): Promise<GraphInput> {
-    const [instanceConfig, ledger] = await Promise.all([
-      this.readInstanceConfig(),
-      this.readLedger(),
-    ]);
-    const plugins = [];
-    for (const [pluginId, plugin] of instanceConfig.bundledPlugins.entries()) {
-      plugins.push({
-        pluginId,
-        plugin,
-        directoryContext: this.pluginDirectoryContext(pluginId),
-      });
-    }
-    return {
-      plugins,
-      ledger,
-    };
+    throw new Error("Not implemented");
   }
 
   async readContributionsInput(): Promise<ContributionsInput> {
-    const instanceConfig = await this.readInstanceConfig();
-    const ledger = await this.readLedger();
-    const plugins = [];
-    for (const {
-      id: pluginId,
-      plugin,
-      configsByTarget,
-    } of instanceConfig.credEquatePlugins) {
-      plugins.push({
-        pluginId,
-        plugin,
-        directoryContext: this.pluginDirectoryContext(pluginId),
-        configsByTarget,
-      });
-    }
-    return {
-      plugins,
-      ledger,
-    };
+    throw new Error("Not implemented");
   }
 
   async writeGraphOutput(
@@ -268,11 +233,6 @@ export class WriteInstance extends ReadInstance implements Instance {
   //////////////////////////////
   //  Private Functions
   //////////////////////////////
-
-  async readInstanceConfig(): Promise<InstanceConfig> {
-    const pluginsConfigPath = pathJoin(...INSTANCE_CONFIG_PATH);
-    return loadJson(this._storage, pluginsConfigPath, configParser);
-  }
 
   pluginDirectoryContext(pluginName: string): PluginDirectoryContext {
     const cacheDir = this.createPluginDirectory(["cache"], pluginName);
