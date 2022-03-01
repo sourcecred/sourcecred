@@ -60,7 +60,7 @@ const api = {
   },
   instance: {
     readInstance,
-    writeInstance
+    writeInstance,
   },
   core: {
     address,
