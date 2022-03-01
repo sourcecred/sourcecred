@@ -47,6 +47,7 @@ import * as graphApi from "../main/graph";
 import * as grainApi from "../main/grain";
 import * as analysis from "../main/analysis";
 import * as readInstance from "../../api/instance/readInstance";
+import * as writeInstance from "../../api/instance/writeInstance";
 
 const api = {
   api: {
@@ -59,6 +60,7 @@ const api = {
   },
   instance: {
     readInstance,
+    writeInstance
   },
   core: {
     address,
