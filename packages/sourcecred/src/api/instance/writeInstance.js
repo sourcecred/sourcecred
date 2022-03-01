@@ -4,12 +4,9 @@ import {Instance} from "./instance";
 import {ReadInstance} from "./readInstance";
 import type {CredrankOutput} from "../main/credrank";
 import type {CredequateOutput} from "../main/credequate";
-import type {GraphInput, GraphOutput} from "../main/graph";
+import type {GraphOutput} from "../main/graph";
 import type {GrainInput} from "../main/grain";
-import type {
-  ContributionsInput,
-  ContributionsOutput,
-} from "../main/contributions";
+import type {ContributionsOutput} from "../main/contributions";
 import type {AnalysisOutput} from "../main/analysis";
 import type {Neo4jOutput} from "../main/analysisUtils/neo4j";
 import {join as pathJoin} from "path";
@@ -103,14 +100,6 @@ export class WriteInstance extends ReadInstance implements Instance {
   //////////////////////////////
   //  Interface Functions
   //////////////////////////////
-
-  async readGraphInput(): Promise<GraphInput> {
-    throw new Error("Not implemented");
-  }
-
-  async readContributionsInput(): Promise<ContributionsInput> {
-    throw new Error("Not implemented");
-  }
 
   async writeGraphOutput(
     graphOutput: GraphOutput,
