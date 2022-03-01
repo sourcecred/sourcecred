@@ -14,12 +14,6 @@ const api: any = {...cloneDeep(base)};
 import {LocalInstance} from "../../api/instance/localInstance";
 api.instance.LocalInstance = LocalInstance;
 
-import {getOriginWriteInstance} from "../../api/instance/writeInstance";
-api.instance.getOriginWriteInstance = getOriginWriteInstance;
-
-import {getGithubWriteInstance} from "../../api/instance/writeInstance";
-api.instance.getGithubWriteInstance = getGithubWriteInstance;
-
 import {GithubPlugin} from "../../plugins/github/plugin";
 api.plugins.github.GithubPlugin = GithubPlugin;
 
