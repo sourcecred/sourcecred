@@ -205,7 +205,7 @@ Array [
       "bot": false,
       "discriminator": "7902",
       "id": "664562775770791966",
-      "username": "BrianBelhumeur",
+      "username": "Beez",
     },
   },
   Object {
@@ -284,121 +284,6 @@ Array [
 `;
 
 exports[`plugins/discord/fetcher snapshot testing loads messages 1`] = `
-Array [
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "10",
-    "id": "678394455849566208",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812242234,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "9",
-    "id": "678394451462193154",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812241188,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "8",
-    "id": "678394448497082388",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812240481,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "7",
-    "id": "678394445351092275",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812239731,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "6",
-    "id": "678394442301833247",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812239004,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "5",
-    "id": "678394436757094410",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [
-      Object {
-        "id": "678399364418502669",
-        "name": "sourcecred",
-      },
-    ],
-    "timestampMs": 1581812237682,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "4",
-    "id": "678394433233747978",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812236842,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "3",
-    "id": "678394431149178940",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812236345,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "2",
-    "id": "678394428569813013",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [],
-    "timestampMs": 1581812235730,
-  },
-  Object {
-    "authorId": "143776454050709505",
-    "channelId": "678394406507905129",
-    "content": "1",
-    "id": "678394426153893948",
-    "mentions": Array [],
-    "nonUserAuthor": false,
-    "reactionEmoji": Array [
-      Object {
-        "id": null,
-        "name": "👍",
-      },
-    ],
-    "timestampMs": 1581812235154,
-  },
-]
-`;
-
-exports[`plugins/discord/fetcher snapshot testing loads messages 2`] = `
 Array [
   Object {
     "authorId": "143776454050709505",
@@ -504,6 +389,111 @@ Array [
     "nonUserAuthor": false,
     "reactionEmoji": Array [],
     "timestampMs": 1581812245220,
+  },
+]
+`;
+
+exports[`plugins/discord/fetcher snapshot testing loads messages 2`] = `
+Array [
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "9",
+    "id": "678394451462193154",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812241188,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "8",
+    "id": "678394448497082388",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812240481,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "7",
+    "id": "678394445351092275",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812239731,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "6",
+    "id": "678394442301833247",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812239004,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "5",
+    "id": "678394436757094410",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [
+      Object {
+        "id": "678399364418502669",
+        "name": "sourcecred",
+      },
+    ],
+    "timestampMs": 1581812237682,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "4",
+    "id": "678394433233747978",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812236842,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "3",
+    "id": "678394431149178940",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812236345,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "2",
+    "id": "678394428569813013",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812235730,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "1",
+    "id": "678394426153893948",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [
+      Object {
+        "id": null,
+        "name": "👍",
+      },
+    ],
+    "timestampMs": 1581812235154,
   },
 ]
 `;

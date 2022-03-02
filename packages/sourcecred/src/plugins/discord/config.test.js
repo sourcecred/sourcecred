@@ -31,6 +31,7 @@ describe("plugins/discord/config", () => {
         },
         includeNsfwChannels: true,
         simplifyGraph: true,
+        beginningDate: "1/1/2021 GMT",
       },
     ];
     const expected = [
@@ -63,6 +64,7 @@ describe("plugins/discord/config", () => {
         },
         includeNsfwChannels: true,
         simplifyGraph: true,
+        beginningTimestampMs: 1609459200000,
       },
     ];
     const parsed: DiscordConfigs = parser.parseOrThrow(raw);
@@ -93,6 +95,7 @@ describe("plugins/discord/config", () => {
     });
     expect(parsed[0].includeNsfwChannels).toEqual(false);
     expect(parsed[0].simplifyGraph).toEqual(false);
+    expect(parsed[0].beginningTimestampMs).toEqual(-Infinity);
   });
   it("can work with delimiters", () => {
     const raw = [
@@ -153,6 +156,7 @@ describe("plugins/discord/config", () => {
         },
         includeNsfwChannels: true,
         simplifyGraph: false,
+        beginningTimestampMs: -Infinity,
       },
     ];
     const parsed: DiscordConfigs = parser.parseOrThrow(raw);

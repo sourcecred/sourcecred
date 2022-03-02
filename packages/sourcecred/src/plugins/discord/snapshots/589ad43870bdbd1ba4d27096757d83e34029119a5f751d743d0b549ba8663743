@@ -156,7 +156,7 @@
   "mfa_level": 0,
   "explicit_content_filter": 2,
   "max_presences": null,
-  "max_members": 250000,
+  "max_members": 500000,
   "max_video_channel_users": 25,
   "vanity_url_code": null,
   "premium_tier": 0,

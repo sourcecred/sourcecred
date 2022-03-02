@@ -29,6 +29,7 @@ describe("plugins/discord/mirror", () => {
     },
     includeNsfwChannels: true,
     simplifyGraph: true,
+    beginningTimestampMs: -Infinity,
   };
 
   describe("smoke test", () => {

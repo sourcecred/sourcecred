@@ -27,7 +27,7 @@ describe("plugins/discord/fetcher", () => {
     });
     it("loads messages", async () => {
       expect(
-        await snapshotFetcher().messages(channelId, "0", 10)
+        await snapshotFetcher().messages(channelId, "", 10)
       ).toMatchSnapshot();
       expect(
         await snapshotFetcher().messages(channelId, "678394455849566208", 10)
