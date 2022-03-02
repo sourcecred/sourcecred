@@ -31,6 +31,7 @@ type Opts = {
   apiToken: GithubToken,
   repo: string,
   branch: string,
+  message?: string,
 };
 
 type Author = {
@@ -45,11 +46,13 @@ class ReadableGithubStorage implements DataStorage {
     this._token = opts.apiToken;
     this._repoId = stringToRepoId(opts.repo);
     this._branch = opts.branch;
+    this._message = opts.message;
   }
 
   _token: GithubToken;
   _repoId: RepoId;
   _branch: string;
+  _message: ?string;
 
   /**
    * get method loads the content specified by path in the GitHub repository.

@@ -6,7 +6,7 @@ import {declaration as discourseDeclaration} from "../plugins/discourse/declarat
 import {declaration as discordDeclaration} from "../plugins/discord/declaration";
 import {declaration as initiativesDeclaration} from "../plugins/initiatives/declaration";
 import {declaration as ethereumDeclaration} from "../plugins/ethereum/declaration";
-import {type RawInstanceConfig} from "./rawInstanceConfig";
+import {type InstanceConfig} from "./instanceConfig";
 import {type PluginId, getPluginOwner} from "./pluginId";
 import {DataStorage} from "../core/storage";
 import {
@@ -31,8 +31,8 @@ export async function getPluginDeclaration(
   throw "Bad declaration: " + JSON.stringify(pluginId);
 }
 
-export async function upgradeRawInstanceConfig(
-  raw: RawInstanceConfig,
+export async function upgradeInstanceConfig(
+  raw: InstanceConfig,
   storage: DataStorage
 ): Promise<$ReadOnlyMap<PluginId, PluginDeclaration>> {
   const bundledPlugins = new Map();

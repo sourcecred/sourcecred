@@ -6,7 +6,7 @@ import {
   scoreContributions,
 } from "../../core/credequate/scoredContribution";
 import {type PluginId} from "../pluginId";
-import type {RawInstanceConfig} from "../rawInstanceConfig";
+import type {InstanceConfig} from "../instanceConfig";
 import {
   ensureIdentityExists,
   toBonusPolicy,
@@ -21,7 +21,7 @@ export type CredequateInput = {|
     +pluginId: PluginId,
     +contributionsByTarget: ContributionsByTarget,
   |}>,
-  +rawInstanceConfig: RawInstanceConfig,
+  +instanceConfig: InstanceConfig,
 |};
 
 export type CredequateOutput = {|
@@ -41,7 +41,7 @@ function* credequateGenerator(
   input: CredequateInput
 ): Iterable<ScoredContribution> {
   for (const plugin of input.pluginContributions) {
-    const configs = input.rawInstanceConfig.credEquatePlugins.find(
+    const configs = input.instanceConfig.credEquatePlugins.find(
       (p) => p.id === plugin.pluginId
     )?.configsByTarget;
     if (!configs)

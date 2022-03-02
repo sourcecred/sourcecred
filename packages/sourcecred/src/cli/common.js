@@ -8,11 +8,13 @@ import {DiskStorage} from "../core/storage/disk";
 import type {PluginDirectoryContext} from "../api/plugin";
 import {
   parser as configParser,
-  type InstanceConfig,
-} from "../api/instanceConfig";
+  type InstanceConfigWithPlugins,
+} from "../api/instanceConfigWithPlugins";
 import {fromString as verifyPluginId} from "../api/pluginId";
 
-export function loadInstanceConfig(baseDir: string): Promise<InstanceConfig> {
+export function loadInstanceConfig(
+  baseDir: string
+): Promise<InstanceConfigWithPlugins> {
   const storage = new DiskStorage(baseDir);
   const projectFilePath = pathJoin("sourcecred.json");
   return loadJson(storage, projectFilePath, configParser);

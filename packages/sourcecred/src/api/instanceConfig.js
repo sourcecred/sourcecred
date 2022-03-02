@@ -1,38 +1,56 @@
 // @flow
-
-import * as P from "../util/combo";
-import {Plugin} from "./plugin";
-import {getPlugin} from "./bundledPlugins";
-import {rawParser, type RawInstanceConfig} from "./rawInstanceConfig";
 import * as pluginId from "./pluginId";
-import type {ConfigsByTarget} from "../core/credequate/config";
+import * as P from "../util/combo";
+import {
+  type RawConfigsByTarget,
+  type ConfigsByTarget,
+  rawConfigsByTargetParser,
+  configsByTargetParser,
+} from "../core/credequate/config";
 
+export type RawInstanceConfig = {|
+  // Plugin identifier, like `sourcecred/identity`. Version number is
+  // implicit from the SourceCred version. This is a stopgap until we have
+  // a plugin system that admits external, dynamically loaded
+  // dependencies.
+  +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
+  +credEquatePlugins: $ReadOnlyArray<{|
+    id: pluginId.PluginId,
+    configsByTarget: RawConfigsByTarget,
+  |}>,
+|};
 export type InstanceConfig = {|
-  +bundledPlugins: Map<pluginId.PluginId, Plugin>,
+  +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
   +credEquatePlugins: $ReadOnlyArray<{|
     id: pluginId.PluginId,
     configsByTarget: ConfigsByTarget,
-    plugin: Plugin,
   |}>,
 |};
 
-function upgrade(raw: RawInstanceConfig): InstanceConfig {
-  const bundledPlugins = new Map();
-  for (const id of raw.bundledPlugins) {
-    const plugin = getPlugin(id);
-    if (plugin == null) {
-      throw new Error("bad bundled plugin: " + JSON.stringify(id));
-    }
-    bundledPlugins.set(id, plugin);
+export const rawParser: P.Parser<RawInstanceConfig> = P.object(
+  {
+    bundledPlugins: P.array(pluginId.parser),
+  },
+  {
+    credEquatePlugins: P.array(
+      P.object({
+        id: pluginId.parser,
+        configsByTarget: rawConfigsByTargetParser,
+      })
+    ),
   }
-  const credEquatePlugins = raw.credEquatePlugins.map((p) => {
-    const plugin = getPlugin(p.id);
-    if (plugin == null) {
-      throw new Error("bad bundled plugin: " + JSON.stringify(p.id));
-    }
-    return {...p, plugin};
-  });
-  return {bundledPlugins, credEquatePlugins};
-}
+).fmap((config) => ({credEquatePlugins: [], ...config}));
 
-export const parser: P.Parser<InstanceConfig> = rawParser.fmap(upgrade);
+export const parser: P.Parser<InstanceConfig> = P.object(
+  {
+    bundledPlugins: P.array(pluginId.parser),
+  },
+  {
+    credEquatePlugins: P.array(
+      P.object({
+        id: pluginId.parser,
+        configsByTarget: configsByTargetParser,
+      })
+    ),
+  }
+).fmap((config) => ({credEquatePlugins: [], ...config}));
