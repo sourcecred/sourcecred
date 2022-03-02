@@ -113,6 +113,9 @@ const customRoutes = (
     <Route key="ledger" exact path="/ledger">
       <LedgerViewer currency={currency} />
     </Route>,
+    <Route key="profile" exact path="/profile">
+      <ProfilePage credGrainView={credGrainView} />
+    </Route>,
   ];
   const backendRoutes = hasBackend
     ? [
@@ -135,13 +138,7 @@ const customRoutes = (
         </Route>,
       ]
     : [];
-  const devRoutes = isDev
-    ? [
-        <Route key="profile" exact path="/profile">
-          <ProfilePage />
-        </Route>,
-      ]
-    : [];
+  const devRoutes = isDev ? [] : [];
   return routes.concat(backendRoutes, devRoutes);
 };
 
