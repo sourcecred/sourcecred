@@ -5,7 +5,10 @@ import {Plugin} from "./plugin";
 import {getPlugin} from "./bundledPlugins";
 import {rawParser, type RawInstanceConfig} from "./rawInstanceConfig";
 import * as pluginId from "./pluginId";
-import type {ConfigsByTarget} from "../core/credequate/config";
+import {
+  type ConfigsByTarget,
+  configsByTargetParser,
+} from "../core/credequate/config";
 
 export type InstanceConfig = {|
   +bundledPlugins: Map<pluginId.PluginId, Plugin>,
@@ -30,7 +33,11 @@ function upgrade(raw: RawInstanceConfig): InstanceConfig {
     if (plugin == null) {
       throw new Error("bad bundled plugin: " + JSON.stringify(p.id));
     }
-    return {...p, plugin};
+    return {
+      ...p,
+      configsByTarget: configsByTargetParser.parseOrThrow(p.configsByTarget),
+      plugin,
+    };
   });
   return {bundledPlugins, credEquatePlugins};
 }

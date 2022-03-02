@@ -10,6 +10,7 @@ import {CredGrainView} from "../core/credGrainView";
 import {getEarliestStartForConfigs} from "../core/credequate/config";
 import sortBy from "../util/sortBy";
 import {sum} from "d3-array";
+import {configsByTargetParser} from "../core/credequate/config";
 
 const hybridCommand: Command = async (args, std) => {
   let isSimulation = false;
@@ -57,7 +58,7 @@ const hybridCommand: Command = async (args, std) => {
       credrankOutput?.ledger || credrankInput.ledger,
       getEarliestStartForConfigs(
         credequateInput.rawInstanceConfig.credEquatePlugins.map(
-          (p) => p.configsByTarget
+          (p) => configsByTargetParser.parseOrThrow(p.configsByTarget)
         )
       )
     );

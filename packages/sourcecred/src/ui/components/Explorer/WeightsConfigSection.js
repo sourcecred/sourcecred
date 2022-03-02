@@ -38,6 +38,9 @@ const WeightsConfigSection = ({
 
   return (
     <Paper className={classes.container}>
+    <h1 className={`${classes.centerRow} ${classes.pageHeader}`}>
+        Configure CredRank Weights
+      </h1>
       <Grid container>
         <Grid container className={classes.weightConfig} spacing={2}>
           <Grid container item xs={12} direction="column">

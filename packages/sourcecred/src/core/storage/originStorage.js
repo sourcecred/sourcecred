@@ -65,7 +65,7 @@ export class PostableOriginStorage
   }
 }
 
-export const createPostableLedgerStorage = (
+export const createPostableStorage = (
   base: string
 ): PostableOriginStorage => {
   return new PostableOriginStorage(base, {

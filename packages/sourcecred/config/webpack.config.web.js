@@ -61,15 +61,10 @@ function makeConfig(mode /*: "production" | "development" */) /*: Object */ {
           );
         }
 
-        const configContents = fs.readFileSync(configPath);
-        const serveConfig = (_unused_req, res /*: ExpressResponse */) => {
-          res.status(200).send(configContents);
-        };
         const rejectCache = (_unused_req, res /*: ExpressResponse */) => {
           res.status(400).send("Bad Request: Cache unavailable at runtime\n");
         };
 
-        app.get("/sourcecred.json", serveConfig);
         app.get(`/cache`, rejectCache);
         app.get(`/cache/*`, rejectCache);
 
@@ -98,22 +93,35 @@ function makeConfig(mode /*: "production" | "development" */) /*: Object */ {
           "/config/",
           express.static(path.join(developmentInstancePath, "config"))
         );
-
-        // configure the dev server to support writing the ledger to disk
-        app.use(express.text({limit: "50mb"}));
-        const ledgerPath = path.join(
-          developmentInstancePath,
-          "data/ledger.json"
+        app.use(
+          "/config/",
+          express.static(path.join(developmentInstancePath, "config"))
         );
 
-        app.post("/data/ledger.json", (req, res) => {
-          try {
-            fs.writeFileSync(ledgerPath, req.body, "utf8");
-          } catch (e) {
-            res.status(500).send(`error saving ledger.json file: ${e}`);
-          }
-          res.status(201).end();
-        });
+        app.use(express.text({limit: "50mb"}));
+        // configure the dev server to support writing to disk
+        const createPost = (filePath, developmentInstancePath) => {
+          const joinedPath = path.join(developmentInstancePath, filePath);
+          app.post("/" + filePath, (req, res) => {
+            try {
+              fs.writeFileSync(joinedPath, req.body, "utf8");
+            } catch (e) {
+              res.status(500).send(`error saving ${filePath} file: ${e}`);
+            }
+            res.status(201).end();
+          });
+        };
+        const createGet = (filePath, developmentInstancePath) =>
+          app.get("/" + filePath, (_unused_req, res /*: ExpressResponse */) => {
+            res
+              .status(200)
+              .send(
+                fs.readFileSync(path.join(developmentInstancePath, filePath))
+              );
+          });
+        createPost("data/ledger.json", developmentInstancePath);
+        createPost("sourcecred.json", developmentInstancePath);
+        createGet("sourcecred.json", developmentInstancePath);
       },
     },
     output: {

@@ -1,11 +1,11 @@
 // @flow
 
-import React, {type Node as ReactNode, useEffect, useState} from "react";
+import React, {type Node as ReactNode, useEffect, useState, useMemo} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/core/styles";
-import {ExplorerHome} from "./ExplorerHome/ExplorerHome";      
+import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {ProfilePage} from "./Profile/ProfilePage";
 import WeightsConfigSection from "./Explorer/WeightsConfigSection";
 import {LedgerAdmin} from "./LedgerAdmin";
@@ -13,8 +13,7 @@ import {CredGrainView} from "../../core/credGrainView";
 import {AccountOverview} from "./AccountOverview";
 import {Transfer} from "./Transfer";
 import {SpecialDistribution} from "./SpecialDistribution";
-import {ConfigMgr} from "./ConfigMgr";
-import {TestForm} from "./TestForm";
+import {RawInstanceConfigEditor} from "./ConfigEditors/RawInstanceConfigEditor";
 import {load, type LoadResult, type LoadSuccess} from "../load";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import {withRouter} from "react-router-dom";
@@ -27,8 +26,8 @@ import {type WeightsT} from "../../core/weights";
 import {Web3ContextProvider} from "../utils/Web3Context";
 import {MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
+import {WritableGithubStorage} from "../../core/storage/github";
 
-const dataProvider = fakeDataProvider({}, true);
 import sourcecredDataProvider from "../utils/sourcecredDataProvider";
 
 const theme = createMuiTheme({
@@ -94,7 +93,7 @@ const customRoutes = (
   credGrainView: CredGrainView | null,
   pluginDeclarations: $ReadOnlyArray<PluginDeclaration>,
   isDev: boolean,
-  weights: WeightsT,
+  weights: WeightsT
 ) => {
   const [weightsState, setWeightsState] = useState<{weights: WeightsT}>({
     weights,
@@ -135,26 +134,19 @@ const customRoutes = (
             setWeightsState={setWeightsState}
           />
         </Route>,
-        <Route key="config-mgr" exact path="/config-mgr">
-          <ConfigMgr 
-            resource="GrainConfig"
-            basePath="GrainConfig"
-            id="1"
-          />
-        </Route>,
-        <Route key="test-form" exact path="/test-form" >
-          <TestForm
-            resource="FruitConfig"
-            basePath="FruitConfig"
-            id="1"
-          />
-        </Route>,
       ]
     : [];
   const devRoutes = isDev
     ? [
         <Route key="profile" exact path="/profile">
           <ProfilePage />
+        </Route>,
+        <Route key="instance-config" exact path="/instance-config">
+          <RawInstanceConfigEditor
+            resource="RawInstanceConfig"
+            basePath="RawInstanceConfig"
+            id="1"
+          />
         </Route>,
       ]
     : [];
@@ -199,13 +191,12 @@ const AdminApp = (): ReactNode => {
  */
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
-  const dataProvider = sourcecredDataProvider("foo");
+  const dataProvider = useMemo(() => sourcecredDataProvider(loadSuccess.hasBackend), [loadSuccess.hasBackend]);
 
   return (
     // TODO (@topocount) create context for read-only instance state
     <LedgerProvider ledgerManager={loadSuccess.ledgerManager}>
       <Web3ContextProvider>
-<<<<<<< HEAD
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
           <Admin
             disableTelemetry
@@ -226,30 +217,10 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
             This dummy resource is required to get react
             admin working beyond the hello world screen
           */}
-            <Resource name="dummyResource" />
+
+            <Resource name="RawInstanceConfig" edit={RawInstanceConfigEditor} />
           </Admin>
         </MuiPickersUtilsProvider>
-=======
-        <Admin
-          disableTelemetry
-          layout={createAppLayout(loadSuccess)}
-          theme={theme}
-          dataProvider={dataProvider}
-          history={history}
-          customRoutes={customRoutes(
-            loadSuccess.hasBackend,
-            loadSuccess.currency,
-            loadSuccess.credGrainView,
-            Array.from(loadSuccess.bundledPlugins.values()),
-            loadSuccess.isDev,
-            loadSuccess.weights,
-          )}
-        >
-          {}
-          <Resource name="GrainConfig" edit={ConfigMgr}/>
-          <Resource name="FruitConfig" edit={TestForm}/>
-        </Admin>
->>>>>>> c7dc1afe... Proof of concept config gui
       </Web3ContextProvider>
     </LedgerProvider>
   );

@@ -1,6 +1,7 @@
 // @flow
 
 import type {ContributionsByTarget} from "../../core/credequate/contribution";
+import {configsByTargetParser} from "../../core/credequate/config";
 import {
   type ScoredContribution,
   scoreContributions,
@@ -48,6 +49,7 @@ function* credequateGenerator(
       throw new Error(
         `CredEquate configurations not found for plugin ${plugin.pluginId}`
       );
+    const parsedConfigsByTarget = configsByTargetParser.parseOrThrow(configs);
     for (const target of Object.keys(plugin.contributionsByTarget)) {
       if (!configs[target])
         throw new Error(
@@ -55,7 +57,7 @@ function* credequateGenerator(
         );
       const iterable = scoreContributions(
         plugin.contributionsByTarget[target],
-        configs[target]
+        parsedConfigsByTarget[target]
       );
       for (const scoredContribution of iterable) {
         yield scoredContribution;

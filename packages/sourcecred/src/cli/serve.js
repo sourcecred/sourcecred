@@ -45,14 +45,16 @@ const serveCommand: Command = async (args, std) => {
   // middleware that parses text request bodies for us
   server.use(express.text({limit: "50mb"}));
   // write posted ledger.json files to disk
-  server.post("/data/ledger.json", (req, res) => {
+  const createPost = (filePath) => server.post("/" + filePath, (req, res) => {
     try {
-      fs.writeFileSync("./data/ledger.json", req.body, "utf8");
+      fs.writeFileSync("./" + filePath, req.body, "utf8");
     } catch (e) {
       res.status(500).send(`error saving ledger.json file: ${e}`);
     }
     res.status(201).end();
   });
+  createPost("data/ledger.json")
+  createPost("sourcecred.json")
 
   server.listen(6006, () => {
     console.info("admin server running: navigate to http://localhost:6006");

@@ -2,8 +2,8 @@
 import * as pluginId from "./pluginId";
 import * as P from "../util/combo";
 import {
-  type ConfigsByTarget,
-  configsByTargetParser,
+  type RawConfigsByTarget,
+  rawConfigsByTargetParser,
 } from "../core/credequate/config";
 
 export type RawInstanceConfig = {|
@@ -14,7 +14,7 @@ export type RawInstanceConfig = {|
   +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
   +credEquatePlugins: $ReadOnlyArray<{|
     id: pluginId.PluginId,
-    configsByTarget: ConfigsByTarget,
+    configsByTarget: RawConfigsByTarget,
   |}>,
 |};
 
@@ -26,7 +26,7 @@ export const rawParser: P.Parser<RawInstanceConfig> = P.object(
     credEquatePlugins: P.array(
       P.object({
         id: pluginId.parser,
-        configsByTarget: configsByTargetParser,
+        configsByTarget: rawConfigsByTargetParser,
       })
     ),
   }

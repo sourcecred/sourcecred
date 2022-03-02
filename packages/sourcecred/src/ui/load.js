@@ -9,7 +9,7 @@ import {
 import {LedgerManager} from "../api/ledgerManager";
 import {rawParser as rawInstanceConfigParser} from "../api/rawInstanceConfig";
 import * as Combo from "../util/combo";
-import {createPostableLedgerStorage} from "../core/storage/originStorage";
+import {createPostableStorage} from "../core/storage/originStorage";
 import {loadJson, loadJsonWithDefault} from "../util/storage";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {upgradeRawInstanceConfig} from "../api/bundledDeclarations";
@@ -40,7 +40,7 @@ export async function load(): Promise<LoadResult> {
   // Optional loads require some better organization
   // than ternaries. There's also a lot of repeated code here
 
-  const originStorage = createPostableLedgerStorage("");
+  const originStorage = createPostableStorage("");
   const instance = new ReadInstance(originStorage);
   const ledgerManager = new LedgerManager({
     storage: originStorage,
