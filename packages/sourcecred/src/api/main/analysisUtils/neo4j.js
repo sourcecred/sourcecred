@@ -30,6 +30,7 @@ export const computeNeo4jData = (input: AnalysisInput): Neo4jOutput => {
           description: getNodeDescription(node, input.ledger),
           cred: node.cred,
           mint: node.mint,
+          timestampMs: node.timestampMs,
           "address:ID": reformatNodeAddress(node.address),
           "nodeType:LABEL": reformatNodeAddress(node.address, 3),
           "plugin:LABEL": reformatNodeAddress(node.address, 2),

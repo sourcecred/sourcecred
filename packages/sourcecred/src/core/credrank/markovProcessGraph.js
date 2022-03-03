@@ -337,6 +337,7 @@ export class MarkovProcessGraph {
         address: node.address,
         description: node.description,
         mint: weight,
+        timestampMs: node.timestampMs,
       });
     }
 
