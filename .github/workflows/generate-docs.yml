@@ -1,0 +1,27 @@
+name: Generate Docs
+on:
+  push:
+    tags:
+      - "*sourcecred*"
+    workflow_dispatch:
+
+jobs:
+  GenerateDocs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          persist-credentials: false # Required to make github pages deployment work correctly
+
+      - name: Install Packages 🔧
+        run: yarn --frozen-lockfile
+
+      - name: Generate Docs
+        run: yarn docs
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: docs
