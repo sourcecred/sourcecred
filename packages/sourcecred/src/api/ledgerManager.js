@@ -74,13 +74,17 @@ export class LedgerManager {
    * not overwritten. If they were, we can show an error message to client B with
    * a list of changes that failed to sync.
    */
-  async persist(): Promise<ReloadResult> {
+  async persist(...storageSetArgs: any[]): Promise<ReloadResult> {
     // START RACE CONDITION
     const preWriteReloadRes = await this.reloadLedger();
     if (preWriteReloadRes.error) {
       return preWriteReloadRes;
     }
-    await this._storage.set(this._path, encode(this._ledger.serialize()));
+    await this._storage.set(
+      this._path,
+      encode(this._ledger.serialize()),
+      ...storageSetArgs
+    );
     // END RACE CONDITION
 
     // Reload ledger again to ensure all the changes were persisted into storage
