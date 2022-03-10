@@ -38,7 +38,12 @@ export const seedGadget: NodeGadget<void> = (() => {
     }
     return;
   };
-  const node = () => ({address: prefix, description, mint: 0});
+  const node = () => ({
+    address: prefix,
+    description,
+    mint: 0,
+    timestampMs: null,
+  });
   return Object.freeze({prefix, toRaw, fromRaw, node});
 })();
 
@@ -74,6 +79,7 @@ export const accumulatorGadget: NodeGadget<EpochAccumulatorAddress> = (() => {
       address: toRaw(addr),
       description: `Epoch accumulator starting ${addr.epochStart} ms past epoch`,
       mint: 0,
+      timestampMs: addr.epochStart,
     };
   }
   return Object.freeze({prefix, toRaw, fromRaw, node});
@@ -108,6 +114,7 @@ export const epochGadget: NodeGadget<ParticipantEpochAddress> = (() => {
       address: toRaw(addr),
       description: `Participant epoch for ${addr.owner} starting ${addr.epochStart} ms past epoch`,
       mint: 0,
+      timestampMs: addr.epochStart,
     };
   }
   return Object.freeze({prefix, toRaw, fromRaw, node});

@@ -2,22 +2,24 @@
 
 import * as C from "../../util/combo";
 import * as NullUtil from "../../util/null";
-import {type Uuid} from "../../util/uuid";
-import {type NodeAddressT, type EdgeAddressT} from "../graph";
+import type {Uuid} from "../../util/uuid";
+import type {NodeAddressT, EdgeAddressT} from "../graph";
 import {
   MarkovProcessGraph,
   type MarkovProcessGraphJSON,
   jsonParser as markovProcessGraphJSONParser,
 } from "./markovProcessGraph";
-import {type MarkovEdge, type TransitionProbability} from "./markovEdge";
+import type {MarkovEdge, TransitionProbability} from "./markovEdge";
 import {payoutGadget} from "./edgeGadgets";
-import {type IntervalSequence} from "../interval";
+import type {IntervalSequence} from "../interval";
+import type {TimestampMs} from "../../util/timestamp";
 
 export type Node = {|
   +address: NodeAddressT,
   +description: string,
   +cred: number,
   +mint: number,
+  +timestampMs: TimestampMs | null,
 |};
 
 export type Edge = {|
