@@ -1,6 +1,6 @@
 // @flow
 
-import {createPostableLedgerStorage, OriginStorage} from "./originStorage";
+import {createPostableStorage, OriginStorage} from "./originStorage";
 
 const MockServerTempValue = new Map();
 
@@ -104,7 +104,7 @@ describe("core/storage/originStorage", () => {
     it("works when posting and getting data again.", async () => {
       expect.hasAssertions();
       const path = "post/validPath";
-      const storage = createPostableLedgerStorage("");
+      const storage = createPostableStorage("");
       await storage.set(path, value);
       const result = await storage.get(path);
       await expect(result).toEqual(value);

@@ -1,11 +1,15 @@
 // @flow
 
-import React, {type Node as ReactNode, useEffect, useState} from "react";
+import React, {
+  type Node as ReactNode,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/core/styles";
-import fakeDataProvider from "ra-data-fakerest";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {ProfilePage} from "./Profile/ProfilePage";
 import WeightsConfigSection from "./Explorer/WeightsConfigSection";
@@ -14,6 +18,7 @@ import {CredGrainView} from "../../core/credGrainView";
 import {AccountOverview} from "./AccountOverview";
 import {Transfer} from "./Transfer";
 import {SpecialDistribution} from "./SpecialDistribution";
+import {RawInstanceConfigEditor} from "./ConfigEditors/RawInstanceConfigEditor";
 import {load, type LoadResult, type LoadSuccess} from "../load";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import {withRouter} from "react-router-dom";
@@ -27,7 +32,7 @@ import {Web3ContextProvider} from "../utils/Web3Context";
 import {MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 
-const dataProvider = fakeDataProvider({}, true);
+import sourcecredDataProvider from "../utils/sourcecredDataProvider";
 
 const theme = createMuiTheme({
   palette: {
@@ -113,6 +118,13 @@ const customRoutes = (
     <Route key="ledger" exact path="/ledger">
       <LedgerViewer currency={currency} />
     </Route>,
+    <Route key="instance-config" exact path="/instance-config">
+      <RawInstanceConfigEditor
+        resource="RawInstanceConfig"
+        basePath="RawInstanceConfig"
+        id="1"
+      />
+    </Route>,
   ];
   const backendRoutes = hasBackend
     ? [
@@ -183,6 +195,10 @@ const AdminApp = (): ReactNode => {
  */
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
+  const dataProvider = useMemo(
+    () => sourcecredDataProvider(loadSuccess.hasBackend),
+    [loadSuccess.hasBackend]
+  );
 
   return (
     // TODO (@topocount) create context for read-only instance state
@@ -208,7 +224,8 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
             This dummy resource is required to get react
             admin working beyond the hello world screen
           */}
-            <Resource name="dummyResource" />
+
+            <Resource name="RawInstanceConfig" edit={RawInstanceConfigEditor} />
           </Admin>
         </MuiPickersUtilsProvider>
       </Web3ContextProvider>

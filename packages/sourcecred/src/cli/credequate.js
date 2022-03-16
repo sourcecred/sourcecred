@@ -37,7 +37,7 @@ const credequateCommand: Command = async (args, std) => {
   };
 
   const earliestStart = getEarliestStartForConfigs(
-    credequateInput.rawInstanceConfig.credEquatePlugins.map(
+    credequateInput.instanceConfig.credEquatePlugins.map(
       (p) => p.configsByTarget
     )
   );

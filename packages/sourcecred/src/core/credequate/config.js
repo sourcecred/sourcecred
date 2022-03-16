@@ -2,6 +2,7 @@
 
 import {
   type TimestampMs,
+  type TimestampISO,
   timestampISOParser,
   fromISO,
 } from "../../util/timestamp";
@@ -83,10 +84,35 @@ const operatorConfigParser = C.array(
 );
 
 /**
-Wraps the other config types, and defines a time scope via a start timestamp.
-The end timestamp will be inferred as the next highest timestamp in an array
+Wraps the other config types, and defines a time scope via a start date.
+The end date will be inferred as the next highest start date in an array
 of Configs.
  */
+export type RawConfig = {|
+  /** A note or a human-readable description to make it easier to recognize this config. **/
+  +memo: string,
+  +startDate: TimestampISO,
+  +weights: WeightConfig,
+  +operators: OperatorConfig,
+  +shares: WeightConfig,
+|};
+const rawConfigParser = C.object({
+  memo: C.string,
+  startDate: timestampISOParser,
+  weights: weightConfigParser,
+  operators: operatorConfigParser,
+  shares: weightConfigParser,
+});
+/**
+Groups Configs together by target strings that may represent
+a server ID/endpoint, a repository name, etc.
+ */
+export type RawConfigsByTarget = {[string]: $ReadOnlyArray<RawConfig>};
+export const rawConfigsByTargetParser: C.Parser<RawConfigsByTarget> = C.dict(
+  C.array(rawConfigParser),
+  C.string
+);
+
 export type Config = {|
   /** A note or a human-readable description to make it easier to recognize this config. **/
   +memo: string,
@@ -95,27 +121,15 @@ export type Config = {|
   +operators: OperatorConfig,
   +shares: WeightConfig,
 |};
-
-/**
-Groups Configs together by target strings that may represent
-a server ID/endpoint, a repository name, etc.
- */
 export type ConfigsByTarget = {[string]: $ReadOnlyArray<Config>};
-
 export const configsByTargetParser: C.Parser<ConfigsByTarget> = C.dict(
   C.array(
-    C.object({
-      memo: C.string,
-      startDate: timestampISOParser.fmap((t) => fromISO(t)),
-      weights: weightConfigParser,
-      operators: operatorConfigParser,
-      shares: weightConfigParser,
-    }).fmap(({memo, startDate, weights, operators, shares}) => ({
+    rawConfigParser.fmap(({memo, startDate, weights, operators, shares}) => ({
       memo,
       weights,
       operators,
       shares,
-      startTimeMs: startDate,
+      startTimeMs: fromISO(startDate),
     }))
   ),
   C.string

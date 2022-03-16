@@ -7,12 +7,12 @@ import {
   defaultCurrencyConfig,
 } from "../api/currencyConfig";
 import {LedgerManager} from "../api/ledgerManager";
-import {rawParser as rawInstanceConfigParser} from "../api/rawInstanceConfig";
+import {parser as instanceConfigParser} from "../api/instanceConfig";
 import * as Combo from "../util/combo";
-import {createPostableLedgerStorage} from "../core/storage/originStorage";
+import {createPostableStorage} from "../core/storage/originStorage";
 import {loadJson, loadJsonWithDefault} from "../util/storage";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
-import {upgradeRawInstanceConfig} from "../api/bundledDeclarations";
+import {upgradeInstanceConfig} from "../api/bundledDeclarations";
 import * as Weights from "../core/weights";
 import {ReadInstance} from "../api/instance/readInstance";
 
@@ -40,7 +40,7 @@ export async function load(): Promise<LoadResult> {
   // Optional loads require some better organization
   // than ternaries. There's also a lot of repeated code here
 
-  const originStorage = createPostableLedgerStorage("");
+  const originStorage = createPostableStorage("");
   const instance = new ReadInstance(originStorage);
   const ledgerManager = new LedgerManager({
     storage: originStorage,
@@ -48,7 +48,7 @@ export async function load(): Promise<LoadResult> {
 
   // noinspection ES6MissingAwait
   const queries = [
-    loadJson(originStorage, "sourcecred.json", rawInstanceConfigParser),
+    loadJson(originStorage, "sourcecred.json", instanceConfigParser),
     loadJson(originStorage, "static/server-info.json", backendParser),
     loadJsonWithDefault(
       originStorage,
@@ -69,7 +69,7 @@ export async function load(): Promise<LoadResult> {
   ];
   try {
     const [
-      rawInstanceConfig,
+      instanceConfig,
       {hasBackend},
       currency,
       credGrainView,
@@ -83,8 +83,8 @@ export async function load(): Promise<LoadResult> {
         error: `Error processing ledger events: ${ledgerResult.error}`,
       };
     }
-    const bundledPlugins = await upgradeRawInstanceConfig(
-      rawInstanceConfig,
+    const bundledPlugins = await upgradeInstanceConfig(
+      instanceConfig,
       originStorage
     );
     const isDev = new URLSearchParams(location.search).get("dev") === "true";

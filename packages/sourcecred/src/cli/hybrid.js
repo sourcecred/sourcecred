@@ -41,7 +41,7 @@ const hybridCommand: Command = async (args, std) => {
   taskReporter.start("hybrid: running credequate");
   const credequateInput = await instance.readCredequateInput();
   const hasCredequatePlugins =
-    credequateInput.rawInstanceConfig.credEquatePlugins.length;
+    credequateInput.instanceConfig.credEquatePlugins.length;
   const credequateOutput = {
     scoredContributions: Array.from(
       credequate(credequateInput).scoredContributions
@@ -56,7 +56,7 @@ const hybridCommand: Command = async (args, std) => {
       credequateOutput.scoredContributions,
       credrankOutput?.ledger || credrankInput.ledger,
       getEarliestStartForConfigs(
-        credequateInput.rawInstanceConfig.credEquatePlugins.map(
+        credequateInput.instanceConfig.credEquatePlugins.map(
           (p) => p.configsByTarget
         )
       )

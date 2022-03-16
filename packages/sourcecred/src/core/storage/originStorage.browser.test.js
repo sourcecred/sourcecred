@@ -2,7 +2,7 @@
  * @flow
  * @jest-environment jsdom
  */
-import {createPostableLedgerStorage} from "./originStorage";
+import {createPostableStorage} from "./originStorage";
 
 // Note: variables that meant to be used with jest's mocks must be prefixed
 // with 'mock' in order to function.
@@ -59,7 +59,7 @@ describe("core/storage/originStorage.browser", () => {
     it("works when posting and getting data again.", async () => {
       expect.hasAssertions();
       const path = "post/browser/validPath";
-      const storage = createPostableLedgerStorage("");
+      const storage = createPostableStorage("");
       await storage.set(path, value);
       const result = await storage.get(path);
       await expect(result).toEqual(value);

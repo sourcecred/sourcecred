@@ -3,6 +3,7 @@ import React, {type Node as ReactNode} from "react";
 import {useSelector} from "react-redux";
 import {MenuItemLink} from "react-admin";
 import PeopleIcon from "@material-ui/icons/People";
+import SettingsIcon from "@material-ui/icons/Settings";
 import ExplorerIcon from "@material-ui/icons/Equalizer";
 import AccountIcon from "@material-ui/icons/AccountBalanceWallet";
 import HistoryIcon from "@material-ui/icons/History";
@@ -29,17 +30,6 @@ const createMenu = (
     const open = useSelector((state) => state.admin.ui.sidebarOpen);
     return (
       <div className={classes.root}>
-        {isDev && (
-          <>
-            <MenuItemLink
-              to="/profile"
-              primaryText="Profile"
-              leftIcon={<PeopleIcon />}
-              onClick={onMenuClick}
-              sidebarIsOpen={open}
-            />
-          </>
-        )}
         <MenuItemLink
           to="/explorer-home"
           primaryText="Explorer"
@@ -79,8 +69,29 @@ const createMenu = (
             />
             <MenuItemLink
               to="/weight-config"
-              primaryText="Configure Weights"
-              leftIcon={<ExplorerIcon />}
+              primaryText="CredRank Weights"
+              leftIcon={<SettingsIcon />}
+              onClick={onMenuClick}
+              sidebarIsOpen={open}
+            />
+          </>
+        )}
+        <hr />
+        {hasBackend && (
+          <MenuItemLink
+            to="/instance-config"
+            primaryText="Edit Plugins"
+            leftIcon={<SettingsIcon />}
+            onClick={onMenuClick}
+            sidebarIsOpen={open}
+          />
+        )}
+        {isDev && (
+          <>
+            <MenuItemLink
+              to="/profile"
+              primaryText="My Profile"
+              leftIcon={<PeopleIcon />}
               onClick={onMenuClick}
               sidebarIsOpen={open}
             />

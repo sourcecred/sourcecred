@@ -40,10 +40,7 @@ import {
   rawParser as pluginBudgetParser,
   upgrade as pluginBudgetUpgrader,
 } from "../pluginBudgetConfig";
-import {
-  rawParser as rawConfigParser,
-  type RawInstanceConfig,
-} from "../rawInstanceConfig";
+import {parser as configParser, type InstanceConfig} from "../instanceConfig";
 import {NetworkStorage} from "../../core/storage/networkStorage";
 import {OriginStorage} from "../../core/storage/originStorage";
 import {ZipStorage} from "../../core/storage/zip";
@@ -130,13 +127,13 @@ export class ReadInstance implements ReadOnlyInstance {
   }
 
   async readCredequateInput(): Promise<CredequateInput> {
-    const rawInstanceConfig = await this.readRawInstanceConfig();
+    const instanceConfig = await this.readInstanceConfig();
     const pluginContributions = await Promise.all(
-      rawInstanceConfig.credEquatePlugins.map(
+      instanceConfig.credEquatePlugins.map(
         async ({id}) => await this.readPluginContributions(id)
       )
     );
-    return {pluginContributions, rawInstanceConfig};
+    return {pluginContributions, instanceConfig};
   }
 
   async readCredrankInput(): Promise<CredrankInput> {
@@ -274,9 +271,9 @@ export class ReadInstance implements ReadOnlyInstance {
 
   // Private Functions
 
-  async readRawInstanceConfig(): Promise<RawInstanceConfig> {
+  async readInstanceConfig(): Promise<InstanceConfig> {
     const pluginsConfigPath = pathJoin(...RAW_INSTANCE_CONFIG_PATH);
-    return loadJson(this._storage, pluginsConfigPath, rawConfigParser);
+    return loadJson(this._storage, pluginsConfigPath, configParser);
   }
 
   async readPersonalAttributions(): Promise<PersonalAttributionsConfig> {
@@ -290,7 +287,7 @@ export class ReadInstance implements ReadOnlyInstance {
   }
 
   async readPluginGraphs(): Promise<Array<WeightedGraph>> {
-    const instanceConfig = await this.readRawInstanceConfig();
+    const instanceConfig = await this.readInstanceConfig();
     const pluginNames = instanceConfig.bundledPlugins;
     return await Promise.all(
       pluginNames.map(async (name) => {

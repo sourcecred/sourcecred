@@ -65,9 +65,7 @@ export class PostableOriginStorage
   }
 }
 
-export const createPostableLedgerStorage = (
-  base: string
-): PostableOriginStorage => {
+export const createPostableStorage = (base: string): PostableOriginStorage => {
   return new PostableOriginStorage(base, {
     Accept: "text/plain",
     "Content-Type": "text/plain",
