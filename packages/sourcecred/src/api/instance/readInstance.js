@@ -350,7 +350,12 @@ export class ReadInstance implements ReadOnlyInstance {
     }
     const [pluginOwner, pluginName] = idParts;
     const pathComponents = [...components, pluginOwner, pluginName];
-    return pathJoin(...pathComponents);
+    let path = ".";
+    for (const pc of pathComponents) {
+      path = pathJoin(path, pc);
+      this.mkdir(path);
+    }
+    return path;
   }
 
   createPluginGraphDirectory(pluginId: string): string {
@@ -359,5 +364,10 @@ export class ReadInstance implements ReadOnlyInstance {
 
   createPluginContributionsDirectory(pluginId: string): string {
     return this.createPluginDirectory(CONTRIBUTIONS_DIRECTORY, pluginId);
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  mkdir(path: string) {
+    // Override in subclasses
   }
 }
