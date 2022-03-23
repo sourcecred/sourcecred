@@ -372,9 +372,4 @@ export class WriteInstance extends ReadInstance implements Instance {
     }
     await Promise.all(promises);
   }
-
-  // eslint-disable-next-line no-unused-vars
-  mkdir(path: string) {
-    // Override in subclasses
-  }
 }
