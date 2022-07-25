@@ -93,11 +93,32 @@ export class Fetcher implements DiscordApi {
 
   async _fetchJson(endpoint: string): Promise<any> {
     await this._wait();
-    const res = await this._fetch(endpoint);
-    failIfMissing(res);
-    failForNotOk(res);
-    this._checkRateLimit(res);
-    return await res.json();
+    try {
+      const res = await this._fetch(endpoint);
+      failIfMissing(res);
+      // failForNotOk(res);
+      this._checkRateLimit(res);
+      if (res.ok) {
+        return await res.json();
+      }
+      return await this._retryIfFailed(endpoint);
+    } catch (e) {
+      if (e.status === 404) {
+        console.log("not found moving on")
+        return;
+      }
+      console.warn(e)
+      return await this._retryIfFailed(endpoint);
+    }
+  }
+
+  async _retryIfFailed(endpoint: string): Promise<any> {
+      console.warn("Unknown error occurred retrying in 5 seconds...")
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      console.warn("Retrying...")
+      const _res = await this._fetchJson(endpoint, );
+      console.warn("Succeeded!!")
+      return _res
   }
 
   async guilds(): Promise<$ReadOnlyArray<Model.Guild>> {
@@ -236,8 +257,8 @@ function failIfMissing(response: Response) {
   }
 }
 
-function failForNotOk(response: Response) {
-  if (!response.ok) {
-    throw new Error(`not OK status ${response.status} on ${response.url}`);
-  }
-}
+// function failForNotOk(response: Response) {
+//   if (!response.ok) {
+//     throw new Error(`not OK status ${response.status} on ${response.url}`);
+//   }
+// }
