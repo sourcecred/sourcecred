@@ -22,7 +22,7 @@ export interface DiscordApi {
 }
 
 const fetcherDefaults: FetcherOptions = {
-  apiUrl: "https://discordapp.com/api",
+  apiUrl: "https://discord.com/api/v10",
   token: null,
   fetch,
 };
