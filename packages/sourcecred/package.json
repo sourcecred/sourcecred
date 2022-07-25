@@ -1,5 +1,5 @@
 {
-  "name": "sourcecred",
+  "name": "@hozz/sourcecred",
   "description": "a tool for communities to measure and reward value creation",
   "homepage": "https://sourcecred.io",
   "repository": "github:sourcecred/sourcecred",
