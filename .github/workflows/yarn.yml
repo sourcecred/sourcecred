@@ -27,3 +27,4 @@ jobs:
     - run: echo $(yarn --version)
     - run: yarn install --frozen-lockfile
     - run: yarn build
+    - run: yarn test
