@@ -26,4 +26,5 @@ jobs:
     - run: npm install --global yarn
     - run: echo $(yarn --version)
     - run: yarn install --frozen-lockfile
+    - run: export NODE_OPTIONS=--openssl-legacy-provider
     - run: yarn build
