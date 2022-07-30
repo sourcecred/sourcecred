@@ -110,7 +110,7 @@ export class Mirror {
             hasReachedBeginning = true;
             continue;
           }
-          if (!beforeId || beforeId > message.id) {
+          if (!beforeId || Number(beforeId) > Number(message.id)) {
             beforeId = message.id;
           }
           _this._repo.addMessage(message);
