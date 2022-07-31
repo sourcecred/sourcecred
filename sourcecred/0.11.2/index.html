@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset='utf-8'>
-  <title>sourcecred 0.11.1 | Documentation</title>
+  <title>sourcecred 0.11.2 | Documentation</title>
   <meta name='description' content='a tool for communities to measure and reward value creation'>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
   <link href='assets/bass.css' rel='stylesheet'>
@@ -15,7 +15,7 @@
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>sourcecred</h3>
-          <div class='mb1'><code>0.11.1</code></div>
+          <div class='mb1'><code>0.11.2</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
@@ -162,36 +162,6 @@
                   href='#constructorplugin'
                   class="">
                   ConstructorPlugin
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#loadjson'
-                  class="">
-                  loadJson
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#loadjsonwithdefault'
-                  class="">
-                  loadJsonWithDefault
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#loadfilewithdefault'
-                  class="">
-                  loadFileWithDefault
                   
                 </a>
                 
@@ -730,6 +700,16 @@
               
                 
                 <li><a
+                  href='#fromcompat'
+                  class="">
+                  fromCompat
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#map'
                   class="">
                   map
@@ -823,16 +803,6 @@
                   href='#overrideweights'
                   class="">
                   overrideWeights
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#fromcompat'
-                  class="">
-                  fromCompat
                   
                 </a>
                 
@@ -1172,6 +1142,16 @@
               
                 
                 <li><a
+                  href='#uuidfromstring'
+                  class="">
+                  uuidFromString
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#makeseedgadget'
                   class="">
                   makeSeedGadget
@@ -1205,16 +1185,6 @@
                   href='#backwardwebbinggadget'
                   class="">
                   backwardWebbingGadget
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#uuidfromstring'
-                  class="">
-                  uuidFromString
                   
                 </a>
                 
@@ -1810,6 +1780,16 @@
               
                 
                 <li><a
+                  href='#g'
+                  class="">
+                  G
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#jsonlog'
                   class="">
                   JsonLog
@@ -1833,16 +1813,6 @@
                   href='#computedistribution'
                   class="">
                   computeDistribution
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#g'
-                  class="">
-                  G
                   
                 </a>
                 
@@ -2930,16 +2900,6 @@
               
                 
                 <li><a
-                  href='#pluginid'
-                  class="">
-                  PluginId
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
                   href='#originstorage'
                   class=" toggle-sibling">
                   OriginStorage
@@ -2963,16 +2923,6 @@
                   
                   
                 </div>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#normalize'
-                  class="">
-                  normalize
-                  
-                </a>
                 
                 </li>
               
@@ -3194,9 +3144,59 @@
               
                 
                 <li><a
+                  href='#normalize'
+                  class="">
+                  normalize
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#getplugin'
                   class="">
                   getPlugin
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#pluginid'
+                  class="">
+                  PluginId
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#loadjson'
+                  class="">
+                  loadJson
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#loadjsonwithdefault'
+                  class="">
+                  loadJsonWithDefault
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#loadfilewithdefault'
+                  class="">
+                  loadFileWithDefault
                   
                 </a>
                 
@@ -5430,288 +5430,6 @@ for consumption by an ExternalPlugin configuration.</p>
 
   
 
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='loadjson'>
-      loadJson
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>Load and parse a JSON file from DataStorage.</p>
-<p>If the file cannot be read, then an error is thrown.
-If parsing fails, an error is thrown.</p>
-
-    <div class='pre p1 fill-light mt0'>loadJson(storage: <a href="#datastorage">DataStorage</a>, path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, parser: P.Parser&#x3C;T>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>storage</span> <code class='quiet'>(<a href="#datastorage">DataStorage</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>parser</span> <code class='quiet'>(P.Parser&#x3C;T>)</code>
-	    
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></code>
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='loadjsonwithdefault'>
-      loadJsonWithDefault
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>Load and parse a JSON file from DataStorage, with a default to use if the
-file is not found.</p>
-<p>This is intended as a convenience for situations where the user may
-optionally provide configuration in a json file.</p>
-<p>The default must be provided as a function that returns a default, to
-accommodate situations where the object may be mutable, or where constructing
-the default may be expensive.</p>
-<p>If no file is present at that location, then the default constructor is
-invoked to create a default value, and that is returned.</p>
-<p>If attempting to load the file fails for any reason other than ENOENT or a
-404 (e.g. the path actually is a directory), then the error is thrown.</p>
-<p>If parsing fails, an error is thrown.</p>
-
-    <div class='pre p1 fill-light mt0'>loadJsonWithDefault(storage: <a href="#datastorage">DataStorage</a>, path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, parser: P.Parser&#x3C;T>, def: function (): T): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>storage</span> <code class='quiet'>(<a href="#datastorage">DataStorage</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>parser</span> <code class='quiet'>(P.Parser&#x3C;T>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>def</span> <code class='quiet'>(function (): T)</code>
-	    
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></code>
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='loadfilewithdefault'>
-      loadFileWithDefault
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>Read a text file from DataStorage, with a default string value to use if the
-file is not found. The file is read in the default encoding, UTF-8.</p>
-<p>This is intended as a convenience for situations where the user may
-optionally provide configuration in a non-JSON file saved to disk.</p>
-<p>The default must be provided as a function that returns a default, in
-case constructing the default may be expensive.</p>
-<p>If no file is present at that location, then the default constructor is
-invoked to create a default value, and that is returned.</p>
-<p>If attempting to load the file fails for any reason other than ENOENT or a
-404 (e.g. the path actually is a directory), then the error is thrown.</p>
-
-    <div class='pre p1 fill-light mt0'>loadFileWithDefault(storage: <a href="#datastorage">DataStorage</a>, path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, def: function (): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>storage</span> <code class='quiet'>(<a href="#datastorage">DataStorage</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>def</span> <code class='quiet'>(function (): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></code>
-    
   
 
   
@@ -10016,6 +9734,95 @@ should not include NUL characters, such as Jest snapshots.</p>
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='fromcompat'>
+      fromCompat
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Load an object from compatibilized state created by <code>toCompat</code>.
+The object has an expected type and version, and may optionally have
+handler functions for transforming previous versions into a canonical state.
+If a handler is present for the current version, it will be applied.
+Throws an error if the compatibilized object is the wrong type, or if its version
+is not current and there was no handler for its version.</p>
+
+    <div class='pre p1 fill-light mt0'>fromCompat(expectedCompatInfo: CompatInfo, obj: Compatible&#x3C;any>, handlers: {}?): T</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>expectedCompatInfo</span> <code class='quiet'>(CompatInfo)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>obj</span> <code class='quiet'>(Compatible&#x3C;any>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>handlers</span> <code class='quiet'>({}?)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>T</code>
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='map'>
       map
     </h3>
@@ -10745,95 +10552,6 @@ exact same underlying Graph, which should not be modified.</p>
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="#weightedgraph">WeightedGraph</a></code>
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='fromcompat'>
-      fromCompat
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>Load an object from compatibilized state created by <code>toCompat</code>.
-The object has an expected type and version, and may optionally have
-handler functions for transforming previous versions into a canonical state.
-If a handler is present for the current version, it will be applied.
-Throws an error if the compatibilized object is the wrong type, or if its version
-is not current and there was no handler for its version.</p>
-
-    <div class='pre p1 fill-light mt0'>fromCompat(expectedCompatInfo: CompatInfo, obj: Compatible&#x3C;any>, handlers: {}?): T</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>expectedCompatInfo</span> <code class='quiet'>(CompatInfo)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>obj</span> <code class='quiet'>(Compatible&#x3C;any>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>handlers</span> <code class='quiet'>({}?)</code>
-	    
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code>T</code>
     
   
 
@@ -13241,6 +12959,57 @@ a MarkovProcessGraph (where epoch nodes are generated and used instead).</p>
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='uuidfromstring'>
+      uuidFromString
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>This module contains logic for creating nodes and edges that act as "gadgets" in CredRank.
+They are most directly used by markovProcessGraph.js</p>
+
+    <div class='pre p1 fill-light mt0'>uuidFromString</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='makeseedgadget'>
       makeSeedGadget
     </h3>
@@ -13499,57 +13268,6 @@ backwards in time.</p>
       Type:
       EdgeGadget&#x3C;WebbingAddress>
     </p>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='uuidfromstring'>
-      uuidFromString
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>This module contains logic for creating nodes and edges that act as "gadgets" in CredRank.
-They are most directly used by markovProcessGraph.js</p>
-
-    <div class='pre p1 fill-light mt0'>uuidFromString</div>
   
   
 
@@ -18370,6 +18088,58 @@ buffer length must not exceed 65536.</p>
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='g'>
+      G
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>In SourceCred, projects regularly distribute Grain to contributors based on
+their Cred scores. This is called a "Distribution". This module contains the
+logic for computing distributions.</p>
+
+    <div class='pre p1 fill-light mt0'>G</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='jsonlog'>
       JsonLog
     </h3>
@@ -18617,58 +18387,6 @@ confidence that the semantics are correct.
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="#distribution">Distribution</a></code>
     
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='g'>
-      G
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>In SourceCred, projects regularly distribute Grain to contributors based on
-their Cred scores. This is called a "Distribution". This module contains the
-logic for computing distributions.</p>
-
-    <div class='pre p1 fill-light mt0'>G</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-
   
 
   
@@ -26709,59 +26427,6 @@ week thereafter. We could do so with the following config:</p>
   
   <div class='clearfix'>
     
-    <h3 class='fl m0' id='pluginid'>
-      PluginId
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>A PluginId uniquely identifies a Plugin.</p>
-<p>Each PluginId takes a <code>owner/name</code> format, as in
-<code>sourcecred/github</code>.</p>
-<p>PluginIds are canonically lower-case.</p>
-
-    <div class='pre p1 fill-light mt0'>PluginId</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
     <h3 class='fl m0' id='originstorage'>
       OriginStorage
     </h3>
@@ -26882,80 +26547,6 @@ week thereafter. We could do so with the following config:</p>
     </div>
   
 </div>
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='normalize'>
-      normalize
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>Normalize the given POSIX path, resolving ".." and "." segments.</p>
-<p>When multiple, sequential forward slashes are found, they are
-replaced by a single forward slash. A trailing forward slash is
-preserved if present, but not added if absent.</p>
-<p>If the path is a zero-length string, "." is returned, representing
-the current working directory.</p>
-<p>A <code>TypeError</code> is thrown if <code>path</code> is not a string.</p>
-
-    <div class='pre p1 fill-light mt0'>normalize(path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
-    
-  
-
-  
-
-  
-
-  
-
-  
 
   
 
@@ -28360,6 +27951,80 @@ will cause an error to throw.</p>
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='normalize'>
+      normalize
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Normalize the given POSIX path, resolving ".." and "." segments.</p>
+<p>When multiple, sequential forward slashes are found, they are
+replaced by a single forward slash. A trailing forward slash is
+preserved if present, but not added if absent.</p>
+<p>If the path is a zero-length string, "." is returned, representing
+the current working directory.</p>
+<p>A <code>TypeError</code> is thrown if <code>path</code> is not a string.</p>
+
+    <div class='pre p1 fill-light mt0'>normalize(path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='getplugin'>
       getPlugin
     </h3>
@@ -28403,6 +28068,341 @@ declarations; keys are like <code>sourcecred/github</code>.</p>
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code>Plugin?</code>
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='pluginid'>
+      PluginId
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>A PluginId uniquely identifies a Plugin.</p>
+<p>Each PluginId takes a <code>owner/name</code> format, as in
+<code>sourcecred/github</code>.</p>
+<p>PluginIds are canonically lower-case.</p>
+
+    <div class='pre p1 fill-light mt0'>PluginId</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='loadjson'>
+      loadJson
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Load and parse a JSON file from DataStorage.</p>
+<p>If the file cannot be read, then an error is thrown.
+If parsing fails, an error is thrown.</p>
+
+    <div class='pre p1 fill-light mt0'>loadJson(storage: <a href="#datastorage">DataStorage</a>, path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, parser: P.Parser&#x3C;T>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>storage</span> <code class='quiet'>(<a href="#datastorage">DataStorage</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>parser</span> <code class='quiet'>(P.Parser&#x3C;T>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></code>
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='loadjsonwithdefault'>
+      loadJsonWithDefault
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Load and parse a JSON file from DataStorage, with a default to use if the
+file is not found.</p>
+<p>This is intended as a convenience for situations where the user may
+optionally provide configuration in a json file.</p>
+<p>The default must be provided as a function that returns a default, to
+accommodate situations where the object may be mutable, or where constructing
+the default may be expensive.</p>
+<p>If no file is present at that location, then the default constructor is
+invoked to create a default value, and that is returned.</p>
+<p>If attempting to load the file fails for any reason other than ENOENT or a
+404 (e.g. the path actually is a directory), then the error is thrown.</p>
+<p>If parsing fails, an error is thrown.</p>
+
+    <div class='pre p1 fill-light mt0'>loadJsonWithDefault(storage: <a href="#datastorage">DataStorage</a>, path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, parser: P.Parser&#x3C;T>, def: function (): T): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>storage</span> <code class='quiet'>(<a href="#datastorage">DataStorage</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>parser</span> <code class='quiet'>(P.Parser&#x3C;T>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>def</span> <code class='quiet'>(function (): T)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;T></code>
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='loadfilewithdefault'>
+      loadFileWithDefault
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Read a text file from DataStorage, with a default string value to use if the
+file is not found. The file is read in the default encoding, UTF-8.</p>
+<p>This is intended as a convenience for situations where the user may
+optionally provide configuration in a non-JSON file saved to disk.</p>
+<p>The default must be provided as a function that returns a default, in
+case constructing the default may be expensive.</p>
+<p>If no file is present at that location, then the default constructor is
+invoked to create a default value, and that is returned.</p>
+<p>If attempting to load the file fails for any reason other than ENOENT or a
+404 (e.g. the path actually is a directory), then the error is thrown.</p>
+
+    <div class='pre p1 fill-light mt0'>loadFileWithDefault(storage: <a href="#datastorage">DataStorage</a>, path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, def: function (): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>storage</span> <code class='quiet'>(<a href="#datastorage">DataStorage</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>def</span> <code class='quiet'>(function (): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></code>
     
   
 
