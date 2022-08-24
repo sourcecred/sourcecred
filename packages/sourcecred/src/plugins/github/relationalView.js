@@ -37,7 +37,7 @@ const COMPAT_INFO = {
 };
 
 export class RelationalView {
-  _repos: Map<N.RawAddress, RepoEntry>;
+  _repo: RepoEntry;
   _issues: Map<N.RawAddress, IssueEntry>;
   _pulls: Map<N.RawAddress, PullEntry>;
   _comments: Map<N.RawAddress, CommentEntry>;
@@ -47,8 +47,8 @@ export class RelationalView {
   _mapReferences: Map<N.RawAddress, N.ReferentAddress[]>;
   _mapReferencedBy: Map<N.RawAddress, N.TextContentAddress[]>;
 
-  constructor(): void {
-    this._repos = new Map();
+  constructor(repo: RepoEntry): void {
+    this._repo = repo;
     this._issues = new Map();
     this._pulls = new Map();
     this._comments = new Map();
@@ -59,14 +59,12 @@ export class RelationalView {
     this._mapReferencedBy = new Map();
   }
 
-  addRepository(repository: T.Repository): void {
-    // Warning: calling `addRepository` can put the RelationalView in an
-    // inconsistent state. for example, if called with a repo with
-    // issues [#1, #2, #3] and then with a repo with issues [#4, #5],
-    // then calls to `repo.issues()` will only give back issues 4 and 5
-    // (although issues 1, 2, and 3 will still be in the view).
-    this._addRepo(repository);
-    this._addReferences();
+  static FromGraphQL(repository: T.Repository): RelationalView {
+    const re: RepoEntry = RelationalView._buildRepoEntry(repository);
+    const rv: RelationalView = new RelationalView(re);
+    rv._addRepo(repository);
+    rv._addReferences();
+    return rv;
   }
 
   /**
@@ -102,15 +100,8 @@ export class RelationalView {
     }
   }
 
-  *repos(): Iterator<Repo> {
-    for (const entry of this._repos.values()) {
-      yield new Repo(this, entry);
-    }
-  }
-
-  repo(address: RepoAddress): ?Repo {
-    const entry = this._repos.get(N.toRaw(address));
-    return entry == null ? entry : new Repo(this, entry);
+  repo(): Repo {
+    return new Repo(this, this._repo);
   }
 
   *issues(): Iterator<Issue> {
@@ -182,7 +173,7 @@ export class RelationalView {
   entity(address: N.StructuredAddress): ?Entity {
     switch (address.type) {
       case "REPO":
-        return this.repo(address);
+        return this.repo();
       case "ISSUE":
         return this.issue(address);
       case "PULL":
@@ -201,7 +192,7 @@ export class RelationalView {
   }
 
   *referentEntities(): Iterator<ReferentEntity> {
-    yield* this.repos();
+    yield this.repo();
     yield* this.issues();
     yield* this.pulls();
     yield* this.reviews();
@@ -219,7 +210,7 @@ export class RelationalView {
   }
 
   *parentEntities(): Iterator<ParentEntity> {
-    yield* this.repos();
+    yield this.repo();
     yield* this.issues();
     yield* this.pulls();
     yield* this.reviews();
@@ -241,7 +232,7 @@ export class RelationalView {
   }
 
   *entities(): Iterator<Entity> {
-    yield* this.repos();
+    yield this.repo();
     yield* this.issues();
     yield* this.pulls();
     yield* this.reviews();
@@ -257,8 +248,11 @@ export class RelationalView {
   }
 
   toJSON(): RelationalViewJSON {
+    // TODO: migrate to singular 'RepoEntry' value in the serialized representation as well
+    var compatRepoMap = new Map();
+    compatRepoMap.set(N.toRaw(this._repo.address), this._repo);
     const rawJSON = {
-      repos: MapUtil.toObject(this._repos),
+      repos: MapUtil.toObject(compatRepoMap),
       issues: MapUtil.toObject(this._issues),
       pulls: MapUtil.toObject(this._pulls),
       reviews: MapUtil.toObject(this._reviews),
@@ -273,8 +267,14 @@ export class RelationalView {
 
   static fromJSON(compatJson: RelationalViewJSON): RelationalView {
     const json = fromCompat(COMPAT_INFO, compatJson);
-    const rv = new RelationalView();
-    rv._repos = MapUtil.fromObject(json.repos);
+
+    // TODO: migrate to singular 'RepoEntry' value in the serialized representation as well
+    var repoEntry: RepoEntry = MapUtil.mapToArray(
+      MapUtil.fromObject(json.repos),
+      (pair) => pair[1]
+    )[0];
+
+    const rv = new RelationalView(repoEntry);
     rv._issues = MapUtil.fromObject(json.issues);
     rv._pulls = MapUtil.fromObject(json.pulls);
     rv._reviews = MapUtil.fromObject(json.reviews);
@@ -283,31 +283,45 @@ export class RelationalView {
     rv._userlikes = MapUtil.fromObject(json.userlikes);
     rv._mapReferences = MapUtil.fromObject(json.references);
     rv._mapReferencedBy = MapUtil.fromObject(json.referencedBy);
+
     return rv;
   }
 
-  _addRepo(json: T.Repository) {
-    const address: RepoAddress = {
+  static _getRepoAddress(json: T.Repository): RepoAddress {
+    return {
       type: N.REPO_TYPE,
       owner: NullUtil.get(json.owner).login,
       name: json.name,
     };
+  }
+
+  _addRepo(json: T.Repository) {
+    const address: RepoAddress = RelationalView._getRepoAddress(json);
+    expectAllNonNull(json, "issues", json.issues).map((x) =>
+      this._addIssue(address, x)
+    );
+    expectAllNonNull(json, "pullRequests", json.pullRequests).map((x) =>
+      this._addPull(address, x)
+    );
+    this._addCommitHistory(json);
+  }
+
+  static _buildRepoEntry(json: T.Repository): RepoEntry {
+    const address: RepoAddress = RelationalView._getRepoAddress(json);
     const entry: RepoEntry = {
       address,
       url: json.url,
       issues: expectAllNonNull(json, "issues", json.issues).map((x) =>
-        this._addIssue(address, x)
+        RelationalView._getIssueAddress(address, x)
       ),
       pulls: expectAllNonNull(
         json,
         "pullRequests",
         json.pullRequests
-      ).map((x) => this._addPull(address, x)),
+      ).map((x) => RelationalView._getPullAddress(address, x)),
       timestampMs: +new Date(json.createdAt),
     };
-    const raw = N.toRaw(address);
-    this._repos.set(raw, entry);
-    this._addCommitHistory(json);
+    return entry;
   }
 
   _addCommitHistory(json: T.Repository) {
@@ -327,12 +341,16 @@ export class RelationalView {
     }
   }
 
-  _addIssue(repo: RepoAddress, json: T.Issue): IssueAddress {
-    const address: IssueAddress = {
+  static _getIssueAddress(repo: RepoAddress, json: T.Issue): IssueAddress {
+    return {
       type: N.ISSUE_TYPE,
       number: String(json.number),
       repo,
     };
+  }
+
+  _addIssue(repo: RepoAddress, json: T.Issue): IssueAddress {
+    const address: IssueAddress = RelationalView._getIssueAddress(repo, json);
     const entry: IssueEntry = {
       address,
       url: json.url,
@@ -416,12 +434,16 @@ export class RelationalView {
     return NullUtil.get(originalAddress);
   }
 
-  _addPull(repo: RepoAddress, json: T.PullRequest): PullAddress {
-    const address: PullAddress = {
+  static _getPullAddress(repo: RepoAddress, json: T.PullRequest): PullAddress {
+    return {
       type: N.PULL_TYPE,
       number: String(json.number),
       repo,
     };
+  }
+
+  _addPull(repo: RepoAddress, json: T.PullRequest): PullAddress {
+    const address: PullAddress = RelationalView._getPullAddress(repo, json);
     const mergedAs =
       json.mergeCommit == null ? null : this._addCommit(json.mergeCommit);
 
@@ -694,7 +716,7 @@ export class RelationalView {
         let entity: ?ReferentEntity;
         switch (address.type) {
           case "REPO":
-            entity = this.repo(address);
+            entity = this.repo();
             break;
           case "ISSUE":
             entity = this.issue(address);
@@ -829,7 +851,7 @@ export class Issue extends _Entity<IssueEntry> {
   }
   parent(): Repo {
     const address = this.address().repo;
-    const repo = this._view.repo(address);
+    const repo = this._view.repo();
     return assertExists(repo, address);
   }
   number(): string {
@@ -888,7 +910,7 @@ export class Pull extends _Entity<PullEntry> {
   }
   parent(): Repo {
     const address = this.address().repo;
-    const repo = this._view.repo(address);
+    const repo = this._view.repo();
     return assertExists(repo, address);
   }
   number(): string {

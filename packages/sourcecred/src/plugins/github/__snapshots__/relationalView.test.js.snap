@@ -326,14 +326,6 @@ Array [
 ]
 `;
 
-exports[`plugins/github/relationalView RelationalView entity: repos has expected number of them 1`] = `1`;
-
-exports[`plugins/github/relationalView RelationalView entity: repos they have expected urls 1`] = `
-Array [
-  "https://github.com/sourcecred-test/example-github",
-]
-`;
-
 exports[`plugins/github/relationalView RelationalView entity: reviews has expected number of them 1`] = `2`;
 
 exports[`plugins/github/relationalView RelationalView entity: reviews they have expected urls 1`] = `

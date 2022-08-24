@@ -20,8 +20,7 @@ export function exampleRepository(): Repository {
 }
 
 export function exampleRelationalView(): RelationalView {
-  const rv = new RelationalView();
-  rv.addRepository(exampleRepository());
+  const rv = RelationalView.FromGraphQL(exampleRepository());
   return rv;
 }
 
@@ -39,7 +38,7 @@ export function exampleEntities(): {|
   userlike: Userlike,
 |} {
   const view = exampleRelationalView();
-  const repo = Array.from(view.repos())[0];
+  const repo = view.repo();
   const issue = Array.from(repo.issues())[1];
   const pull = Array.from(repo.pulls())[1];
   const review = Array.from(pull.reviews())[0];
